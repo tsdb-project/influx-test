@@ -32,7 +32,7 @@ public class InfluxBasicTest {
         InfluxDB influxDB = InfluxDBFactory.connect("http://localhost:8086", "root", "root");
         String dbName = "test";
         influxDB.createDatabase(dbName);
-        String filename = "1.csv";
+        String filename = "data//1.csv";
 
         FileReader reader = new FileReader(filename);
         BufferedReader bufferReader = new BufferedReader(reader);
