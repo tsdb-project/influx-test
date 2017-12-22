@@ -29,10 +29,11 @@ public class InfluxBasicTest {
     private final static Integer BATCH_MAX = 5000;
 
     public static void testRun() throws IOException, ParseException {
-        InfluxDB influxDB = InfluxDBFactory.connect("http://localhost:8086", "root", "root");
-        String dbName = "test";
+        InfluxDB influxDB = InfluxDBFactory.connect("http://192.168.1.157:8086", "admin", "1QaZ2WsX");
+        String dbName = "upmc";
         influxDB.createDatabase(dbName);
-        String filename = "data//1.csv";
+        // String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_1d24806c-5972-4900-b004-4affb1fc910c.csv";
+        String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_93cd75fa-564b-4726-a72c-cd268378e07e.csv";
 
         FileReader reader = new FileReader(filename);
         BufferedReader bufferReader = new BufferedReader(reader);

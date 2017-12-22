@@ -15,12 +15,12 @@ import org.influxdb.dto.QueryResult.Result;
  */
 public class QueryTest {
     public static void main(String[] args) {
-        InfluxDB influxDB = InfluxDBFactory.connect("http://localhost:8086", "root", "root");
-        String dbName = "test";
+        InfluxDB influxDB = InfluxDBFactory.connect("http://192.168.1.157:8086", "admin", "1QaZ2WsX");
+        String dbName = "upmc";
 //        influxDB.createDatabase(dbName);
 //        String rpName = "aRetentionPolicy";
 //        influxDB.createRetentionPolicy(rpName, dbName, "30d", "30m", 2, true);
-        Query query = new Query("SELECT * FROM files", dbName);
+        Query query = new Query("SELECT * FROM records", dbName);
         QueryResult result = influxDB.query(query);
         for (Result res : result.getResults()) {
             System.out.println(res);
