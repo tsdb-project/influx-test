@@ -9,6 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.apache.poi.ss.usermodel.DateUtil;
+
 /**
  * @author Isolachine
  */
@@ -38,10 +40,15 @@ public class Util {
         return dateString;
     }
 
+    public static long serialTimeToLongDate(String serial) {
+        return DateUtil.getJavaDate(Double.valueOf(serial)).getTime();
+    }
+
     public static void main(String[] args) throws ParseException {
         System.out.println(dateToTimestamp("1/2/1934"));
         System.out.println(timestampToUTCDate(dateToTimestamp("1/1/1934")));
         System.out.println(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"));
         System.out.println(timestampToUTCDateTimeFormat(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"), "yyyy.MM.dd HH:mm:ss"));
+        System.out.println(serialTimeToLongDate("43036.6402314815"));
     }
 }

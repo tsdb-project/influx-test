@@ -100,11 +100,11 @@ public class InfluxBasicTest {
         while (bufferReader.ready()) {
             String[] values = bufferReader.readLine().split(",");
             Map<String, Object> keyValueMap = new HashMap<>();
-            for (int i = 0; i < values.length; i++) {
+            for (int i = 1; i < values.length; i++) {
                 keyValueMap.put(columnNames[i], Double.valueOf(values[i]));
             }
 
-            Point record = Point.measurement("records").time(System.currentTimeMillis() + count, TimeUnit.MILLISECONDS).fields(keyValueMap).build();
+            Point record = Point.measurement("records").time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS).fields(keyValueMap).build();
             records.point(record);
             batchCount++;
             count++;
