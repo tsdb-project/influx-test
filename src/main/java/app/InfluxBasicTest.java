@@ -27,7 +27,7 @@ import app.util.Util;
  */
 public class InfluxBasicTest {
 
-    private final static Integer BATCH_MAX = 5000;
+    private final static Integer BULK_INSERT_MAX = 5000;
 
     public static void testRun() throws IOException, ParseException {
         InfluxDB influxDB = InfluxDBFactory.connect(InfluxConfig.ADDR, InfluxConfig.USERNAME, InfluxConfig.PASSWD);
@@ -35,8 +35,8 @@ public class InfluxBasicTest {
         influxDB.createDatabase(dbName);
 
 //        String filename = "data//1.csv";
-        String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_1d24806c-5972-4900-b004-4affb1fc910c.csv";
-//        String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_93cd75fa-564b-4726-a72c-cd268378e07e.csv";
+//        String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_1d24806c-5972-4900-b004-4affb1fc910c.csv";
+        String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_93cd75fa-564b-4726-a72c-cd268378e07e.csv";
 
         FileReader reader = new FileReader(filename);
         BufferedReader bufferReader = new BufferedReader(reader, 4096000);
@@ -58,6 +58,7 @@ public class InfluxBasicTest {
                         break;
                     case 3:
                         // Patient ID, hided in the CSV
+                        // TODO: UUID for each patient
                         file.put(line.split(",")[0], "000000001");
                         break;
                     case 4:
@@ -79,21 +80,24 @@ public class InfluxBasicTest {
             }
             lineNumber++;
         }
-        // File table
+
+        // File metadata table
         Builder p = Point.measurement("files")
                 .time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
         for (String key : file.keySet()) {
             p.addField(key, file.get(key));
         }
         Point point = p.build();
-
         BatchPoints fileInfo = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
         fileInfo.point(point);
         influxDB.write(fileInfo);
 
+        // Skip the 7th line
         bufferReader.readLine();
+        // Read the column name
         String[] columnNames = bufferReader.readLine().split(",");
 
+        // File records table
         BatchPoints records = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
         int batchCount = 0;
         int count = 0;
@@ -104,11 +108,13 @@ public class InfluxBasicTest {
                 keyValueMap.put(columnNames[i], Double.valueOf(values[i]));
             }
 
-            Point record = Point.measurement("records").time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS).fields(keyValueMap).build();
+            // Table with ID for each patient
+            Point record = Point.measurement("records_" + file.get("PatientID"))
+                    .time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS).fields(keyValueMap).build();
             records.point(record);
             batchCount++;
             count++;
-            if (batchCount >= BATCH_MAX) {
+            if (batchCount >= BULK_INSERT_MAX) {
                 influxDB.write(records);
                 records = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
                 batchCount = 0;
@@ -123,10 +129,12 @@ public class InfluxBasicTest {
     }
 
     public static void main(String[] args) throws IOException, ParseException {
+
         long startTime = System.currentTimeMillis();
         testRun();
         long endTime = System.currentTimeMillis();
 
         System.out.println("running time: " + (endTime - startTime) / 60000.0 + " min");
     }
+
 }
