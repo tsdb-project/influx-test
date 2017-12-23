@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package app;
 
@@ -21,55 +21,67 @@ import org.influxdb.dto.Point.Builder;
 import app.util.Util;
 
 /**
- * @author Isolachine
+ * Test for importing CSV data into InfluxDB
  *
+ * @author Isolachine
  */
 public class InfluxBasicTest {
 
     private final static Integer BATCH_MAX = 5000;
 
     public static void testRun() throws IOException, ParseException {
-        InfluxDB influxDB = InfluxDBFactory.connect("http://192.168.1.157:8086", "admin", "1QaZ2WsX");
-        String dbName = "upmc";
+        InfluxDB influxDB = InfluxDBFactory.connect(InfluxConfig.ADDR, InfluxConfig.USERNAME, InfluxConfig.PASSWD);
+        String dbName = InfluxConfig.DBNAME;
         influxDB.createDatabase(dbName);
-        // String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_1d24806c-5972-4900-b004-4affb1fc910c.csv";
-        String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_93cd75fa-564b-4726-a72c-cd268378e07e.csv";
+
+//        String filename = "data//1.csv";
+        String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_1d24806c-5972-4900-b004-4affb1fc910c.csv";
+//        String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_93cd75fa-564b-4726-a72c-cd268378e07e.csv";
 
         FileReader reader = new FileReader(filename);
-        BufferedReader bufferReader = new BufferedReader(reader);
+        BufferedReader bufferReader = new BufferedReader(reader, 4096000);
 
         int lineNumber = 1;
         Map<String, String> file = new HashMap<>();
         String timestamp = "";
-        while (bufferReader.ready() && lineNumber <= 6) {
+        while (bufferReader.ready() && (lineNumber <= 6)) {
             String line = bufferReader.readLine();
             if (line != null) {
                 switch (lineNumber) {
-                case 1:
-                    file.put(line.split(",")[0], line.split(",")[1]);
-                    break;
-                case 2:
-                    file.put(line.split(",")[0], line.split(",")[1] + line.split(",")[2]);
-                    break;
-                case 3:
-                    file.put(line.split(",")[0], "000000001");
-                    break;
-                case 4:
-                    file.put(line.split(",")[0], String.valueOf(Util.dateTimeFormatToTimestamp(line.split(",")[1], "m/d/yy")));
-                    break;
-                case 5:
-                    timestamp = line.split(",")[1];
-                    break;
-                case 6:
-                    timestamp += " " + line.split(",")[1];
-                    break;
-                default:
-                    break;
+                    case 1:
+                        // File name
+                        file.put(line.split(",")[0], line.split(",")[1]);
+                        break;
+                    case 2:
+                        // Patient Name
+                        file.put(line.split(",")[0], line.split(",")[1] + line.split(",")[2]);
+                        break;
+                    case 3:
+                        // Patient ID, hided in the CSV
+                        file.put(line.split(",")[0], "000000001");
+                        break;
+                    case 4:
+                        // Patient DoB
+                        file.put(line.split(",")[0],
+                                String.valueOf(Util.dateTimeFormatToTimestamp(line.split(",")[1], "m/d/yy")));
+                        break;
+                    case 5:
+                        // Current Date
+                        timestamp = line.split(",")[1];
+                        break;
+                    case 6:
+                        // Current Time
+                        timestamp += " " + line.split(",")[1];
+                        break;
+                    default:
+                        break;
                 }
             }
             lineNumber++;
         }
-        Builder p = Point.measurement("files").time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
+        // File table
+        Builder p = Point.measurement("files")
+                .time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
         for (String key : file.keySet()) {
             p.addField(key, file.get(key));
         }
@@ -106,7 +118,7 @@ public class InfluxBasicTest {
 
         influxDB.write(records);
         System.out.println("finished " + count + " records.");
-        
+
         reader.close();
     }
 
@@ -114,6 +126,7 @@ public class InfluxBasicTest {
         long startTime = System.currentTimeMillis();
         testRun();
         long endTime = System.currentTimeMillis();
+
         System.out.println("running time: " + (endTime - startTime) / 60000.0 + " min");
     }
 }

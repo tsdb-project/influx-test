@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package app.util;
 
@@ -11,13 +11,12 @@ import java.util.TimeZone;
 
 /**
  * @author Isolachine
- *
  */
 public class Util {
     public static long dateToTimestamp(String dateOfBirth) throws ParseException {
         return dateTimeFormatToTimestamp(dateOfBirth, "mm/dd/yyyy");
     }
-    
+
     public static long dateTimeFormatToTimestamp(String dateTime, String format) throws ParseException {
         TimeZone timeZone = TimeZone.getTimeZone("UTC");
         DateFormat formatter = new SimpleDateFormat(format);
@@ -25,11 +24,11 @@ public class Util {
         long unixTime = formatter.parse(dateTime).getTime();
         return unixTime;
     }
-    
+
     public static String timestampToUTCDate(long unixTime) {
         return timestampToUTCDateTimeFormat(unixTime, "mm/dd/yyyy");
     }
-    
+
     public static String timestampToUTCDateTimeFormat(long unixTime, String format) {
         TimeZone timeZone = TimeZone.getTimeZone("UTC");
         DateFormat formatter = new SimpleDateFormat(format);
@@ -38,7 +37,7 @@ public class Util {
         String dateString = formatter.format(date);
         return dateString;
     }
-    
+
     public static void main(String[] args) throws ParseException {
         System.out.println(dateToTimestamp("1/2/1934"));
         System.out.println(timestampToUTCDate(dateToTimestamp("1/1/1934")));
