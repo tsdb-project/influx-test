@@ -4,12 +4,15 @@
 package app;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
@@ -29,16 +32,18 @@ public class InfluxBasicTest {
 
     private final static Integer BULK_INSERT_MAX = 5000;
 
-    public static void testRun() throws IOException, ParseException {
+    public static void testSingleFileImport(String file_path) throws IOException, ParseException {
         InfluxDB influxDB = InfluxDBFactory.connect(InfluxConfig.ADDR, InfluxConfig.USERNAME, InfluxConfig.PASSWD);
         String dbName = InfluxConfig.DBNAME;
         influxDB.createDatabase(dbName);
 
-//        String filename = "data//1.csv";
-//        String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_1d24806c-5972-4900-b004-4affb1fc910c.csv";
-        String filename = "E:\\Grad@Pitt\\TS ProjectData\\Xxxxxxxx~ Xxxx_93cd75fa-564b-4726-a72c-cd268378e07e.csv";
+        File file_info = new File(file_path);
+        String uuid = "unknown";
+        // Extract UUID from file name
+        Matcher matcher = Pattern.compile("(_)(.+)(.csv)").matcher(file_info.getName());
+        if (matcher.find()) uuid = matcher.group(2);
 
-        FileReader reader = new FileReader(filename);
+        FileReader reader = new FileReader(file_info);
         BufferedReader bufferReader = new BufferedReader(reader, 4096000);
 
         int lineNumber = 1;
@@ -50,10 +55,12 @@ public class InfluxBasicTest {
                 switch (lineNumber) {
                     case 1:
                         // File name
+                        // TODO: FN for each patient
                         file.put(line.split(",")[0], line.split(",")[1]);
                         break;
                     case 2:
                         // Patient Name
+                        // TODO: LN for each patient
                         file.put(line.split(",")[0], line.split(",")[1] + line.split(",")[2]);
                         break;
                     case 3:
@@ -85,6 +92,7 @@ public class InfluxBasicTest {
         Builder p = Point.measurement("files")
                 .time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
         for (String key : file.keySet()) {
+            // TODO: field is not indexable
             p.addField(key, file.get(key));
         }
         Point point = p.build();
@@ -99,8 +107,7 @@ public class InfluxBasicTest {
 
         // File records table
         BatchPoints records = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
-        int batchCount = 0;
-        int count = 0;
+        int batchCount = 0, totalCount = 0;
         while (bufferReader.ready()) {
             String[] values = bufferReader.readLine().split(",");
             Map<String, Object> keyValueMap = new HashMap<>();
@@ -110,31 +117,44 @@ public class InfluxBasicTest {
 
             // Table with ID for each patient
             Point record = Point.measurement("records_" + file.get("PatientID"))
-                    .time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS).fields(keyValueMap).build();
+                    .time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS)
+                    // TODO: Tag is indexable, use it
+                    .tag("file_uuid", uuid)
+                    .fields(keyValueMap) // Notice: fields are not indexable!
+                    .build();
             records.point(record);
             batchCount++;
-            count++;
+            totalCount++;
             if (batchCount >= BULK_INSERT_MAX) {
                 influxDB.write(records);
                 records = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
                 batchCount = 0;
-                System.out.println("finished " + count + " records.");
+                System.out.println("finished " + totalCount + " records.");
             }
         }
 
+        // Last batch haven't wrote to DB
         influxDB.write(records);
-        System.out.println("finished " + count + " records.");
+        System.out.println("finished " + totalCount + " records.");
 
         reader.close();
     }
 
     public static void main(String[] args) throws IOException, ParseException {
 
-        long startTime = System.currentTimeMillis();
-        testRun();
-        long endTime = System.currentTimeMillis();
+        String superDirectory = "E:\\Grad@Pitt\\TS ProjectData";
+        String[] all_csvs = Util.getAllCsvFileInDirectory(superDirectory);
 
-        System.out.println("running time: " + (endTime - startTime) / 60000.0 + " min");
+        for (String f_path : all_csvs) {
+            System.out.println("Processing '" + f_path + "'");
+
+            long startTime = System.currentTimeMillis();
+            testSingleFileImport(f_path);
+            long endTime = System.currentTimeMillis();
+
+            System.out.println("running time: " + String.format("%.2f", (endTime - startTime) / 60000.0) + " min\n");
+        }
+
     }
 
 }
