@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class AlertTest {
 
     public static final int
-            delayMS = 1500,
+            delayMS = 800,
             maxInsert = 300;
 
     public static void rndInsert(InfluxDB influxDB) {
