@@ -8,7 +8,7 @@ public class InfluxConfig {
     /**
      * Server Address
      */
-    public static String ADDR = "http://192.168.1.157:8086";
+    public static String ADDR = "http://192.168.254.129:8086";
 
     /**
      * Server writable user's name (better to be an admin)
@@ -23,6 +23,6 @@ public class InfluxConfig {
     /**
      * Server DB name
      */
-    public static String DBNAME = "upmc";
+    public static String DBNAME = "limit_test";
 
 }
