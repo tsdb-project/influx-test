@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +31,7 @@ import app.util.Util;
  * @author Isolachine
  */
 public class InfluxBasicTest {
-
+    private static long fileLine = 0;
     private final static Integer BULK_INSERT_MAX = 5000;
 
     public static void testSingleFileImport(String file_path) throws IOException, ParseException {
@@ -41,7 +43,8 @@ public class InfluxBasicTest {
         String uuid = "unknown";
         // Extract UUID from file name
         Matcher matcher = Pattern.compile("(_)(.+)(.csv)").matcher(file_info.getName());
-        if (matcher.find()) uuid = matcher.group(2);
+        if (matcher.find())
+            uuid = matcher.group(2);
 
         FileReader reader = new FileReader(file_info);
         BufferedReader bufferReader = new BufferedReader(reader, 4096000);
@@ -53,44 +56,42 @@ public class InfluxBasicTest {
             String line = bufferReader.readLine();
             if (line != null) {
                 switch (lineNumber) {
-                    case 1:
-                        // File name
-                        // TODO: FN for each patient
-                        file.put(line.split(",")[0], line.split(",")[1]);
-                        break;
-                    case 2:
-                        // Patient Name
-                        // TODO: LN for each patient
-                        file.put(line.split(",")[0], line.split(",")[1] + line.split(",")[2]);
-                        break;
-                    case 3:
-                        // Patient ID, hided in the CSV
-                        // TODO: UUID for each patient
-                        file.put(line.split(",")[0], "000000001");
-                        break;
-                    case 4:
-                        // Patient DoB
-                        file.put(line.split(",")[0],
-                                String.valueOf(Util.dateTimeFormatToTimestamp(line.split(",")[1], "m/d/yy")));
-                        break;
-                    case 5:
-                        // Current Date
-                        timestamp = line.split(",")[1];
-                        break;
-                    case 6:
-                        // Current Time
-                        timestamp += " " + line.split(",")[1];
-                        break;
-                    default:
-                        break;
+                case 1:
+                    // File name
+                    // TODO: FN for each patient
+                    file.put(line.split(",")[0], line.split(",")[1]);
+                    break;
+                case 2:
+                    // Patient Name
+                    // TODO: LN for each patient
+                    file.put(line.split(",")[0], line.split(",")[1] + line.split(",")[2]);
+                    break;
+                case 3:
+                    // Patient ID, hided in the CSV
+                    // TODO: UUID for each patient
+                    file.put(line.split(",")[0], "000000001");
+                    break;
+                case 4:
+                    // Patient DoB
+                    file.put(line.split(",")[0], String.valueOf(Util.dateTimeFormatToTimestamp(line.split(",")[1], "m/d/yy")));
+                    break;
+                case 5:
+                    // Current Date
+                    timestamp = line.split(",")[1];
+                    break;
+                case 6:
+                    // Current Time
+                    timestamp += " " + line.split(",")[1];
+                    break;
+                default:
+                    break;
                 }
             }
             lineNumber++;
         }
 
         // File metadata table
-        Builder p = Point.measurement("files")
-                .time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
+        Builder p = Point.measurement("files").time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
         for (String key : file.keySet()) {
             // TODO: field is not indexable
             p.addField(key, file.get(key));
@@ -116,11 +117,9 @@ public class InfluxBasicTest {
             }
 
             // Table with ID for each patient
-            Point record = Point.measurement("records_" + file.get("PatientID"))
-                    .time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS)
+            Point record = Point.measurement("records_" + file.get("PatientID")).time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS)
                     // TODO: Tag is indexable, use it
-                    .tag("file_uuid", uuid)
-                    .fields(keyValueMap) // Notice: fields are not indexable!
+                    .tag("file_uuid", uuid).fields(keyValueMap) // Notice: fields are not indexable!
                     .build();
             records.point(record);
             batchCount++;
@@ -129,7 +128,7 @@ public class InfluxBasicTest {
                 influxDB.write(records);
                 records = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
                 batchCount = 0;
-                System.out.println("finished " + totalCount + " records.");
+                System.out.println("finished " + totalCount + " records. " + (totalCount * 1.0 / fileLine));
             }
         }
 
@@ -143,10 +142,14 @@ public class InfluxBasicTest {
     public static void main(String[] args) throws IOException, ParseException {
 
         String superDirectory = "E:\\Grad@Pitt\\TS ProjectData";
+        // String superDirectory = "data//1.csv";
         String[] all_csvs = Util.getAllCsvFileInDirectory(superDirectory);
 
         for (String f_path : all_csvs) {
             System.out.println("Processing '" + f_path + "'");
+
+            fileLine = Files.lines(Paths.get(superDirectory)).count();
+            System.out.println("Number of records: " + (fileLine - 8));
 
             long startTime = System.currentTimeMillis();
             testSingleFileImport(f_path);
