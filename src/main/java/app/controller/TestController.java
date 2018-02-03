@@ -16,12 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Controller
 @RestController
-@RequestMapping("data")
-public class ImportDataController {
-    @RequestMapping("import")
+@RequestMapping("template")
+public class TestController {
+    @RequestMapping("template")
     @ResponseBody
-    public Model importData(Model model) {
+    public Model template(Model model) {
         return model;
     }
-
 }
