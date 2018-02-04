@@ -4,13 +4,21 @@
 package app;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
+import org.influxdb.InfluxDB.ConsistencyLevel;
+import org.influxdb.dto.BatchPoints;
+import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
+
+import app.util.Util;
 
 /**
  * @author Isolachine
@@ -28,7 +36,8 @@ public class QueryTest {
     /**
      * Print out InfluxDB query result, if has error then print error
      *
-     * @param result QueryResult instance
+     * @param result
+     *            QueryResult instance
      */
     static void printResult(QueryResult result) {
         if (result.hasError()) {
@@ -65,7 +74,7 @@ public class QueryTest {
         try {
             val = Double.parseDouble(sc.nextLine());
         } catch (Exception e) {
-            //TODO: Do something in the future!
+            // TODO: Do something in the future!
             val = Double.parseDouble(sc.nextLine());
         }
         return val;
@@ -84,14 +93,13 @@ public class QueryTest {
         SOP("Query A testing, case-s ...");
         SOP("Find all patients where values in column X exceed value Y in at least Z consecutive records in the first 8 hours of available data.");
 
-        //TODO: First 8 hour of aval data
-        String template =
-                "SELECT * FROM (SELECT COUNT(%s) AS cocount FROM %s WHERE %s > %f GROUP BY TIME(10s)) WHERE cocount = %d";
+        // TODO: First 8 hour of aval data
+        String template = "SELECT * FROM (SELECT COUNT(%s) AS cocount FROM %s WHERE %s > %f GROUP BY TIME(%ds)) WHERE cocount = %d";
 
         SOP("Input a column X (eg. I10_1): ");
         String col = getUserInputColumns(colNames);
 
-        //TODO: Make sure it correct (threshold)
+        // TODO: Make sure it correct (threshold)
         SOP("Input a threshold value Y (eg. 8): ");
         double thrVal = getUserInputValue();
 
@@ -100,7 +108,7 @@ public class QueryTest {
 
         SOP(null);
         SOP("Your matches are:");
-        String finalD = String.format(template, col, tableName, col, thrVal * thrSec, thrSec);
+        String finalD = String.format(template, col, tableName, col, thrVal, thrSec, thrSec);
         queryRunner(idb, finalD);
 
         SOP(null);
@@ -113,9 +121,7 @@ public class QueryTest {
         SOP("Query B testing, case-s ...");
         SOP("Find all patients where the hourly mean values in column X and column Y differ by at least Z% for at least Q hourly epochs.");
 
-        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" +
-                "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM %s GROUP BY TIME(1h)) " +
-                "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
+        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" + "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM %s GROUP BY TIME(1h)) " + "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
 
         SOP("Input a column X (eg. I10_1): ");
         String colA = getUserInputColumns(colNames);
@@ -157,6 +163,23 @@ public class QueryTest {
         return colN;
     }
 
+    static void insertColumns() {
+        String[] names = { "Artifact Intensity", "Seizure Detections", "Rhythmicity Spectrogram, Left Hemisphere", "Rhythmicity Spectrogram, Right Hemisphere", "FFT Spectrogram, Left Hemisphere", "FFT Spectrogram, Right Hemisphere", "Asymmetry, Relative Spectrogram, Asym Hemi", "Asymmetry, Absolute Index (EASI), 1 - 18 Hz, Asym Hemi", "Asymmetry, Relative Index (REASI)01, 1 - 18 Hz, Asym Hemi", "aEEG, Left Hemisphere", "aEEG, Right Hemisphere", "Suppression Ratio, Left Hemisphere",
+                "Suppression Ratio, Right Hemisphere", "Time_Column" };
+        int[] columnsNumbers = { 4, 1, 97, 97, 40, 40, 34, 1, 1, 5, 5, 1, 1, 1 };
+        InfluxDB influxDB = InfluxDBFactory.connect(InfluxConfig.ADDR, InfluxConfig.USERNAME, InfluxConfig.PASSWD);
+        BatchPoints records = BatchPoints.database(InfluxConfig.DBNAME).consistency(ConsistencyLevel.ALL).build();
+
+        for (int i = 1; i <= names.length; i++) {
+            for (int j = 1; j <= columnsNumbers[i - 1]; j++) {
+                Point record = Point.measurement("columns").time(System.currentTimeMillis(), TimeUnit.MILLISECONDS).addField("name", names[i - 1]).tag("column", "I" + i + "_" + j).build();
+                records.point(record);
+            }
+            influxDB.write(records);
+            records = BatchPoints.database(InfluxConfig.DBNAME).consistency(ConsistencyLevel.ALL).build();
+        }
+    }
+
     public static void main(String[] args) {
 
         InfluxDB influxDB = InfluxDBFactory.connect(InfluxConfig.ADDR, InfluxConfig.USERNAME, InfluxConfig.PASSWD);
@@ -165,16 +188,13 @@ public class QueryTest {
         List<String> colNames = getColNames(influxDB, tableName);
 
         /*
-        queryRunner(influxDB,
-                "SELECT * FROM (SELECT COUNT(I10_1) AS cocount FROM records_000000001 WHERE I10_1 > 80 GROUP BY TIME(10s)) WHERE cocount = 10");
-        queryRunner(influxDB,
-                "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" +
-                        "SELECT * FROM (SELECT (MEAN(I10_1) - MEAN(I11_1)) / MEAN(I10_1) AS diff FROM records_000000001 GROUP BY TIME(1h)) " +
-                        "WHERE diff > 0.03 OR diff < - 0.03) GROUP BY TIME(5h)) WHERE c = 5");
-        */
+         * queryRunner(influxDB, "SELECT * FROM (SELECT COUNT(I10_1) AS cocount FROM records_000000001 WHERE I10_1 > 80 GROUP BY TIME(10s)) WHERE cocount = 10"); queryRunner(influxDB,
+         * "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" + "SELECT * FROM (SELECT (MEAN(I10_1) - MEAN(I11_1)) / MEAN(I10_1) AS diff FROM records_000000001 GROUP BY TIME(1h)) " +
+         * "WHERE diff > 0.03 OR diff < - 0.03) GROUP BY TIME(5h)) WHERE c = 5");
+         */
 
-        routineA(influxDB, tableName, colNames);
-        routineB(influxDB, tableName, colNames);
+         routineA(influxDB, tableName, colNames);
+         routineB(influxDB, tableName, colNames);
 
     }
 }

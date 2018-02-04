@@ -8,6 +8,10 @@ import java.io.FilenameFilter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.TimeZone;
@@ -122,6 +126,13 @@ public class Util {
         }
 
         return file_list.toArray(new String[file_list.size()]);
+    }
+    
+    
+    public static int timestampToAge(long birthDate) {
+        LocalDate dob = Instant.ofEpochMilli(birthDate).atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate now = Instant.ofEpochMilli(System.currentTimeMillis()).atZone(ZoneId.systemDefault()).toLocalDate();
+        return Period.between(dob, now).getYears();
     }
 
     public static void main(String[] args) throws ParseException {

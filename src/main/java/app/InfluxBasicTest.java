@@ -51,6 +51,7 @@ public class InfluxBasicTest {
 
         int lineNumber = 1;
         Map<String, String> file = new HashMap<>();
+        Map<String, String> patient = new HashMap<>();
         String timestamp = "";
         while (bufferReader.ready() && (lineNumber <= 6)) {
             String line = bufferReader.readLine();
@@ -65,15 +66,19 @@ public class InfluxBasicTest {
                     // Patient Name
                     // TODO: LN for each patient
                     file.put(line.split(",")[0], line.split(",")[1] + line.split(",")[2]);
+                    patient.put("first_name", line.split(",")[1]);
+                    patient.put("last_name", line.split(",")[2]);
                     break;
                 case 3:
                     // Patient ID, hided in the CSV
                     // TODO: UUID for each patient
-                    file.put(line.split(",")[0], "000000001");
+                    file.put(line.split(",")[0], "000000002");
+                    patient.put("id", "000000002");
                     break;
                 case 4:
                     // Patient DoB
                     file.put(line.split(",")[0], String.valueOf(Util.dateTimeFormatToTimestamp(line.split(",")[1], "m/d/yy")));
+                    patient.put("birth_date", String.valueOf(Util.dateTimeFormatToTimestamp(line.split(",")[1], "m/d/yy")));
                     break;
                 case 5:
                     // Current Date
@@ -100,6 +105,17 @@ public class InfluxBasicTest {
         BatchPoints fileInfo = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
         fileInfo.point(point);
         influxDB.write(fileInfo);
+
+        // Patient metadata table
+        Builder patientBuilder = Point.measurement("patient").time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        for (String key : patient.keySet()) {
+            // TODO: field is not indexable
+            patientBuilder.addField(key, patient.get(key));
+        }
+        Point patientPoint = patientBuilder.build();
+        BatchPoints patientInfo = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
+        patientInfo.point(patientPoint);
+        influxDB.write(patientInfo);
 
         // Skip the 7th line
         bufferReader.readLine();
