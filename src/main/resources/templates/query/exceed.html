@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Vendor styles -->
+<link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.css">
+<link rel="stylesheet" href="/vendors/bower_components/select2/dist/css/select2.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/dropzone/dist/dropzone.css">
+<link rel="stylesheet" href="/vendors/bower_components/flatpickr/dist/flatpickr.min.css" />
+<link rel="stylesheet" href="/vendors/bower_components/nouislider/distribute/nouislider.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
+<link rel="stylesheet" href="/vendors/bower_components/trumbowyg/dist/ui/trumbowyg.min.css">
+
+<!-- App styles -->
+<link rel="stylesheet" href="/css/app.min.css">
+
+<!-- Demo only -->
+<link rel="stylesheet" href="/demo/css/demo.css">
+<!-- <link rel="shortcut icon" href="http://www.upmc.com/PublishingImages/favicon.ico" type="image/x-icon" /> -->
+</head>
+
+<body data-ma-theme="blue">
+    <main class="main">
+    <div th:insert="fragments/page-loader :: div"></div>
+    <div th:insert="fragments/header :: header"></div>
+    <div th:insert="fragments/sidebar :: aside"></div>
+    <div th:insert="fragments/chat :: aside"></div>
+
+    <section class="content">
+        <!-- PUT THE MAIN CONTENT HERE -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Query</h2>
+                <small class="card-subtitle">Find all patients where values in column X exceed value Y in at least Z consecutive records in the first 8 hours of available data.</small>
+            </div>
+            <div class="card-block">
+                <form role="form" id="parameter-form">
+                    <div class="row">
+                        <!-- <div class="col-sm-4 col-md-4">
+                        <div class="form-group">
+                            <label>Column X</label>
+                            <select class="select2" data-placeholder="Select Category" data-minimum-results-for-search="Infinity" id="category">
+                                <option disabled="disabled" selected="selected" value="">Select Category</option>
+                                <option th:value="${columnName}" th:each="columnName : ${columnNames}" th:text="${columnName}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4 col-md-2">
+                        <div class="form-group">
+                            <label>&nbsp</label>
+                            <select class="select2" data-placeholder="Select Column" data-minimum-results-for-search="Infinity">
+                                <option disabled="disabled" selected="selected" value="">Select Column</option>
+                                <option th:value="${column}" th:each="column : ${categories.columnName}" th:text="${column}"></option>
+                            </select>
+                        </div>
+                    </div> -->
+
+                        <div class="col-sm-4 col-md-2">
+                            <div class="form-group">
+                                <label>Column X</label>
+                                <select class="select2" data-placeholder="Select Category" id="column">
+                                    <option disabled="disabled" selected="selected" value="">Select Category</option>
+                                    <option th:value="${column}" th:each="column : ${columns}" th:text="${column}"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4 col-md-2">
+                            <div class="form-group">
+                                <label>Value Y</label>
+                                <input type="text" class="form-control" id="threshold">
+                                <i class="form-group__bar"></i>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4 col-md-2">
+                            <div class="form-group">
+                                <label>Z Records</label>
+                                <input type="text" class="form-control" id="count">
+                                <i class="form-group__bar"></i>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4 col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp</label>
+                                <button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" id="filterButton">Go</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive" th:fragment="aaa">
+                    <table id="patient-table" class="table table-bordered">
+                        <thead class="thead-default">
+                            <tr>
+                                <th>ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Age</th>
+                                <th>Date of Birth</th>
+                                <th>Number of Occurence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ID</td>
+                                <td>First Name</td>
+                                <td>Last Name</td>
+                                <td>Age</td>
+                                <td>Date of Birth</td>
+                                <td>Number of Occurence</td>
+                            </tr>
+                            <!-- <tr th:each="patient : ${patients}" id="patients">
+                    <td th:text="${patient.patient.id}">000000001</td>
+                    <td th:text="${patient.patient.firstName}">John</td>
+                    <td th:text="${patient.patient.lastName}">Smith</td>
+                    <td th:text="${patient.patient.age}">23</td>
+                    <td th:text="${patient.patient.birthDate}">01/05/1985</td>
+                    <td th:text="${patient.occurence}">1</td>
+                </tr> -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- /MAIN CONTENT -->
+        <div th:insert="fragments/footer :: footer"></div>
+    </section>
+    </main>
+
+    <div th:insert="fragments/ie-warning :: div"></div>
+    <!-- Javascript -->
+    <!-- Vendors -->
+    <script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="/vendors/bower_components/tether/dist/js/tether.min.js"></script>
+    <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/vendors/bower_components/Waves/dist/waves.min.js"></script>
+    <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+
+    <!-- Vendors: Data tables -->
+    <script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="/vendors/bower_components/jszip/dist/jszip.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
+
+    <script src="/vendors/bower_components/jquery-mask-plugin/dist/jquery.mask.min.js"></script>
+    <script src="/vendors/bower_components/select2/dist/js/select2.full.min.js"></script>
+    <script src="/vendors/bower_components/dropzone/dist/min/dropzone.min.js"></script>
+    <script src="/vendors/bower_components/moment/min/moment.min.js"></script>
+    <script src="/vendors/bower_components/flatpickr/dist/flatpickr.min.js"></script>
+    <script src="/vendors/bower_components/nouislider/distribute/nouislider.min.js"></script>
+    <script src="/vendors/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
+    <script src="/vendors/bower_components/trumbowyg/dist/trumbowyg.min.js"></script>
+
+
+    <!-- App functions and actions -->
+    <script src="/js/app.min.js"></script>
+    <script src="/js/query/exceed.js"></script>
+</body>
+</html>
