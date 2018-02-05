@@ -164,7 +164,7 @@ public class InfluxBasicTest {
         for (String f_path : all_csvs) {
             System.out.println("Processing '" + f_path + "'");
 
-            fileLine = Files.lines(Paths.get(superDirectory)).count();
+            fileLine = Files.lines(Paths.get(f_path)).count();
             System.out.println("Number of records: " + (fileLine - 8));
 
             long startTime = System.currentTimeMillis();
