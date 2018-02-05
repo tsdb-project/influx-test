@@ -28,6 +28,12 @@ public class PatientService {
     public List<Patient> selectAll() {
         Query query = new Query("select \"id\",\"first_name\",\"last_name\",\"birth_date\" from " + tableName, InfluxConfig.DBNAME);
         QueryResult results = influxDB.query(query);
+        return queryResultToPatientList(results);
+    }
+
+    // TODO: Select by more attribute?
+
+    private List<Patient> queryResultToPatientList(QueryResult results) {
         List<Patient> patients = new ArrayList<>();
         for (List<Object> result : results.getResults().get(0).getSeries().get(0).getValues()) {
             Patient patient = new Patient();
@@ -40,7 +46,7 @@ public class PatientService {
         }
         return patients;
     }
-    
+
     public static void main(String[] args) {
         PatientService patientService = new PatientService();
         System.out.println(patientService.selectAll().get(0).getId());

@@ -29,7 +29,7 @@ import app.service.PatientService;
 
 @Controller
 @RestController
-@RequestMapping("query")
+@RequestMapping("apis/query")
 public class QueryController {
     @Autowired
     ColumnService columnService;

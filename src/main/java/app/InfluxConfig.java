@@ -8,7 +8,7 @@ public class InfluxConfig {
     /**
      * Server Address
      */
-    public static String ADDR = "http://127.0.0.1:8086";
+    public static String ADDR = "http://192.168.254.130:8086";
 
     /**
      * Server writable user's name (better to be an admin)
