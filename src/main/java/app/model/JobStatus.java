@@ -1,9 +1,9 @@
 package app.model;
 
 /**
- * Non-data restful status
+ * Non-data restful job status
  */
-public class RestStatus {
+public class JobStatus {
 
     private int statusCode;
     private String info;

@@ -1,11 +1,12 @@
 /**
  * 
  */
-package app;
+package app.util;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import app.InfluxappConfig;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.InfluxDB.ConsistencyLevel;
@@ -25,7 +26,7 @@ public class RealTimeDataTest {
     }
 
     public static void insert() {
-        InfluxDB influxDB = InfluxDBFactory.connect(InfluxConfig.ADDR, InfluxConfig.USERNAME, InfluxConfig.PASSWD);
+        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
         String dbName = "test";
         influxDB.createDatabase(dbName);
 

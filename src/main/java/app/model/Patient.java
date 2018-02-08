@@ -4,73 +4,35 @@
 package app.model;
 
 /**
- * @author Isolachine
- *
+ * Single patient model
  */
 public class Patient {
-    private String id;
-    private String firstName;
-    private String lastName;
-    private Integer age;
-    private String birthDate;
-    /**
-     * @return the id
-     */
-    public String getId() {
-        return id;
+
+    private String pid;
+    private Double age;
+    private String gender;
+
+    public String getPid() {
+        return pid;
     }
-    /**
-     * @param id the id to set
-     */
-    public void setId(String id) {
-        this.id = id;
+
+    public void setPid(String pid) {
+        this.pid = pid;
     }
-    /**
-     * @return the firstName
-     */
-    public String getFirstName() {
-        return firstName;
-    }
-    /**
-     * @param firstName the firstName to set
-     */
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-    /**
-     * @return the lastName
-     */
-    public String getLastName() {
-        return lastName;
-    }
-    /**
-     * @param lastName the lastName to set
-     */
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-    /**
-     * @return the age
-     */
-    public Integer getAge() {
+
+    public Double getAge() {
         return age;
     }
-    /**
-     * @param age the age to set
-     */
-    public void setAge(Integer age) {
+
+    public void setAge(Double age) {
         this.age = age;
     }
-    /**
-     * @return the birthDate
-     */
-    public String getBirthDate() {
-        return birthDate;
+
+    public String getGender() {
+        return gender;
     }
-    /**
-     * @param birthDate the birthDate to set
-     */
-    public void setBirthDate(String birthDate) {
-        this.birthDate = birthDate;
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }

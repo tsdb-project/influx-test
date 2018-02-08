@@ -14,7 +14,7 @@ import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.springframework.stereotype.Service;
 
-import app.InfluxConfig;
+import app.InfluxappConfig;
 
 /**
  * @author Isolachine
@@ -22,11 +22,11 @@ import app.InfluxConfig;
  */
 @Service
 public class ColumnService {
-    private InfluxDB influxDB = InfluxDBFactory.connect(InfluxConfig.ADDR, InfluxConfig.USERNAME, InfluxConfig.PASSWD);
+    private InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
     private String tableName = "columns";
 
     public List<String> selectAllCategory() {
-        Query query = new Query("select distinct(\"name\") from " + tableName, InfluxConfig.DBNAME);
+        Query query = new Query("select distinct(\"name\") from " + tableName, InfluxappConfig.IFX_DBNAME);
         QueryResult results = influxDB.query(query);
         List<String> categories = new ArrayList<>();
         for (List<Object> result : results.getResults().get(0).getSeries().get(0).getValues()) {
@@ -36,7 +36,7 @@ public class ColumnService {
     }
 
     public Map<String, List<String>> selectAllColumnAndCategory() {
-        Query query = new Query("select \"name\", \"column\" from " + tableName, InfluxConfig.DBNAME);
+        Query query = new Query("select \"name\", \"column\" from " + tableName, InfluxappConfig.IFX_DBNAME);
         QueryResult results = influxDB.query(query);
         Map<String, List<String>> columns = new HashMap<>();
         for (List<Object> result : results.getResults().get(0).getSeries().get(0).getValues()) {
@@ -49,7 +49,7 @@ public class ColumnService {
     }
     
     public List<String> selectAllColumn() {
-        Query query = new Query("select \"name\", \"column\" from " + tableName, InfluxConfig.DBNAME);
+        Query query = new Query("select \"name\", \"column\" from " + tableName, InfluxappConfig.IFX_DBNAME);
         QueryResult results = influxDB.query(query);
         List<String> columns = new ArrayList<>();
         for (List<Object> result : results.getResults().get(0).getSeries().get(0).getValues()) {

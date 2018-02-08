@@ -12,11 +12,14 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.TimeZone;
+import java.util.*;
 
+import app.InfluxappConfig;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.Query;
+import org.influxdb.dto.QueryResult;
 
 /**
  * @author Isolachine
@@ -127,15 +130,40 @@ public class Util {
 
         return file_list.toArray(new String[file_list.size()]);
     }
-    
-    
+
+
     public static int timestampToAge(long birthDate) {
         LocalDate dob = Instant.ofEpochMilli(birthDate).atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate now = Instant.ofEpochMilli(System.currentTimeMillis()).atZone(ZoneId.systemDefault()).toLocalDate();
         return Period.between(dob, now).getYears();
     }
 
+    public static List<String> getAllTables(InfluxDB idb) {
+        Query q = new Query("SHOW MEASUREMENTS", InfluxappConfig.IFX_DBNAME);
+        QueryResult qr = idb.query(q);
+        List<QueryResult.Series> s = qr.getResults().get(0).getSeries();
+        if (s == null) return null;
+        List<List<Object>> os = s.get(0).getValues();
+
+        List<String> lists = new ArrayList<>(os.size());
+        for (List<Object> oss : os) {
+            lists.add(String.valueOf(oss.get(0)));
+        }
+        return lists;
+    }
+
+    public static double getDataTableRows(InfluxDB idb, String tn) {
+        Query q = new Query("SELECT COUNT(\"Time\") FROM \"" + tn + "\"", InfluxappConfig.IFX_DBNAME);
+        QueryResult qr = idb.query(q);
+        return (double) qr.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
+    }
+
     public static void main(String[] args) throws ParseException {
+
+        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+        getAllTables(influxDB);
+        getDataTableRows(influxDB, "data_PUH-2010-093_noar");
+
         System.out.println(dateToTimestamp("1/2/1934"));
         System.out.println(timestampToUTCDate(dateToTimestamp("1/1/1934")));
         System.out.println(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"));

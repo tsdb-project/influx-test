@@ -3,9 +3,7 @@
  */
 package app.controller;
 
-import app.InfluxBasicTest;
-import app.model.RestStatus;
-import org.springframework.ui.Model;
+import app.model.JobStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,8 +24,8 @@ public class ImportDataController {
 
     @RequestMapping(value = "/import", method = RequestMethod.POST)
     @ResponseBody
-    public RestStatus importData(@RequestParam("file") MultipartFile file) {
-        RestStatus rst = new RestStatus();
+    public JobStatus importData(@RequestParam("file") MultipartFile file) {
+        JobStatus rst = new JobStatus();
         rst.setStatusCode(200);
         rst.setInfo("File import OK!");
 
@@ -44,7 +42,6 @@ public class ImportDataController {
             f.flush();
             f.close();
 
-            InfluxBasicTest.testSingleFileImport(fileLocation);
         } catch (IOException e) {
             rst.setStatusCode(500);
             rst.setInfo(e.getLocalizedMessage());
