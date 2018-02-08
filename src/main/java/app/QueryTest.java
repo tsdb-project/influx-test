@@ -32,8 +32,7 @@ public class QueryTest {
     /**
      * Print out InfluxDB query result, if has error then print error
      *
-     * @param result
-     *            QueryResult instance
+     * @param result QueryResult instance
      */
     static void printResult(QueryResult result) {
         if (result.hasError()) {
@@ -147,7 +146,7 @@ public class QueryTest {
     }
 
     static List<String> getColNames(InfluxDB idb, String pid) {
-        Query q = new Query("SHOW FIELD KEYS FROM " + pid, InfluxappConfig.IFX_DBNAME);
+        Query q = new Query("SHOW FIELD KEYS FROM \"" + pid + "\"", InfluxappConfig.IFX_DBNAME);
         QueryResult qR = idb.query(q);
         List<List<Object>> qRR = qR.getResults().get(0).getSeries().get(0).getValues();
         List<String> colN = new ArrayList<>(qRR.size());
@@ -160,9 +159,9 @@ public class QueryTest {
     }
 
     static void insertColumns() {
-        String[] names = { "Artifact Intensity", "Seizure Detections", "Rhythmicity Spectrogram, Left Hemisphere", "Rhythmicity Spectrogram, Right Hemisphere", "FFT Spectrogram, Left Hemisphere", "FFT Spectrogram, Right Hemisphere", "Asymmetry, Relative Spectrogram, Asym Hemi", "Asymmetry, Absolute Index (EASI), 1 - 18 Hz, Asym Hemi", "Asymmetry, Relative Index (REASI)01, 1 - 18 Hz, Asym Hemi", "aEEG, Left Hemisphere", "aEEG, Right Hemisphere", "Suppression Ratio, Left Hemisphere",
-                "Suppression Ratio, Right Hemisphere", "Time_Column" };
-        int[] columnsNumbers = { 4, 1, 97, 97, 40, 40, 34, 1, 1, 5, 5, 1, 1, 1 };
+        String[] names = {"Artifact Intensity", "Seizure Detections", "Rhythmicity Spectrogram, Left Hemisphere", "Rhythmicity Spectrogram, Right Hemisphere", "FFT Spectrogram, Left Hemisphere", "FFT Spectrogram, Right Hemisphere", "Asymmetry, Relative Spectrogram, Asym Hemi", "Asymmetry, Absolute Index (EASI), 1 - 18 Hz, Asym Hemi", "Asymmetry, Relative Index (REASI)01, 1 - 18 Hz, Asym Hemi", "aEEG, Left Hemisphere", "aEEG, Right Hemisphere", "Suppression Ratio, Left Hemisphere",
+                "Suppression Ratio, Right Hemisphere", "Time_Column"};
+        int[] columnsNumbers = {4, 1, 97, 97, 40, 40, 34, 1, 1, 5, 5, 1, 1, 1};
         InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
         BatchPoints records = BatchPoints.database(InfluxappConfig.IFX_DBNAME).consistency(ConsistencyLevel.ALL).build();
 
@@ -180,17 +179,19 @@ public class QueryTest {
 
         InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
 
-        String tableName = "records_000000001";
+        String tableName = "data_PUH-2010-080_noar";
         List<String> colNames = getColNames(influxDB, tableName);
 
-        /*
-         * queryRunner(influxDB, "SELECT * FROM (SELECT COUNT(I10_1) AS cocount FROM records_000000001 WHERE I10_1 > 80 GROUP BY TIME(10s)) WHERE cocount = 10"); queryRunner(influxDB,
-         * "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" + "SELECT * FROM (SELECT (MEAN(I10_1) - MEAN(I11_1)) / MEAN(I10_1) AS diff FROM records_000000001 GROUP BY TIME(1h)) " +
-         * "WHERE diff > 0.03 OR diff < - 0.03) GROUP BY TIME(5h)) WHERE c = 5");
-         */
 
-         routineA(influxDB, tableName, colNames);
-         routineB(influxDB, tableName, colNames);
+        queryRunner(influxDB, "SELECT * FROM (SELECT COUNT(I10_1) AS cocount FROM \"data_PUH-2010-080_noar\" WHERE I10_1 > 80 GROUP BY TIME(10s)) WHERE cocount = 10");
+        queryRunner(influxDB,
+                "SELECT * FROM (SELECT COUNT(diff) AS c FROM ("
+                        + "SELECT * FROM (SELECT (MEAN(I10_1) - MEAN(I11_1)) / MEAN(I10_1) AS diff FROM \"data_PUH-2010-080_noar\" GROUP BY TIME(1h)) "
+                        + "WHERE diff > 0.03 OR diff < - 0.03) GROUP BY TIME(5h)) WHERE c = 5");
+
+
+        //routineA(influxDB, tableName, colNames);
+        //routineB(influxDB, tableName, colNames);
 
     }
 }

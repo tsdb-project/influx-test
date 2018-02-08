@@ -20,7 +20,7 @@ import org.influxdb.dto.Point.Builder;
 
 import app.util.Util;
 import org.influxdb.dto.Query;
-import org.influxdb.dto.QueryResult;
+import okhttp3.OkHttpClient;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,6 +31,12 @@ public class ImportCsvService {
 
     private final static Random rnd = new Random();
 
+    private final static okhttp3.OkHttpClient.Builder importHttpClient =
+            new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS);
+
     /**
      * Process a file object
      *
@@ -39,7 +45,8 @@ public class ImportCsvService {
      * @param fileSize  File size to estimate progress
      */
     private static void importProc(File file_info, boolean hasAr, double fileSize, String taskName) throws IOException, ParseException {
-        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD, importHttpClient);
+        influxDB.disableGzip();
         String dbName = InfluxappConfig.IFX_DBNAME;
         influxDB.createDatabase(dbName);
 
@@ -115,7 +122,7 @@ public class ImportCsvService {
         String[] introColumns = svL.split(",");
         String[] columnNames = eiL.split(",");
         int columnCount = columnNames.length;
-        System.out.println(file_name + " columns: " + columnCount);
+        SOP(file_name + " columns: " + columnCount);
         int bulkInsertMax = 1550000 / columnCount;
 
         // File records table
@@ -128,7 +135,7 @@ public class ImportCsvService {
         if (!isNewPatient) {
             if (Util.getAllTables(influxDB).contains(tableName)) {
                 if (isFileUUIDExist(influxDB, file_uuid)) {
-                    System.out.println("Already imported '" + file_uuid + "'");
+                    SOP("Already imported '" + file_uuid + "'");
                     bufferReader.close();
                     reader.close();
                     return;
@@ -162,7 +169,7 @@ public class ImportCsvService {
                 records = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
                 batchCount = 0;
                 String percent = String.format("%.2f%%", processedSize / fileSize * 100.0);
-                System.out.println(taskName + " processed " + percent + " (" + totalCount + " records), " + file_name);
+                SOP(taskName + " processed " + percent + " (" + totalCount + " records), " + file_name);
             }
         }
         bufferReader.close();
@@ -170,7 +177,7 @@ public class ImportCsvService {
 
         // Last batch haven't wrote to DB
         influxDB.write(records);
-        System.out.println("Finished for '" + file_name + "'");
+        SOP("Finished for '" + file_name + "'");
     }
 
     private static boolean isNewPatient(InfluxDB idb, String id) {
@@ -190,13 +197,13 @@ public class ImportCsvService {
 
         try {
             File file_info = new File(oneCsv);
-            System.out.println(threadName + " processing '" + file_info.getName() + "'");
+            SOP(threadName + " processing '" + file_info.getName() + "'");
 
             long startTime = System.currentTimeMillis();
             importProc(file_info, hasAr, file_info.length(), threadName);
             long endTime = System.currentTimeMillis();
 
-            System.out.println(oneCsv + ". Import time: " + String.format("%.2f", (endTime - startTime) / 60000.0) + " min\n");
+            SOP(oneCsv + ". Import time: " + String.format("%.2f", (endTime - startTime) / 60000.0) + " min\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -212,6 +219,11 @@ public class ImportCsvService {
         for (String f_path : allCsv) {
             ImportByFile(f_path, hasAr, nkName);
         }
+    }
+
+    // Dummy System.out.println
+    private static void SOP(String s) {
+        System.out.println(s);
     }
 
     public static void main(String[] args) {
