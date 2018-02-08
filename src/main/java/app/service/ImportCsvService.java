@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,16 +29,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class ImportCsvService {
 
-    private static long fileLine = 0;
     private final static Random rnd = new Random();
 
-    // TODO: return JobStatus class
-    public static void singleFileImport(String file_path, boolean hasAr) throws IOException, ParseException {
+    /**
+     * Process a file object
+     *
+     * @param file_info File object
+     * @param hasAr     AR?
+     * @param fileSize  File size to estimate progress
+     */
+    private static void importProc(File file_info, boolean hasAr, double fileSize, String taskName) throws IOException, ParseException {
         InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
         String dbName = InfluxappConfig.IFX_DBNAME;
         influxDB.createDatabase(dbName);
 
-        File file_info = new File(file_path);
         // Extract PID from file name (Always first 12 chars)
         String file_name = file_info.getName();
         String pid, file_uuid = "unknown";
@@ -84,17 +86,20 @@ public class ImportCsvService {
 
         // File metadata table
         Builder filemetaBuilder = Point.measurement(InfluxappConfig.IFX_TABLE_FILES).time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
+        filemetaBuilder.tag("pid", pid);
         filemetaBuilder.addField("uuid", file_uuid);
+        filemetaBuilder.addField("name", file_name);
+        filemetaBuilder.addField("size", (long) fileSize);
         Point point = filemetaBuilder.build();
         BatchPoints fileInfo = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
         fileInfo.point(point);
         influxDB.write(fileInfo);
 
+        // On-demand patient metadata table
         if (isNewPatient) {
-            // Patient metadata table
             Builder patientBuilder = Point.measurement(InfluxappConfig.IFX_TABLE_PATIENTS).time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
             patientBuilder.tag("pid", pid);
-            patientBuilder.addField("age", rnd.nextInt(90));
+            patientBuilder.addField("age", rnd.nextInt(80) + 10);
             patientBuilder.addField("gender", rnd.nextBoolean() ? "M" : "F");
             Point patientPoint = patientBuilder.build();
             BatchPoints patientInfo = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
@@ -102,25 +107,28 @@ public class ImportCsvService {
             influxDB.write(patientInfo);
         }
 
-        // TODO: 7th line
-        String[] introColumns = bufferReader.readLine().split(",");
-        // Read the column name
-        String[] columnNames = bufferReader.readLine().split(",");
+        // 7th line
+        String svL = bufferReader.readLine();
+        // 8th Line
+        String eiL = bufferReader.readLine();
+
+        String[] introColumns = svL.split(",");
+        String[] columnNames = eiL.split(",");
         int columnCount = columnNames.length;
-        System.out.println("Number of columns: " + columnCount);
+        System.out.println(file_name + " columns: " + columnCount);
         int bulkInsertMax = 1550000 / columnCount;
 
         // File records table
         BatchPoints records = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
         int batchCount = 0, totalCount = 0;
+        double processedSize = svL.length() + eiL.length();
         String tableName = InfluxappConfig.IFX_DATA_PREFIX + pid + (hasAr ? "_ar" : "_noar");
 
         // Avoid duplicate import
         if (!isNewPatient) {
             if (Util.getAllTables(influxDB).contains(tableName)) {
-                if (Util.getDataTableRows(influxDB, tableName) - fileLine < 0.001) {
-                    // Already imported
-                    System.out.println("Already imported this dataset!");
+                if (isFileUUIDExist(influxDB, file_uuid)) {
+                    System.out.println("Already imported '" + file_uuid + "'");
                     bufferReader.close();
                     reader.close();
                     return;
@@ -129,7 +137,8 @@ public class ImportCsvService {
         }
 
         while (bufferReader.ready()) {
-            String[] values = bufferReader.readLine().split(",");
+            String aLine = bufferReader.readLine();
+            String[] values = aLine.split(",");
             if (columnCount != values.length)
                 throw new RuntimeException("File content inconsistent!");
             Map<String, Object> lineKVMap = new HashMap<>();
@@ -146,12 +155,14 @@ public class ImportCsvService {
             records.point(record);
             batchCount++;
             totalCount++;
+            processedSize += aLine.length();
             if (batchCount >= bulkInsertMax) {
+                // Insert in BULK
                 influxDB.write(records);
                 records = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
                 batchCount = 0;
-                String percent = String.format("%.2f%%", (totalCount * 100.0 / fileLine));
-                System.out.println("Processed " + percent + " (" + totalCount + " records)");
+                String percent = String.format("%.2f%%", processedSize / fileSize * 100.0);
+                System.out.println(taskName + " processed " + percent + " (" + totalCount + " records), " + file_name);
             }
         }
         bufferReader.close();
@@ -159,37 +170,74 @@ public class ImportCsvService {
 
         // Last batch haven't wrote to DB
         influxDB.write(records);
-        System.out.println("Finished...");
+        System.out.println("Finished for '" + file_name + "'");
     }
 
     private static boolean isNewPatient(InfluxDB idb, String id) {
         return (idb.query(new Query(
-                "SELECT pid FROM " + InfluxappConfig.IFX_TABLE_PATIENTS
+                "SELECT * FROM " + InfluxappConfig.IFX_TABLE_PATIENTS
                         + " WHERE pid = '" + id.toUpperCase() + "'", InfluxappConfig.IFX_DBNAME))
                 .getResults().get(0).getSeries()) == null;
     }
 
-    public static void main(String[] args) throws IOException, ParseException {
+    private static boolean isFileUUIDExist(InfluxDB idb, String uuid) {
+        return (idb.query(new Query(
+                "SHOW TAG VALUES WITH KEY = \"file_uuid\" WHERE \"file_uuid\" = '" + uuid + "'",
+                InfluxappConfig.IFX_DBNAME)).getResults().get(0).getSeries()) != null;
+    }
 
-//        String superDirectory = "E:\\Grad@Pitt\\TS ProjectData";
+    public static void ImportByFile(String oneCsv, boolean hasAr, String threadName) {
 
-//        String superDirectory = "data//1.csv";
-//        String[] all_csvs = Util.getAllCsvFileInDirectory(superDirectory);
-//
-//        for (String f_path : all_csvs) {
-//            System.out.println("Processing '" + f_path + "'");
-//
-        String f_path = "N:\\Exported Files without Artifact Reduction\\PUH-2010-093_01noar.csv";
-        // Spend lots of time, but accruate for progress
-        fileLine = Files.lines(Paths.get(f_path)).count();
-        System.out.println("Number of records: " + (fileLine - 8));
+        try {
+            File file_info = new File(oneCsv);
+            System.out.println(threadName + " processing '" + file_info.getName() + "'");
 
-        long startTime = System.currentTimeMillis();
-        singleFileImport(f_path, false);
-        long endTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
+            importProc(file_info, hasAr, file_info.length(), threadName);
+            long endTime = System.currentTimeMillis();
 
-        System.out.println("Import time: " + String.format("%.2f", (endTime - startTime) / 60000.0) + " min\n");
-//        }
+            System.out.println(oneCsv + ". Import time: " + String.format("%.2f", (endTime - startTime) / 60000.0) + " min\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void ImportByList(String[] allCsv, boolean hasAr, String nkName) {
+
+        int cores = Runtime.getRuntime().availableProcessors(),
+                queueLen = allCsv.length;
+
+        // TODO: Parallel importing
+
+        for (String f_path : allCsv) {
+            ImportByFile(f_path, hasAr, nkName);
+        }
+    }
+
+    public static void main(String[] args) {
+
+        String[] allAR = Util.getAllCsvFileInDirectory("N:\\Test_AR\\");
+        String[] allNoAR = Util.getAllCsvFileInDirectory("N:\\Test_NoAR\\");
+
+        Thread thread1 = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                ImportByList(allNoAR, false, "NoART");
+            }
+
+        });
+
+        Thread thread2 = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                ImportByList(allAR, true, "ART");
+            }
+        });
+
+        thread1.start();
+        thread2.start();
 
     }
 
