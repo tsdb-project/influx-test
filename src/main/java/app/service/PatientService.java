@@ -38,7 +38,7 @@ public class PatientService {
      * @param pid Patient ID
      * @return Patient Object
      */
-    public List<Patient> SelectById(String pid) {
+    public List<Patient> FindById(String pid) {
         Query query = new Query(patientQueryStr + " WHERE pid = '" + pid.toUpperCase() + "'", InfluxappConfig.IFX_DBNAME);
         return resultMapper.toPOJO(influxDB.query(query), Patient.class);
     }
@@ -49,7 +49,7 @@ public class PatientService {
      * @param gnd (M)ale or (F)emale
      * @return Lists of patients
      */
-    public List<Patient> SelectByGender(String gnd) {
+    public List<Patient> FindByGender(String gnd) {
         Query query = new Query(patientQueryStr + " WHERE gender = '" + gnd.toUpperCase() + "'", InfluxappConfig.IFX_DBNAME);
         return resultMapper.toPOJO(influxDB.query(query), Patient.class);
     }
@@ -61,7 +61,7 @@ public class PatientService {
      * @param upper Non-inclusive upper
      * @return Lists of patients
      */
-    public List<Patient> SelectByAge(int lower, int upper) {
+    public List<Patient> FindByAge(int lower, int upper) {
         Query query = new Query(patientQueryStr + " WHERE age >= " + lower + " AND age < " + upper, InfluxappConfig.IFX_DBNAME);
         return resultMapper.toPOJO(influxDB.query(query), Patient.class);
     }
@@ -72,7 +72,7 @@ public class PatientService {
      * @param upper Inclusive upper
      * @return Lists of patients
      */
-    public List<Patient> SelectByAgeUpperbound(int upper) {
+    public List<Patient> FindByAgeUpperbound(int upper) {
         Query query = new Query(patientQueryStr + " WHERE age <= " + upper, InfluxappConfig.IFX_DBNAME);
         return resultMapper.toPOJO(influxDB.query(query), Patient.class);
     }
@@ -83,7 +83,7 @@ public class PatientService {
      * @param lower Inclusive lower
      * @return Lists of patients
      */
-    public List<Patient> SelectByAgeLowerbound(int lower) {
+    public List<Patient> FindByAgeLowerbound(int lower) {
         Query query = new Query(patientQueryStr + " WHERE age >= " + lower, InfluxappConfig.IFX_DBNAME);
         return resultMapper.toPOJO(influxDB.query(query), Patient.class);
     }
@@ -91,11 +91,11 @@ public class PatientService {
     public static void main(String[] args) {
         PatientService patientService = new PatientService();
         List<Patient> s = patientService.SelectAll();
-        s = patientService.SelectByGender("M");
-        s = patientService.SelectById("pu-2010-083");
-        s = patientService.SelectByAgeLowerbound(23);
-        s = patientService.SelectByAgeUpperbound(50);
-        s = patientService.SelectByAge(20, 24);
+        s = patientService.FindByGender("M");
+        s = patientService.FindById("pu-2010-083");
+        s = patientService.FindByAgeLowerbound(23);
+        s = patientService.FindByAgeUpperbound(50);
+        s = patientService.FindByAge(20, 24);
         System.out.println();
     }
 }

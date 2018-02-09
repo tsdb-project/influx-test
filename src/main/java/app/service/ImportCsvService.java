@@ -95,6 +95,7 @@ public class ImportCsvService {
         // File metadata table
         Builder filemetaBuilder = Point.measurement(InfluxappConfig.IFX_TABLE_FILES).time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
         filemetaBuilder.tag("pid", pid);
+        filemetaBuilder.addField("isAR", hasAr);
         filemetaBuilder.addField("uuid", file_uuid);
         filemetaBuilder.addField("name", file_name);
         filemetaBuilder.addField("size", (long) fileSize);

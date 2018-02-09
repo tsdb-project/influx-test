@@ -16,11 +16,17 @@ import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
+import org.influxdb.impl.InfluxDBResultMapper;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Isolachine
  */
+@Service
 public class QueryService {
+
+    private static final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+    private static final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
 
     /**
      * Print out InfluxDB query result, if has error then print error
