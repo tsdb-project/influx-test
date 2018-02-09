@@ -27,8 +27,7 @@ public class InfluxUtil {
         QueryResult.Series oper = resSer.get(0);
         int rows = oper.getValues().size(),
                 cols = oper.getColumns().size();
-        // High load factor because the length is known
-        Map<String, List<Object>> finalKV = new HashMap<>(rows, 0.95f);
+        Map<String, List<Object>> finalKV = new HashMap<>((int) (rows / 0.75));
 
         for (int i = 0; i < cols; ++i) {
             String colName = oper.getColumns().get(i);

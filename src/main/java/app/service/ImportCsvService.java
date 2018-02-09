@@ -71,7 +71,11 @@ public class ImportCsvService {
                     // Check PID in the first line? If not, error
                     if (!line.toUpperCase().contains(pid))
                         throw new RuntimeException("Wrong PID in filename!");
+                    if (line.length() < 40)
+                        throw new RuntimeException("File UUID misformat!");
                     file_uuid = line.substring(line.length() - 40, line.length() - 4);
+                    if (file_uuid.contains("."))
+                        throw new RuntimeException("File UUID misformat!");
                     break;
                 case 2:
                 case 3:
@@ -91,18 +95,6 @@ public class ImportCsvService {
         }
 
         boolean isNewPatient = isNewPatient(influxDB, pid);
-
-        // File metadata table
-        Builder filemetaBuilder = Point.measurement(InfluxappConfig.IFX_TABLE_FILES).time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
-        filemetaBuilder.tag("pid", pid);
-        filemetaBuilder.addField("isAR", hasAr);
-        filemetaBuilder.addField("uuid", file_uuid);
-        filemetaBuilder.addField("name", file_name);
-        filemetaBuilder.addField("size", (long) fileSize);
-        Point point = filemetaBuilder.build();
-        BatchPoints fileInfo = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
-        fileInfo.point(point);
-        influxDB.write(fileInfo);
 
         // On-demand patient metadata table
         if (isNewPatient) {
@@ -125,6 +117,7 @@ public class ImportCsvService {
         String[] columnNames = eiL.split(",");
         int columnCount = columnNames.length;
         SOP(file_name + " columns: " + columnCount);
+        // Oversize will cause TCP connection to break
         int bulkInsertMax = 1550000 / columnCount;
 
         // File records table
@@ -145,12 +138,17 @@ public class ImportCsvService {
             }
         }
 
+        Map<String, String> dataTag = new HashMap<>(5);
+        dataTag.put("fileUUID", file_uuid);
+        dataTag.put("isAR", String.valueOf(hasAr ? 1 : 0));
+
         while (bufferReader.ready()) {
             String aLine = bufferReader.readLine();
             String[] values = aLine.split(",");
             if (columnCount != values.length)
                 throw new RuntimeException("File content inconsistent!");
-            Map<String, Object> lineKVMap = new HashMap<>();
+            // Large initial cap for better importing performance
+            Map<String, Object> lineKVMap = new HashMap<>((int) (columnCount / 0.75));
             for (int i = 1; i < values.length; i++) {
                 lineKVMap.put(columnNames[i], Double.valueOf(values[i]));
             }
@@ -158,7 +156,7 @@ public class ImportCsvService {
             // Table with ID for each patient
             Point record = Point.measurement(tableName)
                     .time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS)
-                    .tag("file_uuid", file_uuid)
+                    .tag(dataTag)
                     .fields(lineKVMap)
                     .build();
             records.point(record);
@@ -179,6 +177,20 @@ public class ImportCsvService {
 
         // Last batch haven't wrote to DB
         influxDB.write(records);
+
+        // File metadata table, move this part to final because: only success imports will be in the File table
+        Builder filemetaBuilder = Point.measurement(InfluxappConfig.IFX_TABLE_FILES).time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
+        filemetaBuilder.tag("pid", pid);
+        filemetaBuilder.addField("isAR", hasAr);
+        filemetaBuilder.addField("uuid", file_uuid);
+        filemetaBuilder.addField("name", file_name);
+        filemetaBuilder.addField("path", file_info.getAbsolutePath());
+        filemetaBuilder.addField("size", (long) fileSize);
+        Point point = filemetaBuilder.build();
+        BatchPoints fileInfo = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
+        fileInfo.point(point);
+        influxDB.write(fileInfo);
+
         SOP("Finished for '" + file_name + "'");
     }
 
@@ -207,6 +219,7 @@ public class ImportCsvService {
 
             SOP(oneCsv + ". Import time: " + String.format("%.2f", (endTime - startTime) / 60000.0) + " min\n");
         } catch (Exception e) {
+            // TODO: InfluxDB error will remove currently importing data
             e.printStackTrace();
         }
     }
@@ -250,8 +263,11 @@ public class ImportCsvService {
             }
         });
 
+        long startTime = System.currentTimeMillis();
         thread1.start();
         thread2.start();
+        long endTime = System.currentTimeMillis();
+        SOP("Total time: " + String.format("%.2f", (endTime - startTime) / 60000.0) + " min\n");
 
     }
 

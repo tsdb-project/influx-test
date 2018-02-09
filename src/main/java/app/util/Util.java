@@ -141,6 +141,8 @@ public class Util {
 
     public static void main(String[] args) throws ParseException {
 
+        Instant i = Instant.parse("2010-06-04T22:35:50Z");
+
         System.out.println(dateToTimestamp("1/2/1934"));
         System.out.println(timestampToUTCDate(dateToTimestamp("1/1/1934")));
         System.out.println(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"));
