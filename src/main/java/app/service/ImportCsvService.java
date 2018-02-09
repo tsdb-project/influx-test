@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -32,12 +34,6 @@ public class ImportCsvService {
 
     private final static Random rnd = new Random();
 
-    private final static okhttp3.OkHttpClient.Builder importHttpClient =
-            new OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(60, TimeUnit.SECONDS)
-                    .writeTimeout(60, TimeUnit.SECONDS);
-
     /**
      * Process a file object
      *
@@ -46,7 +42,11 @@ public class ImportCsvService {
      * @param fileSize  File size to estimate progress
      */
     private static void importProc(File file_info, boolean hasAr, double fileSize, String taskName) throws IOException, ParseException {
-        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD, importHttpClient);
+        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+                new OkHttpClient.Builder()
+                        .connectTimeout(10, TimeUnit.SECONDS)
+                        .readTimeout(60, TimeUnit.SECONDS)
+                        .writeTimeout(60, TimeUnit.SECONDS));
         influxDB.disableGzip();
         String dbName = InfluxappConfig.IFX_DBNAME;
         influxDB.createDatabase(dbName);
@@ -191,7 +191,7 @@ public class ImportCsvService {
         fileInfo.point(point);
         influxDB.write(fileInfo);
 
-        SOP("Finished for '" + file_name + "'");
+        SOP("Finished for '" + file_name + "' (" + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ")");
     }
 
     private static boolean isNewPatient(InfluxDB idb, String id) {
@@ -263,11 +263,8 @@ public class ImportCsvService {
             }
         });
 
-        long startTime = System.currentTimeMillis();
         thread1.start();
         thread2.start();
-        long endTime = System.currentTimeMillis();
-        SOP("Total time: " + String.format("%.2f", (endTime - startTime) / 60000.0) + " min\n");
 
     }
 
