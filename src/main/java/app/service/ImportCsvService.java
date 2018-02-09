@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import app.common.Measurement;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.InfluxDBFactory;
@@ -101,7 +102,7 @@ public class ImportCsvService {
 
         // On-demand patient metadata table
         if (isNewPatient) {
-            Builder patientBuilder = Point.measurement(InfluxappConfig.IFX_TABLE_PATIENTS).time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+            Builder patientBuilder = Point.measurement(Measurement.PATIENTS).time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
             patientBuilder.tag("pid", pid);
             patientBuilder.addField("age", rnd.nextInt(80) + 10);
             patientBuilder.addField("gender", rnd.nextBoolean() ? "M" : "F");
@@ -127,7 +128,7 @@ public class ImportCsvService {
         BatchPoints records = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
         int batchCount = 0, totalCount = 0;
         double processedSize = svL.length() + eiL.length();
-        String tableName = InfluxappConfig.IFX_DATA_PREFIX + pid + (hasAr ? "_ar" : "_noar");
+        String tableName = Measurement.DATA_PREFIX + pid + (hasAr ? "_ar" : "_noar");
 
         // Avoid duplicate import
         if (!isNewPatient) {
@@ -182,7 +183,7 @@ public class ImportCsvService {
         influxDB.write(records);
 
         // File metadata table, move this part to final because: only success imports will be in the File table
-        Builder filemetaBuilder = Point.measurement(InfluxappConfig.IFX_TABLE_FILES).time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
+        Builder filemetaBuilder = Point.measurement(Measurement.FILES).time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
         filemetaBuilder.tag("pid", pid);
         filemetaBuilder.addField("isAR", hasAr);
         filemetaBuilder.addField("uuid", file_uuid);
@@ -198,7 +199,7 @@ public class ImportCsvService {
     }
 
     private static boolean isNewPatient(InfluxDB idb, String id) {
-        return (idb.query(new Query("SELECT * FROM " + InfluxappConfig.IFX_TABLE_PATIENTS + " WHERE pid = '" + id.toUpperCase() + "'", InfluxappConfig.IFX_DBNAME)).getResults().get(0).getSeries()) == null;
+        return (idb.query(new Query("SELECT * FROM " + Measurement.PATIENTS + " WHERE pid = '" + id.toUpperCase() + "'", InfluxappConfig.IFX_DBNAME)).getResults().get(0).getSeries()) == null;
     }
 
     private static boolean isFileUUIDExist(InfluxDB idb, String uuid) {

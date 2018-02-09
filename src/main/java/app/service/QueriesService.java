@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import app.common.Measurement;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
@@ -100,11 +101,11 @@ public class QueriesService {
 
         for (String pid : patientList) {
             // TODO: AR or NoAR?
-            String tableName = InfluxappConfig.IFX_DATA_PREFIX + pid + "_ar";
+            String tableName = Measurement.DATA_PREFIX + pid + "_ar";
             String finalQ = String.format(template, colX, tableName, colX, thrVal, thrSec, thrSec);
             QueryResultBean ar = checkOnePatient(finalQ, pid, queryDesc, true);
 
-            tableName = InfluxappConfig.IFX_DATA_PREFIX + pid + "_noar";
+            tableName = Measurement.DATA_PREFIX + pid + "_noar";
             finalQ = String.format(template, colX, tableName, colX, thrVal, thrSec, thrSec);
             QueryResultBean noar = checkOnePatient(finalQ, pid, queryDesc, false);
 
@@ -134,11 +135,11 @@ public class QueriesService {
         valDiff /= 100;
         for (String pid : patientList) {
             // TODO: AR or NoAR?
-            String tableName = InfluxappConfig.IFX_DATA_PREFIX + pid + "_ar";
+            String tableName = Measurement.DATA_PREFIX + pid + "_ar";
             String finalQ = String.format(template, colA, colB, colA, tableName, valDiff, valDiff, hEp, hEp);
             QueryResultBean ar = checkOnePatient(finalQ, pid, queryDesc, true);
 
-            tableName = InfluxappConfig.IFX_DATA_PREFIX + pid + "_noar";
+            tableName = Measurement.DATA_PREFIX + pid + "_noar";
             finalQ = String.format(template, colA, colB, colA, tableName, valDiff, valDiff, hEp, hEp);
             QueryResultBean noar = checkOnePatient(finalQ, pid, queryDesc, false);
 

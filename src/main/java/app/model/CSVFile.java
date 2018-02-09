@@ -10,7 +10,7 @@ import app.common.InfluxappConfig;
 /**
  * Single CSV file modle
  */
-@Measurement(name = InfluxappConfig.IFX_TABLE_FILES)
+@Measurement(name = app.common.Measurement.FILES)
 public class CSVFile {
 
     @Column(name = "time")

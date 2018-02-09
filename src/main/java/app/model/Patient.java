@@ -8,15 +8,13 @@ import java.time.Instant;
 import org.influxdb.annotation.Column;
 import org.influxdb.annotation.Measurement;
 
-import app.common.InfluxappConfig;
-
 /**
  * Single patient model
  */
-@Measurement(name = InfluxappConfig.IFX_TABLE_PATIENTS)
+@Measurement(name = app.common.Measurement.PATIENTS)
 public class Patient {
 
-    @Column(name="time")
+    @Column(name = "time")
     private Instant imported_time;
 
     @Column(name = "pid")

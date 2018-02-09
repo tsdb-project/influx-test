@@ -2,6 +2,7 @@ package app.service;
 
 import java.util.List;
 
+import app.common.Measurement;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
@@ -21,7 +22,7 @@ public class CsvFileService {
     private static final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
     private static final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
 
-    private static final String fileQueryStr = "SELECT * FROM " + InfluxappConfig.IFX_TABLE_FILES;
+    private static final String fileQueryStr = "SELECT * FROM " + Measurement.FILES;
 
     //TODO: AR state judge!
 

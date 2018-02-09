@@ -29,21 +29,8 @@ public final class InfluxappConfig {
     public static final String IFX_DBNAME = "upmc";
 
     /**
-     * Table name for patients
+     * A globally useable InfluxDB Client
      */
-    public static final String IFX_TABLE_PATIENTS="Patients";
-
-    /**
-     * Table name for files
-     */
-    public static final String IFX_TABLE_FILES="Files";
-
-    /**
-     * Prefix for InfluxDB patient data table
-     */
-    public static final String IFX_DATA_PREFIX="data_";
-    
-    
     public static InfluxDB INFLUX_DB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
 
 }

@@ -2,6 +2,7 @@ package app.service;
 
 import java.util.List;
 
+import app.common.Measurement;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
@@ -20,7 +21,7 @@ public class PatientService {
     private static final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
     private static final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
 
-    private static final String patientQueryStr = "SELECT * FROM " + InfluxappConfig.IFX_TABLE_PATIENTS;
+    private static final String patientQueryStr = "SELECT * FROM " + Measurement.PATIENTS;
 
     /**
      * Select all patients from DB
@@ -95,7 +96,7 @@ public class PatientService {
         s = patientService.FindById("pu-2010-083");
         s = patientService.FindByAgeLowerbound(23);
         s = patientService.FindByAgeUpperbound(50);
-        s = patientService.FindByAge(20, 24);
+        s = patientService.FindByAge(10, 50);
         System.out.println();
     }
 }
