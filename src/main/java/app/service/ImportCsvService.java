@@ -121,8 +121,8 @@ public class ImportCsvService {
         String[] columnNames = eiL.split(",");
         int columnCount = columnNames.length;
         SOP(file_name + " columns: " + columnCount);
-        // Oversize will cause TCP connection to break
-        int bulkInsertMax = 1550000 / columnCount;
+        // Oversize will cause TCP socket to break
+        int bulkInsertMax = 1500000 / columnCount;
 
         // File records table
         BatchPoints records = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
