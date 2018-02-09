@@ -29,7 +29,7 @@ import app.service.PatientService;
 
 @Controller
 @RestController
-@RequestMapping("apis/query")
+@RequestMapping("query")
 public class QueryController {
     @Autowired
     ColumnService columnService;
@@ -40,15 +40,15 @@ public class QueryController {
     @ResponseBody
     public Model exceed(Model model) {
         model.addAttribute("columns", columnService.selectAllColumn());
-//        List<Patient> patients = patientService.selectAll();
-//        List<OccurenceBean> occurenceBeans = new ArrayList<>();
-//        for (Patient patient : patients) {
-//            OccurenceBean occurenceBean = new OccurenceBean();
-//            occurenceBean.setOccurence("N/A");
-//            occurenceBean.setPatient(patient);
-//            occurenceBeans.add(occurenceBean);
-//        }
-//        model.addAttribute("patients", occurenceBeans);
+        // List<Patient> patients = patientService.selectAll();
+        // List<OccurenceBean> occurenceBeans = new ArrayList<>();
+        // for (Patient patient : patients) {
+        // OccurenceBean occurenceBean = new OccurenceBean();
+        // occurenceBean.setOccurence("N/A");
+        // occurenceBean.setPatient(patient);
+        // occurenceBeans.add(occurenceBean);
+        // }
+        // model.addAttribute("patients", occurenceBeans);
         return model;
     }
 

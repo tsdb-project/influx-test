@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+<title>Brain FLux</title>
 <!-- Vendor styles -->
 <link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
 <link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
@@ -44,55 +44,56 @@
             <div class="card">
 
                 <div class="card-block">
-                    <button class="btn btn-primary btn--icon">
-                        <i class="zmdi zmdi-plus"></i>
-                    </button>
-                    <button class="btn btn-danger btn--icon">
-                        <i class="zmdi zmdi-close"></i>
-                    </button>
-                    <table class="table table-sm mb-0">
-                        <thead>
-                            <tr>
-                                <th>File</th>
-                                <th>Directory</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row">1.csv</th>
-                                <td>C:\SAS\Test_file\Xxxxxxxx~ Xxxx_93cd75fa-564b-4726-a72c-cd268378e07e\</td>
-                                <td>
-                                    <label class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input">
-                                        <span class="custom-control-indicator"></span>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">2.csv</th>
-                                <td>C:\SAS\Test_file\Xxxxxxxx~ Xxxx_93cd75fa-564b-4726-a72c-cd268378e07e\</td>
-                                <td>
-                                    <label class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input">
-                                        <span class="custom-control-indicator"></span>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">3.csv</th>
-                                <td>C:\SAS\Test_file\Xxxxxxxx~ Xxxx_93cd75fa-564b-4726-a72c-cd268378e07e\</td>
-                                <td>
-                                    <label class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input">
-                                        <span class="custom-control-indicator"></span>
-                                    </label>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <button type="button" class="btn btn-success waves-effect">Import</button>
+                    <div class="row">
+                        <div class="col-sm-10 col-md-10">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Input Directory" id="directory">
+                                <i class="form-group__bar"></i>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 col-md-2">
+                            <button class="btn btn-primary btn--icon" id="searchButton">
+                                <i class="zmdi zmdi-search"></i>
+                            </button>
+                            <!-- <button class="btn btn-danger btn--icon">
+                                <i class="zmdi zmdi-close"></i>
+                            </button> -->
+                        </div>
+                        <!-- <form action="/file-upload" class="dropzone">
+                        <div class="fallback">
+                            <input name="file" type="file" multiple />
+                        </div>
+                    </form> -->
+                    </div>
+                    <div class="table-responsive">
+                        <table id="filesTable" class="table table-bordered">
+                            <thead class="thead-default">
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Size</th>
+                                    <!-- <th>
+                                        <label class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-indicator"></span>
+                                        </label>
+                                    </th> -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <!-- <td>ID</td>
+                                    <td>ID</td>
+                                    <td>
+                                        <label class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-indicator"></span>
+                                        </label>
+                                    </td> -->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-success waves-effect" id="importButton">Import</button>
                 </div>
             </div>
 
@@ -130,8 +131,17 @@
     <script src="/vendors/bower_components/Waves/dist/waves.min.js"></script>
     <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
     <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+    <script src="/vendors/bower_components/dropzone/dist/min/dropzone.min.js"></script>
+
+    <!-- Vendors: Data tables -->
+    <script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="/vendors/bower_components/jszip/dist/jszip.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
 
     <!-- App functions and actions -->
     <script src="/js/app.min.js"></script>
+    <script src="/js/data/import.js"></script>
 </body>
 </html>
