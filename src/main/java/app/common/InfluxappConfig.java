@@ -6,42 +6,43 @@ import org.influxdb.InfluxDBFactory;
 /**
  * Configuration file for InfluxDB connection
  */
-public class InfluxappConfig {
+public final class InfluxappConfig {
 
     /**
      * Server Address
      */
-    public static String IFX_ADDR = "http://127.0.0.1:8086";
+    public static final String IFX_ADDR = "http://127.0.0.1:8086";
 
     /**
      * Server writable user's name (better to be an admin)
      */
-    public static String IFX_USERNAME = "root";
+    public static final String IFX_USERNAME = "admin";
 
     /**
      * Server writable user's passwd
      */
-    public static String IFX_PASSWD = "root";
+    public static final String IFX_PASSWD = "1QaZ2WsX";
 
     /**
      * Server DB name
      */
-    public static String IFX_DBNAME = "upmc";
+    public static final String IFX_DBNAME = "upmc";
 
     /**
      * Table name for patients
      */
-    public static String IFX_TABLE_PATIENTS="patient";
+    public static final String IFX_TABLE_PATIENTS="Patients";
 
     /**
      * Table name for files
      */
-    public static String IFX_TABLE_FILES="patient";
+    public static final String IFX_TABLE_FILES="Files";
 
     /**
      * Prefix for InfluxDB patient data table
      */
-    public static String IFX_DATA_PREFIX="data_";
+    public static final String IFX_DATA_PREFIX="data_";
+    
     
     public static InfluxDB INFLUX_DB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
 

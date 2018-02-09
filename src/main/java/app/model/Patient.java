@@ -1,15 +1,31 @@
 /**
- * 
+ *
  */
 package app.model;
+
+import java.time.Instant;
+
+import org.influxdb.annotation.Column;
+import org.influxdb.annotation.Measurement;
+
+import app.common.InfluxappConfig;
 
 /**
  * Single patient model
  */
+@Measurement(name = InfluxappConfig.IFX_TABLE_PATIENTS)
 public class Patient {
 
+    @Column(name="time")
+    private Instant imported_time;
+
+    @Column(name = "pid")
     private String pid;
+
+    @Column(name = "age")
     private Double age;
+
+    @Column(name = "gender")
     private String gender;
 
     public String getPid() {
@@ -34,5 +50,13 @@ public class Patient {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public Instant getImported_time() {
+        return imported_time;
+    }
+
+    public void setImported_time(Instant imported_time) {
+        this.imported_time = imported_time;
     }
 }

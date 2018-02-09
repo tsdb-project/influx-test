@@ -54,7 +54,7 @@ public class QueryController {
 
     @RequestMapping("exceed/query")
     public Map<String, Object> exceedQuery(@RequestBody ExceedRequestBodyBean request, Model model) {
-        List<Patient> patients = patientService.selectAll();
+        List<Patient> patients = patientService.SelectAll();
         List<OccurenceBean> occurenceBeans = new ArrayList<>();
         System.out.println(request.getColumn());
         for (Patient patient : patients) {
