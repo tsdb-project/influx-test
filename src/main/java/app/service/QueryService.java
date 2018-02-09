@@ -1,13 +1,14 @@
 /**
  *
  */
-package app;
+package app.service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
+import app.InfluxappConfig;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.InfluxDB.ConsistencyLevel;
@@ -19,15 +20,7 @@ import org.influxdb.dto.QueryResult;
 /**
  * @author Isolachine
  */
-public class QueryTest {
-
-    private static void SOP(Object s) {
-        if (s == null) {
-            System.out.println();
-        } else {
-            System.out.println(s);
-        }
-    }
+public class QueryService {
 
     /**
      * Print out InfluxDB query result, if has error then print error
@@ -43,7 +36,7 @@ public class QueryTest {
                 SOP("Error with query: " + listResult.get(0).getError());
             } else {
                 for (List<Object> res : listResult.get(0).getSeries().get(0).getValues()) {
-                    SOP(res);
+                    SOP(res.toString());
                 }
             }
         }
@@ -138,11 +131,12 @@ public class QueryTest {
         SOP(null);
     }
 
-    /**
-     *
-     */
-    static void exportColumnSelect() {
-
+    private static void SOP(String s) {
+        if (s == null) {
+            System.out.println();
+        } else {
+            System.out.println(s);
+        }
     }
 
     static List<String> getColNames(InfluxDB idb, String pid) {
@@ -183,7 +177,7 @@ public class QueryTest {
         List<String> colNames = getColNames(influxDB, tableName);
 
 
-        queryRunner(influxDB, "SELECT * FROM (SELECT COUNT(I10_1) AS cocount FROM \"data_PUH-2010-080_noar\" WHERE I10_1 > 80 GROUP BY TIME(10s)) WHERE cocount = 10");
+        queryRunner(influxDB, "SELECT * FROM (SELECT COUNT(I1_1) AS cocount FROM \"data_PUH-2010-080_noar\" WHERE I1_1 > 80 GROUP BY TIME(10s)) WHERE cocount = 10");
         queryRunner(influxDB,
                 "SELECT * FROM (SELECT COUNT(diff) AS c FROM ("
                         + "SELECT * FROM (SELECT (MEAN(I10_1) - MEAN(I11_1)) / MEAN(I10_1) AS diff FROM \"data_PUH-2010-080_noar\" GROUP BY TIME(1h)) "

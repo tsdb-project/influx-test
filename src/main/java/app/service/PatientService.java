@@ -1,17 +1,15 @@
 package app.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
-import org.influxdb.dto.QueryResult;
+import org.influxdb.impl.InfluxDBResultMapper;
 import org.springframework.stereotype.Service;
 
 import app.InfluxappConfig;
 import app.model.Patient;
-import app.util.Util;
 
 /**
  * Patient related services
@@ -19,45 +17,85 @@ import app.util.Util;
 @Service
 public class PatientService {
 
-    private InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-    private String tableName = InfluxappConfig.IFX_TABLE_PATIENTS;
+    private static final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+    private static final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
 
-    public List<Patient> selectAll() {
-        Query query = new Query("SELECT pid, age, gender FROM " + tableName, InfluxappConfig.IFX_DBNAME);
-        QueryResult results = influxDB.query(query);
-        return queryResultToPatientList(results);
-    }
+    private static final String patientQueryStr = "SELECT * FROM " + InfluxappConfig.IFX_TABLE_PATIENTS;
 
-    public Patient selectById(String pid) {
-        Query query = new Query("SELECT pid, age, gender FROM " + tableName +
-                " WHERE pid = '" + pid.toUpperCase() + "'", InfluxappConfig.IFX_DBNAME);
-        QueryResult results = influxDB.query(query);
-        if (results.getResults().get(0).getSeries() == null)
-            return null;
-        return queryResultToPatient(results.getResults().get(0).getSeries().get(0).getValues().get(0));
-    }
-
-    private Patient queryResultToPatient(List<Object> result) {
-        Patient tmP = new Patient();
-        tmP.setPid(result.get(1).toString());
-        tmP.setAge((Double) result.get(2));
-        tmP.setGender(result.get(3).toString());
-        return tmP;
+    /**
+     * Select all patients from DB
+     *
+     * @return List<Patient>
+     */
+    public List<Patient> SelectAll() {
+        Query query = new Query(patientQueryStr, InfluxappConfig.IFX_DBNAME);
+        return resultMapper.toPOJO(influxDB.query(query), Patient.class);
     }
 
     /**
-     * DB result to List for json serialize
+     * Select a patient by ID
+     *
+     * @param pid Patient ID
+     * @return Patient Object
      */
-    private List<Patient> queryResultToPatientList(QueryResult results) {
-        List<Patient> patients = new ArrayList<>();
-        for (List<Object> result : results.getResults().get(0).getSeries().get(0).getValues()) {
-            patients.add(queryResultToPatient(result));
-        }
-        return patients;
+    public List<Patient> SelectById(String pid) {
+        Query query = new Query(patientQueryStr + " WHERE pid = '" + pid.toUpperCase() + "'", InfluxappConfig.IFX_DBNAME);
+        return resultMapper.toPOJO(influxDB.query(query), Patient.class);
+    }
+
+    /**
+     * Select a patient by Gender
+     *
+     * @param gnd (M)ale or (F)emale
+     * @return Lists of patients
+     */
+    public List<Patient> SelectByGender(String gnd) {
+        Query query = new Query(patientQueryStr + " WHERE gender = '" + gnd.toUpperCase() + "'", InfluxappConfig.IFX_DBNAME);
+        return resultMapper.toPOJO(influxDB.query(query), Patient.class);
+    }
+
+    /**
+     * Select patients with age
+     *
+     * @param lower Inclusive lower
+     * @param upper Non-inclusive upper
+     * @return Lists of patients
+     */
+    public List<Patient> SelectByAge(int lower, int upper) {
+        Query query = new Query(patientQueryStr + " WHERE age >= " + lower + " AND age < " + upper, InfluxappConfig.IFX_DBNAME);
+        return resultMapper.toPOJO(influxDB.query(query), Patient.class);
+    }
+
+    /**
+     * Select patients with age
+     *
+     * @param upper Inclusive upper
+     * @return Lists of patients
+     */
+    public List<Patient> SelectByAgeUpperbound(int upper) {
+        Query query = new Query(patientQueryStr + " WHERE age <= " + upper, InfluxappConfig.IFX_DBNAME);
+        return resultMapper.toPOJO(influxDB.query(query), Patient.class);
+    }
+
+    /**
+     * Select patients with age
+     *
+     * @param lower Inclusive lower
+     * @return Lists of patients
+     */
+    public List<Patient> SelectByAgeLowerbound(int lower) {
+        Query query = new Query(patientQueryStr + " WHERE age >= " + lower, InfluxappConfig.IFX_DBNAME);
+        return resultMapper.toPOJO(influxDB.query(query), Patient.class);
     }
 
     public static void main(String[] args) {
         PatientService patientService = new PatientService();
-        System.out.println(patientService.selectById("puh-2010-093"));
+        List<Patient> s = patientService.SelectAll();
+        s = patientService.SelectByGender("M");
+        s = patientService.SelectById("pu-2010-083");
+        s = patientService.SelectByAgeLowerbound(23);
+        s = patientService.SelectByAgeUpperbound(50);
+        s = patientService.SelectByAge(20, 24);
+        System.out.println();
     }
 }

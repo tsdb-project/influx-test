@@ -1,15 +1,25 @@
 /**
- * 
+ *
  */
 package app.model;
+
+import app.InfluxappConfig;
+import org.influxdb.annotation.Column;
+import org.influxdb.annotation.Measurement;
 
 /**
  * Single patient model
  */
+@Measurement(name = InfluxappConfig.IFX_TABLE_PATIENTS)
 public class Patient {
 
+    @Column(name = "pid")
     private String pid;
+
+    @Column(name = "age")
     private Double age;
+
+    @Column(name = "gender")
     private String gender;
 
     public String getPid() {

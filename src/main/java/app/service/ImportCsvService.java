@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import app.InfluxappConfig;
+import app.util.InfluxUtil;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.InfluxDBFactory;
@@ -133,7 +134,7 @@ public class ImportCsvService {
 
         // Avoid duplicate import
         if (!isNewPatient) {
-            if (Util.getAllTables(influxDB).contains(tableName)) {
+            if (InfluxUtil.getAllTables(influxDB).contains(tableName)) {
                 if (isFileUUIDExist(influxDB, file_uuid)) {
                     SOP("Already imported '" + file_uuid + "'");
                     bufferReader.close();

@@ -138,31 +138,8 @@ public class Util {
         return Period.between(dob, now).getYears();
     }
 
-    public static List<String> getAllTables(InfluxDB idb) {
-        Query q = new Query("SHOW MEASUREMENTS", InfluxappConfig.IFX_DBNAME);
-        QueryResult qr = idb.query(q);
-        List<QueryResult.Series> s = qr.getResults().get(0).getSeries();
-        if (s == null) return null;
-        List<List<Object>> os = s.get(0).getValues();
-
-        List<String> lists = new ArrayList<>(os.size());
-        for (List<Object> oss : os) {
-            lists.add(String.valueOf(oss.get(0)));
-        }
-        return lists;
-    }
-
-    public static double getDataTableRows(InfluxDB idb, String tn) {
-        Query q = new Query("SELECT COUNT(\"Time\") FROM \"" + tn + "\"", InfluxappConfig.IFX_DBNAME);
-        QueryResult qr = idb.query(q);
-        return (double) qr.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
-    }
 
     public static void main(String[] args) throws ParseException {
-
-        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-        getAllTables(influxDB);
-        getDataTableRows(influxDB, "data_PUH-2010-093_noar");
 
         System.out.println(dateToTimestamp("1/2/1934"));
         System.out.println(timestampToUTCDate(dateToTimestamp("1/1/1934")));

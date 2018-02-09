@@ -17,12 +17,12 @@ public class PatientGetController {
 
     @RequestMapping(value = "/patients", method = RequestMethod.GET)
     public List<Patient> getAllPatientInfo() {
-        return patientService.selectAll();
+        return patientService.SelectAll();
     }
 
     @RequestMapping(value = "/patients/{idx}", method = RequestMethod.GET)
     public Patient getOnePatientByIndex(@PathVariable String idx) {
-        return patientService.selectAll().get(Integer.parseInt(idx));
+        return patientService.SelectAll().get(Integer.parseInt(idx));
     }
 
 }
