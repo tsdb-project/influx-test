@@ -9,7 +9,7 @@ import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.springframework.stereotype.Service;
 
-import app.InfluxappConfig;
+import app.common.InfluxappConfig;
 import app.model.Patient;
 import app.util.Util;
 

@@ -16,6 +16,8 @@ import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 
+import app.common.InfluxappConfig;
+
 /**
  * @author Isolachine
  */

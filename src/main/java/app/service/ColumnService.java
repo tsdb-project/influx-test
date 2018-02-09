@@ -14,7 +14,7 @@ import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.springframework.stereotype.Service;
 
-import app.InfluxappConfig;
+import app.common.InfluxappConfig;
 
 /**
  * @author Isolachine

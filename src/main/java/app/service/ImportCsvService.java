@@ -10,18 +10,18 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import app.InfluxappConfig;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Point.Builder;
-
-import app.util.Util;
 import org.influxdb.dto.Query;
-import okhttp3.OkHttpClient;
 import org.springframework.stereotype.Service;
+
+import app.common.InfluxappConfig;
+import app.util.Util;
+import okhttp3.OkHttpClient;
 
 /**
  * Importing CSV data into InfluxDB
@@ -31,18 +31,17 @@ public class ImportCsvService {
 
     private final static Random rnd = new Random();
 
-    private final static okhttp3.OkHttpClient.Builder importHttpClient =
-            new OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(60, TimeUnit.SECONDS)
-                    .writeTimeout(60, TimeUnit.SECONDS);
+    private final static okhttp3.OkHttpClient.Builder importHttpClient = new OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS);
 
     /**
      * Process a file object
      *
-     * @param file_info File object
-     * @param hasAr     AR?
-     * @param fileSize  File size to estimate progress
+     * @param file_info
+     *            File object
+     * @param hasAr
+     *            AR?
+     * @param fileSize
+     *            File size to estimate progress
      */
     private static void importProc(File file_info, boolean hasAr, double fileSize, String taskName) throws IOException, ParseException {
         InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD, importHttpClient);
@@ -66,25 +65,25 @@ public class ImportCsvService {
         while (bufferReader.ready() && (lineNumber <= 6)) {
             String line = bufferReader.readLine();
             switch (lineNumber) {
-                case 1:
-                    // Check PID in the first line? If not, error
-                    if (!line.toUpperCase().contains(pid))
-                        throw new RuntimeException("Wrong PID in filename!");
-                    file_uuid = line.substring(line.length() - 40, line.length() - 4);
-                    break;
-                case 2:
-                case 3:
-                case 4:
-                    // Line 2-4 rely on seperated metadata
-                    break;
-                case 5:
-                    timestamp = line.split(",")[1];
-                    break;
-                case 6:
-                    timestamp += " " + line.split(",")[1];
-                    break;
-                default:
-                    throw new IndexOutOfBoundsException("Line number out of range");
+            case 1:
+                // Check PID in the first line? If not, error
+                if (!line.toUpperCase().contains(pid))
+                    throw new RuntimeException("Wrong PID in filename!");
+                file_uuid = line.substring(line.length() - 40, line.length() - 4);
+                break;
+            case 2:
+            case 3:
+            case 4:
+                // Line 2-4 rely on seperated metadata
+                break;
+            case 5:
+                timestamp = line.split(",")[1];
+                break;
+            case 6:
+                timestamp += " " + line.split(",")[1];
+                break;
+            default:
+                throw new IndexOutOfBoundsException("Line number out of range");
             }
             lineNumber++;
         }
@@ -154,11 +153,7 @@ public class ImportCsvService {
             }
 
             // Table with ID for each patient
-            Point record = Point.measurement(tableName)
-                    .time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS)
-                    .tag("file_uuid", file_uuid)
-                    .fields(lineKVMap)
-                    .build();
+            Point record = Point.measurement(tableName).time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS).tag("file_uuid", file_uuid).fields(lineKVMap).build();
             records.point(record);
             batchCount++;
             totalCount++;
@@ -181,16 +176,11 @@ public class ImportCsvService {
     }
 
     private static boolean isNewPatient(InfluxDB idb, String id) {
-        return (idb.query(new Query(
-                "SELECT * FROM " + InfluxappConfig.IFX_TABLE_PATIENTS
-                        + " WHERE pid = '" + id.toUpperCase() + "'", InfluxappConfig.IFX_DBNAME))
-                .getResults().get(0).getSeries()) == null;
+        return (idb.query(new Query("SELECT * FROM " + InfluxappConfig.IFX_TABLE_PATIENTS + " WHERE pid = '" + id.toUpperCase() + "'", InfluxappConfig.IFX_DBNAME)).getResults().get(0).getSeries()) == null;
     }
 
     private static boolean isFileUUIDExist(InfluxDB idb, String uuid) {
-        return (idb.query(new Query(
-                "SHOW TAG VALUES WITH KEY = \"file_uuid\" WHERE \"file_uuid\" = '" + uuid + "'",
-                InfluxappConfig.IFX_DBNAME)).getResults().get(0).getSeries()) != null;
+        return (idb.query(new Query("SHOW TAG VALUES WITH KEY = \"file_uuid\" WHERE \"file_uuid\" = '" + uuid + "'", InfluxappConfig.IFX_DBNAME)).getResults().get(0).getSeries()) != null;
     }
 
     public static void ImportByFile(String oneCsv, boolean hasAr, String threadName) {
@@ -209,10 +199,9 @@ public class ImportCsvService {
         }
     }
 
-    public static void ImportByList(String[] allCsv, boolean hasAr, String nkName) {
+    public void ImportByList(String[] allCsv, boolean hasAr, String nkName) {
 
-        int cores = Runtime.getRuntime().availableProcessors(),
-                queueLen = allCsv.length;
+        int cores = Runtime.getRuntime().availableProcessors(), queueLen = allCsv.length;
 
         // TODO: Parallel importing
 
@@ -228,27 +217,28 @@ public class ImportCsvService {
 
     public static void main(String[] args) {
 
-        String[] allAR = Util.getAllCsvFileInDirectory("N:\\Test_AR\\");
-        String[] allNoAR = Util.getAllCsvFileInDirectory("N:\\Test_NoAR\\");
-
-        Thread thread1 = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                ImportByList(allNoAR, false, "NoART");
-            }
-
-        });
+        String[] allAR = Util.getAllCsvFileInDirectory("/Users/Isolachine/tsdb/test");
+        // String[] allNoAR = Util.getAllCsvFileInDirectory("N:\\Test_NoAR\\");
+        //
+        // Thread thread1 = new Thread(new Runnable() {
+        //
+        // @Override
+        // public void run() {
+        // ImportByList(allNoAR, false, "NoART");
+        // }
+        //
+        // });
 
         Thread thread2 = new Thread(new Runnable() {
 
             @Override
             public void run() {
-                ImportByList(allAR, true, "ART");
+                ImportCsvService importCsvService = new ImportCsvService();
+                importCsvService.ImportByList(allAR, true, "ART");
             }
         });
 
-        thread1.start();
+        // thread1.start();
         thread2.start();
 
     }

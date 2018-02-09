@@ -6,13 +6,14 @@ package app.util;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import app.InfluxappConfig;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Point.Builder;
+
+import app.common.InfluxappConfig;
 
 /**
  * @author Isolachine

@@ -14,12 +14,15 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.util.*;
 
-import app.InfluxappConfig;
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
+
+import app.bean.FileBean;
+import app.common.InfluxappConfig;
 
 /**
  * @author Isolachine
@@ -29,9 +32,11 @@ public class Util {
     /**
      * Convert a DoB String (e.g. 04/27/1995) to UNIX timestamp
      *
-     * @param dateOfBirth DOB String
+     * @param dateOfBirth
+     *            DOB String
      * @return long UNIX Timestamp
-     * @throws ParseException Shouldn't happen
+     * @throws ParseException
+     *             Shouldn't happen
      */
     public static long dateToTimestamp(String dateOfBirth) throws ParseException {
         return dateTimeFormatToTimestamp(dateOfBirth, "mm/dd/yyyy");
@@ -40,10 +45,13 @@ public class Util {
     /**
      * Convert some string to a UNIX timestamp
      *
-     * @param dateTime String
-     * @param format   String format
+     * @param dateTime
+     *            String
+     * @param format
+     *            String format
      * @return long UNIX Timestamp
-     * @throws ParseException Wrong format
+     * @throws ParseException
+     *             Wrong format
      */
     public static long dateTimeFormatToTimestamp(String dateTime, String format) throws ParseException {
         TimeZone timeZone = TimeZone.getTimeZone("UTC");
@@ -55,7 +63,8 @@ public class Util {
     /**
      * Convert UNIX Timestamp to UTC Time string (US format)
      *
-     * @param unixTime UNIX Timestamp
+     * @param unixTime
+     *            UNIX Timestamp
      * @return String Formatted DateTime
      */
     public static String timestampToUTCDate(long unixTime) {
@@ -65,8 +74,10 @@ public class Util {
     /**
      * Convert UNIX Timestamp to UTC Time (Any format)
      *
-     * @param unixTime UNIX Timestamp
-     * @param format   String UTC
+     * @param unixTime
+     *            UNIX Timestamp
+     * @param format
+     *            String UTC
      * @return
      */
     public static String timestampToUTCDateTimeFormat(long unixTime, String format) {
@@ -79,7 +90,8 @@ public class Util {
     /**
      * Convert serial# time to a specific timestamp
      *
-     * @param serial String Serial number
+     * @param serial
+     *            String Serial number
      * @return Apache POI defined timestamp
      */
     public static long serialTimeToLongDate(String serial) {
@@ -89,7 +101,8 @@ public class Util {
     /**
      * Get all CSV files under a directory
      *
-     * @param dir String directory path
+     * @param dir
+     *            String directory path
      * @return String Full file path
      */
     public static String[] getAllCsvFileInDirectory(String dir) {
@@ -99,28 +112,32 @@ public class Util {
     /**
      * Get all specific files under a directory
      *
-     * @param dir  String directory path
-     * @param type String file extension
+     * @param dir
+     *            String directory path
+     * @param type
+     *            String file extension
      * @return String Full file path
      */
     public static String[] getAllSpecificFileInDirectory(String dir, String type) {
         File folder = new File(dir);
         if (folder.isFile()) {
-            if (dir.toLowerCase().endsWith("." + type)) return new String[]{dir};
-            else return new String[0];
+            if (dir.toLowerCase().endsWith("." + type))
+                return new String[] { dir };
+            else
+                return new String[0];
         }
 
         FilenameFilter txtFileFilter = (dirs, name) -> {
             // Filter hidden or not wanted file
-            if (!name.startsWith(".")
-                    && name.toLowerCase().endsWith("." + type))
+            if (!name.startsWith(".") && name.toLowerCase().endsWith("." + type))
                 return true;
             return false;
         };
         File[] files = folder.listFiles(txtFileFilter);
 
         assert files != null;
-        if (files.length == 0) return new String[0];
+        if (files.length == 0)
+            return new String[0];
 
         LinkedList<String> file_list = new LinkedList<>();
         for (File file : files) {
@@ -130,7 +147,6 @@ public class Util {
 
         return file_list.toArray(new String[file_list.size()]);
     }
-
 
     public static int timestampToAge(long birthDate) {
         LocalDate dob = Instant.ofEpochMilli(birthDate).atZone(ZoneId.systemDefault()).toLocalDate();
@@ -142,7 +158,8 @@ public class Util {
         Query q = new Query("SHOW MEASUREMENTS", InfluxappConfig.IFX_DBNAME);
         QueryResult qr = idb.query(q);
         List<QueryResult.Series> s = qr.getResults().get(0).getSeries();
-        if (s == null) return null;
+        if (s == null)
+            return null;
         List<List<Object>> os = s.get(0).getValues();
 
         List<String> lists = new ArrayList<>(os.size());
@@ -158,7 +175,35 @@ public class Util {
         return (double) qr.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
     }
 
+    public static List<FileBean> filesInFolder(String directory) {
+        File folder = new File(directory);
+
+        if (!directory.endsWith("/")) {
+            directory += "/";
+        }
+
+        File[] listOfFiles = folder.listFiles();
+        List<FileBean> fileBeans = new ArrayList<>();
+
+        if (listOfFiles != null) {
+            for (int i = 0; i < listOfFiles.length; i++) {
+                if (listOfFiles[i].isFile()) {
+                    FileBean fileBean = new FileBean();
+                    fileBean.setName(listOfFiles[i].getName());
+                    fileBean.setDirectory(directory);
+                    long length = FileUtils.sizeOf(listOfFiles[i]);
+                    fileBean.setBytes(length);
+                    fileBean.setSize(FileUtils.byteCountToDisplaySize(length));
+                    fileBeans.add(fileBean);
+                }
+            }
+        }
+        return fileBeans;
+    }
+
     public static void main(String[] args) throws ParseException {
+
+        System.out.println(filesInFolder("/Users/Isolachine/tsdb/ar/"));
 
         InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
         getAllTables(influxDB);
