@@ -70,7 +70,7 @@ public class QueriesService {
         if (res.size() == 0) return null;
 
         QueryResultBean qrb = new QueryResultBean();
-        qrb.setProblemPid(pid);
+        qrb.setInterestPatient(patientS.FindById(pid.toUpperCase()).get(0));
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 

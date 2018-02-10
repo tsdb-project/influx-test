@@ -10,7 +10,7 @@ public class QueryResultBean implements java.io.Serializable {
 
     private String queryNickname;
 
-    private String problemPid;
+    private Patient interestPatient;
 
     private List<Instant> occurTime;
 
@@ -27,14 +27,6 @@ public class QueryResultBean implements java.io.Serializable {
 
     public void setQueryNickname(String queryNickname) {
         this.queryNickname = queryNickname;
-    }
-
-    public String getProblemPid() {
-        return problemPid;
-    }
-
-    public void setProblemPid(String problemPid) {
-        this.problemPid = problemPid;
     }
 
     public List<Instant> getOccurTime() {
@@ -59,5 +51,13 @@ public class QueryResultBean implements java.io.Serializable {
 
     public void setAR(boolean AR) {
         isAR = AR;
+    }
+
+    public Patient getInterestPatient() {
+        return interestPatient;
+    }
+
+    public void setInterestPatient(Patient interestPatient) {
+        this.interestPatient = interestPatient;
     }
 }
