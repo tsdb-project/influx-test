@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 import app.bean.ExceedRequestBodyBean;
 import app.model.OccurenceBean;
 import app.model.Patient;
+import app.model.QueryResultBean;
 import app.service.ColumnService;
 import app.service.PatientService;
+import app.service.QueriesService;
 
 /**
  * @author Isolachine
@@ -31,6 +33,8 @@ import app.service.PatientService;
 @RestController
 @RequestMapping("query")
 public class QueryController {
+    @Autowired
+    QueriesService queriesService;
     @Autowired
     ColumnService columnService;
     @Autowired
@@ -54,17 +58,25 @@ public class QueryController {
 
     @RequestMapping("exceed/query")
     public Map<String, Object> exceedQuery(@RequestBody ExceedRequestBodyBean request, Model model) {
+        if (request.getColumn() == null) {
+            Map<String, Object> map = new HashedMap<>();
+            map.put("data", new ArrayList<>());
+            return map;
+        }
         List<Patient> patients = patientService.SelectAll();
         List<OccurenceBean> occurenceBeans = new ArrayList<>();
-        System.out.println(request.getColumn());
-        for (Patient patient : patients) {
-            OccurenceBean occurenceBean = new OccurenceBean();
-            occurenceBean.setOccurence("5");
-            occurenceBean.setPatient(patient);
-            occurenceBeans.add(occurenceBean);
-        }
+        
+        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double)request.getThreshold(), request.getCount());
+//        
+//        System.out.println(request.getColumn());
+//        for (Patient patient : patients) {
+//            OccurenceBean occurenceBean = new OccurenceBean();
+//            occurenceBean.setOccurence("N/A");
+//            occurenceBean.setPatient(patient);
+//            occurenceBeans.add(occurenceBean);
+//        }
         Map<String, Object> map = new HashedMap<>();
-        map.put("data", occurenceBeans);
+        map.put("data", resultBeans);
         return map;
     }
 

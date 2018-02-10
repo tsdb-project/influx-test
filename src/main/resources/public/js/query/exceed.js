@@ -1,3 +1,19 @@
+var timespan = {
+    "data" : [ {
+        "start" : "2017-10-26 16:30:20",
+        "end" : "2017-10-26 16:30:29",
+        "length" : "10 seconds"
+    }, {
+        "start" : "2017-10-26 16:23:20",
+        "end" : "2017-10-26 16:23:32",
+        "length" : "13 seconds"
+    }, {
+        "start" : "2017-10-26 16:44:20",
+        "end" : "2017-10-26 16:23:29",
+        "length" : "10 seconds"
+    } ]
+};
+
 $(document).ready(function() {
     var patients = {
         "data" : []
@@ -19,21 +35,21 @@ $(document).ready(function() {
         },
         data : patients.data,
         columns : [ {
-            data : 'patient.pid'
+            data : 'problemPid'
         }, {
-            data : 'patient.age'
+            data : 'problemPid'
         }, {
-            data : 'patient.gender'
+            data : 'problemPid'
         }, {
-            data : 'occurence'
+            data : 'occurTime'
         } ],
     });
-    
-    
-    var timespan = {
-            "data" : [{"start":"2017-10-26 16:30:20", "end":"2017-10-26 16:30:29", "length":"10 seconds"}, {"start":"2017-10-26 16:23:20", "end":"2017-10-26 16:23:32", "length":"13 seconds"}, {"start":"2017-10-26 16:44:20", "end":"2017-10-26 16:23:29", "length":"10 seconds"}]
-        };
-    
+
+    $('#patient-table tbody').on('click', 'tr', function() {
+        $(this).addClass('selected');
+        var time
+    });
+
     var timespantable = $('#timespan-table').DataTable({
         data : timespan.data,
         columns : [ {
@@ -44,11 +60,11 @@ $(document).ready(function() {
             data : 'length'
         } ],
     });
-    
+
     var records = {
-            "data" : []
-        };
-    
+        "data" : []
+    };
+
     var recordstable = $('#records-table').DataTable({
         data : records.data,
         columns : [ {
