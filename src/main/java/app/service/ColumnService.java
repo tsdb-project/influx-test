@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import app.common.InfluxappConfig;
 
 /**
- * @deprecated What's this for?
+ * an service for returning column information of data
  * @author Isolachine
  */
 @Service
@@ -62,6 +62,7 @@ public class ColumnService {
     }
 
     //TODO: What's this for?
+    @SuppressWarnings("unused")
     private static void insertColumns() {
         String[] names = {"Artifact Intensity", "Seizure Detections", "Rhythmicity Spectrogram, Left Hemisphere", "Rhythmicity Spectrogram, Right Hemisphere", "FFT Spectrogram, Left Hemisphere", "FFT Spectrogram, Right Hemisphere", "Asymmetry, Relative Spectrogram, Asym Hemi", "Asymmetry, Absolute Index (EASI), 1 - 18 Hz, Asym Hemi", "Asymmetry, Relative Index (REASI)01, 1 - 18 Hz, Asym Hemi", "aEEG, Left Hemisphere", "aEEG, Right Hemisphere", "Suppression Ratio, Left Hemisphere",
                 "Suppression Ratio, Right Hemisphere", "Time_Column"};
