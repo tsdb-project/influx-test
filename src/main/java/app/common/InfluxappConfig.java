@@ -2,6 +2,7 @@ package app.common;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
+import org.springframework.boot.ApplicationTemp;
 
 /**
  * Configuration file for InfluxDB connection
@@ -27,6 +28,11 @@ public final class InfluxappConfig {
      * Server DB name
      */
     public static final String IFX_DBNAME = "upmc";
+
+    /**
+     * InfluxDB system temp directory
+     */
+    public static final ApplicationTemp TMP_DIR = new ApplicationTemp();
 
     /**
      * A globally useable InfluxDB Client
