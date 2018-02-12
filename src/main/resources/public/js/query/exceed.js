@@ -1,17 +1,5 @@
 var timespan = {
-    "data" : [ {
-        "start" : "2017-10-26 16:30:20",
-        "end" : "2017-10-26 16:30:29",
-        "length" : "10 seconds"
-    }, {
-        "start" : "2017-10-26 16:23:20",
-        "end" : "2017-10-26 16:23:32",
-        "length" : "13 seconds"
-    }, {
-        "start" : "2017-10-26 16:44:20",
-        "end" : "2017-10-26 16:23:29",
-        "length" : "10 seconds"
-    } ]
+    "data" : []
 };
 
 $(document).ready(function() {
@@ -35,30 +23,44 @@ $(document).ready(function() {
         },
         data : patients.data,
         columns : [ {
-            data : 'problemPid'
+            data : 'interestPatient.pid'
         }, {
-            data : 'problemPid'
+            data : 'interestPatient.age'
         }, {
-            data : 'problemPid'
+            data : 'interestPatient.gender'
         }, {
-            data : 'occurTime'
+            data : 'occurTimes'
         } ],
-    });
-
-    $('#patient-table tbody').on('click', 'tr', function() {
-        $(this).addClass('selected');
-        var time
     });
 
     var timespantable = $('#timespan-table').DataTable({
         data : timespan.data,
         columns : [ {
-            data : 'start'
+            title : "Start",
+            data : "start"
         }, {
-            data : 'end'
-        }, {
-            data : 'length'
-        } ],
+            title : "End",
+            data : "end"
+        } ]
+    });
+
+    $('#patient-table tbody').on('click', 'tr', function() {
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+            $(this).removeAttr("style");
+        } else {
+            table.$('tr.selected').removeAttr('style');
+            table.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+            $(this).attr("style", "background-color:#eeeeee");
+        }
+        var timespan = {
+            "data" : table.row($(this)).data().occurTime
+        };
+        timespantable.clear().draw();
+        timespantable.rows.add(timespan.data); // Add new data
+        timespantable.columns.adjust().draw();
+        console.log(timespan);
     });
 
     var records = {
@@ -87,6 +89,19 @@ $(document).ready(function() {
             data : 'I10_8'
         } ],
     });
+    
+    $('#timespan-table tbody').on('click', 'tr', function() {
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+            $(this).removeAttr("style");
+        } else {
+            timespantable.$('tr.selected').removeAttr('style');
+            timespantable.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+            $(this).attr("style", "background-color:#eeeeee");
+        }
+    });
+    
 
     $("#filterButton").click(function() {
         table.ajax.reload();

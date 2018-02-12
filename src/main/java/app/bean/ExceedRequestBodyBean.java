@@ -9,7 +9,7 @@ package app.bean;
  */
 public class ExceedRequestBodyBean {
     private String column;
-    private int threshold;
+    private double threshold;
     private int count;
     /**
      * @return the column
@@ -26,13 +26,13 @@ public class ExceedRequestBodyBean {
     /**
      * @return the threshold
      */
-    public int getThreshold() {
+    public double getThreshold() {
         return threshold;
     }
     /**
      * @param threshold the threshold to set
      */
-    public void setThreshold(int threshold) {
+    public void setThreshold(double threshold) {
         this.threshold = threshold;
     }
     /**

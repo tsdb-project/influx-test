@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import app.common.InfluxappConfig;
 import app.model.Patient;
 import app.model.QueryResultBean;
+import app.model.TimeSpan;
 import app.util.InfluxUtil;
 
 /**
@@ -77,9 +78,12 @@ public class QueriesService {
         List<Object> occTime = res.get("time");
         qrb.setOccurTimes(occTime.size());
 
-        List<Instant> occTimes = new ArrayList<>(occTime.size());
+        List<TimeSpan> occTimes = new ArrayList<>(occTime.size());
         for (Object s : occTime) {
-            occTimes.add(Instant.parse((String) s));
+            TimeSpan timeSpan = new TimeSpan();
+            timeSpan.setStart(Instant.parse((String) s));
+            timeSpan.setEnd(Instant.parse((String) s).plusSeconds(10));
+            occTimes.add(timeSpan);
         }
         qrb.setOccurTime(occTimes);
 

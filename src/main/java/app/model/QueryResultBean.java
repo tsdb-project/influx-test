@@ -1,6 +1,5 @@
 package app.model;
 
-import java.time.Instant;
 import java.util.List;
 
 /**
@@ -8,11 +7,13 @@ import java.util.List;
  */
 public class QueryResultBean implements java.io.Serializable {
 
+    private static final long serialVersionUID = -6110153689820276538L;
+
     private String queryNickname;
 
     private Patient interestPatient;
 
-    private List<Instant> occurTime;
+    private List<TimeSpan> occurTime;
 
     private int occurTimes;
 
@@ -29,11 +30,11 @@ public class QueryResultBean implements java.io.Serializable {
         this.queryNickname = queryNickname;
     }
 
-    public List<Instant> getOccurTime() {
+    public List<TimeSpan> getOccurTime() {
         return occurTime;
     }
 
-    public void setOccurTime(List<Instant> occurTime) {
+    public void setOccurTime(List<TimeSpan> occurTime) {
         this.occurTime = occurTime;
     }
 

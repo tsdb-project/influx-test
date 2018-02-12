@@ -63,18 +63,18 @@ public class QueryController {
             map.put("data", new ArrayList<>());
             return map;
         }
-        List<Patient> patients = patientService.SelectAll();
-        List<OccurenceBean> occurenceBeans = new ArrayList<>();
-        
-        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double)request.getThreshold(), request.getCount());
-//        
-//        System.out.println(request.getColumn());
-//        for (Patient patient : patients) {
-//            OccurenceBean occurenceBean = new OccurenceBean();
-//            occurenceBean.setOccurence("N/A");
-//            occurenceBean.setPatient(patient);
-//            occurenceBeans.add(occurenceBean);
-//        }
+        // List<Patient> patients = patientService.SelectAll();
+        // List<OccurenceBean> occurenceBeans = new ArrayList<>();
+
+        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount());
+        //
+        // System.out.println(request.getColumn());
+        // for (Patient patient : patients) {
+        // OccurenceBean occurenceBean = new OccurenceBean();
+        // occurenceBean.setOccurence("N/A");
+        // occurenceBean.setPatient(patient);
+        // occurenceBeans.add(occurenceBean);
+        // }
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
         return map;
