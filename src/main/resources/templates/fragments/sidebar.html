@@ -21,24 +21,25 @@
                     <a class="dropdown-item" href="">Logout</a>
                 </div>
             </div>
-
+            <div hidden="hidden" th:name=${nav} id="nav"></div>
+            <div hidden="hidden" th:name=${subnav} id="subnav"></div>
             <ul class="navigation">
-                <li>
+                <li id="import">
                     <a href="/data/import">
                         <i class="zmdi zmdi-collection-text"></i>
                         Data Import
                     </a>
                 </li>
-                <li class="navigation__sub navigation__sub--active navigation__sub--toggled">
+                <li class="navigation__sub" id="queries">
                     <a href="">
                         <i class="zmdi zmdi-view-list"></i>
                         Queries
                     </a>
                     <ul>
-                        <li class="navigation__active">
+                        <li id="exceed">
                             <a href="/query/exceed">Exceed</a>
                         </li>
-                        <li>
+                        <li id="differ">
                             <a href="/query/differ">Mean Difference</a>
                         </li>
                     </ul>
