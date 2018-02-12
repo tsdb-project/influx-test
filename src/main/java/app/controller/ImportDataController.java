@@ -33,7 +33,7 @@ public class ImportDataController {
 
     @Autowired
     ImportCsvService importCsvService;
-    
+
     private String fileLocation;
 
     @RequestMapping(value = "/apis/data/import", method = RequestMethod.POST)
@@ -70,6 +70,8 @@ public class ImportDataController {
     @RequestMapping("data/import")
     @ResponseBody
     public Model importData(Model model) {
+        model.addAttribute("nav", "import");
+        model.addAttribute("subnav", "");
         return model;
     }
 
@@ -103,22 +105,48 @@ public class ImportDataController {
         map.put("dir", directory);
         return map;
     }
-    
+
     @RequestMapping(value = "api/data/import")
     @ResponseBody
     public Map<String, Object> importDir(@RequestBody(required = false) SearchFileForm dir, @RequestParam(value = "dir", required = false, defaultValue = "") String dirString, Model model) {
         String directory;
+        Map<String, Object> map = new HashMap<>();
+
         if (dir != null) {
             directory = dir.getDir();
         } else {
             directory = dirString;
         }
 
-        String[] allAR = Util.getAllCsvFileInDirectory(directory);
-        importCsvService.ImportByList(allAR, true, "ART");
-        Map<String, Object> map = new HashMap<>();
-        
+        if (!directory.equals("")) {
+            String[] allAR = Util.getAllCsvFileInDirectory(directory);
+            importCsvService.ImportByList(allAR, true, "ART");
+        }
+
         map.put("dir", directory);
+        return map;
+    }
+
+    @RequestMapping(value = "api/data/progress")
+    @ResponseBody
+    public Map<String, Object> importProgress(Model model) {
+
+        Map<String, Object> map = new HashMap<>();
+
+        String uuid = importCsvService.currentUUID;
+
+        map.put("uuid", uuid);
+        map.put("file", importCsvService.currentFile);
+        if (uuid.equals("")) {
+            map.put("progress", 0.0);
+        } else {
+            String progress = String.format("%.2f", importCsvService.CheckProgressWithUUID(uuid) * 100);
+            map.put("progress", progress);
+        }
+        String totalProgress = String.format("%.2f", importCsvService.totalProgress * 100);
+        map.put("total", totalProgress);
+        map.put("finished", importCsvService.progressState);
+
         return map;
     }
 }

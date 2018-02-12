@@ -71,24 +71,10 @@
                                 <tr>
                                     <th>File Name</th>
                                     <th>Size</th>
-                                    <!-- <th>
-                                        <label class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input">
-                                            <span class="custom-control-indicator"></span>
-                                        </label>
-                                    </th> -->
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <!-- <td>ID</td>
-                                    <td>ID</td>
-                                    <td>
-                                        <label class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input">
-                                            <span class="custom-control-indicator"></span>
-                                        </label>
-                                    </td> -->
                                 </tr>
                             </tbody>
                         </table>
@@ -97,23 +83,25 @@
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card" style="display: none" id="progressCard">
                 <div class="card-header">
                     <h2 class="card-title">Import Progress</h2>
                 </div>
 
                 <div class="card-block">
                     <div class="progress">
-                        <div class="progress-bar" role="progressbar" style="width: 33%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="fileProgress"></div>
                     </div>
-                    <small class="card-subtitle">File: 33%</small>
+                    <small class="card-subtitle" id="fileName"></small>
+                    <small class="card-subtitle" id="filePercent">0%</small>
 
                     <br>
 
                     <div class="progress">
-                        <div class="progress-bar" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="totalProgress"></div>
                     </div>
-                    <small class="card-subtitle">Total: 10%</small>
+                    <small class="card-subtitle">Total</small>
+                    <small class="card-subtitle" id="totalPercent">0%</small>
                     <br>
                 </div>
             </div>
@@ -141,6 +129,7 @@
     <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
 
     <!-- App functions and actions -->
+    <script src="/js/navigation.js"></script>
     <script src="/js/app.min.js"></script>
     <script src="/js/data/import.js"></script>
 </body>

@@ -1,16 +1,25 @@
 package app.service;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import app.common.Measurement;
+import org.apache.commons.io.FileUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.InfluxDBFactory;
@@ -22,6 +31,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import app.common.InfluxappConfig;
+import app.common.Measurement;
 import app.util.InfluxUtil;
 import app.util.Util;
 import okhttp3.OkHttpClient;
@@ -36,19 +46,25 @@ public class ImportCsvService {
 
     private final static File progressDir = InfluxappConfig.TMP_DIR.getDir("imp_progress");
 
+    public String currentUUID = "";
+    public String currentFile = "";
+    public double totalProgress = 0.0;
+    public boolean progressState = false;
+    private long totalSize = 0;
+    private long totalProcessedSize = 0;
+
     /**
      * Process a file object
      *
-     * @param file_info File object
-     * @param hasAr     AR?
-     * @param fileSize  File size to estimate progress
+     * @param file_info
+     *            File object
+     * @param hasAr
+     *            AR?
+     * @param fileSize
+     *            File size to estimate progress
      */
-    private static void importProc(File file_info, boolean hasAr, double fileSize, String taskName, String statusUUID) throws IOException, ParseException {
-        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder()
-                        .connectTimeout(30, TimeUnit.SECONDS)
-                        .readTimeout(60, TimeUnit.SECONDS)
-                        .writeTimeout(60, TimeUnit.SECONDS));
+    private void importProc(File file_info, boolean hasAr, double fileSize, String taskName, String statusUUID) throws IOException, ParseException {
+        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD, new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS));
         influxDB.disableGzip();
         String dbName = InfluxappConfig.IFX_DBNAME;
         influxDB.createDatabase(dbName);
@@ -76,29 +92,29 @@ public class ImportCsvService {
         while (bufferReader.ready() && (lineNumber <= 6)) {
             String line = bufferReader.readLine();
             switch (lineNumber) {
-                case 1:
-                    // Check PID in the first line? If not, error
-                    if (!line.toUpperCase().contains(pid))
-                        throw new RuntimeException("Wrong PID in filename!");
-                    if (line.length() < 40)
-                        throw new RuntimeException("File UUID misformat!");
-                    file_uuid = line.substring(line.length() - 40, line.length() - 4);
-                    if (file_uuid.contains("."))
-                        throw new RuntimeException("File UUID misformat!");
-                    break;
-                case 2:
-                case 3:
-                case 4:
-                    // Line 2-4 rely on seperated metadata
-                    break;
-                case 5:
-                    timestamp = line.split(",")[1];
-                    break;
-                case 6:
-                    timestamp += " " + line.split(",")[1];
-                    break;
-                default:
-                    throw new IndexOutOfBoundsException("Line number out of range");
+            case 1:
+                // Check PID in the first line? If not, error
+                if (!line.toUpperCase().contains(pid))
+                    throw new RuntimeException("Wrong PID in filename!");
+                if (line.length() < 40)
+                    throw new RuntimeException("File UUID misformat!");
+                file_uuid = line.substring(line.length() - 40, line.length() - 4);
+                if (file_uuid.contains("."))
+                    throw new RuntimeException("File UUID misformat!");
+                break;
+            case 2:
+            case 3:
+            case 4:
+                // Line 2-4 rely on seperated metadata
+                break;
+            case 5:
+                timestamp = line.split(",")[1];
+                break;
+            case 6:
+                timestamp += " " + line.split(",")[1];
+                break;
+            default:
+                throw new IndexOutOfBoundsException("Line number out of range");
             }
             lineNumber++;
         }
@@ -165,11 +181,7 @@ public class ImportCsvService {
             }
 
             // Table with ID for each patient
-            Point record = Point.measurement(tableName)
-                    .time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS)
-                    .tag(dataTag)
-                    .fields(lineKVMap)
-                    .build();
+            Point record = Point.measurement(tableName).time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS).tag(dataTag).fields(lineKVMap).build();
             records.point(record);
             batchCount++;
             totalCount++;
@@ -181,6 +193,9 @@ public class ImportCsvService {
                 batchCount = 0;
                 bw.write(Instant.now().toString() + "," + String.format("%.4f", processedSize / fileSize) + "\n");
                 bw.flush();
+
+                totalProgress = (totalProcessedSize + processedSize) * 1.0 / totalSize;
+
             }
         }
         bufferReader.close();
@@ -218,18 +233,26 @@ public class ImportCsvService {
     /**
      * Import a CSV by file path
      *
-     * @param oneCsv     CSV file path
-     * @param hasAr      AR or NoAR
-     * @param threadName Running in which thread (Log purpose)
-     * @param statusUUID UUID for Status file (Can be null)
+     * @param oneCsv
+     *            CSV file path
+     * @param hasAr
+     *            AR or NoAR
+     * @param threadName
+     *            Running in which thread (Log purpose)
+     * @param statusUUID
+     *            UUID for Status file (Can be null)
      */
-    public static String ImportByFile(String oneCsv, boolean hasAr, String threadName, @Nullable String statusUUID) {
+    public String ImportByFile(String oneCsv, boolean hasAr, String threadName, @Nullable String statusUUID) {
 
-        if (statusUUID == null) statusUUID = UUID.randomUUID().toString();
+        if (statusUUID == null)
+            statusUUID = UUID.randomUUID().toString();
 
         try {
             File file_info = new File(oneCsv);
             SOP(threadName + " processing '" + file_info.getName() + "'");
+
+            currentUUID = statusUUID;
+            currentFile = file_info.getName();
 
             long startTime = System.currentTimeMillis();
             importProc(file_info, hasAr, file_info.length(), threadName, statusUUID);
@@ -240,39 +263,57 @@ public class ImportCsvService {
             // TODO: Import error will remove currently imported data
             e.printStackTrace();
         }
-
         return statusUUID;
     }
 
     /**
      * Import all path provided
      *
-     * @param allCsv An array with full path to a CSV file
-     * @param hasAr  AR or NoAR
-     * @param nkName Process nickname
+     * @param allCsv
+     *            An array with full path to a CSV file
+     * @param hasAr
+     *            AR or NoAR
+     * @param nkName
+     *            Process nickname
      */
     public void ImportByList(String[] allCsv, boolean hasAr, String nkName) {
 
         // TODO: Parallel importing
         int cores = Runtime.getRuntime().availableProcessors(), queueLen = allCsv.length;
 
+        totalSize = 0;
+        totalProcessedSize = 0;
+        progressState = false;
+        totalProgress = 0.0;
+        
         for (String f_path : allCsv) {
+            totalSize += FileUtils.sizeOf(new File(f_path));
+        }
+
+        for (String f_path : allCsv) {
+            long tempSize = totalProcessedSize;
             // Every file should have a different UUID
             String f_uuid = ImportByFile(f_path, hasAr, nkName, UUID.randomUUID().toString());
+            totalProcessedSize = tempSize + FileUtils.sizeOf(new File(f_path));
+            totalProgress = totalProcessedSize * 1.0 / totalSize;
         }
+        progressState = true;
     }
 
     /**
      * Check the import progress for a file
      *
-     * @param uuid Progress UUID
+     * @param uuid
+     *            Progress UUID
      * @return double (0~1)
      */
-    public static double CheckProgressWithUUID(String uuid) {
-        if (!make_progress_dir()) return 0;
+    public double CheckProgressWithUUID(String uuid) {
+        if (!make_progress_dir())
+            return 0;
         File interestProg = new File(progressDir, gen_progress_file_name(uuid));
         // No such file means finished
-        if (!interestProg.exists()) return 1;
+        if (!interestProg.exists())
+            return 1;
 
         List<String> prgF;
         try {
@@ -304,10 +345,11 @@ public class ImportCsvService {
 
     public static void main(String[] args) {
 
-        String[] allAR = Util.getAllCsvFileInDirectory("/Users/Isolachine/tsdb/test");
+        // String uuid = ImportByFile("/Users/Isolachine/tsdb/test", true, "ART", null);
+        // System.out.println(CheckProgressWithUUID("b3422428-91e1-4ea1-ad38-1e13c0aa1a67"));
+        // String[] allAR = Util.getAllCsvFileInDirectory("/Users/Isolachine/tsdb/test");
         // String[] allNoAR = Util.getAllCsvFileInDirectory("N:\\Test_NoAR\\");
-        String[] debugPth = Util.getAllCsvFileInDirectory("N:\\BK_NAR\\");
-
+        // String[] debugPth = Util.getAllCsvFileInDirectory("N:\\BK_NAR\\");
         //
         // Thread thread1 = new Thread(new Runnable() {
         //
@@ -317,18 +359,18 @@ public class ImportCsvService {
         // }
         //
         // });
-
-        Thread thread2 = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                ImportCsvService importCsvService = new ImportCsvService();
-                importCsvService.ImportByList(debugPth, false, "Debug");
-            }
-        });
-
+        //
+        // Thread thread2 = new Thread(new Runnable() {
+        //
+        // @Override
+        // public void run() {
+        // ImportCsvService importCsvService = new ImportCsvService();
+        // importCsvService.ImportByList(debugPth, false, "Debug");
+        // }
+        // });
+        //
         // thread1.start();
-        thread2.start();
+        // thread2.start();
 
     }
 

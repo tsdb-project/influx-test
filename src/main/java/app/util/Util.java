@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 
 import app.bean.FileBean;
@@ -166,7 +167,7 @@ public class Util {
 
         if (listOfFiles != null) {
             for (int i = 0; i < listOfFiles.length; i++) {
-                if (listOfFiles[i].isFile()) {
+                if (listOfFiles[i].isFile() && FilenameUtils.getExtension(listOfFiles[i].getName()).toLowerCase().equals("csv")) {
                     FileBean fileBean = new FileBean();
                     fileBean.setName(listOfFiles[i].getName());
                     fileBean.setDirectory(directory);
@@ -181,18 +182,18 @@ public class Util {
     }
 
     public static void main(String[] args) throws ParseException {
-
-        System.out.println(filesInFolder("/Users/Isolachine/tsdb/ar/"));
-
-        System.out.println(dateToTimestamp("1/2/1934"));
-        System.out.println(timestampToUTCDate(dateToTimestamp("1/1/1934")));
-        System.out.println(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"));
-        System.out.println(timestampToUTCDateTimeFormat(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"), "yyyy.MM.dd HH:mm:ss"));
-        System.out.println(timestampToUTCDateTimeFormat(serialTimeToLongDate("43036.6402314815"), "yyyy-MM-dd HH:mm:ss"));
-
-        String[] testF = getAllSpecificFileInDirectory("E:\\Grad@Pitt\\TS ProjectData", "csv");
-        for (String a : testF) {
-            System.out.println(a);
-        }
+        System.out.println(FileUtils.sizeOf(new File("/tsdb/testing3")));
+//        System.out.println(filesInFolder("/Users/Isolachine/tsdb/testing2"));
+//
+//        System.out.println(dateToTimestamp("1/2/1934"));
+//        System.out.println(timestampToUTCDate(dateToTimestamp("1/1/1934")));
+//        System.out.println(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"));
+//        System.out.println(timestampToUTCDateTimeFormat(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"), "yyyy.MM.dd HH:mm:ss"));
+//        System.out.println(timestampToUTCDateTimeFormat(serialTimeToLongDate("43036.6402314815"), "yyyy-MM-dd HH:mm:ss"));
+//
+//        String[] testF = getAllSpecificFileInDirectory("E:\\Grad@Pitt\\TS ProjectData", "csv");
+//        for (String a : testF) {
+//            System.out.println(a);
+//        }
     }
 }
