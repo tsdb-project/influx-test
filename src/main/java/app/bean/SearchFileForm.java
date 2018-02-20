@@ -3,12 +3,15 @@
  */
 package app.bean;
 
+import java.util.List;
+
 /**
  * @author Isolachine
  *
  */
 public class SearchFileForm {
     private String dir;
+    private List<String> files;
 
     /**
      * @return the dir
@@ -22,5 +25,19 @@ public class SearchFileForm {
      */
     public void setDir(String dir) {
         this.dir = dir;
+    }
+
+    /**
+     * @return the files
+     */
+    public List<String> getFiles() {
+        return files;
+    }
+
+    /**
+     * @param files the files to set
+     */
+    public void setFiles(List<String> files) {
+        this.files = files;
     }
 }
