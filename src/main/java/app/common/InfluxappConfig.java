@@ -4,6 +4,8 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.springframework.boot.ApplicationTemp;
 
+import app.Environment;
+
 /**
  * Configuration file for InfluxDB connection
  */
@@ -17,12 +19,12 @@ public final class InfluxappConfig {
     /**
      * Server writable user's name (better to be an admin)
      */
-    public static final String IFX_USERNAME = "root";
+    public static final String IFX_USERNAME = Environment.DEV_MACHINE.equals("quz3") ? "root" : "admin";
 
     /**
      * Server writable user's passwd
      */
-    public static final String IFX_PASSWD = "root";
+    public static final String IFX_PASSWD = Environment.DEV_MACHINE.equals("quz3") ? "root" : "1QaZ2WsX";
 
     /**
      * Server DB name

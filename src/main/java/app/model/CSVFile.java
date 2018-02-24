@@ -5,8 +5,6 @@ import java.time.Instant;
 import org.influxdb.annotation.Column;
 import org.influxdb.annotation.Measurement;
 
-import app.common.InfluxappConfig;
-
 /**
  * Single CSV file modle
  */
