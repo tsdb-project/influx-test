@@ -72,21 +72,29 @@ public class ImportDataController {
     @RequestMapping(value = "api/data/import")
     @ResponseBody
     public Map<String, Object> importDir(@RequestBody(required = false) SearchFileForm dir, @RequestParam(value = "dir", required = false, defaultValue = "") String dirString, Model model) {
-        String directory;
+        // String directory;
         Map<String, Object> map = new HashMap<>();
 
-        if (dir != null) {
-            directory = dir.getDir();
-        } else {
-            directory = dirString;
+        for (String ee : dir.getFiles()) {
+            System.out.println(ee);
         }
 
-        if (!directory.equals("")) {
-            String[] allAR = Util.getAllCsvFileInDirectory(directory);
-            importCsvService.ImportByList(allAR, true, "ART");
+        // if (dir != null) {
+        // directory = dir.getDir();
+        // } else {
+        // directory = dirString;
+        // }
+        //
+        // if (!directory.equals("")) {
+        
+        String[] allAR = new String[dir.getFiles().size()];
+        for (int i = 0; i < allAR.length; i++) {
+            allAR[i] = dir.getFiles().get(i);
         }
-
-        map.put("dir", directory);
+        importCsvService.ImportByList(allAR, true, "ART");
+        // }
+        //
+        // map.put("dir", directory);
         return map;
     }
 

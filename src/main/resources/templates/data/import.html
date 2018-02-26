@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Brain FLux</title>
+<title>Brain Flux</title>
 <!-- Vendor styles -->
 <link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
 <link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
@@ -65,20 +65,28 @@
                         </div>
                     </form> -->
                     </div>
-                    <div class="table-responsive">
-                        <table id="filesTable" class="table table-bordered">
-                            <thead class="thead-default">
-                                <tr>
-                                    <th>File Name</th>
-                                    <th>Size</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <form id="fileForm">
+                        <div class="table-responsive">
+                            <table id="filesTable" class="table table-bordered">
+                                <thead class="thead-default">
+                                    <tr>
+                                        <th>File Name</th>
+                                        <th>Size</th>
+                                        <th>
+                                            <label class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="selectAllFiles">
+                                                <span class="custom-control-indicator"></span>
+                                            </label>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
                     <button type="button" class="btn btn-success waves-effect" id="importButton">Import</button>
                 </div>
             </div>

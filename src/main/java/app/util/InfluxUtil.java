@@ -21,7 +21,7 @@ public class InfluxUtil {
      * Convert InfluxDB Java Client result to a "real-db" like table
      *
      * @param results Influx Query result
-     * @return KV-Map
+     * @return KV-Map (Size = 0 if no result)
      */
     public static Map<String, List<Object>> QueryResultToKV(QueryResult results) {
         List<QueryResult.Series> resSer = results.getResults().get(0).getSeries();
