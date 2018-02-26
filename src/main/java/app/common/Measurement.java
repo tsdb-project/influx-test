@@ -10,6 +10,11 @@ package app.common;
 public class Measurement {
 
     /**
+     * Meta data for patients
+     */
+    public static final String PATIENT_META= "Patients_metadata";
+
+    /**
      * Table name for patients
      */
     public static final String PATIENTS = "Patients";
