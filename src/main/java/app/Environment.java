@@ -14,7 +14,7 @@ public class Environment {
     /**
      * Specify a devlopment and test machine to fit the configurations
      */
-    public static final String DEV_MACHINE = "quz3";
-    // public static final String DEV_MACHINE = "yiz141";
+    // public static final String DEV_MACHINE = "quz3";
+    public static final String DEV_MACHINE = "yiz141";
 
 }

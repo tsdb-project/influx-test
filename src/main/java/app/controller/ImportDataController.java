@@ -6,7 +6,7 @@ package app.controller;
 import app.bean.FileBean;
 import app.bean.Response;
 import app.bean.SearchFileForm;
-import app.service.ImportCsvService;
+import app.service.OldImportCsvService;
 import app.util.Util;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import java.util.Map;
 public class ImportDataController {
 
     @Autowired
-    ImportCsvService importCsvService;
+    OldImportCsvService oldImportCsvService;
 
     private String fileLocation;
 
@@ -91,7 +91,7 @@ public class ImportDataController {
         for (int i = 0; i < allAR.length; i++) {
             allAR[i] = dir.getFiles().get(i);
         }
-        importCsvService.ImportByList(allAR, true, "ART");
+        oldImportCsvService.ImportByList(allAR, true, "ART");
         // }
         //
         // map.put("dir", directory);
@@ -104,19 +104,19 @@ public class ImportDataController {
 
         Map<String, Object> map = new HashMap<>();
 
-        String uuid = importCsvService.currentUUID;
+        String uuid = oldImportCsvService.currentUUID;
 
         map.put("uuid", uuid);
-        map.put("file", importCsvService.currentFile);
+        map.put("file", oldImportCsvService.currentFile);
         if (uuid.equals("")) {
             map.put("progress", 0.0);
         } else {
-            String progress = String.format("%.2f", importCsvService.CheckProgressWithUUID(uuid) * 100);
+            String progress = String.format("%.2f", oldImportCsvService.CheckProgressWithUUID(uuid) * 100);
             map.put("progress", progress);
         }
-        String totalProgress = String.format("%.2f", importCsvService.totalProgress * 100);
+        String totalProgress = String.format("%.2f", oldImportCsvService.totalProgress * 100);
         map.put("total", totalProgress);
-        map.put("finished", importCsvService.progressState);
+        map.put("finished", oldImportCsvService.progressState);
 
         return map;
     }
