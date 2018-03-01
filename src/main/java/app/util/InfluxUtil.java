@@ -24,6 +24,8 @@ public class InfluxUtil {
      * @return KV-Map (Size = 0 if no result)
      */
     public static Map<String, List<Object>> QueryResultToKV(QueryResult results) {
+        if (results.hasError()) throw new RuntimeException(results.getError());
+
         List<QueryResult.Series> resSer = results.getResults().get(0).getSeries();
         // No results
         if (resSer == null) return new HashMap<>(0);
@@ -63,6 +65,21 @@ public class InfluxUtil {
             lists.add(String.valueOf(oss.get(0)));
         }
         return lists;
+    }
+
+    /**
+     * Duplicate tag key values?
+     *
+     * @param idb          InfluxDB Connection
+     * @param keyName      Key name
+     * @param toCheckValue Checked value
+     */
+    public static boolean hasDuplicateTagKeyValues(InfluxDB idb, String keyName, String toCheckValue, String dbName) {
+        Query q = new Query("SHOW TAG VALUES ON \"" + dbName + "\" WITH KEY = \"" + keyName + "\"", dbName);
+        Map<String, List<Object>> qr = QueryResultToKV(idb.query(q));
+        if (qr.size() == 0) return false;
+
+        return qr.get("value").contains(toCheckValue);
     }
 
     /**

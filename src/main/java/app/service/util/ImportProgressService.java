@@ -7,10 +7,10 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
-import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -90,7 +90,7 @@ public class ImportProgressService {
      * Init progress service
      */
     public ImportProgressService(String uuid) {
-        Assert.notNull(uuid);
+        Objects.requireNonNull(uuid);
         sysMiscIdb.createDatabase(dbName);
         this.uuid = uuid;
         // Keep data for 7 days
