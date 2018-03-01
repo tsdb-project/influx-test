@@ -26,7 +26,6 @@ public class ImportProgressService {
 
     private final InfluxDB sysMiscIdb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
     private static final String dbName = InfluxappConfig.SYSTEM_DBNAME;
-    public static final String importProgressRpName = "importProgressRetentionPolicy";
     private String uuid;
 
     /**
@@ -51,7 +50,7 @@ public class ImportProgressService {
      */
     public static Map<String, List<Object>> GetTaskAllFileProgress(String uuid) {
         Query q = new Query(
-                "SELECT \"filename\", MAX(\"CurrentPercent\") AS progress, \"status\" FROM "
+                "SELECT \"filename\", MAX(\"CurrentPercent\") AS progress, \"status\", \"Reason\" FROM "
                         + Measurement.SYS_FILE_IMPORT_PROGRESS
                         + " WHERE tid = '" + uuid + "' GROUP BY \"filename\";", dbName);
         return InfluxUtil.QueryResultToKV(prgsLookupIdb.query(q));
@@ -66,23 +65,33 @@ public class ImportProgressService {
      * @param processedSize      Current processed size
      * @param totalProcessedSize All processed size
      * @param status             Current file status
+     * @param failReason         Reason why failed
      */
     public void UpdateFileProgress(String fileName, long totalFileSize, long fileSize,
                                    long processedSize, long totalProcessedSize,
-                                   FileProgressStatus status) {
+                                   FileProgressStatus status, String failReason) {
+        double allPercent = 0, currPercent = 0;
+        if (totalFileSize != 0) allPercent = 1.0 * totalProcessedSize / totalFileSize;
+        if (fileSize != 0) currPercent = 1.0 * processedSize / fileSize;
+
         Point.Builder pnt = Point.measurement(Measurement.SYS_FILE_IMPORT_PROGRESS)
                 .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
                 .tag("status", String.valueOf(status))
                 .tag("filename", fileName)
-                .addField("AllPercent", 1.0 * totalProcessedSize / totalFileSize)
-                .addField("CurrentPercent", 1.0 * processedSize / fileSize)
+                .addField("AllPercent", allPercent)
+                .addField("CurrentPercent", currPercent)
                 .addField("fileAllSz", fileSize)
                 .addField("allFilesSz", totalFileSize);
+        if (status == FileProgressStatus.STATUS_FAIL) {
+            pnt.addField("Reason", failReason);
+        } else {
+            pnt.addField("Reason", "N/A");
+        }
         doInsert(pnt);
     }
 
     private void doInsert(Point.Builder p) {
-        p.tag("tid", uuid);
+        p.tag("tid", this.uuid);
         sysMiscIdb.write(p.build());
     }
 
@@ -93,24 +102,20 @@ public class ImportProgressService {
         Objects.requireNonNull(uuid);
         sysMiscIdb.createDatabase(dbName);
         this.uuid = uuid;
-        // Keep data for 7 days
-        sysMiscIdb.createRetentionPolicy(importProgressRpName, dbName, "7d", 2, true);
-        sysMiscIdb.dropRetentionPolicy("autogen", dbName);
         // Init this class for writing
         sysMiscIdb.setDatabase(dbName);
-        sysMiscIdb.setRetentionPolicy(importProgressRpName);
     }
 
     public static void main(String[] args) {
         ImportProgressService ips = new ImportProgressService("TESTUUID");
         boolean loadTestingData = false;
         if (loadTestingData) {
-            ips.UpdateFileProgress("1.csv", 100, 10, 5, 5, FileProgressStatus.STATUS_INPROGRESS);
-            ips.UpdateFileProgress("2.csv", 100, 40, 40, 45, FileProgressStatus.STATUS_FINISHED);
-            ips.UpdateFileProgress("3.csv", 100, 20, 3, 48, FileProgressStatus.STATUS_INPROGRESS);
-            ips.UpdateFileProgress("3.csv", 100, 20, 10, 55, FileProgressStatus.STATUS_FAIL);
-            ips.UpdateFileProgress("1.csv", 100, 10, 6, 56, FileProgressStatus.STATUS_INPROGRESS);
-            ips.UpdateFileProgress("1.csv", 100, 10, 10, 60, FileProgressStatus.STATUS_FINISHED);
+            ips.UpdateFileProgress("1.csv", 100, 10, 5, 5, FileProgressStatus.STATUS_INPROGRESS, null);
+            ips.UpdateFileProgress("2.csv", 100, 40, 40, 45, FileProgressStatus.STATUS_FINISHED, null);
+            ips.UpdateFileProgress("3.csv", 100, 20, 3, 48, FileProgressStatus.STATUS_INPROGRESS, null);
+            ips.UpdateFileProgress("3.csv", 100, 20, 10, 55, FileProgressStatus.STATUS_FAIL, "Wrong file format");
+            ips.UpdateFileProgress("1.csv", 100, 10, 6, 56, FileProgressStatus.STATUS_INPROGRESS, null);
+            ips.UpdateFileProgress("1.csv", 100, 10, 10, 60, FileProgressStatus.STATUS_FINISHED, null);
         }
         double s = GetTaskOverallProgress("TESTUUID");
         Map<String, List<Object>> ss = GetTaskAllFileProgress("TESTUUID");

@@ -31,15 +31,22 @@ public class InfluxUtil {
         if (resSer == null) return new HashMap<>(0);
 
         List<String> columnsData = resSer.get(0).getColumns();
-        int rows = resSer.size(),
-                cols = columnsData.size();
+
+        int a = resSer.size(), b = resSer.get(0).getValues().size();
+        int cols = columnsData.size(),
+                rows = a > b ? a : b;
+
         Map<String, List<Object>> finalKV = new HashMap<>((int) (rows / 0.75));
 
         for (int i = 0; i < cols; ++i) {
             String colName = columnsData.get(i);
             List<Object> dataList = new ArrayList<>(rows);
-            for (QueryResult.Series aResSer : resSer) {
-                dataList.add(aResSer.getValues().get(0).get(i));
+            for (int j = 0; j < rows; j++) {
+                if (a > b) {
+                    dataList.add(resSer.get(j).getValues().get(0).get(i));
+                } else {
+                    dataList.add(resSer.get(0).getValues().get(j).get(i));
+                }
             }
             finalKV.put(colName, dataList);
         }

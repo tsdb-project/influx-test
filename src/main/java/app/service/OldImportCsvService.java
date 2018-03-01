@@ -38,6 +38,7 @@ import okhttp3.OkHttpClient;
 
 /**
  * Importing CSV data into InfluxDB
+ *
  * @deprecated Tmp...
  */
 @Service
@@ -57,12 +58,9 @@ public class OldImportCsvService {
     /**
      * Process a file object
      *
-     * @param file_info
-     *            File object
-     * @param hasAr
-     *            AR?
-     * @param fileSize
-     *            File size to estimate progress
+     * @param file_info File object
+     * @param hasAr     AR?
+     * @param fileSize  File size to estimate progress
      */
     private void importProc(File file_info, boolean hasAr, double fileSize, String taskName, String statusUUID) throws IOException, ParseException {
         InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD, new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS));
@@ -93,29 +91,29 @@ public class OldImportCsvService {
         while (bufferReader.ready() && (lineNumber <= 6)) {
             String line = bufferReader.readLine();
             switch (lineNumber) {
-            case 1:
-                // Check PID in the first line? If not, error
-                if (!line.toUpperCase().contains(pid))
-                    throw new RuntimeException("Wrong PID in filename!");
-                if (line.length() < 40)
-                    throw new RuntimeException("File UUID misformat!");
-                file_uuid = line.substring(line.length() - 40, line.length() - 4);
-                if (file_uuid.contains("."))
-                    throw new RuntimeException("File UUID misformat!");
-                break;
-            case 2:
-            case 3:
-            case 4:
-                // Line 2-4 rely on seperated metadata
-                break;
-            case 5:
-                timestamp = line.split(",")[1];
-                break;
-            case 6:
-                timestamp += " " + line.split(",")[1];
-                break;
-            default:
-                throw new IndexOutOfBoundsException("Line number out of range");
+                case 1:
+                    // Check PID in the first line? If not, error
+                    if (!line.toUpperCase().contains(pid))
+                        throw new RuntimeException("Wrong PID in filename!");
+                    if (line.length() < 40)
+                        throw new RuntimeException("File UUID misformat!");
+                    file_uuid = line.substring(line.length() - 40, line.length() - 4);
+                    if (file_uuid.contains("."))
+                        throw new RuntimeException("File UUID misformat!");
+                    break;
+                case 2:
+                case 3:
+                case 4:
+                    // Line 2-4 rely on seperated metadata
+                    break;
+                case 5:
+                    timestamp = line.split(",")[1];
+                    break;
+                case 6:
+                    timestamp += " " + line.split(",")[1];
+                    break;
+                default:
+                    throw new IndexOutOfBoundsException("Line number out of range");
             }
             lineNumber++;
         }
@@ -182,7 +180,7 @@ public class OldImportCsvService {
             }
 
             // Table with ID for each patient
-            Point record = Point.measurement(tableName).time(Util.serialTimeToLongDate(values[0]), TimeUnit.MILLISECONDS).tag(dataTag).fields(lineKVMap).build();
+            Point record = Point.measurement(tableName).time(Util.serialTimeToLongDate(values[0], null), TimeUnit.MILLISECONDS).tag(dataTag).fields(lineKVMap).build();
             records.point(record);
             batchCount++;
             totalCount++;
@@ -206,7 +204,7 @@ public class OldImportCsvService {
         influxDB.write(records);
 
         // File metadata table, move this part to final because: only success imports will be in the File table
-        Builder filemetaBuilder = Point.measurement(Measurement.FILES).time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss"), TimeUnit.MILLISECONDS);
+        Builder filemetaBuilder = Point.measurement(Measurement.FILES).time(Util.dateTimeFormatToTimestamp(timestamp, "yyyy.MM.dd HH:mm:ss", null), TimeUnit.MILLISECONDS);
         filemetaBuilder.tag("pid", pid);
         filemetaBuilder.addField("isAR", hasAr);
         filemetaBuilder.addField("uuid", file_uuid);
@@ -234,14 +232,10 @@ public class OldImportCsvService {
     /**
      * Import a CSV by file path
      *
-     * @param oneCsv
-     *            CSV file path
-     * @param hasAr
-     *            AR or NoAR
-     * @param threadName
-     *            Running in which thread (Log purpose)
-     * @param statusUUID
-     *            UUID for Status file (Can be null)
+     * @param oneCsv     CSV file path
+     * @param hasAr      AR or NoAR
+     * @param threadName Running in which thread (Log purpose)
+     * @param statusUUID UUID for Status file (Can be null)
      */
     public String ImportByFile(String oneCsv, boolean hasAr, String threadName, @Nullable String statusUUID) {
 
@@ -270,12 +264,9 @@ public class OldImportCsvService {
     /**
      * Import all path provided
      *
-     * @param allCsv
-     *            An array with full path to a CSV file
-     * @param hasAr
-     *            AR or NoAR
-     * @param nkName
-     *            Process nickname
+     * @param allCsv An array with full path to a CSV file
+     * @param hasAr  AR or NoAR
+     * @param nkName Process nickname
      */
     public void ImportByList(String[] allCsv, boolean hasAr, String nkName) {
 
@@ -286,7 +277,7 @@ public class OldImportCsvService {
         totalProcessedSize = 0;
         progressState = false;
         totalProgress = 0.0;
-        
+
         for (String f_path : allCsv) {
             totalSize += FileUtils.sizeOf(new File(f_path));
         }
@@ -304,8 +295,7 @@ public class OldImportCsvService {
     /**
      * Check the import progress for a file
      *
-     * @param uuid
-     *            Progress UUID
+     * @param uuid Progress UUID
      * @return double (0~1)
      */
     public double CheckProgressWithUUID(String uuid) {
