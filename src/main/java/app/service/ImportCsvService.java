@@ -309,7 +309,8 @@ public class ImportCsvService {
         ics.AddArrayFiles(allAr);
 
         // Invoke this should finish fast, then the process is in the background
-        ics.DoImport(0.01);
+        ics.DoImport(0.5);
+        System.out.println("Main exited, worker running...");
     }
 
 }
