@@ -3,11 +3,8 @@
  */
 package app.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
-
+import app.common.DBConfiguration;
+import app.common.InfluxappConfig;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.InfluxDBFactory;
@@ -17,7 +14,10 @@ import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.springframework.stereotype.Service;
 
-import app.common.InfluxappConfig;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Old Query service to be compatible
@@ -76,7 +76,7 @@ public class QueryService {
     }
 
     static void queryRunner(InfluxDB idb, String queryString) {
-        Query q = new Query(queryString, InfluxappConfig.IFX_DBNAME);
+        Query q = new Query(queryString, DBConfiguration.Data.DBNAME);
         QueryResult result = idb.query(q);
         printResult(result);
     }
@@ -147,7 +147,7 @@ public class QueryService {
     }
 
     static List<String> getColNames(InfluxDB idb, String pid) {
-        Query q = new Query("SHOW FIELD KEYS FROM \"" + pid + "\"", InfluxappConfig.IFX_DBNAME);
+        Query q = new Query("SHOW FIELD KEYS FROM \"" + pid + "\"", DBConfiguration.Data.DBNAME);
         QueryResult qR = idb.query(q);
         List<List<Object>> qRR = qR.getResults().get(0).getSeries().get(0).getValues();
         List<String> colN = new ArrayList<>(qRR.size());
@@ -164,7 +164,7 @@ public class QueryService {
                 "Suppression Ratio, Right Hemisphere", "Time_Column" };
         int[] columnsNumbers = { 4, 1, 97, 97, 40, 40, 34, 1, 1, 5, 5, 1, 1, 1 };
         InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-        BatchPoints records = BatchPoints.database(InfluxappConfig.IFX_DBNAME).consistency(ConsistencyLevel.ALL).build();
+        BatchPoints records = BatchPoints.database(DBConfiguration.Data.DBNAME).consistency(ConsistencyLevel.ALL).build();
 
         for (int i = 1; i <= names.length; i++) {
             for (int j = 1; j <= columnsNumbers[i - 1]; j++) {
@@ -172,7 +172,7 @@ public class QueryService {
                 records.point(record);
             }
             influxDB.write(records);
-            records = BatchPoints.database(InfluxappConfig.IFX_DBNAME).consistency(ConsistencyLevel.ALL).build();
+            records = BatchPoints.database(DBConfiguration.Data.DBNAME).consistency(ConsistencyLevel.ALL).build();
         }
     }
 

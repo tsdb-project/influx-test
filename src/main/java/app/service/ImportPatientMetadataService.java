@@ -1,7 +1,7 @@
 package app.service;
 
+import app.common.DBConfiguration;
 import app.common.InfluxappConfig;
-import app.common.Measurement;
 import app.util.Util;
 import com.opencsv.CSVReader;
 import org.influxdb.InfluxDB;
@@ -31,13 +31,11 @@ public class ImportPatientMetadataService {
         ALL_GOOD, FILE_IO_ERROR, FILE_NOT_FOUND, FILE_DATE_ERROR, FILE_FORMAT_ERROR
     }
 
-    private final static String tableName = Measurement.PATIENT_META;
-    private static final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+    private final static String tableName = DBConfiguration.Meta.PATIENT_META;
+    private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
 
     /**
      * CSV Header processing
-     *
-     * @return Status
      */
     private void processHeader(String[] hdr) {
         // TODO: Need more soild vaildation
@@ -106,7 +104,7 @@ public class ImportPatientMetadataService {
      * @param fileTime File time
      */
     private StatusCode processFile(BufferedReader fReader, Instant fileTime) {
-        String dbName = InfluxappConfig.IFX_DBNAME;
+        String dbName = DBConfiguration.Meta.DBNAME;
         influxDB.createDatabase(dbName);
 
         // Batch records perp

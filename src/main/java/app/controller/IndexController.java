@@ -3,16 +3,15 @@
  */
 package app.controller;
 
+import app.service.ColumnService;
+import app.service.PatientFilteringService;
+import app.service.QueriesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import app.service.ColumnService;
-import app.service.PatientService;
-import app.service.QueriesService;
 
 /**
  * @author Isolachine
@@ -27,7 +26,7 @@ public class IndexController {
     @Autowired
     ColumnService columnService;
     @Autowired
-    PatientService patientService;
+    PatientFilteringService patientFilteringService;
 
     @RequestMapping("index/home")
     @ResponseBody

@@ -1,14 +1,16 @@
 package app.model;
 
-import java.time.Instant;
-
+import app.common.DBConfiguration;
 import org.influxdb.annotation.Column;
 import org.influxdb.annotation.Measurement;
 
+import java.time.Instant;
+
 /**
- * Single CSV file modle
+ * Single CSV file model
  */
-@Measurement(name = app.common.Measurement.FILES)
+@Measurement(name = DBConfiguration.App.FILES)
+@Deprecated
 public class CSVFile {
 
     @Column(name = "time")

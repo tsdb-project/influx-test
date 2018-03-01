@@ -1,15 +1,15 @@
 package app.util;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
+import app.common.DBConfiguration;
+import app.common.InfluxappConfig;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 
-import app.common.InfluxappConfig;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Alert msg via email
@@ -26,7 +26,7 @@ public class AlertTest {
     public static void rndInsert(InfluxDB influxDB) {
 
         Random rnd = new Random();
-        String dbName = InfluxappConfig.IFX_DBNAME;
+        String dbName = DBConfiguration.App.DBNAME;
         influxDB.createDatabase(dbName);
 
 

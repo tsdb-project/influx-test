@@ -1,8 +1,11 @@
 package app.controller;
 
 import app.model.Patient;
-import app.service.PatientService;
-import org.springframework.web.bind.annotation.*;
+import app.service.PatientFilteringService;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -13,21 +16,21 @@ import java.util.List;
 @RequestMapping("/apis")
 public class PatientGetController {
 
-    private PatientService patientService = new PatientService();
+    private PatientFilteringService patientFilteringService = new PatientFilteringService();
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.GET)
     public List<Patient> getAllPatientInfo() {
-        return patientService.SelectAll();
+        return patientFilteringService.SelectAll();
     }
 
     @RequestMapping(value = "/patients/{idx}", method = RequestMethod.GET)
     public Patient getOnePatientByIndex(@PathVariable String idx) {
-        return patientService.FindById(idx.toUpperCase()).get(0);
+        return patientFilteringService.FindById(idx.toUpperCase()).get(0);
     }
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.POST)
     public List<Patient> getPatientWithCriteria() {
-        return patientService.FindByGender("F");
+        return patientFilteringService.FindByGender("F");
     }
 
 }

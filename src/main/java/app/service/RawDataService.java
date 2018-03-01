@@ -3,19 +3,18 @@
  */
 package app.service;
 
-import java.text.ParseException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-
+import app.common.DBConfiguration;
+import app.common.InfluxappConfig;
+import app.model.RawData;
+import app.util.Util;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.springframework.stereotype.Service;
 
-import app.common.InfluxappConfig;
-import app.common.Measurement;
-import app.model.RawData;
-import app.util.Util;
+import java.text.ParseException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Isolachine
@@ -24,8 +23,8 @@ import app.util.Util;
 public class RawDataService {
     public List<RawData> selectAllRawDataInColumns(String patientTable, List<String> columnNames) throws ParseException {
         String columns = String.join(", ", columnNames);
-        String queryString = "Select " + columns + " from \"" + Measurement.DATA_PREFIX + patientTable + "_ar\"";
-        Query q = new Query(queryString, InfluxappConfig.IFX_DBNAME);
+        String queryString = "Select " + columns + " from \"" + patientTable;
+        Query q = new Query(queryString, DBConfiguration.Data.DBNAME);
         QueryResult result = InfluxappConfig.INFLUX_DB.query(q);
 
         List<RawData> data = new ArrayList<>();

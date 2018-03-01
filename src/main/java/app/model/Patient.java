@@ -3,15 +3,17 @@
  */
 package app.model;
 
-import java.time.Instant;
-
+import app.common.DBConfiguration;
 import org.influxdb.annotation.Column;
 import org.influxdb.annotation.Measurement;
+
+import java.time.Instant;
 
 /**
  * Single patient model
  */
-@Measurement(name = app.common.Measurement.PATIENTS)
+@Deprecated
+@Measurement(name = DBConfiguration.Meta.PATIENT_META)
 public class Patient {
 
     @Column(name = "time")

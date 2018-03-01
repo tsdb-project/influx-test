@@ -1,22 +1,21 @@
 package app.service;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import app.common.Measurement;
+import app.common.DBConfiguration;
+import app.common.InfluxappConfig;
+import app.model.Patient;
+import app.model.QueryResultBean;
+import app.model.TimeSpan;
+import app.util.InfluxUtil;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.impl.InfluxDBResultMapper;
 import org.springframework.stereotype.Service;
 
-import app.common.InfluxappConfig;
-import app.model.Patient;
-import app.model.QueryResultBean;
-import app.model.TimeSpan;
-import app.util.InfluxUtil;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Query related services
@@ -24,18 +23,20 @@ import app.util.InfluxUtil;
 @Service
 public class QueriesService {
 
-    private static final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-    private static final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
+    private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+    private final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
 
-    private static final PatientService patientS = new PatientService();
-    private static final CsvFileService csvFileS = new CsvFileService();
+    private final PatientFilteringService patientS = new PatientFilteringService();
+    private final CsvFileService csvFileS = new CsvFileService();
+
+    private final String dbName = DBConfiguration.Data.DBNAME;
 
     // TODO: Patient AR or Not AR
     private final List<String> patientList;
     private final List<Integer> arStatus;
 
     private List<Object> getColNames(String tableName) {
-        Query q = new Query("SHOW FIELD KEYS FROM \"" + tableName + "\"", InfluxappConfig.IFX_DBNAME);
+        Query q = new Query("SHOW FIELD KEYS FROM \"" + tableName + "\"", dbName);
         Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
         return res.get("fieldKey");
     }
@@ -57,19 +58,16 @@ public class QueriesService {
     /**
      * Run a assembled query on one data table(patient)
      *
-     * @param queryString
-     *            Assembled query string
-     * @param pid
-     *            PID
-     * @param queryN
-     *            Query Nickname
+     * @param queryString Assembled query string
+     * @param pid         PID
+     * @param queryN      Query Nickname
      * @param thrSec
-     * @param isAr
-     *            AR status
+     * @param isAr        AR status
      * @return Query execuation results
      */
     private QueryResultBean checkOnePatient(String queryString, String pid, String queryN, int thrSec, boolean isAr) {
-        Query q = new Query(queryString, InfluxappConfig.IFX_DBNAME);
+        //TODO: AR NoAR
+        Query q = new Query(queryString, dbName);
         Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
 
         // This patient doesn't need to be included.
@@ -97,7 +95,7 @@ public class QueriesService {
     }
 
     private QueryResultBean checkOnePatientB(String queryString, String pid, String queryN, int he, boolean isAr) {
-        Query q = new Query(queryString, InfluxappConfig.IFX_DBNAME);
+        Query q = new Query(queryString, dbName);
         Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
 
         // This patient doesn't need to be included.
@@ -127,12 +125,9 @@ public class QueriesService {
     /**
      * Type A query
      *
-     * @param colX
-     *            column X (eg. I10_1)
-     * @param thrVal
-     *            threshold value Y (eg. 80)
-     * @param thrSec
-     *            consecutive threshold Z (eg. 10)
+     * @param colX   column X (eg. I10_1)
+     * @param thrVal threshold value Y (eg. 80)
+     * @param thrSec consecutive threshold Z (eg. 10)
      * @return Return a list of patients
      */
     public List<QueryResultBean> TypeAQuery(String colX, double thrVal, int thrSec) {
@@ -142,11 +137,10 @@ public class QueriesService {
 
         for (String pid : patientList) {
             // TODO: AR or NoAR?
-            String tableName = Measurement.DATA_PREFIX + pid + "_ar";
+            String tableName = pid;
             String finalQ = String.format(template, colX, tableName, colX, thrVal, thrSec, thrSec);
             QueryResultBean ar = checkOnePatient(finalQ, pid, queryDesc, thrSec, true);
 
-            tableName = Measurement.DATA_PREFIX + pid + "_noar";
             finalQ = String.format(template, colX, tableName, colX, thrVal, thrSec, thrSec);
             QueryResultBean noar = checkOnePatient(finalQ, pid, queryDesc, thrSec, false);
 
@@ -162,14 +156,10 @@ public class QueriesService {
     /**
      * Type B query
      *
-     * @param colA
-     *            column X (eg. I10_1)
-     * @param colB
-     *            column Y (eg. I11_1)
-     * @param valDiff
-     *            difference tolerance Z, in % form (eg. 3)
-     * @param hEp
-     *            hourly epochs Q (eg. 5)
+     * @param colA    column X (eg. I10_1)
+     * @param colB    column Y (eg. I11_1)
+     * @param valDiff difference tolerance Z, in % form (eg. 3)
+     * @param hEp     hourly epochs Q (eg. 5)
      * @return Return a list of patients
      */
     public List<QueryResultBean> TypeBQuery(String colA, String colB, double valDiff, int hEp) {
@@ -180,11 +170,11 @@ public class QueriesService {
         valDiff /= 100;
         for (String pid : patientList) {
             // TODO: AR or NoAR?
-            String tableName = Measurement.DATA_PREFIX + pid + "_ar";
+            String tableName = pid;
             String finalQ = String.format(template, colA, colB, colA, tableName, valDiff, valDiff, hEp, hEp);
             QueryResultBean ar = checkOnePatientB(finalQ, pid, queryDesc, hEp, true);
 
-            tableName = Measurement.DATA_PREFIX + pid + "_noar";
+            tableName = pid;
             finalQ = String.format(template, colA, colB, colA, tableName, valDiff, valDiff, hEp, hEp);
             QueryResultBean noar = checkOnePatientB(finalQ, pid, queryDesc, hEp, false);
 

@@ -1,16 +1,16 @@
 package app.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import app.common.DBConfiguration;
+import app.common.InfluxappConfig;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 
-import app.common.InfluxappConfig;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utilities for InfluxDB Java Client
@@ -61,7 +61,7 @@ public class InfluxUtil {
      * @return List of names
      */
     public static List<String> getAllTables(InfluxDB idb) {
-        Query q = new Query("SHOW MEASUREMENTS", InfluxappConfig.IFX_DBNAME);
+        Query q = new Query("SHOW MEASUREMENTS", DBConfiguration.Data.DBNAME);
         QueryResult qr = idb.query(q);
         List<QueryResult.Series> s = qr.getResults().get(0).getSeries();
         if (s == null) return new ArrayList<>(0);
@@ -97,14 +97,14 @@ public class InfluxUtil {
      * @return Number of lines
      */
     public static long getDataTableRows(InfluxDB idb, String tn) {
-        Query q = new Query("SELECT COUNT(\"Time\") FROM \"" + tn + "\"", InfluxappConfig.IFX_DBNAME);
+        Query q = new Query("SELECT COUNT(\"Time\") FROM \"" + tn + "\"", DBConfiguration.Data.DBNAME);
         QueryResult qr = idb.query(q);
         if (qr.getResults().get(0).getSeries() == null) return -1;
         return (long) qr.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
     }
 
     private static void test_map(InfluxDB idb) {
-        Query q = new Query("SELECT * FROM Files", InfluxappConfig.IFX_DBNAME);
+        Query q = new Query("SELECT * FROM Files", DBConfiguration.Data.DBNAME);
         QueryResult qr = idb.query(q);
         Map<String, List<Object>> s = QueryResultToKV(qr);
         List<Object> ss = s.get("name");

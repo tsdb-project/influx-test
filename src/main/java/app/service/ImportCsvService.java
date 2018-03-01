@@ -1,12 +1,11 @@
 package app.service;
 
 
+import app.common.DBConfiguration;
 import app.common.InfluxappConfig;
-import app.common.Measurement;
 import app.service.util.ImportProgressService;
 import app.util.InfluxUtil;
 import app.util.Util;
-import com.opencsv.CSVReader;
 import okhttp3.OkHttpClient;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -17,11 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +38,7 @@ public class ImportCsvService {
     private final AtomicLong totalProcessedSize = new AtomicLong(0);
     private final Map<String, Long> everyFileSize = new HashMap<>();
 
-    private static final String dbName = InfluxappConfig.IFX_DBNAME;
+    private static final String dbName = DBConfiguration.Data.DBNAME;
 
     private boolean importingLock = false;
 
@@ -80,8 +77,27 @@ public class ImportCsvService {
         scheduler.shutdown();
     }
 
+    public static void main(String[] args) throws InterruptedException {
+        ImportCsvService ics = new ImportCsvService();
+        String[] allNoAr = Util.getAllCsvFileInDirectory("N:\\Test_NoAR\\");
+        String[] allAr = Util.getAllCsvFileInDirectory("N:\\Test_AR\\");
+
+        ics.AddArrayFiles(allNoAr);
+        ics.AddArrayFiles(allAr);
+
+        // Invoke this should finish fast, then the process is in the background
+        ics.DoImport(0.01);
+
+        // Wait 10s to get some status
+        Thread.sleep(10000);
+        double ovr = ImportProgressService.GetTaskOverallProgress(ics.GetUUID());
+        Map<String, List<Object>> ss = ImportProgressService.GetTaskAllFileProgress(ics.GetUUID());
+
+        System.out.println("Main exited, worker running...");
+    }
+
     /**
-     * Add one file to the queue
+     * Add one file to the queue (Blocking)
      *
      * @param path File path
      */
@@ -100,7 +116,7 @@ public class ImportCsvService {
     }
 
     /**
-     * Add a list of files into the queue
+     * Add a list of files into the queue (Blocking)
      *
      * @param paths List of files
      */
@@ -109,6 +125,14 @@ public class ImportCsvService {
         for (String aPath : paths) {
             AddOneFile(aPath);
         }
+    }
+
+    private String processFirstLineInCSV(String fLine, String pid) {
+        if (!fLine.toUpperCase().contains(pid))
+            throw new RuntimeException("Wrong PID in filename!");
+        if (fLine.length() < 50)
+            throw new RuntimeException("File UUID misformat!");
+        return fLine.substring(fLine.length() - 40, fLine.length() - 4);
     }
 
     /**
@@ -123,14 +147,15 @@ public class ImportCsvService {
         // Has been uploaded successfully according to the log?
         Query q = new Query(
                 "SELECT MAX(\"CurrentPercent\") AS A, \"status\" AS B FROM \""
-                        + Measurement.SYS_FILE_IMPORT_PROGRESS + "\" WHERE \"filename\" = '"
-                        + p.toString().replace("\\", "\\\\") + "' GROUP BY \"filename\";", InfluxappConfig.SYSTEM_DBNAME);
+                        + DBConfiguration.App.SYS_FILE_IMPORT_PROGRESS + "\" WHERE \"filename\" = '"
+                        + p.toString().replace("\\", "\\\\") + "' GROUP BY \"filename\";", DBConfiguration.App.DBNAME);
         Map<String, List<Object>> tmpQ1 = InfluxUtil.QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
         if (tmpQ1.size() == 0) {
             // Never updated
             res[2] = "0";
         } else {
             if (!tmpQ1.get("B").get(0).equals(String.valueOf(ImportProgressService.FileProgressStatus.STATUS_FAIL))) {
+                // Already loaded before
                 res[2] = "1";
             } else {
                 // Uploaded but failed
@@ -149,21 +174,22 @@ public class ImportCsvService {
         return res;
     }
 
-    private String processFirstLineInCSV(String fLine, String pid) {
-        if (!fLine.toUpperCase().contains(pid))
-            throw new RuntimeException("Wrong PID in filename!");
-        if (fLine.length() < 50)
-            throw new RuntimeException("File UUID misformat!");
-        return fLine.substring(fLine.length() - 40, fLine.length() - 4);
-    }
+    /**
+     * The main importing logic
+     *
+     * @return Obj[0]: Err msg; Obj[1]: Processed size.
+     */
+    private Object[] fileImport(InfluxDB idb, String ar_type, String pid, Path file) {
+        long currentProcessed = 0;
+        String filename = file.getFileName().toString();
 
-    private String fileImport(InfluxDB idb, String ar_type, String pid, Path file) {
         try {
             BufferedReader reader = Files.newBufferedReader(file);
 
+            // First line contains some curcial info
             String firstLine = reader.readLine();
             String fileUUID = processFirstLineInCSV(firstLine, pid);
-            long currentProcessed = firstLine.length();
+            currentProcessed = firstLine.length();
 
             // Next 6 lines no use.
             long tmp_size = 0;
@@ -172,35 +198,35 @@ public class ImportCsvService {
             }
             currentProcessed += tmp_size;
 
-            // 8th Line
+            // 8th Line is column header line
             String eiL = reader.readLine();
-            currentProcessed += eiL.length();
             String[] columnNames = eiL.split(",");
             int columnCount = columnNames.length,
                     bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount,
                     batchCount = 0;
+            currentProcessed += eiL.length();
 
             BatchPoints records = BatchPoints.database(dbName).consistency(InfluxDB.ConsistencyLevel.ALL).build();
-            String tableName = Measurement.DATA_PREFIX + pid;
 
             Map<String, String> dataTag = new HashMap<>(5);
             dataTag.put("fileUUID", fileUUID);
             dataTag.put("arType", ar_type);
+            dataTag.put("fileName", filename.substring(0, filename.length() - 4));
 
             String aLine;
             while ((aLine = reader.readLine()) != null) {
                 String[] values = aLine.split(",");
                 if (columnCount != values.length)
-                    throw new RuntimeException("File content inconsistent!");
+                    throw new RuntimeException("File content columns length inconsistent!");
 
-                // Large initial cap for better importing performance
+                // Set initial capacity for slightly better performance
                 Map<String, Object> lineKVMap = new HashMap<>((int) (columnCount / 0.70));
                 for (int i = 1; i < values.length; i++) {
                     lineKVMap.put(columnNames[i], Double.valueOf(values[i]));
                 }
 
-                // Table with ID for each patient
-                Point record = Point.measurement(tableName)
+                // Measurement is PID
+                Point record = Point.measurement(pid)
                         .time(Util.serialTimeToLongDate(values[0], null), TimeUnit.MILLISECONDS)
                         .tag(dataTag).fields(lineKVMap).build();
                 records.point(record);
@@ -226,16 +252,14 @@ public class ImportCsvService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return e.getLocalizedMessage();
+            return new Object[]{e.getMessage(), currentProcessed};
         }
 
-        return "OK";
+        return new Object[]{"OK", currentProcessed};
     }
 
     /**
      * Import file - internal method
-     *
-     * @param pFile File Path NIO class
      */
     private void internalImportMain(Path pFile) {
         String fileFullPath = pFile.toString();
@@ -248,7 +272,7 @@ public class ImportCsvService {
             return;
         }
 
-        // Duplicate Check
+        // Duplication Check
         if (fileInfo[2].equals("1")) {
             //TODO: If the same file appears already, having a summary of comparing the contents of the new and old
             //TODO: file will be useful.  For example, if I generate a new set of CSVs using a novel signal processing
@@ -258,31 +282,18 @@ public class ImportCsvService {
             return;
         } else if (fileInfo[2].equals("2")) {
             //TODO: Clean the failed table?
-            logFailureFiles(fileFullPath, "Corrupted import, TODO.",
+            logFailureFiles(fileFullPath, "Corrupted or finished import, TODO.",
                     everyFileSize.get(fileFullPath), 0);
             return;
         }
 
         // New file, all good, just import!
-        String impStr = fileImport(generateIdb(), fileInfo[1], fileInfo[0], pFile);
-        if (impStr.equals("OK")) {
+        Object[] impStr = fileImport(generateIdbClient(), fileInfo[1], fileInfo[0], pFile);
+        if (impStr[0].equals("OK")) {
             logSuccessFiles(fileFullPath, everyFileSize.get(fileFullPath), everyFileSize.get(fileFullPath));
         } else {
-            logFailureFiles(fileFullPath, impStr, everyFileSize.get(fileFullPath), 0);
+            logFailureFiles(fileFullPath, (String) impStr[0], everyFileSize.get(fileFullPath), (long) impStr[1]);
         }
-    }
-
-    private InfluxDB generateIdb() {
-        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME,
-                InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
-                        .readTimeout(60, TimeUnit.SECONDS)
-                        .writeTimeout(60, TimeUnit.SECONDS));
-        // Disable GZip to save CPU
-        idb.disableGzip();
-        String dbName = InfluxappConfig.IFX_DBNAME;
-        idb.createDatabase(dbName);
-        return idb;
     }
 
     private void logSuccessFiles(String fn, long thisFileSize, long thisFileProcessedSize) {
@@ -300,17 +311,17 @@ public class ImportCsvService {
                 ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
     }
 
-    public static void main(String[] args) {
-        ImportCsvService ics = new ImportCsvService();
-        String[] allNoAr = Util.getAllCsvFileInDirectory("N:\\Test_NoAR\\");
-        String[] allAr = Util.getAllCsvFileInDirectory("N:\\Test_AR\\");
-
-        ics.AddArrayFiles(allNoAr);
-        ics.AddArrayFiles(allAr);
-
-        // Invoke this should finish fast, then the process is in the background
-        ics.DoImport(0.5);
-        System.out.println("Main exited, worker running...");
+    private InfluxDB generateIdbClient() {
+        InfluxDB idb = InfluxDBFactory.connect(
+                InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+                new OkHttpClient.Builder().connectTimeout(300, TimeUnit.SECONDS)
+                        .readTimeout(300, TimeUnit.SECONDS)
+                        .writeTimeout(300, TimeUnit.SECONDS));
+        // Disable GZip to save CPU
+        idb.disableGzip();
+        //TODO: Batch option
+        idb.createDatabase(dbName);
+        return idb;
     }
 
 }

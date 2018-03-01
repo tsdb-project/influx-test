@@ -3,11 +3,15 @@
  */
 package app.controller;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import app.bean.DifferRequestBodyBean;
+import app.bean.ExceedRequestBodyBean;
+import app.bean.RawDataRequestBodyBean;
+import app.model.QueryResultBean;
+import app.model.RawData;
+import app.service.ColumnService;
+import app.service.PatientFilteringService;
+import app.service.QueriesService;
+import app.service.RawDataService;
 import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,15 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import app.bean.DifferRequestBodyBean;
-import app.bean.ExceedRequestBodyBean;
-import app.bean.RawDataRequestBodyBean;
-import app.model.QueryResultBean;
-import app.model.RawData;
-import app.service.ColumnService;
-import app.service.PatientService;
-import app.service.QueriesService;
-import app.service.RawDataService;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isolachine
@@ -41,7 +40,7 @@ public class QueryController {
     @Autowired
     ColumnService columnService;
     @Autowired
-    PatientService patientService;
+    PatientFilteringService patientFilteringService;
     @Autowired
     RawDataService rawDataService;
 

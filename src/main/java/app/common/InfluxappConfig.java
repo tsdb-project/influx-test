@@ -1,10 +1,9 @@
 package app.common;
 
+import app.Environment;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.springframework.boot.system.ApplicationTemp;
-
-import app.Environment;
 
 /**
  * Configuration file for InfluxDB connection
@@ -25,16 +24,6 @@ public final class InfluxappConfig {
      * Server writable user's passwd
      */
     public static final String IFX_PASSWD = Environment.DEV_MACHINE.equals("quz3") ? "root" : "1QaZ2WsX";
-
-    /**
-     * System related DB name
-     */
-    public static final String SYSTEM_DBNAME = "tsdbsys";
-
-    /**
-     * Server DB name
-     */
-    public static final String IFX_DBNAME = "upmc";
 
     /**
      * InfluxDB system temp directory

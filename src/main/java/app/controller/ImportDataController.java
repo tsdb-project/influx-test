@@ -6,9 +6,9 @@ package app.controller;
 import app.bean.FileBean;
 import app.bean.Response;
 import app.bean.SearchFileForm;
-import app.service.OldImportCsvService;
+import app.service.ImportCsvService;
+import app.service.util.ImportProgressService;
 import app.util.Util;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,7 +26,7 @@ import java.util.Map;
 public class ImportDataController {
 
     @Autowired
-    OldImportCsvService oldImportCsvService;
+    ImportCsvService importCsvService = new ImportCsvService();
 
     private String fileLocation;
 
@@ -91,7 +91,9 @@ public class ImportDataController {
         for (int i = 0; i < allAR.length; i++) {
             allAR[i] = dir.getFiles().get(i);
         }
-        oldImportCsvService.ImportByList(allAR, true, "ART");
+        importCsvService.AddArrayFiles(allAR);
+        //TODO: Should let user choose LoadFactor
+        importCsvService.DoImport(0.01);
         // }
         //
         // map.put("dir", directory);
@@ -104,19 +106,16 @@ public class ImportDataController {
 
         Map<String, Object> map = new HashMap<>();
 
-        String uuid = oldImportCsvService.currentUUID;
+        String uuid = importCsvService.GetUUID();
 
         map.put("uuid", uuid);
-        map.put("file", oldImportCsvService.currentFile);
-        if (uuid.equals("")) {
-            map.put("progress", 0.0);
-        } else {
-            String progress = String.format("%.2f", oldImportCsvService.CheckProgressWithUUID(uuid) * 100);
-            map.put("progress", progress);
-        }
-        String totalProgress = String.format("%.2f", oldImportCsvService.totalProgress * 100);
-        map.put("total", totalProgress);
-        map.put("finished", oldImportCsvService.progressState);
+
+        //TODO: Check the content of allstat
+        Map<String, List<Object>> allstat = ImportProgressService.GetTaskAllFileProgress(uuid);
+
+        map.put("file", "Shoud be a list here");
+        map.put("progress", "Shoud be a list here");
+        map.put("total", ImportProgressService.GetTaskOverallProgress(uuid));
 
         return map;
     }

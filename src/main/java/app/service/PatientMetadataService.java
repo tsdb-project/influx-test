@@ -1,5 +1,6 @@
 package app.service;
 
+import app.common.DBConfiguration;
 import app.common.InfluxappConfig;
 import app.model.Patient;
 import app.util.InfluxUtil;
@@ -16,16 +17,17 @@ import java.util.Map;
  * Get some metadata for a patient
  */
 @Service
+@Deprecated
 public class PatientMetadataService {
 
-    private static final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+    private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
 
     private Patient target;
 
     private Instant availDataTimeQ(String qT, boolean hasAr) {
         String table = "data_" + target.getPid().toUpperCase() + "_" + (hasAr ? "ar" : "noar");
 
-        Query q = new Query(String.format(qT, table), InfluxappConfig.IFX_DBNAME);
+        Query q = new Query(String.format(qT, table), DBConfiguration.Meta.DBNAME);
         Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
 
         // Table does not exist
@@ -41,7 +43,7 @@ public class PatientMetadataService {
      * @return Found this PID or not
      */
     public boolean SetPatient(String pid) {
-        List<Patient> ps = new PatientService().FindById(pid);
+        List<Patient> ps = new PatientFilteringService().FindById(pid);
         if (ps.size() < 1) return false;
         target = ps.get(0);
         return true;

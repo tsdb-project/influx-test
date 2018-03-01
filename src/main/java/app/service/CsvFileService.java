@@ -1,28 +1,29 @@
 package app.service;
 
-import java.util.List;
-
-import app.common.Measurement;
+import app.common.DBConfiguration;
+import app.common.InfluxappConfig;
+import app.model.CSVFile;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.impl.InfluxDBResultMapper;
 import org.springframework.stereotype.Service;
 
-import app.common.InfluxappConfig;
-import app.model.CSVFile;
+import java.util.List;
 
 
 /**
  * Csv file service
  */
 @Service
+@Deprecated
 public class CsvFileService {
 
     private static final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
     private static final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
 
-    private static final String fileQueryStr = "SELECT * FROM " + Measurement.FILES;
+    private static final String fileQueryStr = "SELECT * FROM " + DBConfiguration.App.FILES;
+    private final String dbName = DBConfiguration.App.DBNAME;
 
     //TODO: AR state judge!
 
@@ -33,7 +34,7 @@ public class CsvFileService {
      * @return File UUID
      */
     public String FindLatestFileForPatient(String pid) {
-        Query q = new Query(fileQueryStr + " WHERE \"pid\" = '" + pid.toUpperCase() + "' ORDER BY time DESC LIMIT 1", InfluxappConfig.IFX_DBNAME);
+        Query q = new Query(fileQueryStr + " WHERE \"pid\" = '" + pid.toUpperCase() + "' ORDER BY time DESC LIMIT 1", dbName);
         return resultMapper.toPOJO(influxDB.query(q), CSVFile.class).get(0).getFile_uuid();
     }
 
@@ -44,7 +45,7 @@ public class CsvFileService {
      * @return File UUID
      */
     public String FindEarliestFileForPatient(String pid) {
-        Query q = new Query(fileQueryStr + " WHERE \"pid\" = '" + pid.toUpperCase() + "' ORDER BY time ASC LIMIT 1", InfluxappConfig.IFX_DBNAME);
+        Query q = new Query(fileQueryStr + " WHERE \"pid\" = '" + pid.toUpperCase() + "' ORDER BY time ASC LIMIT 1", dbName);
         return resultMapper.toPOJO(influxDB.query(q), CSVFile.class).get(0).getFile_uuid();
     }
 
@@ -55,7 +56,7 @@ public class CsvFileService {
      * @return List of files
      */
     public List<CSVFile> FindFilesForPatient(String pid) {
-        Query q = new Query(fileQueryStr + " WHERE \"pid\" = '" + pid.toUpperCase() + "'", InfluxappConfig.IFX_DBNAME);
+        Query q = new Query(fileQueryStr + " WHERE \"pid\" = '" + pid.toUpperCase() + "'", dbName);
         return resultMapper.toPOJO(influxDB.query(q), CSVFile.class);
     }
 
@@ -65,7 +66,7 @@ public class CsvFileService {
      * @return List of files
      */
     public List<CSVFile> FindAllFiles() {
-        Query q = new Query(fileQueryStr, InfluxappConfig.IFX_DBNAME);
+        Query q = new Query(fileQueryStr, dbName);
         return resultMapper.toPOJO(influxDB.query(q), CSVFile.class);
     }
 
