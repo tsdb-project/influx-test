@@ -18,7 +18,7 @@ import app.common.InfluxappConfig;
 public class InfluxUtil {
 
     /**
-     * Convert InfluxDB Java Client result to a "real-db" like table
+     * Reshape InfluxDB Java Client result to a "Dictionary"
      *
      * @param results Influx Query result
      * @return KV-Map (Size = 0 if no result)
@@ -28,16 +28,16 @@ public class InfluxUtil {
         // No results
         if (resSer == null) return new HashMap<>(0);
 
-        QueryResult.Series oper = resSer.get(0);
-        int rows = oper.getValues().size(),
-                cols = oper.getColumns().size();
+        List<String> columnsData = resSer.get(0).getColumns();
+        int rows = resSer.size(),
+                cols = columnsData.size();
         Map<String, List<Object>> finalKV = new HashMap<>((int) (rows / 0.75));
 
         for (int i = 0; i < cols; ++i) {
-            String colName = oper.getColumns().get(i);
+            String colName = columnsData.get(i);
             List<Object> dataList = new ArrayList<>(rows);
-            for (int j = 0; j < rows; ++j) {
-                dataList.add(oper.getValues().get(j).get(i));
+            for (QueryResult.Series aResSer : resSer) {
+                dataList.add(aResSer.getValues().get(0).get(i));
             }
             finalKV.put(colName, dataList);
         }

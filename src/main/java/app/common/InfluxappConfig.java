@@ -27,6 +27,11 @@ public final class InfluxappConfig {
     public static final String IFX_PASSWD = Environment.DEV_MACHINE.equals("quz3") ? "root" : "1QaZ2WsX";
 
     /**
+     * System related DB name
+     */
+    public static final String SYSTEM_DBNAME = "tsdbsys";
+
+    /**
      * Server DB name
      */
     public static final String IFX_DBNAME = "upmc";
