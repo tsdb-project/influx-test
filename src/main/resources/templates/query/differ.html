@@ -32,235 +32,167 @@
 
     <section class="content">
         <!-- PUT THE MAIN CONTENT HERE -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Query</h2>
-                <small class="card-subtitle">Find all patients where the hourly mean values in column X and column Y differ by at least Z% for at least Q hourly epochs.</small>
-            </div>
-            <div class="card-block">
-                <form role="form" id="parameter-form">
-                    <div class="row">
-                        <!-- <div class="col-sm-4 col-md-4">
-                        <div class="form-group">
-                            <label>Column X</label>
-                            <select class="select2" data-placeholder="Select Category" data-minimum-results-for-search="Infinity" id="category">
-                                <option disabled="disabled" selected="selected" value="">Select Category</option>
-                                <option th:value="${columnName}" th:each="columnName : ${columnNames}" th:text="${columnName}"></option>
-                            </select>
+        <div class="content__inner">
+            <header class="content__title">
+                <h1>Query</h1>
+                <small>Find all patients where the hourly mean values in column X and column Y differ by at least Z% for at least Q hourly epochs.</small>
+            </header>
+            <div class="card">
+                <div class="card-block">
+                    <form role="form" id="parameter-form">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-4">
+                                <div class="row align-items-start">
+                                    <div class="col">
+                                        <h3 class="card-block__title">Metadata Filtering</h3>
+                                        <br>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6">
+                                        <div class="form-group">
+                                            <label>Gender</label>
+                                            <select class="select2" data-placeholder="Select Gender" id="gender" data-minimum-results-for-search="Infinity">
+                                                <option disabled="disabled" selected="selected" value="">Select Gender</option>
+                                                <option value="F">Female</option>
+                                                <option value="M">Male</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-2 col-md-2">
+                                        <div class="form-group">
+                                            <label>Age</label>
+                                            <select class="select2" data-placeholder="Select" id="agelimit" data-minimum-results-for-search="Infinity">
+                                                <option disabled="disabled" selected="selected" value="">Select</option>
+                                                <option value=">">&gt;</option>
+                                                <option value=">=">&ge;</option>
+                                                <option value="=">=</option>
+                                                <option value="<=">&le;</option>
+                                                <option value="<">&lt;</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-4 col-md-4">
+                                        <div class="form-group">
+                                            <label>&nbsp</label>
+                                            <input type="text" class="form-control" id="age">
+                                            <i class="form-group__bar"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-8">
+                                <div class="row align-items-start">
+                                    <div class="col">
+                                        <h3 class="card-block__title">Query Parameters</h3>
+                                        <br>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3 col-md-3">
+                                        <div class="form-group">
+                                            <label>Column A</label>
+                                            <select class="select2" data-placeholder="Select Category" id="columnA">
+                                                <option disabled="disabled" selected="selected" value="">Select Category A</option>
+                                                <option th:value="${column}" th:each="column : ${columns}" th:text="${column}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3 col-md-3">
+                                        <div class="form-group">
+                                            <label>Column B</label>
+                                            <select class="select2" data-placeholder="Select Category" id="columnB">
+                                                <option disabled="disabled" selected="selected" value="">Select Category B</option>
+                                                <option th:value="${column}" th:each="column : ${columns}" th:text="${column}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3 col-md-3">
+                                        <div class="form-group">
+                                            <label>Z % Difference</label>
+                                            <input type="text" class="form-control" id="threshold">
+                                            <i class="form-group__bar"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3 col-md-3">
+                                        <div class="form-group">
+                                            <label>Q Hours</label>
+                                            <input type="text" class="form-control" id="count">
+                                            <i class="form-group__bar"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4 col-md-2">
+                                <div class="form-group">
+                                    <label>&nbsp</label>
+                                    <button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" id="filterButton">Go</button>
+                                </div>
+                            </div>
                         </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-block">
+                    <div class="table-responsive">
+                        <table id="patient-table" class="table table-bordered">
+                            <thead class="thead-default">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Age</th>
+                                    <th>Gender</th>
+                                    <th>Number of Occurence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <div class="col-sm-4 col-md-2">
-                        <div class="form-group">
-                            <label>&nbsp</label>
-                            <select class="select2" data-placeholder="Select Column" data-minimum-results-for-search="Infinity">
-                                <option disabled="disabled" selected="selected" value="">Select Column</option>
-                                <option th:value="${column}" th:each="column : ${categories.columnName}" th:text="${column}"></option>
-                            </select>
-                        </div>
-                    </div> -->
-                        <div class="col-sm-12 col-md-4">
-                            <div class="row align-items-start">
-                                <div class="col">
-                                    <h3 class="card-block__title">Metadata Filtering</h3>
-                                    <br>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-6 col-md-6">
-                                    <div class="form-group">
-                                        <label>Gender</label>
-                                        <select class="select2" data-placeholder="Select Gender" id="gender" data-minimum-results-for-search="Infinity">
-                                            <option disabled="disabled" selected="selected" value="">Select Gender</option>
-                                            <option value="F">Female</option>
-                                            <option value="M">Male</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-2 col-md-2">
-                                    <div class="form-group">
-                                        <label>Age</label>
-                                        <select class="select2" data-placeholder="Select" id="agelimit" data-minimum-results-for-search="Infinity">
-                                            <option disabled="disabled" selected="selected" value="">Select</option>
-                                            <option value=">">&gt;</option>
-                                            <option value=">=">&ge;</option>
-                                            <option value="=">=</option>
-                                            <option value="<=">&le;</option>
-                                            <option value="<">&lt;</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-4 col-md-4">
-                                    <div class="form-group">
-                                        <label>&nbsp</label>
-                                        <input type="text" class="form-control" id="age">
-                                        <i class="form-group__bar"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-12 col-md-8">
-                            <div class="row align-items-start">
-                                <div class="col">
-                                    <h3 class="card-block__title">Query Parameters</h3>
-                                    <br>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-3 col-md-3">
-                                    <div class="form-group">
-                                        <label>Column A</label>
-                                        <select class="select2" data-placeholder="Select Category" id="columnA">
-                                            <option disabled="disabled" selected="selected" value="">Select Category A</option>
-                                            <option th:value="${column}" th:each="column : ${columns}" th:text="${column}"></option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-sm-3 col-md-3">
-                                    <div class="form-group">
-                                        <label>Column B</label>
-                                        <select class="select2" data-placeholder="Select Category" id="columnB">
-                                            <option disabled="disabled" selected="selected" value="">Select Category B</option>
-                                            <option th:value="${column}" th:each="column : ${columns}" th:text="${column}"></option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-sm-3 col-md-3">
-                                    <div class="form-group">
-                                        <label>Z % Difference</label>
-                                        <input type="text" class="form-control" id="threshold">
-                                        <i class="form-group__bar"></i>
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-3 col-md-3">
-                                    <div class="form-group">
-                                        <label>Q Hours</label>
-                                        <input type="text" class="form-control" id="count">
-                                        <i class="form-group__bar"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-4 col-md-2">
-                            <div class="form-group">
-                                <label>&nbsp</label>
-                                <button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" id="filterButton">Go</button>
-                            </div>
-                        </div>
-                </form>
-
-                <div class="table-responsive">
-                    <table id="patient-table" class="table table-bordered">
-                        <thead class="thead-default">
-                            <tr>
-                                <th>ID</th>
-                                <th>Age</th>
-                                <th>Gender</th>
-                                <th>Number of Occurence</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- <tr th:each="patient : ${patients}" id="patients">
-                    <td th:text="${patient.patient.id}">000000001</td>
-                    <td th:text="${patient.patient.firstName}">John</td>
-                    <td th:text="${patient.patient.lastName}">Smith</td>
-                    <td th:text="${patient.patient.age}">23</td>
-                    <td th:text="${patient.patient.birthDate}">01/05/1985</td>
-                    <td th:text="${patient.occurence}">1</td>
-                </tr> -->
-                        </tbody>
-                    </table>
-                </div>
-
-
-                <div class="table-responsive">
-                    <table id="timespan-table" class="table table-bordered">
-                        <thead class="thead-default">
-                            <tr>
-                                <th>Start Time</th>
-                                <th>End Time</th>
-                                <!-- <th>Length</th> -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>ID</td>
-                                <td>First Name</td>
-                                <!-- <td>Last Name</td> -->
-                            </tr>
-                            <!-- <tr th:each="patient : ${patients}" id="patients">
-                    <td th:text="${patient.patient.id}">000000001</td>
-                    <td th:text="${patient.patient.firstName}">John</td>
-                    <td th:text="${patient.patient.lastName}">Smith</td>
-                    <td th:text="${patient.patient.age}">23</td>
-                    <td th:text="${patient.patient.birthDate}">01/05/1985</td>
-                    <td th:text="${patient.occurence}">1</td>
-                </tr> -->
-                        </tbody>
-                    </table>
-                </div>
-
-
-                <div class="table-responsive">
-                    <table id="records-table" class="table table-bordered">
-                        <thead class="thead-default">
-                            <tr>
-                                <th>Time</th>
-                                <th>I10_1</th>
-                                <th>I10_2</th>
-                                <th>I10_3</th>
-                                <th>I10_4</th>
-                                <th>I10_5</th>
-                                <th>I10_6</th>
-                                <th>I10_7</th>
-                                <th>I10_8</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2017-10-26T16:23:20Z</td>
-                                <td>10.34</td>
-                                <td>29.0812</td>
-                                <td>24.2531</td>
-                                <td>14.45</td>
-                                <td>17.549</td>
-                                <td>15.2789</td>
-                                <td>201.455</td>
-                                <td>190.212</td>
-                            </tr>
-                            <tr>
-                                <td>2017-10-26T16:23:21Z</td>
-                                <td>0</td>
-                                <td>14.45</td>
-                                <td>17.549</td>
-                                <td>15.2789</td>
-                                <td>29.0812</td>
-                                <td>24.2531</td>
-                                <td>201.455</td>
-                                <td>190.212</td>
-                            </tr>
-                            <!-- <tr th:each="patient : ${patients}" id="patients">
-                    <td th:text="${patient.patient.id}">000000001</td>
-                    <td th:text="${patient.patient.firstName}">John</td>
-                    <td th:text="${patient.patient.lastName}">Smith</td>
-                    <td th:text="${patient.patient.age}">23</td>
-                    <td th:text="${patient.patient.birthDate}">01/05/1985</td>
-                    <td th:text="${patient.occurence}">1</td>
-                </tr> -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
-        </div>
-
-        <!-- /MAIN CONTENT -->
-        <div th:insert="fragments/footer :: footer"></div>
+            <div class="card">
+                <div class="card-block">
+                    <div class="table-responsive">
+                        <table id="timespan-table" class="table table-bordered">
+                            <thead class="thead-default">
+                                <tr>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <!-- <th>Length</th> -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>ID</td>
+                                    <td>First Name</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card" style="display: none" id="PlotCard">
+                <div class="card-block">
+                    <input type="hidden" id="inputPatient" value="">
+                    <input type="hidden" id="inputColumn" value="">
+                    <input type="hidden" id="compareColumn" value="">
+                    <input type="hidden" id="inputTimeStart" value="">
+                    <input type="hidden" id="inputTimeEnd" value="">
+                    <input type="hidden" id="timespanCount" value="">
+                    <div class="flot-chart flot-line" id="Plot" style="width: 100%; height: 400px"></div>
+                    <!-- <div class="flot-chart-legends flot-chart-legends--line" style="width: 100%; height: 50px" id="PlotLegend"></div> -->
+                    <div class="flot-chart flot-line" id="Overview" style="width: 100%; height: 150px"></div>
+                </div>
+            </div>
+            <!-- /MAIN CONTENT -->
+            <div th:insert="fragments/footer :: footer"></div>
     </section>
     </main>
 
@@ -290,7 +222,12 @@
     <script src="/vendors/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
     <script src="/vendors/bower_components/trumbowyg/dist/trumbowyg.min.js"></script>
 
-
+    <!-- Vendors: Flot Charts -->
+    <script src="/vendors/bower_components/flot/jquery.flot.js"></script>
+    <script src="/vendors/bower_components/flot/jquery.flot.time.js"></script>
+    <script src="/vendors/bower_components/flot/jquery.flot.selection.js"></script>
+    <script src="/vendors/bower_components/flot/jquery.flot.resize.js"></script>
+    
     <!-- App functions and actions -->
     <script src="/js/navigation.js"></script>
     <script src="/js/app.min.js"></script>

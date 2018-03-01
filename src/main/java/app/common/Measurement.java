@@ -9,13 +9,19 @@ package app.common;
 public class Measurement {
 
     /**
+     * Meta data for patients
+     */
+    public static final String PATIENT_META = "Patients_metadata";
+
+    /**
      * Table name for patients
      */
     public static final String PATIENTS = "Patients";
+
     /**
      * Table name for files
      */
-    public static final String FILES = "Files";
+    public static final String FILES = "File";
 
     /**
      * Prefix for InfluxDB patient data table

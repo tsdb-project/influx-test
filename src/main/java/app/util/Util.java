@@ -32,39 +32,47 @@ public class Util {
     /**
      * Convert a DoB String (e.g. 04/27/1995) to UNIX timestamp
      *
-     * @param dateOfBirth
-     *            DOB String
+     * @param dateOfBirth DOB String
      * @return long UNIX Timestamp
-     * @throws ParseException
-     *             Shouldn't happen
+     * @throws ParseException Shouldn't happen
      */
     public static long dateToTimestamp(String dateOfBirth) throws ParseException {
-        return dateTimeFormatToTimestamp(dateOfBirth, "mm/dd/yyyy");
+        return dateTimeFormatToTimestamp(dateOfBirth, "mm/dd/yyyy", null);
+    }
+
+    /**
+     * Convert timestamp to instant
+     *
+     * @param dateTime String
+     * @param format   String format
+     * @param timeZone Null for NY(PGH) timezone
+     * @return Instant
+     * @throws ParseException Wrong format
+     */
+    public static Instant dateTimeFormatToInstant(String dateTime, String format, TimeZone timeZone) throws ParseException {
+        if (timeZone == null) timeZone = TimeZone.getTimeZone("America/New_York");
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        sdf.setTimeZone(timeZone);
+        return sdf.parse(dateTime).toInstant();
     }
 
     /**
      * Convert some string to a UNIX timestamp
      *
-     * @param dateTime
-     *            String
-     * @param format
-     *            String format
+     * @param dateTime String
+     * @param format   String format
+     * @param timeZone Null for NY(PGH) timezone
      * @return long UNIX Timestamp
-     * @throws ParseException
-     *             Wrong format
+     * @throws ParseException Wrong format
      */
-    public static long dateTimeFormatToTimestamp(String dateTime, String format) throws ParseException {
-        TimeZone timeZone = TimeZone.getTimeZone("UTC");
-        DateFormat formatter = new SimpleDateFormat(format);
-        formatter.setTimeZone(timeZone);
-        return formatter.parse(dateTime).getTime();
+    public static long dateTimeFormatToTimestamp(String dateTime, String format, TimeZone timeZone) throws ParseException {
+        return dateTimeFormatToInstant(dateTime, format, timeZone).toEpochMilli();
     }
 
     /**
      * Convert UNIX Timestamp to UTC Time string (US format)
      *
-     * @param unixTime
-     *            UNIX Timestamp
+     * @param unixTime UNIX Timestamp
      * @return String Formatted DateTime
      */
     public static String timestampToUTCDate(long unixTime) {
@@ -74,10 +82,8 @@ public class Util {
     /**
      * Convert UNIX Timestamp to UTC Time (Any format)
      *
-     * @param unixTime
-     *            UNIX Timestamp
-     * @param format
-     *            String UTC
+     * @param unixTime UNIX Timestamp
+     * @param format   String UTC
      * @return
      */
     public static String timestampToUTCDateTimeFormat(long unixTime, String format) {
@@ -90,19 +96,21 @@ public class Util {
     /**
      * Convert serial# time to a specific timestamp
      *
-     * @param serial
-     *            String Serial number
+     * @param serial String Serial number
+     * @param timeZone Null for NY(PGH) timezone
      * @return Apache POI defined timestamp
      */
-    public static long serialTimeToLongDate(String serial) {
-        return DateUtil.getJavaDate(Double.valueOf(serial)).getTime();
+    public static long serialTimeToLongDate(String serial, TimeZone timeZone) {
+        if (timeZone == null) timeZone = TimeZone.getTimeZone("America/New_York");
+        double sTime = Double.valueOf(serial);
+        Date d = DateUtil.getJavaDate(sTime, timeZone);
+        return d.getTime();
     }
 
     /**
      * Get all CSV files under a directory
      *
-     * @param dir
-     *            String directory path
+     * @param dir String directory path
      * @return String Full file path
      */
     public static String[] getAllCsvFileInDirectory(String dir) {
@@ -112,17 +120,15 @@ public class Util {
     /**
      * Get all specific files under a directory
      *
-     * @param dir
-     *            String directory path
-     * @param type
-     *            String file extension
+     * @param dir  String directory path
+     * @param type String file extension
      * @return String Full file path
      */
     public static String[] getAllSpecificFileInDirectory(String dir, String type) {
         File folder = new File(dir);
         if (folder.isFile()) {
             if (dir.toLowerCase().endsWith("." + type))
-                return new String[] { dir };
+                return new String[]{dir};
             else
                 return new String[0];
         }
@@ -166,12 +172,12 @@ public class Util {
         List<FileBean> fileBeans = new ArrayList<>();
 
         if (listOfFiles != null) {
-            for (int i = 0; i < listOfFiles.length; i++) {
-                if (listOfFiles[i].isFile() && FilenameUtils.getExtension(listOfFiles[i].getName()).toLowerCase().equals("csv")) {
+            for (File listOfFile : listOfFiles) {
+                if (listOfFile.isFile() && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals("csv")) {
                     FileBean fileBean = new FileBean();
-                    fileBean.setName(listOfFiles[i].getName());
+                    fileBean.setName(listOfFile.getName());
                     fileBean.setDirectory(directory);
-                    long length = FileUtils.sizeOf(listOfFiles[i]);
+                    long length = FileUtils.sizeOf(listOfFile);
                     fileBean.setBytes(length);
                     fileBean.setSize(FileUtils.byteCountToDisplaySize(length));
                     fileBeans.add(fileBean);

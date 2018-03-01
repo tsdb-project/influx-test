@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import app.common.InfluxappConfig;
 
 /**
- * an service for returning column information of data
+ * service for returning column information of data
  * @author Isolachine
  */
 @Service

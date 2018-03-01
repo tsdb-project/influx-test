@@ -30,7 +30,7 @@ public class QueriesService {
     private static final PatientService patientS = new PatientService();
     private static final CsvFileService csvFileS = new CsvFileService();
 
-    //TODO: Patient AR or Not AR
+    // TODO: Patient AR or Not AR
     private final List<String> patientList;
     private final List<Integer> arStatus;
 
@@ -57,18 +57,24 @@ public class QueriesService {
     /**
      * Run a assembled query on one data table(patient)
      *
-     * @param queryString Assembled query string
-     * @param pid         PID
-     * @param queryN      Query Nickname
-     * @param isAr        AR status
+     * @param queryString
+     *            Assembled query string
+     * @param pid
+     *            PID
+     * @param queryN
+     *            Query Nickname
+     * @param thrSec
+     * @param isAr
+     *            AR status
      * @return Query execuation results
      */
-    private QueryResultBean checkOnePatient(String queryString, String pid, String queryN, boolean isAr) {
+    private QueryResultBean checkOnePatient(String queryString, String pid, String queryN, int thrSec, boolean isAr) {
         Query q = new Query(queryString, InfluxappConfig.IFX_DBNAME);
         Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
 
         // This patient doesn't need to be included.
-        if (res.size() == 0) return null;
+        if (res.size() == 0)
+            return null;
 
         QueryResultBean qrb = new QueryResultBean();
         qrb.setInterestPatient(patientS.FindById(pid.toUpperCase()).get(0));
@@ -82,7 +88,35 @@ public class QueriesService {
         for (Object s : occTime) {
             TimeSpan timeSpan = new TimeSpan();
             timeSpan.setStart(Instant.parse((String) s));
-            timeSpan.setEnd(Instant.parse((String) s).plusSeconds(10));
+            timeSpan.setEnd(Instant.parse((String) s).plusSeconds(thrSec));
+            occTimes.add(timeSpan);
+        }
+        qrb.setOccurTime(occTimes);
+
+        return qrb;
+    }
+
+    private QueryResultBean checkOnePatientB(String queryString, String pid, String queryN, int he, boolean isAr) {
+        Query q = new Query(queryString, InfluxappConfig.IFX_DBNAME);
+        Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
+
+        // This patient doesn't need to be included.
+        if (res.size() == 0)
+            return null;
+
+        QueryResultBean qrb = new QueryResultBean();
+        qrb.setInterestPatient(patientS.FindById(pid.toUpperCase()).get(0));
+        qrb.setQueryNickname(queryN);
+        qrb.setAR(isAr);
+
+        List<Object> occTime = res.get("time");
+        qrb.setOccurTimes(occTime.size());
+
+        List<TimeSpan> occTimes = new ArrayList<>(occTime.size());
+        for (Object s : occTime) {
+            TimeSpan timeSpan = new TimeSpan();
+            timeSpan.setStart(Instant.parse((String) s));
+            timeSpan.setEnd(Instant.parse((String) s).plusSeconds(he * 3600));
             occTimes.add(timeSpan);
         }
         qrb.setOccurTime(occTimes);
@@ -93,9 +127,12 @@ public class QueriesService {
     /**
      * Type A query
      *
-     * @param colX   column X (eg. I10_1)
-     * @param thrVal threshold value Y (eg. 80)
-     * @param thrSec consecutive threshold Z (eg. 10)
+     * @param colX
+     *            column X (eg. I10_1)
+     * @param thrVal
+     *            threshold value Y (eg. 80)
+     * @param thrSec
+     *            consecutive threshold Z (eg. 10)
      * @return Return a list of patients
      */
     public List<QueryResultBean> TypeAQuery(String colX, double thrVal, int thrSec) {
@@ -107,14 +144,16 @@ public class QueriesService {
             // TODO: AR or NoAR?
             String tableName = Measurement.DATA_PREFIX + pid + "_ar";
             String finalQ = String.format(template, colX, tableName, colX, thrVal, thrSec, thrSec);
-            QueryResultBean ar = checkOnePatient(finalQ, pid, queryDesc, true);
+            QueryResultBean ar = checkOnePatient(finalQ, pid, queryDesc, thrSec, true);
 
             tableName = Measurement.DATA_PREFIX + pid + "_noar";
             finalQ = String.format(template, colX, tableName, colX, thrVal, thrSec, thrSec);
-            QueryResultBean noar = checkOnePatient(finalQ, pid, queryDesc, false);
+            QueryResultBean noar = checkOnePatient(finalQ, pid, queryDesc, thrSec, false);
 
-            if (noar != null) finalRes.add(noar);
-            if (ar != null) finalRes.add(ar);
+            if (noar != null)
+                finalRes.add(noar);
+            if (ar != null)
+                finalRes.add(ar);
         }
 
         return finalRes;
@@ -123,32 +162,36 @@ public class QueriesService {
     /**
      * Type B query
      *
-     * @param colA    column X (eg. I10_1)
-     * @param colB    column Y (eg. I11_1)
-     * @param valDiff difference tolerance Z, in % form (eg. 3)
-     * @param hEp     hourly epochs Q (eg. 5)
+     * @param colA
+     *            column X (eg. I10_1)
+     * @param colB
+     *            column Y (eg. I11_1)
+     * @param valDiff
+     *            difference tolerance Z, in % form (eg. 3)
+     * @param hEp
+     *            hourly epochs Q (eg. 5)
      * @return Return a list of patients
      */
     public List<QueryResultBean> TypeBQuery(String colA, String colB, double valDiff, int hEp) {
         String queryDesc = "Find all patients where the hourly mean values in column X and column Y differ by at least Z% for at least Q hourly epochs.";
         List<QueryResultBean> finalRes = new ArrayList<>();
-        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM ("
-                + "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM \"%s\" GROUP BY TIME(1h)) "
-                + "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
+        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" + "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM \"%s\" GROUP BY TIME(1h)) " + "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
 
         valDiff /= 100;
         for (String pid : patientList) {
             // TODO: AR or NoAR?
             String tableName = Measurement.DATA_PREFIX + pid + "_ar";
             String finalQ = String.format(template, colA, colB, colA, tableName, valDiff, valDiff, hEp, hEp);
-            QueryResultBean ar = checkOnePatient(finalQ, pid, queryDesc, true);
+            QueryResultBean ar = checkOnePatientB(finalQ, pid, queryDesc, hEp, true);
 
             tableName = Measurement.DATA_PREFIX + pid + "_noar";
             finalQ = String.format(template, colA, colB, colA, tableName, valDiff, valDiff, hEp, hEp);
-            QueryResultBean noar = checkOnePatient(finalQ, pid, queryDesc, false);
+            QueryResultBean noar = checkOnePatientB(finalQ, pid, queryDesc, hEp, false);
 
-            if (noar != null) finalRes.add(noar);
-            if (ar != null) finalRes.add(ar);
+            if (noar != null)
+                finalRes.add(noar);
+            if (ar != null)
+                finalRes.add(ar);
         }
 
         return finalRes;

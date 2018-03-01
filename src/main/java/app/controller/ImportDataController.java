@@ -86,7 +86,7 @@ public class ImportDataController {
         // }
         //
         // if (!directory.equals("")) {
-        
+
         String[] allAR = new String[dir.getFiles().size()];
         for (int i = 0; i < allAR.length; i++) {
             allAR[i] = dir.getFiles().get(i);
