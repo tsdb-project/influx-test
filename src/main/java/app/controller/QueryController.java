@@ -3,6 +3,7 @@
  */
 package app.controller;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import app.bean.DifferRequestBodyBean;
 import app.bean.ExceedRequestBodyBean;
+import app.bean.RawDataRequestBodyBean;
 import app.model.QueryResultBean;
+import app.model.RawData;
 import app.service.ColumnService;
 import app.service.PatientService;
 import app.service.QueriesService;
+import app.service.RawDataService;
 
 /**
  * @author Isolachine
@@ -38,6 +42,8 @@ public class QueryController {
     ColumnService columnService;
     @Autowired
     PatientService patientService;
+    @Autowired
+    RawDataService rawDataService;
 
     @RequestMapping("exceed")
     @ResponseBody
@@ -80,10 +86,10 @@ public class QueryController {
         model.addAttribute("subnav", "differ");
         return model;
     }
-    
+
     @RequestMapping("differ/query")
     public Map<String, Object> differQuery(@RequestBody DifferRequestBodyBean request, Model model) {
-        if (request.getColumnA() == null || request.getColumnB() == null ) {
+        if (request.getColumnA() == null || request.getColumnB() == null) {
             Map<String, Object> map = new HashedMap<>();
             map.put("data", new ArrayList<>());
             return map;
@@ -92,6 +98,34 @@ public class QueryController {
         List<QueryResultBean> resultBeans = queriesService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount());
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
+        return map;
+    }
+
+    @RequestMapping("raw")
+    public Map<String, Object> raw(@RequestBody RawDataRequestBodyBean request, Model model) throws ParseException {
+        Map<String, Object> map = new HashedMap<>();
+        
+        List<RawData> rawData = rawDataService.selectAllRawDataInColumns(request.getTableName(), request.getColumnNames());
+
+        List<List<String[]>> rawDataResponse = new ArrayList<>();
+        int columnSize = request.getColumnNames().size();
+
+        for (int i = 0; i < columnSize; i++) {
+            List<String[]> aColumnData = new ArrayList<>();
+            rawDataResponse.add(aColumnData);
+        }
+
+        for (RawData data : rawData) {
+            for (int i = 0; i < columnSize; i++) {
+                String[] point = new String[2];
+                long millisecond = data.getTime().getEpochSecond() * 1000;
+                point[0] = String.valueOf(millisecond);
+                point[1] = String.valueOf(data.getValues().get(i));
+                rawDataResponse.get(i).add(point);
+            }
+        }
+        map.put("raw", rawDataResponse);
+        
         return map;
     }
 }

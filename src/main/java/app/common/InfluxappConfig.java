@@ -2,7 +2,7 @@ package app.common;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
-import org.springframework.boot.ApplicationTemp;
+import org.springframework.boot.system.ApplicationTemp;
 
 import app.Environment;
 
