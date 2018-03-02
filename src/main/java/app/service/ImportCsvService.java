@@ -166,10 +166,10 @@ public class ImportCsvService {
         res[0] = filename.substring(0, 12).trim().toUpperCase();
         String fn_laterpart = filename.substring(12).toLowerCase();
         // Ar or NoAr
-        if (fn_laterpart.contains("ar")) {
-            res[1] = "ar";
-        } else if (fn_laterpart.contains("noar")) {
+        if (fn_laterpart.contains("noar")) {
             res[1] = "noar";
+        } else if (fn_laterpart.contains("ar")) {
+            res[1] = "ar";
         }
         return res;
     }
