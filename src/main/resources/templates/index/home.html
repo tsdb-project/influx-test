@@ -11,6 +11,19 @@
 
 <!-- App styles -->
 <link rel="stylesheet" href="/css/app.min.css">
+<style>
+img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+img-block {
+	height: 300px;
+	border: solid;
+}
+</style>
+
 </head>
 
 <body data-ma-theme="blue">
@@ -21,29 +34,28 @@
     <div th:insert="fragments/chat :: aside"></div>
 
     <section class="content">
-        <div class="content__inner">
-            <!-- PUT THE MAIN CONTENT HERE -->
+        <!-- PUT THE MAIN CONTENT HERE -->
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        Welcome!
-                        </br>
-                        &nbsp
-                    </h2>
-                    <small class="card-subtitle">
-                        Brain Flux is a data analysis system designed to process human brain signals.
-                        </br>
-                        </br>
-                        It is aimed at high performance on big data when dealing with dealing with ad-hoc queries.
-                    </small>
-                </div>
+        <div class="card">
+            <div class="card-header">
+                <h1 class="display-4">Welcome to Brain Flux!</h1>
             </div>
-
-
-
-            <div th:insert="fragments/footer :: footer"></div>
+            <div class="card-block">
+                <div class="row">
+                    <div class="img-block col-sm-12 col-md-6">
+                        <img src="/img/home1.png">
+                    </div>
+                    <div class="img-block col-sm-12 col-md-6">
+                        <img src="/img/home2.jpg">
+                    </div>
+                </div>
+                <br>
+                <blockquote class="blockquote">
+                    <div>Brain Flux is a data analysis system designed to process human brain signals. It aims at high performance on ad-hoc queries while dealing with multi-terabytes of data.</div>
+                </blockquote>
+            </div>
         </div>
+        <div th:insert="fragments/footer :: footer"></div>
     </section>
     </main>
 
@@ -56,7 +68,7 @@
     <script src="/vendors/bower_components/Waves/dist/waves.min.js"></script>
     <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
     <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
-    
+
     <!-- App functions and actions -->
     <script src="/js/home/home.js"></script>
     <script src="/js/navigation.js"></script>

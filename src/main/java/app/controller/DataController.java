@@ -26,9 +26,7 @@ import java.util.Map;
 public class DataController {
 
     @Autowired
-    ImportCsvService importCsvService = new ImportCsvService();
-
-    private String fileLocation;
+    ImportCsvService importCsvService;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -80,31 +78,19 @@ public class DataController {
     @RequestMapping(value = "api/data/import")
     @ResponseBody
     public Map<String, Object> importDir(@RequestBody(required = false) SearchFileForm dir, @RequestParam(value = "dir", required = false, defaultValue = "") String dirString, Model model) {
-        // String directory;
         Map<String, Object> map = new HashMap<>();
 
-        for (String ee : dir.getFiles()) {
-            System.out.println(ee);
-        }
-
-        // if (dir != null) {
-        // directory = dir.getDir();
-        // } else {
-        // directory = dirString;
-        // }
-        //
-        // if (!directory.equals("")) {
-
         String[] allAR = new String[dir.getFiles().size()];
+        
         for (int i = 0; i < allAR.length; i++) {
             allAR[i] = dir.getFiles().get(i);
         }
+        
         importCsvService.AddArrayFiles(allAR);
+        
         //TODO: Should let user choose LoadFactor
         importCsvService.DoImport(0.01);
-        // }
-        //
-        // map.put("dir", directory);
+        
         return map;
     }
 
