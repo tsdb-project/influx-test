@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @Controller
 @RestController
-public class ImportDataController {
+public class DataController {
 
     @Autowired
     ImportCsvService importCsvService = new ImportCsvService();
@@ -33,8 +33,16 @@ public class ImportDataController {
     @RequestMapping("data/import")
     @ResponseBody
     public Model importData(Model model) {
-        model.addAttribute("nav", "import");
-        model.addAttribute("subnav", "");
+        model.addAttribute("nav", "data");
+        model.addAttribute("subnav", "import");
+        return model;
+    }
+    
+    @RequestMapping("data/status")
+    @ResponseBody
+    public Model dataStatus(Model model) {
+        model.addAttribute("nav", "data");
+        model.addAttribute("subnav", "status");
         return model;
     }
 

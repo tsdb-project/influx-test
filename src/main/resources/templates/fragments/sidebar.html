@@ -6,22 +6,33 @@
 <body>
     <aside class="sidebar">
         <div class="scrollbar-inner">
-            
+
             <div hidden="hidden" th:name=${nav} id="nav"></div>
             <div hidden="hidden" th:name=${subnav} id="subnav"></div>
             <ul class="navigation">
+                <!-- Menu Home-->
                 <li id="home">
                     <a href="/index/home">
                         <i class="zmdi zmdi-home"></i>
                         Home
                     </a>
                 </li>
-                <li id="import">
-                    <a href="/data/import">
+                <!-- Menu Data-->
+                <li class="navigation__sub" id="data">
+                    <a href="">
                         <i class="zmdi zmdi-collection-text"></i>
-                        Data Import
+                        Data
                     </a>
+                    <ul>
+                        <li id="import">
+                            <a href="/data/import">Import</a>
+                        </li>
+                        <li id="status">
+                            <a href="/data/status">Status</a>
+                        </li>
+                    </ul>
                 </li>
+                <!-- Menu Query-->
                 <li class="navigation__sub" id="queries">
                     <a href="">
                         <i class="zmdi zmdi-view-list"></i>
