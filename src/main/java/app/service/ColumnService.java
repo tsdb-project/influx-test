@@ -75,8 +75,10 @@ public class ColumnService {
         Query query = new Query("select \"name\", \"column\" from " + tableName, dbName);
         QueryResult results = influxDB.query(query);
         List<String> columns = new ArrayList<>();
-        for (List<Object> result : results.getResults().get(0).getSeries().get(0).getValues()) {
-            columns.add(result.get(2).toString());
+        if (results.getResults().size() > 0 && results.getResults().get(0).getSeries() != null) {
+            for (List<Object> result : results.getResults().get(0).getSeries().get(0).getValues()) {
+                columns.add(result.get(2).toString());
+            }
         }
         return columns;
     }
