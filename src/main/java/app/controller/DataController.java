@@ -77,7 +77,7 @@ public class DataController {
 
     @RequestMapping(value = "api/data/import")
     @ResponseBody
-    public Map<String, Object> importDir(@RequestBody(required = false) SearchFileForm dir, @RequestParam(value = "dir", required = false, defaultValue = "") String dirString, Model model) {
+    public Map<String, Object> importDir(@RequestBody(required = false) SearchFileForm dir, String dirString, Model model) {
         Map<String, Object> map = new HashMap<>();
 
         String[] allAR = new String[dir.getFiles().size()];
