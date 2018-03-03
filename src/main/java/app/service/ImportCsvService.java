@@ -147,8 +147,8 @@ public class ImportCsvService {
         // Has been uploaded successfully according to the log?
         Query q = new Query(
                 "SELECT MAX(\"CurrentPercent\") AS A, \"status\" AS B FROM \""
-                        + DBConfiguration.App.SYS_FILE_IMPORT_PROGRESS + "\" WHERE \"filename\" = '"
-                        + p.toString().replace("\\", "\\\\") + "' GROUP BY \"filename\";", DBConfiguration.App.DBNAME);
+                        + DBConfiguration.Sys.SYS_FILE_IMPORT_PROGRESS + "\" WHERE \"filename\" = '"
+                        + p.toString().replace("\\", "\\\\") + "' GROUP BY \"filename\";", DBConfiguration.Sys.DBNAME);
         Map<String, List<Object>> tmpQ1 = InfluxUtil.QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
         if (tmpQ1.size() == 0) {
             // Never updated

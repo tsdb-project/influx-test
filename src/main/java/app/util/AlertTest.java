@@ -26,7 +26,7 @@ public class AlertTest {
     public static void rndInsert(InfluxDB influxDB) {
 
         Random rnd = new Random();
-        String dbName = DBConfiguration.App.DBNAME;
+        String dbName = DBConfiguration.Sys.DBNAME;
         influxDB.createDatabase(dbName);
 
 

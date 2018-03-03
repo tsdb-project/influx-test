@@ -13,7 +13,7 @@ import java.time.Instant;
  * Single patient model
  */
 @Deprecated
-@Measurement(name = DBConfiguration.Meta.PATIENT_META)
+@Measurement(name = DBConfiguration.Meta.PATIENT)
 public class Patient {
 
     @Column(name = "time")

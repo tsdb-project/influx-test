@@ -23,7 +23,7 @@ public class PatientFilteringService {
     private final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
 
     private final String dbName = DBConfiguration.Data.DBNAME;
-    private final String patientQueryStr = "SELECT * FROM " + DBConfiguration.Data.PATIENTS;
+    private final String patientQueryStr = "SELECT * FROM " + DBConfiguration.Data.PATIENT;
 
     public static void main(String[] args) {
         PatientFilteringService patientFilteringService = new PatientFilteringService();

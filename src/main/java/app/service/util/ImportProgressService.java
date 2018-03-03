@@ -23,7 +23,7 @@ public class ImportProgressService {
     }
 
     private final InfluxDB sysMiscIdb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-    private static final String dbName = DBConfiguration.App.DBNAME;
+    private static final String dbName = DBConfiguration.Sys.DBNAME;
     private String uuid;
 
     /**
@@ -43,7 +43,7 @@ public class ImportProgressService {
      * @param uuid Task UUID
      */
     public static double GetTaskOverallProgress(String uuid) {
-        Query q = new Query("SELECT \"AllPercent\" AS C FROM " + DBConfiguration.App.SYS_FILE_IMPORT_PROGRESS
+        Query q = new Query("SELECT \"AllPercent\" AS C FROM " + DBConfiguration.Sys.SYS_FILE_IMPORT_PROGRESS
                 + " WHERE status != '" + FileProgressStatus.STATUS_FAIL
                 + "' AND tid = '" + uuid + "' ORDER BY time DESC LIMIT 1;", dbName);
         Map<String, List<Object>> result = InfluxUtil.QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
@@ -60,7 +60,7 @@ public class ImportProgressService {
     public static Map<String, List<Object>> GetTaskAllFileProgress(String uuid) {
         Query q = new Query(
                 "SELECT \"filename\", MAX(\"CurrentPercent\") AS progress, \"status\", \"Reason\" FROM "
-                        + DBConfiguration.App.SYS_FILE_IMPORT_PROGRESS
+                        + DBConfiguration.Sys.SYS_FILE_IMPORT_PROGRESS
                         + " WHERE tid = '" + uuid + "' GROUP BY \"filename\";", dbName);
         return InfluxUtil.QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
     }
@@ -105,7 +105,7 @@ public class ImportProgressService {
         if (totalFileSize != 0) allPercent = 1.0 * totalProcessedSize / totalFileSize;
         if (fileSize != 0) currPercent = 1.0 * processedSize / fileSize;
 
-        Point.Builder pnt = Point.measurement(DBConfiguration.App.SYS_FILE_IMPORT_PROGRESS)
+        Point.Builder pnt = Point.measurement(DBConfiguration.Sys.SYS_FILE_IMPORT_PROGRESS)
                 .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
                 .tag("status", String.valueOf(status))
                 .tag("filename", fileName)

@@ -9,47 +9,42 @@ public class DBConfiguration {
      * Measurements in data table
      */
     public class Data {
-        public static final String DBNAME = "upmc";
+        public static final String DBNAME = "data";
 
         /**
          * Table name for patients
          */
-        public static final String PATIENTS = "Patients";
-
-        /**
-         * Prefix for InfluxDB patient data table
-         */
-        public static final String DATA_PREFIX = "data_";
+        public static final String PATIENT = "Patient";
     }
 
     /**
      * Measurements in meta table
      */
     public class Meta {
-        public static final String DBNAME = "tsdbmeta";
+        public static final String DBNAME = "meta";
 
         /**
          * Meta data for patients
          */
-        public static final String PATIENT_META = "Patients_metadata";
+        public static final String PATIENT = "Patient";
     }
 
     /**
      * Measurements in application table
      */
-    public class App {
-        public static final String DBNAME = "tsdbapp";
+    public class Sys {
+        public static final String DBNAME = "sys";
 
         /**
          * Table name for files
          */
-        public static final String FILES = "File";
+        public static final String FILE = "File";
 
 
         /**
          * File import progress data table
          */
-        public static final String SYS_FILE_IMPORT_PROGRESS = "file_impprgs";
+        public static final String SYS_FILE_IMPORT_PROGRESS = "ImportProgress";
     }
 
 }

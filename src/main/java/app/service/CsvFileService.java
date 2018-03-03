@@ -22,8 +22,8 @@ public class CsvFileService {
     private static final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
     private static final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
 
-    private static final String fileQueryStr = "SELECT * FROM " + DBConfiguration.App.FILES;
-    private final String dbName = DBConfiguration.App.DBNAME;
+    private static final String fileQueryStr = "SELECT * FROM " + DBConfiguration.Sys.FILE;
+    private final String dbName = DBConfiguration.Sys.DBNAME;
 
     //TODO: AR state judge!
 

@@ -31,7 +31,7 @@ public class ImportPatientMetadataService {
         ALL_GOOD, FILE_IO_ERROR, FILE_NOT_FOUND, FILE_DATE_ERROR, FILE_FORMAT_ERROR
     }
 
-    private final static String tableName = DBConfiguration.Meta.PATIENT_META;
+    private final static String tableName = DBConfiguration.Meta.PATIENT;
     private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
 
     /**

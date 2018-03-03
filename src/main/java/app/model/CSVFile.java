@@ -9,7 +9,7 @@ import java.time.Instant;
 /**
  * Single CSV file model
  */
-@Measurement(name = DBConfiguration.App.FILES)
+@Measurement(name = DBConfiguration.Sys.FILE)
 @Deprecated
 public class CSVFile {
 
