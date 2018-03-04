@@ -19,13 +19,13 @@ public class Patient {
     @Column(name = "time")
     private Instant imported_time;
 
-    @Column(name = "pid")
+    @Column(name = "PID")
     private String pid;
 
     @Column(name = "age")
     private Double age;
 
-    @Column(name = "gender")
+    @Column(name = "Gender")
     private String gender;
 
     public String getPid() {

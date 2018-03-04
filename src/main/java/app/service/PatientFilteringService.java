@@ -22,8 +22,8 @@ public class PatientFilteringService {
     private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
     private final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
 
-    private final String dbName = DBConfiguration.Data.DBNAME;
-    private final String patientQueryStr = "SELECT * FROM " + DBConfiguration.Data.PATIENT;
+    private final String dbName = DBConfiguration.Meta.DBNAME;
+    private final String patientQueryStr = "select \"time\", \"PID\", \"age\", \"Gender\" from " + DBConfiguration.Meta.PATIENT;
 
     public static void main(String[] args) {
         PatientFilteringService patientFilteringService = new PatientFilteringService();

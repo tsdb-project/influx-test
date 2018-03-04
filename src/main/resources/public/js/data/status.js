@@ -20,7 +20,6 @@ $(document).ready(
                     data : 'imported_time',
                 } ],
                 order : [ [ 3, 'asc' ] ],
-                paging : false,
             });
             
             $("#refreshButton").click(function() {
