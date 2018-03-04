@@ -241,7 +241,11 @@ public class ImportCsvService {
                 if (batchCount >= bulkInsertMax) {
                     idb.write(records);
                     // Reset batch point
-                    records = BatchPoints.database(dbName).consistency(InfluxDB.ConsistencyLevel.ALL).build();
+                    records = BatchPoints.database(dbName)
+                            .tag("fileUUID", fileUUID)
+                            .tag("arType", ar_type)
+                            .tag("fileName", filename.substring(0, filename.length() - 4))
+                            .build();
                     batchCount = 0;
                     logImportingFile(file.toString(), aFileSize, currentProcessed);
                 }
