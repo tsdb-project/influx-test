@@ -220,7 +220,7 @@ $(document).ready(function() {
         timespantable.$('tr.selected').removeClass('selected');
         $(this).addClass('selected');
         $(this).attr('disabled', '');
-        $(this).attr("style", "background-color:#eeeeee");
+        $(this).attr("style", "background-color:#ffffdd");
 
         $("#inputTimeStart").val(timespantable.row($(this)).data().start);
         $("#inputTimeEnd").val(timespantable.row($(this)).data().end);
