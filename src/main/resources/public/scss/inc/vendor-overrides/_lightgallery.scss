@@ -1,19 +1,13 @@
 .lg-outer {
-  .lg-thumb-outer {
-    background-color: rgba($white, 0.1);
-  }
-
   .lg-thumb-item {
-    border-radius: 50%;
-    width: 60px !important;
-    display: inline-block;
-    height: 60px;
     border: 0;
-    float: none;
-    margin: 0 5px;
 
-    &:hover {
-      box-shadow: 0 0 0 4px rgba($white, 0.1);
+    &:not(.active) {
+      opacity: 0.25;
+
+      &:hover {
+        opacity: 0.7;
+      }
     }
   }
 

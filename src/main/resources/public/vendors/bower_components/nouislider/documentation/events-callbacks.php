@@ -11,6 +11,8 @@
 
 		<p>noUiSlider offers several ways to listen to interaction: <code>'update'</code>, <code>'change'</code>, <code>'set'</code> and <code>'slide'</code>. You can use these events all at the same time. There are also the <code>'start'</code> and <code>'end'</code> events, that fire when a drag is started or ended.</p>
 
+		<p>Events always fire in the order <code>'start'</code> &gt; <code>'slide'</code> &gt; <code>'update'</code> &gt; <code>'change'</code> &gt; <code>'set'</code> &gt; <code>'end'</code>.</p>
+
 		<div class="example">
 
 			<div id="slider-events"></div>
@@ -163,7 +165,7 @@
 <section>
 
 	<div class="view">
-		<p>Use this event when synchronising the slider value to another element, such as an <code>&lt;input&gt;</code>. It fires every time the slider values are <strong>changed</strong>, either by a user or by calling API methods. Additionally, it fires <strong>immediately</strong> when bound.</p>
+		<p>Use this event when synchronising the slider value to another element, such as an <code>&lt;input&gt;</code>. It fires every time the slider values are <strong>changed</strong>, either by a user or by calling API methods. Additionally, it fires <strong>immediately</strong> when bound. In most cases, this event should be more convenient than the <code>'slide'</code> event.</p>
 	</div>
 </section>
 
@@ -174,10 +176,9 @@
 <section>
 
 	<div class="view">
-		<p>This event is useful when you want to update a value or perform an actions every time a handle is dragged. For example, you can use the <code>'slide'</code> event to update graphs. For convenience, this function also fires on a change by 'tap'.</p>
+		<p>This event is useful when you specifically want to listen to a handle being dragged, but want to <strong>ignore other updates</strong> to the slider value. This event also fires on a change by a 'tap'. In most cases, the <code>'update'</code> is the better choice.</p>
 	</div>
 </section>
-
 
 <?php sect('set'); ?>
 <h2>Set</h2>

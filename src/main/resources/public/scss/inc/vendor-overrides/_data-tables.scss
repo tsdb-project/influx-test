@@ -3,6 +3,43 @@
 
   .table {
     margin: 40px 0 20px;
+
+    & > thead {
+      & > tr {
+        & > th {
+          cursor: pointer;
+
+          &:hover {
+            background-color: lighten($gray-100, 2%);
+          }
+
+          &.sorting_asc,
+          &.sorting_desc {
+            position: relative;
+
+            &:after {
+              font-family: $font-family-icon;
+              position: absolute;
+              top: 0.75rem;
+              right: 1rem;
+              font-size: 1.4rem;
+            }
+          }
+
+          &.sorting_asc {
+            &:after {
+              content: '\f1cd';
+            }
+          }
+
+          &.sorting_desc {
+            &:after {
+              content: '\f1ce';
+            }
+          }
+        }
+      }
+    }
   }
 }
 
@@ -14,7 +51,7 @@
   &:after {
     font-family: $font-family-icon;
     position: absolute;
-    left: 0;
+    left: 1px;
     bottom: 6px;
     font-size: 1.3rem;
     color: $headings-color;
@@ -77,7 +114,7 @@
       bottom: 0;
       @include transition(all 200ms);
       transition-timing-function: ease;
-      background-color: $light-blue;
+      background-color: $blue;
     }
 
     &:before {
@@ -116,6 +153,7 @@
   height: 2.5rem;
   line-height: 2.5rem;
   text-align: center;
+  @include transition(background-color 300ms, color 300ms);
 
   &.current {
     background-color: $pagination-active-bg;
@@ -183,16 +221,9 @@
 
 .dataTables_buttons {
   float: right;
-  margin: 10px 0 0 30px;
-
-  .actions__item {
-    color: $body-color !important;
-
-    &:hover {
-      color: $black !important;
-
-    }
-  }
+  margin: 0 0 0 20px;
+  border-bottom: 1px solid $input-border-color;
+  min-height: 35px;
 }
 
 .dt-buttons {

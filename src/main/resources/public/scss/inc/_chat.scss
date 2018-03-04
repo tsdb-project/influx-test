@@ -7,7 +7,7 @@
   background-color: $white;
   z-index: $header-z-index + 1;
   box-shadow: -5px 0 10px rgba($black, 0.08);
-  padding-top: $grid-gutter-width-base;
+  padding-top: $grid-gutter-width;
   @include transition(transform 300ms, opacity 300ms);
 
   &:not(.toggled) {
@@ -55,8 +55,7 @@
 }
 
 .chat__buddies {
-  height: 100%;
-  overflow-y: auto;
+  height: calc(100vh - 150px);
 
   .listview__item {
     padding-left: 3rem;
@@ -83,7 +82,7 @@
 }
 
 .chat__available:before { background-color: $green }
-.chat__away:before { background-color: $amber }
+.chat__away:before { background-color: $orange }
 .chat__busy:before { background-color: $red }
 
 

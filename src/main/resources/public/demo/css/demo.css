@@ -48,11 +48,11 @@
     margin-bottom: 0.9rem;
 }
 
-.animation-demo .card-block {
+.animation-demo .card-body {
     padding-bottom: 1.15rem;
 }
 
-.animation-demo .card-block > img {
+.animation-demo .card-body > img {
     position: relative;
     width: 100%;
     z-index: 1;
@@ -60,21 +60,21 @@
     box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.2);
 }
 
-.animation-demo .card-block .btn {
+.animation-demo .card-body .btn {
     width: 100%;
 }
 
-.icons-demo .card-block .zmdi {
+.icons-demo .card-body .zmdi {
     font-size: 1.7rem;
     vertical-align: bottom;
     margin-right: 1rem;
 }
 
-.icons-demo .card-block .col-sm-4 {
+.icons-demo .card-body .col-sm-4 {
     padding: 0.8rem 1.1rem;
 }
 
-.icons-demo .card-block .col-sm-4:hover {
+.icons-demo .card-body .col-sm-4:hover {
     background: rgba(0, 0, 0, 0.03);
 }
 

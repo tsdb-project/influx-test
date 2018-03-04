@@ -1,10 +1,16 @@
 # noUiSlider
 
-noUiSlider is lightweight JavaScript range slider, originally developed to be a jQuery UI alternative.
+noUiSlider is lightweight JavaScript range slider.
 
-It features cross-browser support, a wide range of options and support for a bunch of touch devices. It has been tested on Android phones, iPhone & iPad, Windows phone and touch-screen laptops and tablets and desktops.
+- **No dependencies**
+- All modern browsers and [IE9+](#browser-support) are supported
+- Fully **responsive**
+- **Touch support** on Android, iOS and Windows devices
+- Tons of [examples](https://refreshless.com/nouislider/examples) and answered [Stack Overflow questions](https://stackoverflow.com/questions/tagged/nouislider)
 
-All modern browsers and [IE9+](#browser-support) are supported. noUiSlider has no dependencies!
+--------
+**Quick note:** I'm out of town for a while, so support will be slower than usual. Apologies in advance.
+--------
 
 License
 -------
@@ -24,6 +30,21 @@ npm [(package)](https://www.npmjs.com/package/nouislider)
 
 Changelog
 ---------
+
+### 10.1.0 (*2017-07-26*)
+- Added: `multitouch` option (#793);
+
+### 10.0.0 (*2017-05-28*)
+- Change: Change event listeners to be passive (#785);
+- Fixed: Pips are now updated when calling `updateOptions` (#669);
+- Fixed: Content Security Policy issue with pips;
+- Added: `removePips` method;
+- Added: aria support (#685);
+- Added: `ariaFormat` option (controls `aria-valuetext`); 
+- Fixed: throw a better error when mistakenly trying to initialize noUiSlider with `null` (#658);
+- Fixed: Made order of events consistent and documented it (#775);
+- Fixed: Border radius of connect bar, white space wrapping of tooltips (#773, #774);
+- Fixed: Slider now uses `ownerDocument` instead of `document` (#767);
 
 ### 9.2.0 (*2017-01-17*)
 - Added: Version number to exceptions;
@@ -54,9 +75,9 @@ Changelog
 - Change: internal `Spectrum` component is no longer `direction` aware;
 - Change: `limit` and `margin` must be divisible by `step` (if set);
 - Removed: `.noUi-stacking` class. Handles now stack themselves;
-- Removed: `.noUi-handle-lower` and `.noUi-handle-upper` classes;
-- Removed: `.noUi-background`. This is now default;
-- Removed: `connect: 'lower'` and `connect: 'upper'`. These settings are replaced by `connect: [true, false]`;
+- ~~Removed~~ (returned in 9.1.0): `.noUi-handle-lower` and `.noUi-handle-upper` classes;
+- Removed: `.noUi-background`. Use `.noUi-target` instead;
+- ~~Removed~~ (backward compatibility in 9.1.0): `connect: 'lower'` and `connect: 'upper'`. These settings are replaced by `connect: [true, false]`;
 - Fixed: default tooltip color (#687);
 - Fixed: `margin` and `limit` calculated improperly after calling `updateOptions` with a new `range` option;
 - Fixed: `range` option was required in update, even when not updating it (#682);

@@ -1,6 +1,6 @@
 //Listing
 .notes__item {
-  margin-bottom: $grid-gutter-width-base;
+  margin-bottom: $grid-gutter-width;
 
   & > a {
     height: 155px;
@@ -48,7 +48,7 @@
   color: $headings-color;
   margin-bottom: 1rem;
   font-size: 1.1rem;
-  @include text-overflow();
+  @include text-truncate();
 }
 
 .notes__actions {

@@ -1,6 +1,7 @@
 // View More Link
 .view-more {
   display: block;
+  text-transform: uppercase;
   padding: 1.1rem 0;
   text-align: center;
   margin-top: 0.5rem;
@@ -54,7 +55,7 @@
   }
 }
 
-.card-block {
+.card-body {
   .view-more {
     padding: 1rem 0 0;
   }
@@ -62,13 +63,9 @@
 
 // Action Icons
 .actions {
-  [dropdown] {
-    display: inline-block;
-  }
-
   &:not(.actions--inverse) {
     .actions__item {
-      color: lighten($body-color, 30%);
+      color: lighten($body-color, 20%);
 
       &:hover {
         color: $body-color;
@@ -144,7 +141,6 @@
 .avatar-char {
   border-radius: 50%;
   @include size(3rem, 3rem);
-  margin-right: 1.5rem;
 }
 
 .avatar-char {
@@ -156,7 +152,7 @@
   font-style: normal;
 
   & > .zmdi {
-    line-height: 3.1rem;
+    line-height: 3rem;
   }
 }
 
@@ -170,88 +166,4 @@
   height: 100%;
   cursor: pointer;
   z-index: $sidebar-z-index - 1;
-}
-
-
-// Toolbar
-.toolbar {
-  display: flex;
-  flex-direction: row;
-  height: 4.5rem;
-  align-items: center;
-  padding: 0.05rem $card-spacer-x 0;
-  position: relative;
-  margin-bottom: $grid-gutter-width-base;
-
-  &:not(.toolbar--inner) {
-    @include card();
-  }
-
-  .actions {
-    margin: 0.05rem -0.8rem 0 auto;
-  }
-}
-
-.toolbar--inner {
-  border-bottom: 1px solid #f6f6f6;
-}
-
-.toolbar__nav {
-  white-space: nowrap;
-  overflow-x: auto;
-  margin-right: 1rem;
-
-  & > a {
-    text-transform: uppercase;
-    font-weight: $font-weight-bold;
-    color: lighten($body-color, 25%);
-    display: inline-block;
-    @include transition(color 300ms);
-
-    & + a {
-      padding-left: 1rem;
-    }
-
-    &.active,
-    &:hover {
-      color: $body-color;
-    }
-  }
-}
-
-.toolbar__search {
-  position: absolute;
-  left: 0;
-  top: 0;
-  @include size(100%, 100%);
-  background-color: $white;
-  border-radius: $border-radius;
-  padding-left: 3rem;
-  display: none;
-
-  input[type=text] {
-    @include size(100%, 100%);
-    border: 0;
-    padding: 0 1.6rem;
-    font-size: 1.2rem;
-  }
-}
-
-.toolbar__search__close {
-  @include transition(color 300ms);
-  cursor: pointer;
-  position: absolute;
-  top: 1.5rem;
-  left: 1.8rem;
-  font-size: 1.5rem;
-  color: lighten($body-color, 15%);
-
-  &:hover {
-    color: $body-color;
-  }
-}
-
-.toolbar__label {
-  margin: 0;
-  font-size: 1.1rem;
 }

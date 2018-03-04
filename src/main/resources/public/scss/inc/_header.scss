@@ -273,12 +273,12 @@
     @include search-float(rgba($white, 0.2), $white, $white);
 
     &:focus {
-      @include search-float(darken($gray-lighter, 1%), $input-color, lighten($input-color, 10%));
+      @include search-float($white, $input-color, lighten($input-color, 10%));
     }
   }
 
   @include media-breakpoint-down(lg) {
-    @include search-float(darken($gray-lighter, 1%), $input-color, lighten($input-color, 10%));
+    @include search-float($gray-100, $input-color, lighten($input-color, 10%));
   }
 }
 
@@ -332,10 +332,22 @@
   text-align: center;
   padding: 1rem 0;
   border-radius: $border-radius;
+  position: relative;
+  overflow: hidden;
   @include transition(background-color 300ms);
 
   &:hover {
-    background-color: $gray-lighter;
+    & > small {
+      color: $white;
+    }
+
+    & > i {
+      background-color: rgba($white, 0.15);
+    }
+
+    .app-shortcuts__helper {
+      transform: scale(3.5);
+    }
   }
 
   & > i {
@@ -345,34 +357,48 @@
     color: $white;
     line-height: 45px;
     font-size: 1.5rem;
+    @include transition(background-color 500ms);
   }
 
   & > small {
     display: block;
     margin-top: 0.5rem;
     font-size: 0.95rem;
-
-    &,
-    &:hover,
-    &:focus {
-      color: $text-muted;
-    }
+    color: $text-muted;
+    @include transition(color 500ms);
   }
+}
+
+.app-shortcuts__helper {
+  position: absolute;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  top: 13px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  z-index: -1;
+  @include transition(transform 500ms);
+  backface-visibility: hidden;
 }
 
 
 // Top Navigation
 .top-menu {
   position: absolute;
-  background-color: $white;
   left: 0;
   top: 100%;
   width: 100%;
-  box-shadow: 0 3px 5px -2px rgba($black, 0.1);
-  justify-content: center;
-  white-space: nowrap;
+  box-shadow: $header-shadow;
+  padding: 0 1rem 0.5rem;
+  margin-top: -0.85rem;
+  list-style: none;
+  text-align: center;
 
   & > li {
+    display: inline-block;
+
     &.active {
       position: relative;
       box-shadow: 0 0 0 -2px red;
@@ -380,12 +406,21 @@
 
     & > a {
       line-height: 100%;
-      color: lighten($body-color, 15%);
+      color: rgba($white, 0.65);
       font-weight: $font-weight-bold;
       text-transform: uppercase;
+      padding: 1rem;
+      display: block;
+      @include transition(color 300ms);
 
-      &.active {
-        color: $headings-color;
+      &:hover {
+        color: $white;
+      }
+    }
+    
+    &.active {
+      & > a {
+        color: $white;
       }
     }
   }

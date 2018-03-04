@@ -221,8 +221,8 @@ $(document)
                                         };
                                         timespantable.clear().draw();
                                         timespantable.rows.add(timespan.data); // Add
-                                                                                // new
-                                                                                // data
+                                        // new
+                                        // data
                                         timespantable.columns.adjust().draw();
                                         console.log(timespan);
                                         $("#inputPatient")
@@ -262,9 +262,8 @@ $(document)
                                         };
 
                                         var params = {
-                                            'var-table' : "data_"
-                                                    + $("#inputPatient").val()
-                                                    + "_ar",
+                                            'var-table' : $("#inputPatient")
+                                                    .val(),
                                             'var-column' : $("#inputColumn")
                                                     .val(),
                                             'var-compare' : $("#inputColumn")

@@ -2,7 +2,8 @@
 @mixin ma-theme($color) {
   .header,
   .login__block__header,
-  .login__block__btn {
+  .login__block__btn,
+  .top-menu {
     background-color: $color;
   }
 
@@ -11,58 +12,30 @@
   .navigation__active:before {
     color: $color;
   }
+}
 
-  .top-menu {
-    & > li.active {
-      box-shadow: inset 0 -2px 0 $color;
-    }
+$themes: (
+  red: $red,
+  purple: $purple,
+  indigo: $indigo,
+  blue: $blue,
+  cyan: $cyan,
+  teal: $teal,
+  green: $green,
+  brown: $brown,
+  orange: $orange,
+  blue-grey: $blue-grey
+);
+
+@each $theme, $value in $themes {
+  [data-ma-theme="#{$theme}"] {
+    @include ma-theme($value);
   }
 }
 
-[data-ma-theme="green"] {
-  @include ma-theme($green);
-}
-
-[data-ma-theme="blue"] {
-  @include ma-theme($blue);
-}
-
-[data-ma-theme="red"] {
-  @include ma-theme($red);
-}
-
-[data-ma-theme="orange"] {
-  @include ma-theme($orange);
-}
-
-[data-ma-theme="teal"] {
-  @include ma-theme($teal);
-}
-
-[data-ma-theme="cyan"] {
-  @include ma-theme($cyan);
-}
-
-[data-ma-theme="blue-grey"] {
-  @include ma-theme($blue-grey);
-}
-
-[data-ma-theme="purple"] {
-  @include ma-theme($purple);
-}
-
-[data-ma-theme="indigo"] {
-  @include ma-theme($indigo);
-}
-
-[data-ma-theme="lime"] {
-  @include ma-theme($lime);
-}
-
-
-// Switcher
 .theme-switch {
   .btn-group--colors {
     display: block;
+    margin-top: 0.75rem;
   }
 }

@@ -1,22 +1,44 @@
 .alert {
-  font-weight: 500;
+  position: relative;
+  padding: $alert-padding-y $alert-padding-x;
+  margin-bottom: $alert-margin-bottom;
+  border: $alert-border-width solid transparent;
+  color: $white;
+  @include border-radius($alert-border-radius);
 }
 
-[class*="alert-"] {
-  .alert-link {
-    color: $white;
-    border-bottom: 1px dotted rgba($white, 0.5);
+.alert-heading {
+  color: inherit;
+}
+
+.alert-link {
+  font-weight: $alert-link-font-weight;
+  color: $white;
+  border-bottom: 1px dotted rgba($white, 0.5);
+
+  &:hover,
+  &:focus {
+    opacity: 0.9;
   }
 }
 
 .alert-heading {
-  font-weight: 500;
-  font-size: 1.3rem;
-  margin-top: 0.15rem;
+  font-size: 1.1rem;
+  margin: 0.15rem 0 1rem;
 }
 
 .alert-dismissible {
+  padding-right: ($close-font-size + $alert-padding-x * 2);
+
   .close {
+    margin-left: 2rem;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: $alert-padding-y $alert-padding-x;
+    color: inherit;
+
     & > span:not(.sr-only) {
       background-color: rgba($white, 0.2);
       line-height: 19px;
@@ -25,12 +47,12 @@
       border-radius: 50%;
       font-size: 1.1rem;
       display: block;
+      font-weight: $font-weight-bold;
+      color: $white;
     }
 
     &:hover,
     &:focus {
-      color: $white;
-
       span:not(.sr-only) {
         background-color: rgba($white, 0.3);
       }
@@ -38,29 +60,22 @@
   }
 }
 
-// Alert Inverse
-.alert-inverse {
-  @include alert-variant(#2c2c2c, #2c2c2c, $white);
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+@each $color, $value in $theme-colors {
+  .alert-#{$color} {
+    @include alert-variant($value, $value, $value);
+  }
 }
+
 
 // Notify
 .alert--notify {
   max-width: 600px;
   width: 100%;
   padding-right: 60px;
+  box-shadow: 0 3px 10px rgba($black, 0.15);
 
-  &:not(.alert-inverse) {
-    .alert--notify__close {
-      color: $white;
-
-      &:hover {
-        opacity: 0.8;
-      }
-    }
-  }
-
-  &.alert-inverse {
+  &:not(.alert-info):not(.alert-success):not(.alert-warning):not(.alert-danger) {
+    background-color: rgba($black, 0.95);
     .alert--notify__close {
       color: $yellow;
 
@@ -70,6 +85,7 @@
     }
   }
 }
+
 
 .alert--notify__close {
   background-color: transparent;
@@ -81,4 +97,5 @@
   position: absolute;
   right: $alert-padding-x;
   top: $alert-padding-y;
+  color: $white;
 }

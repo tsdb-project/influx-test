@@ -1,5 +1,5 @@
 .breadcrumb {
-  border-bottom: 1px solid darken($body-bg, 3%);
+  border-bottom: 1px solid $gray-200;
   border-radius: 0;
 }
 
@@ -9,15 +9,16 @@
       font-family: $font-family-icon;
       position: relative;
       top: 1px;
-      color: lighten($body-color, 20%);
+      color: $text-muted;
     }
   }
-  
-  &, & > a {
-    color: $body-color;
-    
-    &:hover {
-      color: darken($body-color, 10%);
-    }
+}
+
+.breadcrumb-item > a,
+a.breadcrumb-item {
+  color: $body-color;
+
+  &:hover {
+    color: darken($body-color, 10%);
   }
 }

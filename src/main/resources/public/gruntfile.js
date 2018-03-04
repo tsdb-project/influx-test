@@ -17,8 +17,9 @@ module.exports = function(grunt) {
     ];
 
     var cssFiles = ['css/**/**/*.css', '!css/app-1.css', '!css/app-2.css', '!css/app-3.css'],
+        cssMain = 'css/**/**/*.css',
         scssFiles = 'scss/**/*.scss',
-        htmlFiles = ['*.html', '_includes/*.html', 'variants/*.html'],
+        htmlFiles = ['*.html', '_includes/**/*.html', 'variants/*.html'],
         jsFiles = 'js/**/*',
         miscFiles = ['gruntfile.js', 'package.json'],
         demoFiles = 'demo/**/*',
@@ -35,14 +36,13 @@ module.exports = function(grunt) {
 
         // Compile less files to css
         sass: {
-            development: {
-                options: {
-                    style: 'expanded'
-                },
+            options: {
+                sourceMap: true
+            },
+            dist: {
                 files: {
                     "css/app.css": "scss/app.scss"
-                },
-                cleancss: true
+                }
             }
         },
 
@@ -170,7 +170,7 @@ module.exports = function(grunt) {
             },
 
             css: {
-                src: '../dist/css/*.css'
+                src: cssMain
             }
         },
 
@@ -182,11 +182,7 @@ module.exports = function(grunt) {
             },
             styles: {
                 files: scssFiles,
-                tasks: ['sass', 'cssmin']
-            },
-            css: {
-                files: cssFiles,
-                tasks: ['copy:css', 'postcss']
+                tasks: ['sass', 'postcss', 'cssmin', 'copy:css']
             },
             js: {
                 files: jsFiles,
@@ -216,7 +212,7 @@ module.exports = function(grunt) {
     });
 
     // Load the plugins
-    grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-sass');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-include-replace');
@@ -228,6 +224,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-postcss');
 
     // Other tasks.
-    grunt.registerTask('dist', ['sass', 'cssmin', 'uglify', 'clean', 'copy', 'includereplace', 'string-replace']);
+    grunt.registerTask('dist', ['sass', 'postcss', 'cssmin', 'uglify', 'clean', 'copy', 'includereplace', 'string-replace']);
 
 };

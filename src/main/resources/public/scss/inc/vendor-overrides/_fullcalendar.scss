@@ -23,6 +23,12 @@
     margin-right: 0;
     border: 0;
   }
+
+  button {
+    .fc-icon {
+      top: -5px;
+    }
+  }
 }
 
 .fc-unthemed {
@@ -30,7 +36,7 @@
     background-color: transparent;
 
     span {
-      color: $amber;
+      color: $orange;
     }
   }
 }
@@ -45,7 +51,7 @@
     padding: 4px 8px;
     display: block;
     color: $white;
-    @include text-overflow();
+    @include text-truncate();
     font-weight: $font-weight-bold;
   }
 
@@ -78,6 +84,15 @@
 .fc-icon {
   font-family: $font-family-icon;
   font-size: 1.5rem;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  line-height: 35px;
+  @include transition(background-color 300ms);
+
+  &:hover {
+    background-color: $gray-100;
+  }
 }
 
 .fc-button {
@@ -150,9 +165,24 @@
   }
 }
 
+.widget-calendar__header {
+  background-color: $purple;
+  border-radius: $border-radius $border-radius 0 0;
+  padding: $card-spacer-x $card-spacer-y;
+
+  .actions {
+    position: absolute;
+    top: 2.5rem;
+    right: 1.5rem;
+  }
+}
+
 .widget-calendar__year {
   font-size: 1.2rem;
   color: rgba($white, 0.8);
+  margin-bottom: 0.5rem;
+  line-height: 100%;
+
 }
 
 .widget-calendar__day {
@@ -207,8 +237,7 @@
       position: absolute;
       left: 0;
       top: 0;
-      width: 100%;
-      height: 100%;
+      @include size(100%, 100%);
       padding: 4px 0 0 7px;
       opacity: 0;
       transform: scale(0);

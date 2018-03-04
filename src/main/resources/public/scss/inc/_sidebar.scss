@@ -18,7 +18,7 @@
   width: $sidebar-width;
   position: fixed;
   left: 0;
-  padding: ($header-height + $grid-gutter-width-base) 2rem 0.5rem 2rem;
+  padding: ($header-height + $grid-gutter-width) 2rem 0.5rem 2rem;
   height: 100%;
   overflow: hidden;
   z-index: $sidebar-z-index;
@@ -47,6 +47,7 @@
 
   .dropdown-menu {
     width: 100%;
+    transform: none !important;
   }
 }
 
@@ -99,6 +100,7 @@
       a {
         &:hover {
           background-color: $navigation-link-hover-bg;
+          color: darken($navigation-link-color, 10%);
         }
       }
     }

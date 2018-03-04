@@ -7,7 +7,7 @@ $(document).ready(function () {
     var animationDuration;
 
 
-    $('body').on('click', '.animation-demo .card-block .btn', function(){
+    $('body').on('click', '.animation-demo .card-body .btn', function(){
         var animation = $(this).text();
         var cardImg = $(this).closest('.card').find('img');
         if (animation === "hinge") {

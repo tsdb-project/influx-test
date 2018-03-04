@@ -262,9 +262,8 @@ $(document)
                                         };
 
                                         var params = {
-                                            'var-table' : "data_"
-                                                    + $("#inputPatient").val()
-                                                    + "_ar",
+                                            'var-table' : $("#inputPatient")
+                                                    .val(),
                                             'var-column' : $("#inputColumn")
                                                     .val(),
                                             'var-compare' : $("#compareColumn")

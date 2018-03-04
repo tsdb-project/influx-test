@@ -1,25 +1,32 @@
 .btn {
   cursor: pointer;
 
-  &:not(.btn-secondary):not([class*="btn-outline-"]):not(.btn-link) {
-    box-shadow: $btn-box-shadow;
-    border: 0;
+  &:not(.btn-light):not([class*="btn-outline-"]):not(.btn-link):not(.btn-default) {
+    color: $white;
   }
 }
 
-.btn-secondary {
-  &,
-  &:focus {
-    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.05);
-  }
-}
+.btn-light {
+  background-color: $white;
+  box-shadow: 0 2px 3px 0 rgba($black, 0.05);
+  border-color: #efefef;
+  color: #545657;
 
-.btn--white {
-  &,
-  &:hover,
+  &:active,
+  &:focus,
+  &:hover {
+    box-shadow: 0 2px 3px 0 rgba($black, 0.05);
+  }
+
+  &:hover {
+    background-color: #f7f7f7;
+    border-color: #e7e7e7;
+  }
+
+  &:active,
   &:focus {
-    background-color: $white;
-    color: $body-color;
+    border-color: #e3e3e3;
+    background-color: #f4f4f4;
   }
 }
 
@@ -27,7 +34,6 @@
   border-radius: 50%;
   width: 3rem;
   height: 3rem;
-  line-height: 2.9rem;
   padding: 0;
   font-size: 1.2rem;
   text-align: center;
@@ -35,10 +41,10 @@
 
 .btn--icon-text {
   & > .zmdi {
+    font-size: 1.2rem;
     display: inline-block;
     vertical-align: top;
     margin: 1px 5px 0 0;
-    line-height: 100%;
   }
 }
 
@@ -84,12 +90,15 @@
 
 [data-toggle="buttons"]:not(.btn-group--colors) {
   & > .btn {
-    background-color: #ebebeb;
-    color: $body-color;
+    background-color: $gray-100;
     cursor: pointer;
     box-shadow: none !important;
     border: 0 !important;
     margin: 0;
+
+    &:not(.active) {
+      color: $body-color !important;
+    }
 
     &.active {
       background-color: $light-blue;
@@ -105,7 +114,7 @@
     width: 30px;
     height: 30px;
     margin-right: 3px;
-    cursor: pointer;
+    margin-bottom: 3px;
     position: relative;
 
     &:before {
@@ -126,7 +135,7 @@
 
     &.btn:not([class*="bg-"]) {
       border: 1px solid darken($input-border-color, 5%);
-      
+
       &:before {
         color: $body-color;
       }

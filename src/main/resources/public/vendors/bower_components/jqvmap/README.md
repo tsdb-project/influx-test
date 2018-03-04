@@ -28,7 +28,7 @@ To get started, all you need to do is include the JavaScript and CSS files for t
     });
     </script>
   </head>
-  <body data-ma-theme="green">
+  <body>
     <div id="vmap" style="width: 600px; height: 400px;"></div>
   </body>
 </html>
