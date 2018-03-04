@@ -8,7 +8,6 @@ import app.util.InfluxUtil;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
-import org.influxdb.impl.InfluxDBResultMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -23,18 +22,95 @@ import java.util.Map;
 public class QueriesService {
 
     private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-    private final PatientFilteringService patientS = new PatientFilteringService();
+    private final PatientFilteringService patientFilteringService = new PatientFilteringService();
 
     private final String dbName = DBConfiguration.Data.DBNAME;
 
-    private final List<String> avalPidList;
+    public static void main(String[] args) {
+        QueriesService qs = new QueriesService();
+        List<QueryResultBean> a = qs.TypeAQuery("I100_1", 5, 10, null, null);
+        List<QueryResultBean> b = qs.TypeBQuery("I100_1", "I101_1", 3, 5, null, null);
+    }
 
     /**
-     * Query all available patients with ar/noar
+     * Type A query
+     *
+     * @param colX       column X (eg. I10_1)
+     * @param thrVal     threshold value Y (eg. 80)
+     * @param thrSec     consecutive threshold Z (eg. 10)
+     * @param customPids List for custom PIDs (Null for imported PIDs)
+     * @param customAr   List for corresponding Ar/NoAr (Null for not customizing, 0: Only Ar, 1: Only NoAr, 2: Both)
+     * @return Return a list of patients
      */
-    public QueriesService() {
-        // Focus on tables that have been imported
-        avalPidList = InfluxUtil.getAllTables(dbName);
+    public List<QueryResultBean> TypeAQuery(String colX, double thrVal, int thrSec, List<String> customPids, List<Integer> customAr) {
+        String queryDesc = "Find all patients where values in column X exceed value Y in at least Z consecutive records in the first 8 hours of available data.";
+        List<QueryResultBean> finalRes = new ArrayList<>();
+        String template = "SELECT * FROM (SELECT COUNT(%s) AS c FROM \"%s\" WHERE %s > %f AND \"arType\"='%s' GROUP BY TIME(%ds)) WHERE c = %d";
+
+        List<String> targetPid = generateTargetPid(customPids);
+
+        if (customAr != null && customAr.size() != targetPid.size()) {
+            throw new RuntimeException("Ar/NoAr and PID List not match.");
+        }
+
+        for (String pid : targetPid) {
+            // TODO: AR or NoAR based on customAr
+            String finalQ = String.format(template, colX, pid, colX, thrVal, "ar", thrSec, thrSec);
+            QueryResultBean ar = checkOnePatientA(finalQ, pid, queryDesc, thrSec, true);
+
+            finalQ = String.format(template, colX, pid, colX, thrVal, "noar", thrSec, thrSec);
+            QueryResultBean noar = checkOnePatientA(finalQ, pid, queryDesc, thrSec, false);
+
+            if (noar != null)
+                finalRes.add(noar);
+            if (ar != null)
+                finalRes.add(ar);
+        }
+
+        return finalRes;
+    }
+
+    /**
+     * Type B query
+     *
+     * @param colA     column X (eg. I10_1)
+     * @param colB     column Y (eg. I11_1)
+     * @param valDiff  difference tolerance Z, in % form (eg. 3)
+     * @param hEp      hourly epochs Q (eg. 5)
+     * @param customAr List for corresponding Ar/NoAr (Null for not customizing, 0: Only Ar, 1: Only NoAr, 2: Both)
+     * @return Return a list of patients
+     */
+    public List<QueryResultBean> TypeBQuery(String colA, String colB, double valDiff, int hEp, List<String> customPids, List<Integer> customAr) {
+        String queryDesc = "Find all patients where the hourly mean values in column X and column Y differ by at least Z% for at least Q hourly epochs.";
+        List<QueryResultBean> finalRes = new ArrayList<>();
+        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" +
+                "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM \"%s\" WHERE \"arType\"='%s' GROUP BY TIME(1h)) " +
+                "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
+
+        List<String> targetPid = generateTargetPid(customPids);
+
+        if (customAr != null && customAr.size() != targetPid.size()) {
+            throw new RuntimeException("Ar/NoAr and PID List not match.");
+        }
+
+        valDiff /= 100;
+        for (String pid : targetPid) {
+            // TODO: AR or NoAR based on customAr
+            String tableName = pid;
+            String finalQ = String.format(template, colA, colB, colA, tableName, "ar", valDiff, valDiff, hEp, hEp);
+            QueryResultBean ar = checkOnePatientB(finalQ, pid, queryDesc, hEp, true);
+
+            tableName = pid;
+            finalQ = String.format(template, colA, colB, colA, tableName, "noar", valDiff, valDiff, hEp, hEp);
+            QueryResultBean noar = checkOnePatientB(finalQ, pid, queryDesc, hEp, false);
+
+            if (noar != null)
+                finalRes.add(noar);
+            if (ar != null)
+                finalRes.add(ar);
+        }
+
+        return finalRes;
     }
 
     /**
@@ -43,7 +119,7 @@ public class QueriesService {
      * @param queryString Assembled query string
      * @param pid         PID
      * @param queryN      Query Nickname
-     * @param thrSec
+     * @param thrSec      Threshold cont. seconds
      * @param isAr        AR status
      * @return Query execuation results
      */
@@ -56,7 +132,7 @@ public class QueriesService {
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
-        qrb.setInterestPatient(patientS.FindById(pid.toUpperCase()).get(0));
+        qrb.setInterestPatient(patientFilteringService.FindById(pid.toUpperCase()).get(0));
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
@@ -85,7 +161,7 @@ public class QueriesService {
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
-        qrb.setInterestPatient(patientS.FindById(pid.toUpperCase()).get(0));
+        qrb.setInterestPatient(patientFilteringService.FindById(pid.toUpperCase()).get(0));
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
@@ -104,76 +180,18 @@ public class QueriesService {
         return qrb;
     }
 
-    /**
-     * Type A query
-     *
-     * @param colX   column X (eg. I10_1)
-     * @param thrVal threshold value Y (eg. 80)
-     * @param thrSec consecutive threshold Z (eg. 10)
-     * @return Return a list of patients
-     */
-    public List<QueryResultBean> TypeAQuery(String colX, double thrVal, int thrSec) {
-        String queryDesc = "Find all patients where values in column X exceed value Y in at least Z consecutive records in the first 8 hours of available data.";
-        List<QueryResultBean> finalRes = new ArrayList<>();
-        String template = "SELECT * FROM (SELECT COUNT(%s) AS c FROM \"%s\" WHERE %s > %f AND \"arType\"='%s' GROUP BY TIME(%ds)) WHERE c = %d";
-
-        for (String pid : avalPidList) {
-            String finalQ = String.format(template, colX, pid, colX, thrVal, "ar", thrSec, thrSec);
-            QueryResultBean ar = checkOnePatientA(finalQ, pid, queryDesc, thrSec, true);
-
-            finalQ = String.format(template, colX, pid, colX, thrVal, "noar", thrSec, thrSec);
-            QueryResultBean noar = checkOnePatientA(finalQ, pid, queryDesc, thrSec, false);
-
-            if (noar != null)
-                finalRes.add(noar);
-            if (ar != null)
-                finalRes.add(ar);
+    private List<String> generateTargetPid(List<String> customPids) {
+        List<String> targetPid;
+        if (customPids == null) {
+            targetPid = getCurrentPatientList();
+        } else {
+            targetPid = customPids;
         }
-
-        return finalRes;
+        return targetPid;
     }
 
-    /**
-     * Type B query
-     *
-     * @param colA    column X (eg. I10_1)
-     * @param colB    column Y (eg. I11_1)
-     * @param valDiff difference tolerance Z, in % form (eg. 3)
-     * @param hEp     hourly epochs Q (eg. 5)
-     * @return Return a list of patients
-     */
-    public List<QueryResultBean> TypeBQuery(String colA, String colB, double valDiff, int hEp) {
-        String queryDesc = "Find all patients where the hourly mean values in column X and column Y differ by at least Z% for at least Q hourly epochs.";
-        List<QueryResultBean> finalRes = new ArrayList<>();
-        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" +
-                "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM \"%s\" WHERE \"arType\"='%s' GROUP BY TIME(1h)) " +
-                "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
-
-        valDiff /= 100;
-        for (String pid : avalPidList) {
-            // TODO: AR or NoAR?
-            String tableName = pid;
-            String finalQ = String.format(template, colA, colB, colA, tableName, "ar", valDiff, valDiff, hEp, hEp);
-            QueryResultBean ar = checkOnePatientB(finalQ, pid, queryDesc, hEp, true);
-
-            tableName = pid;
-            finalQ = String.format(template, colA, colB, colA, tableName, "noar", valDiff, valDiff, hEp, hEp);
-            QueryResultBean noar = checkOnePatientB(finalQ, pid, queryDesc, hEp, false);
-
-            if (noar != null)
-                finalRes.add(noar);
-            if (ar != null)
-                finalRes.add(ar);
-        }
-
-        return finalRes;
-    }
-
-    public static void main(String[] args) {
-
-        QueriesService qs = new QueriesService();
-        List<QueryResultBean> a = qs.TypeAQuery("I100_1", 5, 10);
-        List<QueryResultBean> b = qs.TypeBQuery("I100_1", "I101_1", 3, 5);
-
+    private List<String> getCurrentPatientList() {
+        // Focus on tables that have been imported
+        return InfluxUtil.getAllTables(dbName);
     }
 }
