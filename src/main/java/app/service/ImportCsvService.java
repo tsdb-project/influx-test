@@ -253,20 +253,7 @@ public class ImportCsvService {
             idb.close();
 
         } catch (Exception e) {
-            StringBuilder sb = new StringBuilder(e.getMessage());
-            StackTraceElement[] ste = e.getStackTrace();
-            for (StackTraceElement aste : ste) {
-                sb.append("\n  Source file: '");
-                sb.append(aste.getFileName());
-                sb.append("', class name: '");
-                sb.append(aste.getClassName());
-                sb.append("'. On method '");
-                sb.append(aste.getMethodName());
-                sb.append("' line: ");
-                sb.append(aste.getLineNumber());
-                sb.append(".");
-            }
-            return new Object[]{sb.toString(), currentProcessed};
+            return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
         }
 
         return new Object[]{"OK", currentProcessed};

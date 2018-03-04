@@ -96,7 +96,7 @@ public class Util {
     /**
      * Convert serial# time to a specific timestamp
      *
-     * @param serial String Serial number
+     * @param serial   String Serial number
      * @param timeZone Null for NY(PGH) timezone
      * @return Apache POI defined timestamp
      */
@@ -185,6 +185,30 @@ public class Util {
             }
         }
         return fileBeans;
+    }
+
+    /**
+     * Generate info inside a exception
+     *
+     * @return String
+     */
+    public static String stackTraceErrorToString(Exception e) {
+        StringBuilder sb = new StringBuilder("Error message: ");
+        sb.append(e.getMessage());
+        sb.append(".\n Stack trace:\n");
+        StackTraceElement[] ste = e.getStackTrace();
+        for (StackTraceElement aste : ste) {
+            sb.append("  Source file: '");
+            sb.append(aste.getFileName());
+            sb.append("', class name: '");
+            sb.append(aste.getClassName());
+            sb.append("'. On method '");
+            sb.append(aste.getMethodName());
+            sb.append("' line: ");
+            sb.append(aste.getLineNumber());
+            sb.append(".\n");
+        }
+        return sb.toString();
     }
 
     public static void main(String[] args) throws ParseException {
