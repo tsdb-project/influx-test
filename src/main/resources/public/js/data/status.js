@@ -19,7 +19,7 @@ $(document).ready(
                 }, {
                     data : 'imported_time',
                 } ],
-                order : [ [ 3, 'asc' ] ],
+                order : [ [ 0, 'asc' ] ],
             });
             
             $("#refreshButton").click(function() {

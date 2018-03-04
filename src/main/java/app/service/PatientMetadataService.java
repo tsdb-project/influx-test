@@ -17,17 +17,16 @@ import java.util.Map;
  * Get some metadata for a patient
  */
 @Service
-@Deprecated
 public class PatientMetadataService {
 
     private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-
+    private final String dbName = DBConfiguration.Data.DBNAME;
     private Patient target;
 
     private Instant availDataTimeQ(String qT, boolean hasAr) {
-        String table = "data_" + target.getPid().toUpperCase() + "_" + (hasAr ? "ar" : "noar");
+        String table = target.getPid().toUpperCase();
 
-        Query q = new Query(String.format(qT, table), DBConfiguration.Meta.DBNAME);
+        Query q = new Query(String.format(qT, table, hasAr ? "ar" : "noar"), dbName);
         Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
 
         // Table does not exist
@@ -57,7 +56,7 @@ public class PatientMetadataService {
     public Instant GetFirstAvailData(boolean hasAr) {
         if (target == null) return null;
 
-        String qT = "SELECT \"time\",\"Time\" FROM \"%s\" ORDER BY \"time\" ASC LIMIT 1";
+        String qT = "SELECT \"time\",\"Time\" FROM \"%s\" WHERE \"arType\"='%s' ORDER BY \"time\" ASC LIMIT 1";
         return availDataTimeQ(qT, hasAr);
     }
 
@@ -69,16 +68,18 @@ public class PatientMetadataService {
     public Instant GetLastAvailData(boolean hasAr) {
         if (target == null) return null;
 
-        String qT = "SELECT \"time\",\"Time\" FROM \"%s\" ORDER BY \"time\" DESC LIMIT 1";
+        String qT = "SELECT \"time\",\"Time\" FROM \"%s\" WHERE \"arType\"='%s' ORDER BY \"time\" DESC LIMIT 1";
         return availDataTimeQ(qT, hasAr);
     }
 
     public static void main(String[] args) {
         PatientMetadataService pms = new PatientMetadataService();
-        pms.SetPatient("PUH-2010-087");
-
-        Instant a = pms.GetFirstAvailData(true);
-        Instant b = pms.GetLastAvailData(false);
+        Instant a;
+        if (pms.SetPatient("PUH-2010-087")) {
+            a = pms.GetFirstAvailData(true);
+            a = pms.GetLastAvailData(true);
+            System.out.println();
+        }
     }
 
 }

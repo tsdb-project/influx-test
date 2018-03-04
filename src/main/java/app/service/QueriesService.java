@@ -2,7 +2,6 @@ package app.service;
 
 import app.common.DBConfiguration;
 import app.common.InfluxappConfig;
-import app.model.Patient;
 import app.model.QueryResultBean;
 import app.model.TimeSpan;
 import app.util.InfluxUtil;
@@ -24,35 +23,18 @@ import java.util.Map;
 public class QueriesService {
 
     private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-    private final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
-
     private final PatientFilteringService patientS = new PatientFilteringService();
-    private final CsvFileService csvFileS = new CsvFileService();
 
     private final String dbName = DBConfiguration.Data.DBNAME;
 
-    // TODO: Patient AR or Not AR
-    private final List<String> patientList;
-    private final List<Integer> arStatus;
-
-    private List<Object> getColNames(String tableName) {
-        Query q = new Query("SHOW FIELD KEYS FROM \"" + tableName + "\"", dbName);
-        Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
-        return res.get("fieldKey");
-    }
+    private final List<String> avalPidList;
 
     /**
      * Query all available patients with ar/noar
      */
     public QueriesService() {
-        // TODO: Query only interested patients
-        List<Patient> all = patientS.SelectAll();
-        patientList = new ArrayList<>(all.size());
-        arStatus = new ArrayList<>(0);
-        for (Patient one : all) {
-            String pid = one.getPid();
-            patientList.add(pid);
-        }
+        // Focus on tables that have been imported
+        avalPidList = InfluxUtil.getAllTables(dbName);
     }
 
     /**
@@ -65,8 +47,7 @@ public class QueriesService {
      * @param isAr        AR status
      * @return Query execuation results
      */
-    private QueryResultBean checkOnePatient(String queryString, String pid, String queryN, int thrSec, boolean isAr) {
-        //TODO: AR NoAR
+    private QueryResultBean checkOnePatientA(String queryString, String pid, String queryN, int thrSec, boolean isAr) {
         Query q = new Query(queryString, dbName);
         Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
 
@@ -82,7 +63,8 @@ public class QueriesService {
         List<Object> occTime = res.get("time");
         qrb.setOccurTimes(occTime.size());
 
-        List<TimeSpan> occTimes = new ArrayList<>(occTime.size());
+        // Do a type convert (Object -> Instant)
+        List<TimeSpan> occTimes = new ArrayList<>(qrb.getOccurTimes());
         for (Object s : occTime) {
             TimeSpan timeSpan = new TimeSpan();
             timeSpan.setStart(Instant.parse((String) s));
@@ -133,16 +115,14 @@ public class QueriesService {
     public List<QueryResultBean> TypeAQuery(String colX, double thrVal, int thrSec) {
         String queryDesc = "Find all patients where values in column X exceed value Y in at least Z consecutive records in the first 8 hours of available data.";
         List<QueryResultBean> finalRes = new ArrayList<>();
-        String template = "SELECT * FROM (SELECT COUNT(%s) AS c FROM \"%s\" WHERE %s > %f GROUP BY TIME(%ds)) WHERE c = %d";
+        String template = "SELECT * FROM (SELECT COUNT(%s) AS c FROM \"%s\" WHERE %s > %f AND \"arType\"='%s' GROUP BY TIME(%ds)) WHERE c = %d";
 
-        for (String pid : patientList) {
-            // TODO: AR or NoAR?
-            String tableName = pid;
-            String finalQ = String.format(template, colX, tableName, colX, thrVal, thrSec, thrSec);
-            QueryResultBean ar = checkOnePatient(finalQ, pid, queryDesc, thrSec, true);
+        for (String pid : avalPidList) {
+            String finalQ = String.format(template, colX, pid, colX, thrVal, "ar", thrSec, thrSec);
+            QueryResultBean ar = checkOnePatientA(finalQ, pid, queryDesc, thrSec, true);
 
-            finalQ = String.format(template, colX, tableName, colX, thrVal, thrSec, thrSec);
-            QueryResultBean noar = checkOnePatient(finalQ, pid, queryDesc, thrSec, false);
+            finalQ = String.format(template, colX, pid, colX, thrVal, "noar", thrSec, thrSec);
+            QueryResultBean noar = checkOnePatientA(finalQ, pid, queryDesc, thrSec, false);
 
             if (noar != null)
                 finalRes.add(noar);
@@ -165,17 +145,19 @@ public class QueriesService {
     public List<QueryResultBean> TypeBQuery(String colA, String colB, double valDiff, int hEp) {
         String queryDesc = "Find all patients where the hourly mean values in column X and column Y differ by at least Z% for at least Q hourly epochs.";
         List<QueryResultBean> finalRes = new ArrayList<>();
-        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" + "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM \"%s\" GROUP BY TIME(1h)) " + "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
+        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" +
+                "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM \"%s\" WHERE \"arType\"='%s' GROUP BY TIME(1h)) " +
+                "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
 
         valDiff /= 100;
-        for (String pid : patientList) {
+        for (String pid : avalPidList) {
             // TODO: AR or NoAR?
             String tableName = pid;
-            String finalQ = String.format(template, colA, colB, colA, tableName, valDiff, valDiff, hEp, hEp);
+            String finalQ = String.format(template, colA, colB, colA, tableName, "ar", valDiff, valDiff, hEp, hEp);
             QueryResultBean ar = checkOnePatientB(finalQ, pid, queryDesc, hEp, true);
 
             tableName = pid;
-            finalQ = String.format(template, colA, colB, colA, tableName, valDiff, valDiff, hEp, hEp);
+            finalQ = String.format(template, colA, colB, colA, tableName, "noar", valDiff, valDiff, hEp, hEp);
             QueryResultBean noar = checkOnePatientB(finalQ, pid, queryDesc, hEp, false);
 
             if (noar != null)
@@ -190,8 +172,8 @@ public class QueriesService {
     public static void main(String[] args) {
 
         QueriesService qs = new QueriesService();
-        List<QueryResultBean> a = qs.TypeAQuery("I1_1", 80, 10);
-        List<QueryResultBean> b = qs.TypeBQuery("I10_1", "I11_1", 3, 5);
+        List<QueryResultBean> a = qs.TypeAQuery("I100_1", 5, 10);
+        List<QueryResultBean> b = qs.TypeBQuery("I100_1", "I101_1", 3, 5);
 
     }
 }

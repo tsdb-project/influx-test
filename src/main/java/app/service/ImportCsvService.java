@@ -7,6 +7,7 @@ import app.service.util.ImportProgressService;
 import app.util.InfluxUtil;
 import app.util.Util;
 import okhttp3.OkHttpClient;
+import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
@@ -88,8 +89,8 @@ public class ImportCsvService {
         // Invoke this should finish fast, then the process is in the background
         ics.DoImport(0.01);
 
-        // Wait 10s to get some status
-        Thread.sleep(10000);
+        // Wait 3s to get some results
+        Thread.sleep(3000);
         double ovr = ImportProgressService.GetTaskOverallProgress(ics.GetUUID());
         Map<String, List<Object>> ss = ImportProgressService.GetTaskAllFileProgress(ics.GetUUID());
 
@@ -179,7 +180,7 @@ public class ImportCsvService {
      *
      * @return Obj[0]: Err msg; Obj[1]: Processed size.
      */
-    private Object[] fileImport(InfluxDB idb, String ar_type, String pid, Path file) {
+    private Object[] fileImport(InfluxDB idb, String ar_type, String pid, Path file, long aFileSize) {
         long currentProcessed = 0;
         String filename = file.getFileName().toString();
 
@@ -190,6 +191,7 @@ public class ImportCsvService {
             String firstLine = reader.readLine();
             String fileUUID = processFirstLineInCSV(firstLine, pid);
             currentProcessed = firstLine.length();
+            totalProcessedSize.addAndGet(firstLine.length());
 
             // Next 6 lines no use.
             long tmp_size = 0;
@@ -197,6 +199,7 @@ public class ImportCsvService {
                 tmp_size += reader.readLine().length();
             }
             currentProcessed += tmp_size;
+            totalProcessedSize.addAndGet(tmp_size);
 
             // 8th Line is column header line
             String eiL = reader.readLine();
@@ -205,13 +208,13 @@ public class ImportCsvService {
                     bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount,
                     batchCount = 0;
             currentProcessed += eiL.length();
+            totalProcessedSize.addAndGet(eiL.length());
 
-            BatchPoints records = BatchPoints.database(dbName).consistency(InfluxDB.ConsistencyLevel.ALL).build();
-
-            Map<String, String> dataTag = new HashMap<>(5);
-            dataTag.put("fileUUID", fileUUID);
-            dataTag.put("arType", ar_type);
-            dataTag.put("fileName", filename.substring(0, filename.length() - 4));
+            BatchPoints records = BatchPoints.database(dbName)
+                    .tag("fileUUID", fileUUID)
+                    .tag("arType", ar_type)
+                    .tag("fileName", filename.substring(0, filename.length() - 4))
+                    .build();
 
             String aLine;
             while ((aLine = reader.readLine()) != null) {
@@ -228,10 +231,11 @@ public class ImportCsvService {
                 // Measurement is PID
                 Point record = Point.measurement(pid)
                         .time(Util.serialTimeToLongDate(values[0], null), TimeUnit.MILLISECONDS)
-                        .tag(dataTag).fields(lineKVMap).build();
+                        .fields(lineKVMap).build();
                 records.point(record);
                 batchCount++;
                 currentProcessed += aLine.length();
+                totalProcessedSize.addAndGet(aLine.length());
 
                 // Write batch into DB
                 if (batchCount >= bulkInsertMax) {
@@ -239,8 +243,7 @@ public class ImportCsvService {
                     // Reset batch point
                     records = BatchPoints.database(dbName).consistency(InfluxDB.ConsistencyLevel.ALL).build();
                     batchCount = 0;
-                    totalProcessedSize.addAndGet(currentProcessed);
-                    logImportingFile(file.toString(), everyFileSize.get(file.toString()), currentProcessed);
+                    logImportingFile(file.toString(), aFileSize, currentProcessed);
                 }
             }
 
@@ -248,11 +251,9 @@ public class ImportCsvService {
             reader.close();
             idb.write(records);
             idb.close();
-            totalProcessedSize.addAndGet(currentProcessed);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return new Object[]{e.getMessage(), currentProcessed};
+            return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
         }
 
         return new Object[]{"OK", currentProcessed};
@@ -262,13 +263,14 @@ public class ImportCsvService {
      * Import file - internal method
      */
     private void internalImportMain(Path pFile) {
+        long thisFileSize = everyFileSize.get(pFile.toString());
         String fileFullPath = pFile.toString();
         String[] fileInfo = checkerFromFilename(pFile);
 
         // Ar/NoAr Check & Response
         if (fileInfo[1] == null) {
             logFailureFiles(fileFullPath, "Ambiguous Ar/NoAr in file name.",
-                    everyFileSize.get(fileFullPath), 0);
+                    thisFileSize, 0);
             return;
         }
 
@@ -278,21 +280,23 @@ public class ImportCsvService {
             //TODO: file will be useful.  For example, if I generate a new set of CSVs using a novel signal processing
             //TODO: technique, I might want to concatenate the results with the existing time series.
             logFailureFiles(fileFullPath, "Older version (?) for the same file imported.",
-                    everyFileSize.get(fileFullPath), 0);
+                    thisFileSize, 0);
             return;
         } else if (fileInfo[2].equals("2")) {
             //TODO: Clean the failed table?
             logFailureFiles(fileFullPath, "Corrupted or finished import, TODO.",
-                    everyFileSize.get(fileFullPath), 0);
+                    thisFileSize, 0);
             return;
         }
 
         // New file, all good, just import!
-        Object[] impStr = fileImport(generateIdbClient(), fileInfo[1], fileInfo[0], pFile);
+        Object[] impStr = fileImport(generateIdbClient(), fileInfo[1], fileInfo[0], pFile, thisFileSize);
         if (impStr[0].equals("OK")) {
-            logSuccessFiles(fileFullPath, everyFileSize.get(fileFullPath), everyFileSize.get(fileFullPath));
+            logSuccessFiles(fileFullPath, thisFileSize, thisFileSize);
         } else {
-            logFailureFiles(fileFullPath, (String) impStr[0], everyFileSize.get(fileFullPath), (long) impStr[1]);
+            long procedSize = (long) impStr[1];
+            totalAllSize.addAndGet(procedSize - thisFileSize);
+            logFailureFiles(fileFullPath, (String) impStr[0], thisFileSize, procedSize);
         }
     }
 
@@ -314,12 +318,16 @@ public class ImportCsvService {
     private InfluxDB generateIdbClient() {
         InfluxDB idb = InfluxDBFactory.connect(
                 InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder().connectTimeout(300, TimeUnit.SECONDS)
-                        .readTimeout(300, TimeUnit.SECONDS)
-                        .writeTimeout(300, TimeUnit.SECONDS));
+                new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
+                        .readTimeout(60, TimeUnit.SECONDS)
+                        .writeTimeout(60, TimeUnit.SECONDS));
         // Disable GZip to save CPU
         idb.disableGzip();
-        //TODO: Batch option
+        BatchOptions bo = BatchOptions.DEFAULTS
+                .consistency(InfluxDB.ConsistencyLevel.ALL)
+                // Flush every 2000 Points, at least every 100ms, buffer for failed oper is 2200
+                .actions(2000).flushDuration(100).bufferLimit(2200);
+        idb.enableBatch(bo);
         idb.createDatabase(dbName);
         return idb;
     }
