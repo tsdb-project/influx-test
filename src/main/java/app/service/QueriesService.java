@@ -23,10 +23,7 @@ import java.util.Map;
 public class QueriesService {
 
     private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-    private final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
-
     private final PatientFilteringService patientS = new PatientFilteringService();
-    private final CsvFileService csvFileS = new CsvFileService();
 
     private final String dbName = DBConfiguration.Data.DBNAME;
 
@@ -36,6 +33,7 @@ public class QueriesService {
      * Query all available patients with ar/noar
      */
     public QueriesService() {
+        // Focus on tables that have been imported
         avalPidList = InfluxUtil.getAllTables(dbName);
     }
 

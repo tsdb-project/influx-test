@@ -6,14 +6,16 @@ import app.model.Patient;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
+import org.influxdb.dto.QueryResult;
 import org.influxdb.impl.InfluxDBResultMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Patient meta data services
+ * Filter out patient services
  */
 @Service
 public class PatientFilteringService {
@@ -28,16 +30,17 @@ public class PatientFilteringService {
 
     public static void main(String[] args) {
         PatientFilteringService pfs = new PatientFilteringService();
+
+        List<String> pids = pfs.FindAllPid();
         List<Patient> s = null;
-//        s = patientFilteringService.FindAll();
-//        s = patientFilteringService.FindById("pu-2010-083");
-        s = pfs.FindById("puh-2010-074");
+        s = pfs.FindAll();
+        s = pfs.FindById("pu-2010-083");
         pfs.AddGenderFilter("M");
         pfs.AddAgeLowerFilter(50);
         pfs.AddAgeUpperFilter(55);
         pfs.AddArrestLocationFilter(1);
         pfs.AddSurvivedFilter(0);
-        s = pfs.FetchResult();
+        pids = pfs.FetchResultPid();
     }
 
     /**
@@ -46,8 +49,19 @@ public class PatientFilteringService {
      * @return List<Patient>
      */
     public List<Patient> FindAll() {
-        Query query = new Query(patientQueryStr, dbName);
-        return resultMapper.toPOJO(influxDB.query(query), Patient.class);
+        return resultMapper.toPOJO(finalQuery(), Patient.class);
+    }
+
+    public List<String> FindAllPid() {
+        Query q = new Query("SHOW TAG VALUES WITH KEY = \"PID\"", dbName);
+        QueryResult qr = influxDB.query(q);
+
+        List<List<Object>> vals = qr.getResults().get(0).getSeries().get(0).getValues();
+        List<String> res = new ArrayList<>(vals.size());
+        for (List<Object> o : vals) {
+            res.add((String) o.get(1));
+        }
+        return res;
     }
 
     /**
@@ -151,10 +165,24 @@ public class PatientFilteringService {
      */
     public List<Patient> FetchResult() {
         if (filters.size() == 0) return FindAll();
+        return resultMapper.toPOJO(finalQuery(), Patient.class);
+    }
 
-        String fullQuery = patientQueryStr + whereFiltersGenerator();
-        Query q = new Query(fullQuery, dbName);
-        return resultMapper.toPOJO(influxDB.query(q), Patient.class);
+    /**
+     * Fetch results (Only PID) based on current filters
+     *
+     * @return PID
+     */
+    public List<String> FetchResultPid() {
+        if (filters.size() == 0) return FindAllPid();
+
+        QueryResult qr = finalQuery();
+        List<List<Object>> vals = qr.getResults().get(0).getSeries().get(0).getValues();
+        List<String> res = new ArrayList<>(vals.size());
+        for (List<Object> o : vals) {
+            res.add((String) o.get(1));
+        }
+        return res;
     }
 
     /**
@@ -162,6 +190,12 @@ public class PatientFilteringService {
      */
     public int NumOfFilters() {
         return filters.size();
+    }
+
+    private QueryResult finalQuery() {
+        String fullQuery = patientQueryStr + whereFiltersGenerator();
+        Query q = new Query(fullQuery, dbName);
+        return influxDB.query(q);
     }
 
     private String whereFiltersGenerator() {
