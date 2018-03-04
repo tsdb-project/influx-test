@@ -1,20 +1,20 @@
 package app.service;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.Query;
+import org.springframework.stereotype.Service;
+
 import app.common.DBConfiguration;
 import app.common.InfluxappConfig;
 import app.model.QueryResultBean;
 import app.model.TimeSpan;
 import app.util.InfluxUtil;
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.Query;
-import org.influxdb.impl.InfluxDBResultMapper;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Query related services
@@ -174,6 +174,8 @@ public class QueriesService {
         QueriesService qs = new QueriesService();
         List<QueryResultBean> a = qs.TypeAQuery("I100_1", 5, 10);
         List<QueryResultBean> b = qs.TypeBQuery("I100_1", "I101_1", 3, 5);
+        System.out.println(a);
+        System.out.println(b);
 
     }
 }
