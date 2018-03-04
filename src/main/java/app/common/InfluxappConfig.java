@@ -33,7 +33,7 @@ public final class InfluxappConfig {
     /**
      * Bulk insert size (DO NOT CHANGE)
      */
-    public static final int PERFORMANCE_INDEX = 1500000;
+    public static final int PERFORMANCE_INDEX = 1000000;
 
     /**
      * A globally useable InfluxDB Client

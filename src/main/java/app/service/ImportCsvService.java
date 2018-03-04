@@ -7,6 +7,7 @@ import app.service.util.ImportProgressService;
 import app.util.InfluxUtil;
 import app.util.Util;
 import okhttp3.OkHttpClient;
+import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
@@ -88,8 +89,8 @@ public class ImportCsvService {
         // Invoke this should finish fast, then the process is in the background
         ics.DoImport(0.01);
 
-        // Wait 10s to get some status
-        Thread.sleep(10000);
+        // Wait 3s to get some results
+        Thread.sleep(3000);
         double ovr = ImportProgressService.GetTaskOverallProgress(ics.GetUUID());
         Map<String, List<Object>> ss = ImportProgressService.GetTaskAllFileProgress(ics.GetUUID());
 
@@ -209,12 +210,11 @@ public class ImportCsvService {
             currentProcessed += eiL.length();
             totalProcessedSize.addAndGet(eiL.length());
 
-            BatchPoints records = BatchPoints.database(dbName).consistency(InfluxDB.ConsistencyLevel.ALL).build();
-
-            Map<String, String> dataTag = new HashMap<>(5);
-            dataTag.put("fileUUID", fileUUID);
-            dataTag.put("arType", ar_type);
-            dataTag.put("fileName", filename.substring(0, filename.length() - 4));
+            BatchPoints records = BatchPoints.database(dbName)
+                    .tag("fileUUID", fileUUID)
+                    .tag("arType", ar_type)
+                    .tag("fileName", filename.substring(0, filename.length() - 4))
+                    .build();
 
             String aLine;
             while ((aLine = reader.readLine()) != null) {
@@ -231,7 +231,7 @@ public class ImportCsvService {
                 // Measurement is PID
                 Point record = Point.measurement(pid)
                         .time(Util.serialTimeToLongDate(values[0], null), TimeUnit.MILLISECONDS)
-                        .tag(dataTag).fields(lineKVMap).build();
+                        .fields(lineKVMap).build();
                 records.point(record);
                 batchCount++;
                 currentProcessed += aLine.length();
@@ -318,12 +318,16 @@ public class ImportCsvService {
     private InfluxDB generateIdbClient() {
         InfluxDB idb = InfluxDBFactory.connect(
                 InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder().connectTimeout(300, TimeUnit.SECONDS)
-                        .readTimeout(300, TimeUnit.SECONDS)
-                        .writeTimeout(300, TimeUnit.SECONDS));
+                new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
+                        .readTimeout(60, TimeUnit.SECONDS)
+                        .writeTimeout(60, TimeUnit.SECONDS));
         // Disable GZip to save CPU
         idb.disableGzip();
-        //TODO: Batch option
+        BatchOptions bo = BatchOptions.DEFAULTS
+                .consistency(InfluxDB.ConsistencyLevel.ALL)
+                // Flush every 2000 Points, at least every 100ms, buffer for failed oper is 2200
+                .actions(2000).flushDuration(100).bufferLimit(2200);
+        idb.enableBatch(bo);
         idb.createDatabase(dbName);
         return idb;
     }
