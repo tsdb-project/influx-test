@@ -8,6 +8,7 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
+import org.influxdb.dto.Query;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -18,11 +19,10 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Importing patient metadata into InfluxDB
- * Based on mail at 02/21/2018
+ * Importing patient metadata into InfluxDB Based on mail at 02/21/2018
  */
 @Service
-public class ImportPatientMetadataService {
+public class MetadataService {
 
     /**
      * Status code for this service
@@ -56,42 +56,42 @@ public class ImportPatientMetadataService {
         }
 
         switch (i) {
-            case 0:
-                tags.put("PID", val.trim().toUpperCase());
-                return null;
-            case 2:
-                tags.put("Gender", val.equals("1") ? "F" : "M");
-                return null;
-            case 3:
-                tags.put("ArrestLocation", val.equals("1") ? "Outside" : "Inside");
-                return null;
-            case 1:
-                obj = Double.parseDouble(val);
-                break;
-            case 175:
-                tags.put("Survived", val.equals("1") ? "Y" : "N");
-                return null;
-            case 11: //Arrest date
-                obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
-                break;
-            case 12: //Arrest time
-                obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd kk:mm", null).toString();
-                break;
-            case 30: //Arrive date
-                obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd kk:mm", null).toString();
-                break;
-            case 174: //date_fol_com
-                obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
-                break;
-            case 176: //dischargedate
-                obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
-                break;
-            case 177: //deathdate
-                obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
-                break;
-            default:
-                obj = val;
-                break;
+        case 0:
+            tags.put("PID", val.trim().toUpperCase());
+            return null;
+        case 2:
+            tags.put("Gender", val.equals("1") ? "F" : "M");
+            return null;
+        case 3:
+            tags.put("ArrestLocation", val.equals("1") ? "Outside" : "Inside");
+            return null;
+        case 1:
+            obj = Double.parseDouble(val);
+            break;
+        case 175:
+            tags.put("Survived", val.equals("1") ? "Y" : "N");
+            return null;
+        case 11: // Arrest date
+            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
+            break;
+        case 12: // Arrest time
+            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd kk:mm", null).toString();
+            break;
+        case 30: // Arrive date
+            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd kk:mm", null).toString();
+            break;
+        case 174: // date_fol_com
+            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
+            break;
+        case 176: // dischargedate
+            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
+            break;
+        case 177: // deathdate
+            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
+            break;
+        default:
+            obj = val;
+            break;
         }
 
         return obj;
@@ -100,18 +100,19 @@ public class ImportPatientMetadataService {
     /**
      * Process file for importing
      *
-     * @param fReader  Filereader obj
-     * @param fileTime File time
+     * @param fReader
+     *            Filereader obj
+     * @param fileTime
+     *            File time
      */
     private StatusCode processFile(BufferedReader fReader, Instant fileTime) {
         String dbName = DBConfiguration.Meta.DBNAME;
-        influxDB.createDatabase(dbName);
+        influxDB.query(new Query("create database " + dbName, dbName));
 
         // Batch records perp
         BatchPoints records = BatchPoints.database(dbName).consistency(InfluxDB.ConsistencyLevel.ALL).build();
 
-        try {
-            CSVReader csvReader = new CSVReader(fReader);
+        try (CSVReader csvReader = new CSVReader(fReader)) {
             // CSV header
             String[] columnNames = csvReader.readNext();
             processHeader(columnNames);
@@ -148,10 +149,9 @@ public class ImportPatientMetadataService {
                 }
             }
             // Last write
-            if (batchCnt != 0)
+            if (batchCnt != 0) {
                 influxDB.write(records);
-            csvReader.close();
-
+            }
         } catch (IOException ioe) {
             ioe.printStackTrace();
             return StatusCode.FILE_IO_ERROR;
@@ -169,7 +169,8 @@ public class ImportPatientMetadataService {
     /**
      * Invoke importing a PCADatabase file
      *
-     * @param path File path
+     * @param path
+     *            File path
      * @return Status
      */
     public StatusCode DoImport(String path) {
@@ -204,9 +205,10 @@ public class ImportPatientMetadataService {
     }
 
     public static void main(String[] args) {
-        ImportPatientMetadataService ipms = new ImportPatientMetadataService();
+        MetadataService ipms = new MetadataService();
         long startTime = System.currentTimeMillis();
         StatusCode c = ipms.DoImport("E:\\UPMC\\TSDB\\PCASDatabase_DATA_2018-02-21_0905.csv");
+        // StatusCode c = ipms.DoImport("/tsdb/meta/PCASDatabase_DATA_2018-02-21_0905.csv");
         long endTime = System.currentTimeMillis();
         if (c == StatusCode.ALL_GOOD)
             System.out.println("Import time: " + String.format("%.2f", (endTime - startTime) / 60000.0) + " min\n");
