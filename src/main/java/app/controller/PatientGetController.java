@@ -4,8 +4,6 @@ import app.bean.Response;
 import app.model.Patient;
 import app.service.PatientFilteringService;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,10 +27,10 @@ public class PatientGetController {
     @ResponseBody
     public Map<String, Object> getAllPatientInfo() {
         Map<String, Object> map = new HashMap<>();
-        map.put("data", patientFilteringService.SelectAll());
+        map.put("data", patientFilteringService.FindAll());
         Response response = new Response(1, "success");
         map.put("res", response);
-        
+
         return map;
     }
 
@@ -43,7 +41,10 @@ public class PatientGetController {
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.POST)
     public List<Patient> getPatientWithCriteria() {
-        return patientFilteringService.FindByGender("F");
+        patientFilteringService.AddGenderFilter("F");
+        List<Patient> res = patientFilteringService.FetchResult();
+        patientFilteringService.ClearFilters();
+        return res;
     }
 
 }

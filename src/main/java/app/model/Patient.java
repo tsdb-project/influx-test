@@ -10,7 +10,7 @@ import org.influxdb.annotation.Measurement;
 import java.time.Instant;
 
 /**
- * Single patient model
+ * Single simple patient model
  */
 @Measurement(name = DBConfiguration.Meta.PATIENT)
 public class Patient {
@@ -26,6 +26,12 @@ public class Patient {
 
     @Column(name = "Gender")
     private String gender;
+
+    @Column(name = "Survived")
+    private String survived;
+
+    @Column(name = "ArrestLocation")
+    private String arrestLocation;
 
     public String getPid() {
         return pid;
@@ -57,5 +63,21 @@ public class Patient {
 
     public void setImported_time(Instant imported_time) {
         this.imported_time = imported_time;
+    }
+
+    public String getSurvived() {
+        return survived;
+    }
+
+    public void setSurvived(String survived) {
+        this.survived = survived;
+    }
+
+    public String getArrestLocation() {
+        return arrestLocation;
+    }
+
+    public void setArrestLocation(String arrestLocation) {
+        this.arrestLocation = arrestLocation;
     }
 }

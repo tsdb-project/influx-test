@@ -60,7 +60,7 @@ public class QueryController {
             map.put("data", new ArrayList<>());
             return map;
         }
-        // List<Patient> patients = patientService.SelectAll();
+        // List<Patient> patients = patientService.FindAll();
         // List<OccurenceBean> occurenceBeans = new ArrayList<>();
 
         List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount());

@@ -46,7 +46,7 @@ public class QueriesService {
      */
     public QueriesService() {
         // TODO: Query only interested patients
-        List<Patient> all = patientS.SelectAll();
+        List<Patient> all = patientS.FindAll();
         patientList = new ArrayList<>(all.size());
         arStatus = new ArrayList<>(0);
         for (Patient one : all) {
