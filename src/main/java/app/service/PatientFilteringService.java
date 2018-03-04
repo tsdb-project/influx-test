@@ -31,6 +31,7 @@ public class PatientFilteringService {
         List<Patient> s = null;
 //        s = patientFilteringService.FindAll();
 //        s = patientFilteringService.FindById("pu-2010-083");
+        s = pfs.FindById("puh-2010-074");
         pfs.AddGenderFilter("M");
         pfs.AddAgeLowerFilter(50);
         pfs.AddAgeUpperFilter(55);
@@ -56,7 +57,7 @@ public class PatientFilteringService {
      * @return Patient Object
      */
     public List<Patient> FindById(String pid) {
-        Query query = new Query(patientQueryStr + " WHERE pid = '" + pid.toUpperCase() + "'", dbName);
+        Query query = new Query(patientQueryStr + " WHERE \"PID\" = '" + pid.toUpperCase() + "'", dbName);
         return resultMapper.toPOJO(influxDB.query(query), Patient.class);
     }
 

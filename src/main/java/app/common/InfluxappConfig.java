@@ -1,9 +1,12 @@
 package app.common;
 
 import app.Environment;
+import okhttp3.OkHttpClient;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.springframework.boot.system.ApplicationTemp;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Configuration file for InfluxDB connection
@@ -38,6 +41,9 @@ public final class InfluxappConfig {
     /**
      * A globally useable InfluxDB Client
      */
-    public static InfluxDB INFLUX_DB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+    public static InfluxDB INFLUX_DB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR,
+            InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+            new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS));
 
 }
