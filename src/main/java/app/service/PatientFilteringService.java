@@ -76,6 +76,25 @@ public class PatientFilteringService {
     }
 
     /**
+     * Find patients by list of ID
+     *
+     * @param pids List of ID
+     * @return Patient Object
+     */
+    public List<Patient> FindByIds(List<String> pids) {
+        StringBuilder sb = new StringBuilder(patientQueryStr);
+        sb.append(" WHERE");
+        for (String pid : pids) {
+            sb.append(" \"PID\"='");
+            sb.append(pid.toUpperCase());
+            sb.append("' OR ");
+        }
+        String fq = sb.toString();
+        Query q = new Query(fq.substring(0, fq.length() - 4), dbName);
+        return resultMapper.toPOJO(influxDB.query(q), Patient.class);
+    }
+
+    /**
      * Add 'Survived' filter for patient
      *
      * @param status 1 for Yes, 0 for No, 2 for unknown, other for don't care
@@ -193,12 +212,12 @@ public class PatientFilteringService {
     }
 
     private QueryResult finalQuery() {
-        String fullQuery = patientQueryStr + whereFiltersGenerator();
+        String fullQuery = patientQueryStr + whereAndFiltersGenerator();
         Query q = new Query(fullQuery, dbName);
         return influxDB.query(q);
     }
 
-    private String whereFiltersGenerator() {
+    private String whereAndFiltersGenerator() {
         if (filters.size() == 0) return "";
 
         StringBuilder sb = new StringBuilder(" WHERE 1=1");

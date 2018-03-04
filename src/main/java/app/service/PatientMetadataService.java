@@ -7,6 +7,7 @@ import app.util.InfluxUtil;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
+import org.influxdb.impl.InfluxDBResultMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -22,6 +23,8 @@ public class PatientMetadataService {
     private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
     private final String dbName = DBConfiguration.Data.DBNAME;
     private Patient target;
+
+    private final PatientFilteringService pfs = new PatientFilteringService();
 
     private Instant availDataTimeQ(String qT, boolean hasAr) {
         String table = target.getPid().toUpperCase();
@@ -72,8 +75,19 @@ public class PatientMetadataService {
         return availDataTimeQ(qT, hasAr);
     }
 
+    /**
+     * Get data for already imported patients
+     *
+     * @return Patient list
+     */
+    public List<Patient> GetImportedPatientData() {
+        List<String> avalPidList = InfluxUtil.getAllTables(dbName);
+        return pfs.FindByIds(avalPidList);
+    }
+
     public static void main(String[] args) {
         PatientMetadataService pms = new PatientMetadataService();
+        List<Patient> t = pms.GetImportedPatientData();
         Instant a;
         if (pms.SetPatient("PUH-2010-087")) {
             a = pms.GetFirstAvailData(true);
