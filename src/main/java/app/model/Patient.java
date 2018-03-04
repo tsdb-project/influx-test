@@ -12,7 +12,6 @@ import java.time.Instant;
 /**
  * Single patient model
  */
-@Deprecated
 @Measurement(name = DBConfiguration.Meta.PATIENT)
 public class Patient {
 
