@@ -1,0 +1,27 @@
+.accordion,
+.collapse {
+  .card {
+    background-color: $gray-50;
+    box-shadow: none;
+  }
+}
+
+.accordion {
+  .card {
+    margin: 0 0 1px;
+  }
+
+  .card-header {
+    background-color: darken($gray-50, 3.75%);
+    border: 0;
+
+    & > a {
+      color: $headings-color;
+      display: block;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+}

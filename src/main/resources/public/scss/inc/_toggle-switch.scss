@@ -86,8 +86,8 @@ $toggle-switch-rail-bg: #e0e0e0;
 }
 
 .toggle-switch--red { @include toggle-switch-theme($red); }
-.toggle-switch--blue { @include toggle-switch-theme($light-blue); }
+.toggle-switch--blue { @include toggle-switch-theme($blue); }
 .toggle-switch--green { @include toggle-switch-theme($green); }
-.toggle-switch--amber { @include toggle-switch-theme($amber); }
+.toggle-switch--amber { @include toggle-switch-theme($orange); }
 .toggle-switch--purple { @include toggle-switch-theme($purple); }
 .toggle-switch--cyan { @include toggle-switch-theme($cyan); }

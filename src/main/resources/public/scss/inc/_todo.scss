@@ -10,17 +10,17 @@
 
   .custom-control-input {
     &:checked {
-      & ~ .todo__info {
+      & ~ .custom-control-label-char {
         text-decoration: line-through;
       }
 
-      & ~ .custom-control--char__helper {
+      & ~ .custom-control-label-char {
         & > i {
-          background-color: #e9e9e9 !important;
-        }
+          background-color: $gray-200 !important;
 
-        &:after {
-          color: #5E5E5E;
+          &:after {
+            color: $headings-color;
+          }
         }
       }
     }
@@ -39,16 +39,16 @@
 
 .todo__labels {
   & > a {
-    color: $amber;
-    border: 2px solid lighten($amber, 20%);
+    color: $orange;
+    border: 2px solid lighten($orange, 20%);
     border-radius: $border-radius;
-    padding: 0.35rem 0.8rem;
+    padding: 0.55rem 0.8rem;
     display: inline-block;
     margin: 0 0.1rem 0.4rem;
     @include transition(color 300ms, border-color 300ms);
 
     &:hover {
-      color: darken($amber, 5%);
+      color: darken($orange, 5%);
     }
   }
 }

@@ -12,7 +12,7 @@ $message-sidebar-width: 23rem;
   overflow: hidden;
 
   @include media-breakpoint-up(md) {
-    border-right: 1px solid #f1f1f1;
+    border-right: 1px solid $gray-100;
   }
 
   @include media-breakpoint-down(md) {
@@ -55,10 +55,11 @@ $message-sidebar-width: 23rem;
 }
 
 .messages__content {
-  overflow-y: auto;
   position: relative;
   flex: 1 1 auto;
   padding: 2.5rem;
+  overflow: hidden;
+  height: 100%;
 }
 
 .messages__item {
@@ -70,18 +71,12 @@ $message-sidebar-width: 23rem;
   }
 }
 
-.messages__avatar {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-}
-
 .messages__details {
   padding: 0 1rem;
   max-width: 500px;
 
   & > p {
-    border-radius: 0.5rem;
+    border-radius: $border-radius;
     padding: 1rem 1.3rem;
     margin-bottom: 0;
     display: inline-block;
@@ -107,7 +102,7 @@ $message-sidebar-width: 23rem;
   }
 
   &:not(.messages__details--highlight) > p {
-    background-color: $gray-lighter;
+    background-color: $gray-50;
   }
 }
 
@@ -118,7 +113,7 @@ $message-sidebar-width: 23rem;
     text-align: right;
 
     & > p {
-      background-color: $light-blue;
+      background-color: $blue;
       color: $white;
       margin-left: auto;
     }
@@ -126,23 +121,18 @@ $message-sidebar-width: 23rem;
 }
 
 .messages__reply {
-  border-top: 1px solid #f1f1f1;
-  padding: 1rem;
-  padding-right: 3rem;
+  border-top: 1px solid $gray-100;
   position: relative;
 }
 
 .messages__reply__text {
+  height: 50px;
   width: 100%;
+  margin-bottom: -5px;
   border: 0;
   border-radius: $border-radius;
-  padding: 0.5rem;
+  padding: 1rem 1.5rem;
   resize: none;
+  background-color: transparent;
+  color: $input-color;
 }
-
-.messages__reply__btn {
-  position: absolute !important;
-  top: 1.5rem;
-  right: 1.5rem;
-}
-

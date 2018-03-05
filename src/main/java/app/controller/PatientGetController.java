@@ -3,7 +3,9 @@ package app.controller;
 import app.bean.Response;
 import app.model.Patient;
 import app.service.PatientFilteringService;
+import app.service.PatientMetadataService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,12 +24,14 @@ import java.util.Map;
 public class PatientGetController {
 
     private PatientFilteringService patientFilteringService = new PatientFilteringService();
+    @Autowired
+    PatientMetadataService patientMetadataService;
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> getAllPatientInfo() {
         Map<String, Object> map = new HashMap<>();
-        map.put("data", patientFilteringService.FindAll());
+        map.put("data", patientMetadataService.GetImportedPatientData());
         Response response = new Response(1, "success");
         map.put("res", response);
 

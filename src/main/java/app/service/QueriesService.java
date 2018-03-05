@@ -1,19 +1,20 @@
 package app.service;
 
-import app.common.DBConfiguration;
-import app.common.InfluxappConfig;
-import app.model.QueryResultBean;
-import app.model.TimeSpan;
-import app.util.InfluxUtil;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import app.common.DBConfiguration;
+import app.common.InfluxappConfig;
+import app.model.QueryResultBean;
+import app.model.TimeSpan;
+import app.util.InfluxUtil;
 
 /**
  * Query related services

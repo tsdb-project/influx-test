@@ -1,178 +1,134 @@
-.custom-control {
-  margin-bottom: 0;
-  min-height: 1.3rem;
+.custom-control-label {
+  &:before,
+  &:after {
+    top: 0;
+  }
 }
 
-.custom-control-indicator {
-  border: 2px solid #7a7a7a;
-  color: $white;
-  top: 0.01rem;
-  @include transition(border 200ms);
+.custom-control-label {
+  &:before {
+    border: 2px solid $gray-600;
+    @include transition(background-color 300ms, border-color 300ms);
+    text-align: center;
+  }
+}
+
+.custom-control-input {
+  left: 0;
+  top: 0;
+  z-index: 2;
+  @include size($custom-control-indicator-size, $custom-control-indicator-size);
+
+  &:checked {
+    & ~ .custom-control-label {
+      &:before {
+        border-color: $teal;
+      }
+    }
+  }
 }
 
 .custom-checkbox {
-  .custom-control-indicator {
-    &:before {
-      content: '\f26b';
-      font-family: $font-family-icon;
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: $teal;
-      z-index: 1;
-      opacity: 0;
-      @include transition(background-color 200ms);
-      line-height: 1rem;
-      text-align: center;
-      font-size: 0.9rem;
-      font-weight: bold;
-    }
-  }
-
   .custom-control-input {
-    &:checked ~ .custom-control-indicator {
-      &:before {
-        opacity: 1;
+    &:checked {
+      & ~ .custom-control-label {
+        &:before {
+          @include font-icon('\f26b', 1.5rem);
+          line-height: $custom-control-indicator-size - 3;
+        }
       }
     }
   }
 }
 
 .custom-radio {
-  .custom-control-indicator {
-    &:before {
-      content: '';
-      position: absolute;
-      left: 2px;
-      top: 2px;
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background-color: $teal;
-      z-index: 1;
-      transform: scale(0);
-      @include transition(transform 200ms);
-    }
-  }
-
   .custom-control-input {
-    &:checked ~ .custom-control-indicator {
-      &:before {
-        transform: scale(1);
+    &:checked {
+      & ~ .custom-control-label {
+        &:before {
+          background-color: $white;
+        }
+
+        &:after {
+          @include size(10px, 10px);
+          left: 5px;
+          top: 5px;
+          border-radius: 50%;
+          background-color: $custom-control-indicator-checked-bg;
+        }
       }
     }
   }
 }
-
-.custom-control-input {
-  &:checked ~ .custom-control-indicator {
-    border-color: $teal;
-  }
-
-  &:disabled ~ .custom-control-indicator {
-    opacity: 0.5;
-  }
-}
-
-// Checkbox light skin
-.custom-control--light {
-  color: $white;
-
-  .custom-control-indicator {
-    &:before {
-      border-color: $white;
-      background-color: $white;
-      color: lighten($black, 25%);
-    }
-  }
-}
-
 
 // Checkbox Char
 .custom-control--char {
-  margin: 0;
-  font-weight: normal;
-
-  .custom-control-input {
-    width: 3rem;
-    height: 3rem;
-    z-index: 3;
-
-    &:checked + .custom-control--char__helper {
-      &:after {
-        opacity: 1;
-      }
-
-      &:before {
-        opacity: 0;
-      }
-
-      & > i {
-        font-size: 0;
-      }
-    }
-  }
+  border-radius: 50%;
+  position: relative;
 
   &:hover {
-    .custom-control--char__helper {
-      &:before {
-        opacity: 1;
-      }
-
+    .custom-control-label-char {
       & > i {
         font-size: 0;
+
+        &:before {
+          opacity: 1;
+        }
       }
     }
   }
-}
 
-.custom-control--char__helper {
-  position: absolute;
-  font-style: normal;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  left: 0;
-  top: 0;
+  .custom-control-input {
+    &:checked {
+      & ~ .custom-control-label-char {
+        & > i {
+          font-size: 0;
 
-  &:before,
-  &:after,
-  & > i {
-    position: absolute;
-    text-align: center;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    top: 1px;
-    line-height: 3rem;
-    color: $white;
+          &:before {
+            opacity: 0;
+          }
+
+          &:after {
+            opacity: 1;
+          }
+        }
+      }
+    }
   }
 
-  &:before,
-  &:after {
-    font-family: $font-family-icon;
-    font-size: 1.5rem;
-    opacity: 0;
-    @include transition(opacity 300ms);
-  }
+  .custom-control-label-char {
+    & > i {
+      font-size: 1.25rem;
+      color: $white;
+      font-weight: $font-weight-bold;
+      @include transition(font-size 100ms);
+      font-style: normal;
+      text-align: center;
 
-  &:before {
-    content: '\f279';
-    z-index: 1;
-  }
+      &, &:before, &:after {
+        position: absolute;
+        left: 0;
+        top: 0;
+        @include size(100%, 100%);
+        border-radius: 50%;
+        width: 3rem;
+        height: 3rem;
+        line-height: 3rem;
+      }
 
-  &:after {
-    content: '\f26b';
-    z-index: 2;
-  }
+      &:before,
+      &:after {
+        opacity: 0;
+        @include transition(opacity 150ms);
+      }
 
-  & > i {
-    font-style: normal;
-    border-radius: 50%;
-    font-size: 1.2rem;
-    font-weight: $font-weight-bold;
-    @include transition(font-size 200ms, background-color 300ms);
+      &:before {
+        @include font-icon('\f279', 1.5rem);
+      }
+
+      &:after {
+        @include font-icon('\f26b', 1.5rem);
+      }
+    }
   }
 }

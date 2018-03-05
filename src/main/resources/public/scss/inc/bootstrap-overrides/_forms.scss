@@ -1,8 +1,6 @@
-label {
-  font-weight: 500;
-}
-
 .form-control {
+  padding-left: 2px;
+  padding-right: 2px;
   border-left: 0;
   border-right: 0;
   border-top: 0;
@@ -10,42 +8,33 @@ label {
   appearance: none;
   -ms-overflow-style: none;
 
-  &:focus {
-    & ~ .form-group__bar {
-      &:before,
-      &:after {
-        width: 50%;
+  &:not(:disabled):not([readonly]) {
+    &:focus {
+      & ~ .form-group__bar {
+        &:before,
+        &:after {
+          width: 50%;
+        }
       }
     }
   }
 
   &:disabled,
-  &[readonly] {
+  &[readonly]{
     opacity: 0.6;
   }
 }
 
-
 // Form Group
 .form-group {
   position: relative;
-
-  & > label {
-    font-weight: normal;
-  }
-
-  &:not(.form-group--float) {
-    & > label {
-      font-size: 0.9rem;
-    }
-  }
 }
 
 .form-group__bar {
   position: absolute;
   left: 0;
   bottom: 0;
-  z-index: 1;
+  z-index: 3;
   width: 100%;
 
   &:before, &:after {
@@ -56,7 +45,7 @@ label {
     bottom: 0;
     @include transition(all 200ms);
     transition-timing-function: ease;
-    background-color: $light-blue;
+    background-color: $blue;
   }
 
   &:before {
@@ -82,43 +71,47 @@ select::-ms-expand {
       bottom: $bottom-offset-active;
       font-size: $active-font-size;
   }
+
+  & ~ label {
+    left: 2px;
+  }
 }
 
 .form-group--float {
   margin-top: 2rem;
 
   .form-control {
-    @include form-group-float($input-padding-y*4, $font-size-sm);
+    @include form-group-float(($input-btn-padding-y*4), $font-size-sm);
 
     & ~ label {
       font-size: $font-size-base;
-      bottom: $input-padding-y;
+      bottom: $input-btn-padding-y;
       width: 100%;
     }
   }
 
   .form-control-sm {
-    @include form-group-float($input-padding-y-sm*4, $font-size-sm);
+    @include form-group-float($input-btn-padding-y-sm*8, $font-size-sm);
 
     & ~ label {
       font-size: $font-size-sm;
-      bottom: $input-padding-y-sm;
+      bottom: $input-btn-padding-y-sm;
     }
   }
 
   .form-control-lg {
-    @include form-group-float($input-padding-y-lg*4, $font-size-base);
+    @include form-group-float($input-btn-padding-y-lg*5, $font-size-base);
 
     & ~ label {
       font-size: $font-size-lg;
-      bottom: $input-padding-y-lg;
+      bottom: $input-btn-padding-y-lg;
     }
   }
 
   & > label {
-    color: $input-color-placeholder;
+    color: $input-placeholder-color;
     pointer-events: none;
-    left: $input-padding-x;
+    left: $input-btn-padding-x;
     position: absolute;
     margin: 0;
     @include transition(bottom 150ms ease, color 150ms, font-size 150ms ease);
@@ -130,4 +123,11 @@ select::-ms-expand {
   .form-control {
     text-align: center;
   }
+}
+
+.invalid-feedback,
+.valid-feedback {
+  position: absolute;
+  left: 0;
+  bottom: -1.5rem;
 }
