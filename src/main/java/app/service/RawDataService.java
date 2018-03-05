@@ -1,12 +1,11 @@
-/**
- *
- */
 package app.service;
 
 import app.common.DBConfiguration;
 import app.common.InfluxappConfig;
 import app.model.RawData;
+import app.util.InfluxUtil;
 import app.util.Util;
+import org.influxdb.InfluxDB;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.springframework.stereotype.Service;
@@ -15,17 +14,42 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isolachine
  */
 @Service
 public class RawDataService {
+
+    private final InfluxDB influxDB = InfluxappConfig.INFLUX_DB;
+    private final String dbDataName = DBConfiguration.Data.DBNAME;
+
+    /**
+     * Return the first available data for a patient
+     *
+     * @return Time
+     */
+    public Instant GetFirstAvailData(String pid, boolean hasAr) {
+        String qT = "SELECT \"time\",\"Time\" FROM \"%s\" WHERE \"arType\"='%s' ORDER BY \"time\" ASC LIMIT 1";
+        return availDataTimeQ(qT, pid.toUpperCase(), hasAr);
+    }
+
+    /**
+     * Return the last available data for a patient
+     *
+     * @return Time
+     */
+    public Instant GetLastAvailData(String pid, boolean hasAr) {
+        String qT = "SELECT \"time\",\"Time\" FROM \"%s\" WHERE \"arType\"='%s' ORDER BY \"time\" DESC LIMIT 1";
+        return availDataTimeQ(qT, pid.toUpperCase(), hasAr);
+    }
+
     public List<RawData> selectAllRawDataInColumns(String patientTable, List<String> columnNames) throws ParseException {
         String columns = String.join(", ", columnNames);
         String queryString = "Select " + columns + " from \"" + patientTable + "\"";
-        Query q = new Query(queryString, DBConfiguration.Data.DBNAME);
-        QueryResult result = InfluxappConfig.INFLUX_DB.query(q);
+        Query q = new Query(queryString, dbDataName);
+        QueryResult result = influxDB.query(q);
 
         List<RawData> data = new ArrayList<>();
         if (!result.hasError() && !result.getResults().get(0).hasError()) {
@@ -46,8 +70,22 @@ public class RawDataService {
         return data;
     }
 
+    private Instant availDataTimeQ(String qT, String pid, boolean hasAr) {
+        Query q = new Query(String.format(qT, pid, hasAr ? "ar" : "noar"), dbDataName);
+        Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
+
+        // Table does not exist
+        if (res.size() == 0) return null;
+        return Instant.parse(res.get("time").get(0).toString());
+    }
+
     public static void main(String[] args) throws ParseException {
         RawDataService rawDataService = new RawDataService();
+
+        Instant a;
+        a = rawDataService.GetFirstAvailData("PUH-2010-087", true);
+        a = rawDataService.GetLastAvailData("PUH-2010-087", true);
+
         List<String> list = new ArrayList<>();
         list.add("I1_1");
         list.add("I1_2");

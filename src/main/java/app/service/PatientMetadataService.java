@@ -1,5 +1,6 @@
 package app.service;
 
+import app.bean.PatientFilterBean;
 import app.common.DBConfiguration;
 import app.common.InfluxappConfig;
 import app.model.Patient;
@@ -11,68 +12,79 @@ import org.influxdb.impl.InfluxDBResultMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Get some metadata for a patient
+ * Get metadata for patients
  */
 @Service
 public class PatientMetadataService {
 
-    private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-    private final String dbName = DBConfiguration.Data.DBNAME;
-    private Patient target;
+    private final InfluxDB influxDB = InfluxappConfig.INFLUX_DB;
+    private final String dbDataName = DBConfiguration.Data.DBNAME;
+    private final String dbMetaName = DBConfiguration.Meta.DBNAME;
 
+    private final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
     private final PatientFilteringService pfs = new PatientFilteringService();
 
-    private Instant availDataTimeQ(String qT, boolean hasAr) {
-        String table = target.getPid().toUpperCase();
+    private final String patientQueryStr = "SELECT \"time\", \"PID\", \"age\", \"Gender\", \"Survived\", \"ArrestLocation\" FROM \"" + DBConfiguration.Meta.PATIENT + "\"";
 
-        Query q = new Query(String.format(qT, table, hasAr ? "ar" : "noar"), dbName);
-        Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
+    public static void main(String[] args) {
+        PatientFilterBean pfb = new PatientFilterBean();
+        pfb.setGenderFilter("M");
+        pfb.setAgeLowerFilter(50);
+        pfb.setAgeUpperFilter(55);
+        pfb.setArrestLocationFilter(1);
+        pfb.setSurvivedFilter(0);
 
-        // Table does not exist
-        if (res.size() == 0) return null;
-
-        return Instant.parse(res.get("time").get(0).toString());
+        PatientMetadataService pms = new PatientMetadataService();
+        List<Patient> t;
+        t = pms.GetImportedPatientData();
+        t = pms.FetchResult(pfb);
     }
 
     /**
-     * Set a patient for this class
+     * Find patients by list of ID
+     *
+     * @param pids List of ID
+     * @return Patient Object
+     */
+    public List<Patient> FindByIds(List<String> pids) {
+        if (pids.size() == 0) return new ArrayList<>(0);
+
+        StringBuilder sb = new StringBuilder(patientQueryStr);
+        sb.append(" WHERE");
+        for (String pid : pids) {
+            sb.append(" \"PID\"='");
+            sb.append(pid.toUpperCase());
+            sb.append("' OR ");
+        }
+        String fq = sb.toString();
+        Query q = new Query(fq.substring(0, fq.length() - 4), dbMetaName);
+        return resultMapper.toPOJO(influxDB.query(q), Patient.class);
+    }
+
+    /**
+     * Select all patients from DB
+     *
+     * @return List<Patient>
+     */
+    public List<Patient> FindAll() {
+        Query q = new Query(patientQueryStr, dbMetaName);
+        return resultMapper.toPOJO(influxDB.query(q), Patient.class);
+    }
+
+    /**
+     * Select a patient by ID
      *
      * @param pid Patient ID
-     * @return Found this PID or not
+     * @return Patient Object
      */
-    public boolean SetPatient(String pid) {
-        List<Patient> ps = new PatientFilteringService().FindById(pid);
-        if (ps.size() < 1) return false;
-        target = ps.get(0);
-        return true;
-    }
-
-    /**
-     * Return the first available data for a patient
-     *
-     * @return Time
-     */
-    public Instant GetFirstAvailData(boolean hasAr) {
-        if (target == null) return null;
-
-        String qT = "SELECT \"time\",\"Time\" FROM \"%s\" WHERE \"arType\"='%s' ORDER BY \"time\" ASC LIMIT 1";
-        return availDataTimeQ(qT, hasAr);
-    }
-
-    /**
-     * Return the last available data for a patient
-     *
-     * @return Time
-     */
-    public Instant GetLastAvailData(boolean hasAr) {
-        if (target == null) return null;
-
-        String qT = "SELECT \"time\",\"Time\" FROM \"%s\" WHERE \"arType\"='%s' ORDER BY \"time\" DESC LIMIT 1";
-        return availDataTimeQ(qT, hasAr);
+    public List<Patient> GetById(String pid) {
+        Query query = new Query(patientQueryStr + " WHERE \"PID\" = '" + pid.toUpperCase() + "'", dbMetaName);
+        return resultMapper.toPOJO(influxDB.query(query), Patient.class);
     }
 
     /**
@@ -81,19 +93,19 @@ public class PatientMetadataService {
      * @return Patient list
      */
     public List<Patient> GetImportedPatientData() {
-        List<String> avalPidList = InfluxUtil.getAllTables(dbName);
-        return pfs.FindByIds(avalPidList);
+        List<String> avalPidList = pfs.GetAllImportedPid();
+        return this.FindByIds(avalPidList);
     }
 
-    public static void main(String[] args) {
-        PatientMetadataService pms = new PatientMetadataService();
-        List<Patient> t = pms.GetImportedPatientData();
-        Instant a;
-        if (pms.SetPatient("PUH-2010-087")) {
-            a = pms.GetFirstAvailData(true);
-            a = pms.GetLastAvailData(true);
-            System.out.println();
-        }
+    /**
+     * Fetch results based on current filters
+     *
+     * @return "Patient" Data
+     */
+    public List<Patient> FetchResult(PatientFilterBean pfb) {
+        if (pfb.getNumOfFilters() == 0) return FindAll();
+        Query q = new Query(this.patientQueryStr + pfb.getWhereAndFilters(), dbMetaName);
+        return resultMapper.toPOJO(influxDB.query(q), Patient.class);
     }
 
 }

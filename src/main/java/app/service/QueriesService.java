@@ -23,7 +23,7 @@ import app.util.InfluxUtil;
 public class QueriesService {
 
     private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-    private final PatientFilteringService patientFilteringService = new PatientFilteringService();
+    private final PatientMetadataService patientMetadataService = new PatientMetadataService();
 
     private final String dbName = DBConfiguration.Data.DBNAME;
 
@@ -133,7 +133,7 @@ public class QueriesService {
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
-        qrb.setInterestPatient(patientFilteringService.FindById(pid.toUpperCase()).get(0));
+        qrb.setInterestPatient(patientMetadataService.GetById(pid.toUpperCase()).get(0));
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
@@ -162,7 +162,7 @@ public class QueriesService {
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
-        qrb.setInterestPatient(patientFilteringService.FindById(pid.toUpperCase()).get(0));
+        qrb.setInterestPatient(patientMetadataService.GetById(pid.toUpperCase()).get(0));
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
