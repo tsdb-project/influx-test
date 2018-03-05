@@ -77,14 +77,24 @@
                             </div>
                         </div>
                         <div class="row" style="margin-top: 20px">
-                            <div class="col-sm-12 col-md-4">
+                            <div class="col-sm-12 col-md-6">
                                 <div class="row" style="margin-bottom: 10px">
                                     <div class="col">
                                         <h4 class="card-subtitle">Metadata Filtering</h4>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-4 col-md-4">
+                                    <div class="col-sm-3 col-md-3">
+                                        <div class="form-group">
+                                            <label>Artifact Reduction</label>
+                                            <select class="select2" data-placeholder="Select" id="ar" data-minimum-results-for-search="Infinity">
+                                                <option selected="selected" value="all">All</option>
+                                                <option value="ar">Only AR</option>
+                                                <option value="noar">Only No AR</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3 col-md-3">
                                         <div class="form-group">
                                             <label>Gender</label>
                                             <select class="select2" data-placeholder="Select Gender" id="gender" data-minimum-results-for-search="Infinity">
@@ -108,14 +118,14 @@
                                             </select>
                                         </div>
                                     </div> -->
-                                    <div class="col-sm-4 col-md-4">
+                                    <div class="col-sm-3 col-md-3">
                                         <div class="form-group">
                                             <label>Age</label>
                                             <input type="text" class="form-control" id="ageLower" placeholder="Lower Bound">
                                             <i class="form-group__bar"></i>
                                         </div>
                                     </div>
-                                    <div class="col-sm-4 col-md-4">
+                                    <div class="col-sm-3 col-md-3">
                                         <div class="form-group">
                                             <label>&nbsp</label>
                                             <input type="text" class="form-control" id="ageUpper" placeholder="Upper Bound">

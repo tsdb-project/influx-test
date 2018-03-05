@@ -1,19 +1,17 @@
 package app.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.influxdb.InfluxDB;
+import org.influxdb.dto.Query;
+import org.influxdb.dto.QueryResult;
+import org.springframework.stereotype.Service;
+
 import app.bean.PatientFilterBean;
 import app.common.DBConfiguration;
 import app.common.InfluxappConfig;
-import app.model.Patient;
 import app.util.InfluxUtil;
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.Query;
-import org.influxdb.dto.QueryResult;
-import org.influxdb.impl.InfluxDBResultMapper;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Filter out patient's PID services
@@ -41,6 +39,7 @@ public class PatientFilteringService {
         List<String> s;
         s = pfs.GetAllImportedPid();
         s = pfs.FetchResultPid(pfb);
+        System.out.println(s);
     }
 
     /**

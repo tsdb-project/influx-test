@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import app.bean.DifferRequestBodyBean;
 import app.bean.ExceedRequestBodyBean;
+import app.bean.PatientFilterBean;
 import app.bean.RawDataRequestBodyBean;
 import app.model.QueryResultBean;
 import app.model.RawData;
@@ -60,8 +61,21 @@ public class QueryController {
             map.put("data", new ArrayList<>());
             return map;
         }
+        
+        Map<String, String> meta = request.getMeta();
+        PatientFilterBean filter = new PatientFilterBean();
+        if (meta.get("ageLower") != null && !meta.get("ageLower").isEmpty()) {
+            filter.setAgeLowerFilter(Integer.valueOf(meta.get("ageLower")));
+        }
+        if (meta.get("ageUpper") != null && !meta.get("ageUpper").isEmpty()) {
+            filter.setAgeUpperFilter(Integer.valueOf(meta.get("ageUpper")));
+        }
+        if (meta.get("gender") != null && !meta.get("gender").isEmpty()) {
+            filter.setGenderFilter(meta.get("gender"));
+        }
+        List<String> patientIDs = patientFilteringService.FetchResultPid(filter);
 
-        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount(), null, null);
+        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount(), patientIDs, null);
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
         return map;
@@ -84,7 +98,20 @@ public class QueryController {
             return map;
         }
 
-        List<QueryResultBean> resultBeans = queriesService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount(), null, null);
+        Map<String, String> meta = request.getMeta();
+        PatientFilterBean filter = new PatientFilterBean();
+        if (meta.get("ageLower") != null && !meta.get("ageLower").isEmpty()) {
+            filter.setAgeLowerFilter(Integer.valueOf(meta.get("ageLower")));
+        }
+        if (meta.get("ageUpper") != null && !meta.get("ageUpper").isEmpty()) {
+            filter.setAgeUpperFilter(Integer.valueOf(meta.get("ageUpper")));
+        }
+        if (meta.get("gender") != null && !meta.get("gender").isEmpty()) {
+            filter.setGenderFilter(meta.get("gender"));
+        }
+        List<String> patientIDs = patientFilteringService.FetchResultPid(filter);
+
+        List<QueryResultBean> resultBeans = queriesService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount(), patientIDs, null);
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
         return map;

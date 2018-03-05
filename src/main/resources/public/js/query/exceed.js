@@ -168,7 +168,8 @@ $(document).ready(function() {
                 var meta = {
                     'gender' : $("#gender").val(),
                     'ageUpper' : $("#ageUpper").val(),
-                    'ageLower' : $("#ageLower").val()
+                    'ageLower' : $("#ageLower").val(),
+                    'ar' : $("#ar").val()
                 }
                 var form = {
                     'meta' : meta,

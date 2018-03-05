@@ -164,7 +164,14 @@ $(document).ready(function() {
             "contentType" : "application/json",
             "type" : "POST",
             "data" : function() {
+                var meta = {
+                    'gender' : $("#gender").val(),
+                    'ageUpper' : $("#ageUpper").val(),
+                    'ageLower' : $("#ageLower").val(),
+                    'ar' : $("#ar").val()
+                }
                 var form = {
+                    'meta' : meta,
                     'columnA' : $("#columnA").val(),
                     'columnB' : $("#columnB").val(),
                     'threshold' : $("#threshold").val(),
