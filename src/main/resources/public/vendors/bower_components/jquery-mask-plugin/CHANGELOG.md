@@ -1,3 +1,21 @@
+== v1.14.12 (Oct/04 2017 09:57 +0100 by Igor Escobar) ==
+
+Bugfixes:
+
+* bug fixing on caret positioning on some devices
+
+== v1.14.11 (May/30 2017 21:53 +0100 by Igor Escobar) ==
+
+Bugfixes:
+
+* fixing a lot of caret positioning issues. Thanks to @onuradsay
+
+== v1.14.10 (Feb/13 2017 14:18 +0000 by Igor Escobar) ==
+
+Bugfixes:
+
+* fixing exception when oValue in undefined
+
 == v1.14.9 (Jan/25 2017 11:17 +0000 by Igor Escobar) ==
 
 Bugfixes:

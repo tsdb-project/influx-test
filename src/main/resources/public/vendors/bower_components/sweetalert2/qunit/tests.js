@@ -1,7 +1,10 @@
 /* global $, QUnit, swal */
 
-QUnit.test('modal shows up', function (assert) {
+QUnit.test('version is correct semver', function (assert) {
   assert.ok(swal.version.match(/\d+\.\d+\.\d+/))
+})
+
+QUnit.test('modal shows up', function (assert) {
   assert.notOk(swal.isVisible())
   swal('Hello world!')
   assert.ok(swal.isVisible())
@@ -21,6 +24,19 @@ QUnit.test('modal width', function (assert) {
   assert.equal($('.swal2-modal')[0].style.width, '500px')
 })
 
+QUnit.test('window keydown handler', function (assert) {
+  swal('hi')
+  assert.ok(window.onkeydown)
+  swal.close()
+  assert.equal(window.onkeydown, null)
+
+  swal('first call')
+  swal('second call')
+  assert.ok(window.onkeydown)
+  swal.close()
+  assert.equal(window.onkeydown, null)
+})
+
 QUnit.test('getters', function (assert) {
   swal('Title', 'Content')
   assert.equal(swal.getTitle().innerText, 'Title')
@@ -30,11 +46,16 @@ QUnit.test('getters', function (assert) {
     showCancelButton: true,
     imageUrl: 'image.png',
     confirmButtonText: 'Confirm button',
-    cancelButtonText: 'Cancel button'
+    confirmButtonAriaLabel: 'Confirm button aria-label',
+    cancelButtonText: 'Cancel button',
+    cancelButtonAriaLabel: 'Cancel button aria-label'
   })
   assert.ok(swal.getImage().src.indexOf('image.png'))
+  assert.equal(swal.getButtonsWrapper().textContent, 'Confirm buttonCancel button')
   assert.equal(swal.getConfirmButton().innerText, 'Confirm button')
   assert.equal(swal.getCancelButton().innerText, 'Cancel button')
+  assert.equal(swal.getConfirmButton().getAttribute('aria-label'), 'Confirm button aria-label')
+  assert.equal(swal.getCancelButton().getAttribute('aria-label'), 'Cancel button aria-label')
 
   swal({input: 'text'})
   $('.swal2-input').val('input text')
@@ -106,7 +127,7 @@ QUnit.test('esc key', function (assert) {
   )
 
   $(document).trigger($.Event('keydown', {
-    keyCode: 27
+    key: 'Escape'
   }))
 })
 
@@ -226,10 +247,12 @@ QUnit.test('validation error', function (assert) {
     swal.clickConfirm()
     setTimeout(function () {
       assert.ok($('.swal2-validationerror').is(':visible'))
+      assert.ok($('.swal2-input').attr('aria-invalid'))
       assert.ok($('.swal2-modal').outerHeight() > initialModalHeight)
 
       $('.swal2-input').val('blah-blah').trigger('input')
       assert.ok($('.swal2-validationerror').is(':hidden'))
+      assert.notOk($('.swal2-input').attr('aria-invalid'))
       assert.ok($('.swal2-modal').outerHeight() === initialModalHeight)
       done()
     })
@@ -264,7 +287,6 @@ QUnit.test('input select', function (assert) {
 
 QUnit.test('input checkbox', function (assert) {
   const done = assert.async()
-  const checkbox = $('.swal2-checkbox input')
 
   swal({input: 'checkbox', inputAttributes: {name: 'test-checkbox'}}).then(function (result) {
     assert.equal(checkbox.attr('name'), 'test-checkbox')
@@ -272,6 +294,7 @@ QUnit.test('input checkbox', function (assert) {
     done()
   })
 
+  const checkbox = $('.swal2-checkbox input')
   checkbox.prop('checked', true)
   swal.clickConfirm()
 })
@@ -374,11 +397,6 @@ QUnit.test('dymanic queue', function (assert) {
 })
 
 QUnit.test('showLoading and hideLoading', function (assert) {
-  swal({
-    title: 'test loading state',
-    showCancelButton: true
-  })
-
   swal.showLoading()
   assert.ok($('.swal2-buttonswrapper').hasClass('swal2-loading'))
   assert.ok($('.swal2-cancel').is(':disabled'))
@@ -493,7 +511,22 @@ QUnit.test('reversed buttons', function (assert) {
   assert.ok($('.swal2-cancel').index() - $('.swal2-confirm').index() === 1)
 })
 
-QUnit.test('focus cancel', function (assert) {
+QUnit.test('focusConfirm', function (assert) {
+  swal({
+    showCancelButton: true
+  })
+  assert.ok(document.activeElement === $('.swal2-confirm')[0])
+
+  const anchor = $('<a href>link</a>')
+  swal({
+    html: anchor,
+    showCancelButton: true,
+    focusConfirm: false
+  })
+  assert.ok(document.activeElement.outerHTML === anchor[0].outerHTML)
+})
+
+QUnit.test('focusCancel', function (assert) {
   swal({
     text: 'Modal with Cancel button focused',
     showCancelButton: true,
@@ -502,13 +535,15 @@ QUnit.test('focus cancel', function (assert) {
   assert.ok(document.activeElement === $('.swal2-cancel')[0])
 })
 
-QUnit.test('image custom class', function (assert) {
+QUnit.test('image alt text and custom class', function (assert) {
   swal({
     text: 'Custom class is set',
     imageUrl: 'image.png',
+    imageAlt: 'Custom icon',
     imageClass: 'image-custom-class'
   })
   assert.ok($('.swal2-image').hasClass('image-custom-class'))
+  assert.equal($('.swal2-image').attr('alt'), 'Custom icon')
 
   swal({
     text: 'Custom class isn\'t set',
@@ -545,12 +580,28 @@ QUnit.test('modal vertical offset', function (assert) {
 })
 
 QUnit.test('target', function (assert) {
+  const warn = console.warn // Suppress the warnings
+  console.warn = () => true // Suppress the warnings
   swal('Default target')
   assert.equal(document.body, document.querySelector('.swal2-container').parentNode)
   swal.close()
 
-  swal({title: 'Custom target', target: '#qunit'})
+  swal({title: 'Custom valid target (string)', target: '#qunit'}) // switch targets
   assert.equal(document.querySelector('#qunit'), document.querySelector('.swal2-container').parentNode)
+  swal.close()
+
+  swal({title: 'Custom invalid target (string)', target: 'lorem_ipsum'}) // switch targets
+  assert.equal(document.body, document.querySelector('.swal2-container').parentNode)
+  swal.close()
+
+  swal({ title: 'Custom valid target (element)', target: $('#qunit')[0] })
+  assert.equal($('#qunit')[0], document.querySelector('.swal2-container').parentNode)
+  swal.close()
+
+  swal({ title: 'Custom invalid target (element)', target: true })
+  assert.equal(document.body, document.querySelector('.swal2-container').parentNode)
+  swal.close()
+  console.warn = warn // Suppress the warnings
 })
 
 QUnit.test('onOpen', function (assert) {
@@ -565,6 +616,32 @@ QUnit.test('onOpen', function (assert) {
     }
   })
 })
+
+QUnit.test('onBeforeOpen', function (assert) {
+  const done = assert.async()
+
+  // create a modal with an onBeforeOpen callback
+  swal({
+    title: 'onBeforeOpen test',
+    onBeforeOpen: function ($modal) {
+      assert.ok($('.swal2-modal').is($modal))
+    }
+  })
+
+  // check that onBeforeOpen calls properly
+  const dynamicTitle = 'Set onBeforeOpen title'
+  swal({
+    title: 'onBeforeOpen test',
+    onBeforeOpen: function ($modal) {
+      $('.swal2-title').html(dynamicTitle)
+    },
+    onOpen: function () {
+      assert.equal($('.swal2-title').html(), dynamicTitle)
+      done()
+    }
+  })
+})
+
 QUnit.test('onClose', function (assert) {
   const done = assert.async()
 
@@ -579,4 +656,112 @@ QUnit.test('onClose', function (assert) {
 
   const $modal = $('.swal2-modal')
   $('.swal2-close').click()
+})
+QUnit.test('esc key no rejections test', function (assert) {
+  const done = assert.async()
+
+  swal({
+    title: 'Esc me',
+    useRejections: false
+  }).then(
+    function (result) {
+      assert.deepEqual(result, {dismiss: 'esc'})
+      done()
+    },
+    function () {
+    }
+  )
+
+  $(document).trigger($.Event('keydown', {
+    key: 'Escape'
+  }))
+})
+QUnit.test('close button no rejections test', function (assert) {
+  const done = assert.async()
+
+  swal({
+    title: 'Close button test',
+    showCloseButton: true,
+    useRejections: false
+  }).then(
+    function (result) {
+      assert.deepEqual(result, {dismiss: 'close'})
+      done()
+    },
+    function () {}
+  )
+
+  const $closeButton = $('.swal2-close')
+  assert.ok($closeButton.is(':visible'))
+  assert.equal($closeButton.attr('aria-label'), 'Close this dialog')
+  $closeButton.click()
+})
+QUnit.test('overlay click no rejections test', function (assert) {
+  const done = assert.async()
+
+  swal({
+    title: 'Overlay click',
+    useRejections: false
+  }).then(
+    function (result) {
+      assert.deepEqual(result, {dismiss: 'overlay'})
+      done()
+    },
+    function () {}
+  )
+
+  $('.swal2-container').click()
+})
+QUnit.test('cancel button no rejections test', function (assert) {
+  const done = assert.async()
+
+  swal({
+    title: 'Cancel me',
+    useRejections: false
+  }).then(
+    function (result) {
+      assert.deepEqual(result, {dismiss: 'cancel'})
+      done()
+    },
+    function () {}
+  ).catch(swal.noop)
+
+  swal.clickCancel()
+})
+QUnit.test('timer no rejections test', function (assert) {
+  const done = assert.async()
+
+  swal({
+    title: 'Timer test',
+    timer: 10,
+    animation: false,
+    useRejections: false
+  }).then(
+    function (result) {
+      assert.deepEqual(result, {dismiss: 'timer'})
+      done()
+    },
+    function () {}
+  )
+})
+QUnit.test('confirm button object format', function (assert) {
+  const done = assert.async()
+  swal({
+    input: 'radio',
+    inputOptions: {
+      'one': 'one',
+      'two': 'two'
+    },
+    useRejections: false
+  }).then(function (result) {
+    assert.deepEqual(result, {value: 'two'})
+    done()
+  })
+  $('.swal2-radio input[value="two"]').prop('checked', true)
+  swal.clickConfirm()
+})
+
+QUnit.test('params validation', function (assert) {
+  assert.ok(swal.isValidParameter('title'))
+  assert.notOk(swal.isValidParameter('foobar'))
 })

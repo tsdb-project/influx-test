@@ -1,0 +1,4 @@
+@mixin alert-variant($background, $border, $color) {
+  background-color: rgba($background, 0.95);
+  border-color: $border;
+}

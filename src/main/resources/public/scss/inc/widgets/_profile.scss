@@ -1,25 +1,15 @@
 .widget-profile {
   background-color: $light-blue;
 
-  .card-header {
-    background-color: rgba($white, 0.1);
-    text-align: center;
-
-    .btn--float {
-      color: $light-blue;
-    }
-  }
-
   .avatar-char {
-    background-color: rgba($white, 0.95);
-    color: $light-blue;
+    background-color: rgba($white, 0.25);
+    color: $white;
     margin-right: 1.2rem;
   }
 }
 
 .widget-profile__img {
-  width: 100px;
-  height: 100px;
+  @include size(120px, 120px);
   border-radius: 50%;
   margin-bottom: 1.2rem;
   border: 5px solid rgba($white, 0.1);
@@ -31,7 +21,7 @@
   .media {
     padding: 1rem 2rem;
 
-    &:nth-child(even) {
+    &:nth-child(odd) {
       background-color: rgba($white, 0.1);
     }
   }
@@ -39,7 +29,7 @@
   .media-body {
     strong{
       display: block;
-      font-weight: 500;
+      font-weight: $font-weight-bold;
     }
 
     small {

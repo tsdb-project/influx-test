@@ -2,8 +2,7 @@
   color: $headings-color;
   text-transform: uppercase;
   padding: 1.2rem 1rem 1rem;
-  border-bottom: 1px solid $border-light;
-  margin-bottom: 0.75rem;
+  border-bottom: 1px solid $gray-100;
   text-align: center;
 
   .actions {
@@ -18,18 +17,21 @@
 }
 
 .listview__item {
-  display: flex;
-  align-items: center;
   padding: 15px $card-spacer-x;
   @include transition(background-color 300ms);
 }
 
+.listview:not(.listview--block) {
+  .listview__item {
+    display: flex;
+  }
+}
+
 .listview__img {
-  width: 3rem;
   height: 3rem;
   border-radius: 50%;
   vertical-align: top;
-  margin: -0.1rem 1.2rem 0 -0.2rem;
+  margin: -0.1rem 1.2rem 0 0;
 }
 
 .listview__content {
@@ -51,8 +53,9 @@
   & > small {
     float: right;
     color: $text-muted;
-    font-weight: 500;
+    font-weight: $font-weight-bold;
     font-size: 0.85rem;
+    margin-top: 0.1rem;
   }
 
   & + p {
@@ -64,14 +67,15 @@
 .listview__attrs {
   flex: 1 100%;
   margin-top: 0.5rem;
+  display: flex;
 
   & > span {
-    padding: 0.45rem 0.7rem 0.5rem;
-    border: 1px solid lighten($grey, 30%);
+    padding: 0.55rem 0.7rem;
+    border: 1px solid $gray-200;
     display: inline-block;
     line-height: 100%;
-    font-size: 1rem;
-    margin: 0.2rem 0.05rem 0 0;
+    font-size: 0.9rem;
+    margin: 0.2rem 0.25rem 0.055rem 0;
     background-color: $white;
   }
 }

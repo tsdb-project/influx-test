@@ -6,14 +6,6 @@ if($('#dropzone-upload')[0]) {
 }
 
 $(document).ready(function () {
-    /*------------------------------------------------
-        Ripple effect buttons (Waves)
-    -------------------------------------------------*/
-    if($('.btn')[0]) {
-        Waves.init();
-        Waves.attach('.btn');
-    }
-
 
     /*------------------------------------------------
         Data Table (DataTables)
@@ -41,7 +33,7 @@ $(document).ready(function () {
             language: {
                 searchPlaceholder: "Search for records..."
             },
-            dom: 'Blfrtip',
+            "sDom": '<"dataTables__top"lfB>rt<"dataTables__bottom"ip><"clear">',
             buttons: [
                 {
                     extend: 'excelHtml5',
@@ -57,7 +49,7 @@ $(document).ready(function () {
                 }
             ],
             "initComplete": function(settings, json) {
-                $(this).closest('.dataTables_wrapper').prepend(dataTableButtons);
+                $(this).closest('.dataTables_wrapper').find('.dataTables__top').prepend(dataTableButtons);
             }
         });
 
@@ -237,16 +229,16 @@ $(document).ready(function () {
         Color picker (Bootstrap color picker)
     -------------------------------------------------*/
     if ($('.color-picker')[0]) {
-        $(this).each(function () {
-            var horizontal = $(this).find('.color-picker__value').data('horizontal') || false;
+        $('.color-picker').each(function () {
+            var horizontal = $(this).data('horizontal') || false;
 
-            $(this).find('.color-picker__value').colorpicker({
+            $(this).colorpicker({
                 horizontal: horizontal
             });
         });
 
-        $('body').on('change', '.color-picker__value', function () {
-            $(this).closest('.color-picker').find('.color-picker__preview').css('backgroundColor', $(this).val());
+        $('body').on('change', '.color-picker', function () {
+            $(this).next('.color-picker__preview').css('backgroundColor', $(this).val());
         });
     }
 
@@ -256,18 +248,7 @@ $(document).ready(function () {
     -------------------------------------------------*/
     if($('.wysiwyg-editor')[0]) {
         $('.wysiwyg-editor').trumbowyg({
-            autogrow: true,
-            btns: [
-                ['viewHTML'],
-                ['formatting'],
-                ['link'],
-                ['insertImage'],
-                'btnGrp-justify',
-                'btnGrp-lists',
-                ['horizontalRule'],
-                ['removeformat'],
-                ['fullscreen']
-            ]
+            autogrow: true
         });
     }
 

@@ -23,7 +23,7 @@ import java.util.List;
 public class RawDataService {
     public List<RawData> selectAllRawDataInColumns(String patientTable, List<String> columnNames) throws ParseException {
         String columns = String.join(", ", columnNames);
-        String queryString = "Select " + columns + " from \"" + patientTable;
+        String queryString = "Select " + columns + " from \"" + patientTable + "\"";
         Query q = new Query(queryString, DBConfiguration.Data.DBNAME);
         QueryResult result = InfluxappConfig.INFLUX_DB.query(q);
 

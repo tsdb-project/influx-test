@@ -16,24 +16,6 @@ $(document).ready(function () {
         });
     }
 
-    // Sign up widget line chart
-    if($('.sparkline-line-signups')[0]) {
-        $('.sparkline-line-signups').sparkline('html', {
-            type: 'line',
-            width: '100%',
-            height: 50,
-            lineColor: 'rgba(255, 255, 255, 0.8)',
-            fillColor: 'rgba(0,0,0,0)',
-            lineWidth: 1,
-            maxSpotColor: '#fff',
-            minSpotColor: '#fff',
-            spotColor: '#fff',
-            spotRadius: 4,
-            highlightSpotColor: '#fff',
-            highlightLineColor: '#fff'
-        });
-    }
-
     //Sample Sparkline Line Chart
     if ($('.sparkline-line')[0]) {
         $('.sparkline-line').sparkline('html', {

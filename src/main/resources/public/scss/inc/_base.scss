@@ -22,6 +22,10 @@ pre {
   padding: 1.5rem;
 }
 
+strong, b {
+  font-weight: $font-weight-bold;
+}
+
 button,
 input,
 optgroup,

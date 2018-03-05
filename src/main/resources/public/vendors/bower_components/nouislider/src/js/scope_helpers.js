@@ -22,7 +22,7 @@
 				return false;
 			}
 
-			e = fixEvent(e, data.pageOffset);
+			e = fixEvent(e, data.pageOffset, data.target || element);
 
 			// Handle reject of multitouch
 			if ( !e ) {
@@ -39,6 +39,15 @@
 				return false;
 			}
 
+			// 'supportsPassive' is only true if a browser also supports touch-action: none in CSS.
+			// iOS safari does not, so it doesn't get to benefit from passive scrolling. iOS does support
+			// touch-action: manipulation, but that allows panning, which breaks
+			// sliders after zooming/on non-responsive pages.
+			// See: https://bugs.webkit.org/show_bug.cgi?id=133112
+			if ( !supportsPassive ) {
+				e.preventDefault();
+			}
+
 			e.calcPoint = e.points[ options.ort ];
 
 			// Call the event handler with the event [ and additional data ].
@@ -49,7 +58,7 @@
 
 		// Bind a closure on the target for every event type.
 		events.split(' ').forEach(function( eventName ){
-			element.addEventListener(eventName, method, false);
+			element.addEventListener(eventName, method, supportsPassive ? { passive: true } : false);
 			methods.push([eventName, method]);
 		});
 
@@ -57,11 +66,7 @@
 	}
 
 	// Provide a clean event with standardized offset values.
-	function fixEvent ( e, pageOffset ) {
-
-		// Prevent scrolling and panning on touch events, while
-		// attempting to slide. The tap event also depends on this.
-		e.preventDefault();
+	function fixEvent ( e, pageOffset, target ) {
 
 		// Filter the event to register the type, which can be
 		// touch, mouse or pointer. Offset changes need to be
@@ -69,6 +74,7 @@
 		var touch = e.type.indexOf('touch') === 0;
 		var mouse = e.type.indexOf('mouse') === 0;
 		var pointer = e.type.indexOf('pointer') === 0;
+
 		var x;
 		var y;
 
@@ -77,8 +83,35 @@
 			pointer = true;
 		}
 
-		if ( touch ) {
 
+		// In the event that multitouch is activated, the only thing one handle should be concerned
+		// about is the touches that originated on top of it.
+		if ( touch && options.multitouch ) {
+			// Returns true if a touch originated on the target.
+			var isTouchOnTarget = function (touch) {
+				return touch.target === target || target.contains(touch.target);
+			};
+			// In the case of touchstart events, we need to make sure there is still no more than one
+			// touch on the target so we look amongst all touches.
+			if (e.type === 'touchstart') {
+				var targetTouches = Array.prototype.filter.call(e.touches, isTouchOnTarget);
+				// Do not support more than one touch per handle.
+				if ( targetTouches.length > 1 ) {
+					return false;
+				}
+				x = targetTouches[0].pageX;
+				y = targetTouches[0].pageY;
+			} else {
+			// In the other cases, find on changedTouches is enough.
+				var targetTouch = Array.prototype.find.call(e.changedTouches, isTouchOnTarget);
+				// Cancel if the target touch has not moved.
+				if ( !targetTouch ) {
+					return false;
+				}
+				x = targetTouch.pageX;
+				y = targetTouch.pageY;
+			}
+		} else if ( touch ) {
 			// Fix bug when user touches with two or more fingers on mobile devices.
 			// It's useful when you have two or more sliders on one page,
 			// that can be touched simultaneously.
@@ -93,7 +126,7 @@
 			y = e.changedTouches[0].pageY;
 		}
 
-		pageOffset = pageOffset || getPageOffset();
+		pageOffset = pageOffset || getPageOffset(scope_Document);
 
 		if ( mouse || pointer ) {
 			x = e.clientX + pageOffset.x;
@@ -161,7 +194,7 @@
 
 			handleNumbers.forEach(function(handleNumber, o) {
 
-				var to = checkHandlePosition(proposals, handleNumber, proposals[handleNumber] + proposal, b[o], f[o]);
+				var to = checkHandlePosition(proposals, handleNumber, proposals[handleNumber] + proposal, b[o], f[o], false);
 
 				// Stop if one of the handles can't move.
 				if ( to === false ) {

@@ -9,26 +9,26 @@
 .content {
   &:not(.content--boxed):not(.content--full) {
     @include media-breakpoint-up(xl) {
-      padding: ($header-height + $grid-gutter-width-base) $grid-gutter-width-base 0 $sidebar-width;
+      padding: ($header-height + $grid-gutter-width) $grid-gutter-width 0 $sidebar-width;
     }
 
     @include media-breakpoint-between(sm, lg) {
-      padding: ($header-height + $grid-gutter-width-base) $grid-gutter-width-base 0;
+      padding: ($header-height + $grid-gutter-width) $grid-gutter-width 0;
     }
 
     @include media-breakpoint-down(xs) {
-      padding: ($header-height + $grid-gutter-width-base/2) $grid-gutter-width-base/2 0;
+      padding: ($header-height + $grid-gutter-width/2) $grid-gutter-width/2 0;
     }
   }
 }
 
 .content--full {
   @include media-breakpoint-up(sm) {
-    padding: ($header-height + $grid-gutter-width-base) $grid-gutter-width-base 0;
+    padding: ($header-height + $grid-gutter-width) $grid-gutter-width 0;
   }
 
   @include media-breakpoint-down(sm) {
-    padding: ($header-height + $grid-gutter-width-base/2) $grid-gutter-width-base/2 0;
+    padding: ($header-height + $grid-gutter-width/2) $grid-gutter-width/2 0;
   }
 }
 
@@ -86,7 +86,7 @@
     margin: 0 -15px;
 
     .column {
-      padding: 0 $grid-gutter-width-base/2;
+      padding: 0 $grid-gutter-width/2;
     }
   }
 
