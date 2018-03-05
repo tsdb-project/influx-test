@@ -3,15 +3,11 @@
  */
 package app.controller;
 
-import app.bean.DifferRequestBodyBean;
-import app.bean.ExceedRequestBodyBean;
-import app.bean.RawDataRequestBodyBean;
-import app.model.QueryResultBean;
-import app.model.RawData;
-import app.service.ColumnService;
-import app.service.PatientFilteringService;
-import app.service.QueriesService;
-import app.service.RawDataService;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,10 +17,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import app.bean.DifferRequestBodyBean;
+import app.bean.ExceedRequestBodyBean;
+import app.bean.RawDataRequestBodyBean;
+import app.model.QueryResultBean;
+import app.model.RawData;
+import app.service.ColumnService;
+import app.service.PatientFilteringService;
+import app.service.QueriesService;
+import app.service.RawDataService;
 
 /**
  * @author Isolachine
@@ -60,18 +61,13 @@ public class QueryController {
             map.put("data", new ArrayList<>());
             return map;
         }
-        // List<Patient> patients = patientService.FindAll();
-        // List<OccurenceBean> occurenceBeans = new ArrayList<>();
 
-        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount());
-        //
-        // System.out.println(request.getColumn());
-        // for (Patient patient : patients) {
-        // OccurenceBean occurenceBean = new OccurenceBean();
-        // occurenceBean.setOccurence("N/A");
-        // occurenceBean.setPatient(patient);
-        // occurenceBeans.add(occurenceBean);
-        // }
+        patientFilteringService.AddGenderFilter(request.getMeta().get("gender"));
+        patientFilteringService.AddAgeLowerFilter(Integer.valueOf(request.getMeta().get("ageLower")));
+        patientFilteringService.AddAgeUpperFilter(Integer.valueOf(request.getMeta().get("ageUpper")));
+        List<String> patientIDs = patientFilteringService.FetchResultPid();
+        
+        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount(), patientIDs, null);
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
         return map;
@@ -94,7 +90,7 @@ public class QueryController {
             return map;
         }
 
-        List<QueryResultBean> resultBeans = queriesService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount());
+        List<QueryResultBean> resultBeans = queriesService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount(), null, null);
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
         return map;
@@ -103,7 +99,7 @@ public class QueryController {
     @RequestMapping("raw")
     public Map<String, Object> raw(@RequestBody RawDataRequestBodyBean request, Model model) throws ParseException {
         Map<String, Object> map = new HashedMap<>();
-        
+
         List<RawData> rawData = rawDataService.selectAllRawDataInColumns(request.getTableName(), request.getColumnNames());
 
         List<List<String[]>> rawDataResponse = new ArrayList<>();
@@ -124,7 +120,7 @@ public class QueryController {
             }
         }
         map.put("raw", rawDataResponse);
-        
+
         return map;
     }
 }
