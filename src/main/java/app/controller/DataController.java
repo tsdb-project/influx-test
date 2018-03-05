@@ -88,9 +88,6 @@ public class DataController {
         
         importCsvService.AddArrayFiles(allAR);
         
-        //TODO: Should let user choose LoadFactor
-        importCsvService.DoImport(0.01);
-        
         return map;
     }
 

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -39,60 +40,44 @@ public class ImportCsvService {
     private final AtomicLong totalProcessedSize = new AtomicLong(0);
     private final Map<String, Long> everyFileSize = new HashMap<>();
 
-    private static final String dbName = DBConfiguration.Data.DBNAME;
+    private final String dbName = DBConfiguration.Data.DBNAME;
+    private double loadFactor = 0.6;
 
-    private boolean importingLock = false;
+    private final AtomicBoolean importingLock = new AtomicBoolean(false);
 
     private final BlockingQueue<Path> fileQueue = new LinkedBlockingQueue<>();
     private final ImportProgressService ips = new ImportProgressService(this.taskUUID);
 
+    public double GetLoadFactor() {
+        return loadFactor;
+    }
+
     /**
-     * Get UUID for this task
+     * Set a load factor for importing
      */
+    public void SetLoadFactor(double loadFactor) {
+        this.loadFactor = loadFactor;
+    }
+
     public String GetUUID() {
         return this.taskUUID;
     }
 
-    /**
-     * Start multi-thread importing
-     * Once start, this class should be locked
-     */
-    public void DoImport(double loadFactor) {
-        if (importingLock) return;
-        if (fileQueue.isEmpty()) return;
-
-        int paraCount = (int) Math.round(loadFactor * availCores);
-        paraCount = paraCount > 0 ? paraCount : 1;
-        ExecutorService scheduler = Executors.newFixedThreadPool(paraCount);
-
-        Runnable importTask = () -> {
-            Path aFilePath;
-            while ((aFilePath = fileQueue.poll()) != null) {
-                internalImportMain(aFilePath);
-            }
-        };
-
-        importingLock = true;
-        for (int i = 0; i < paraCount; ++i)
-            scheduler.submit(importTask);
-        scheduler.shutdown();
-    }
-
     public static void main(String[] args) throws InterruptedException {
         ImportCsvService ics = new ImportCsvService();
-        String[] allNoAr = Util.getAllCsvFileInDirectory("N:\\Test_NoAR\\");
-        String[] allAr = Util.getAllCsvFileInDirectory("N:\\Test_AR\\");
+        String[] allNoAr = Util.getAllCsvFileInDirectory("N:\\1\\");
+        String[] allAr = Util.getAllCsvFileInDirectory("N:\\2\\");
 
         ics.AddArrayFiles(allNoAr);
         ics.AddArrayFiles(allAr);
 
-        // Invoke this should finish fast, then the process is in the background
-        ics.DoImport(0.01);
-
-        // Wait 3s to get some results
-        Thread.sleep(3000);
+        // Wait s to get some results
+        Thread.sleep(8000);
         double ovr = ImportProgressService.GetTaskOverallProgress(ics.GetUUID());
         Map<String, List<Object>> ss = ImportProgressService.GetTaskAllFileProgress(ics.GetUUID());
+
+        // Add again
+        ics.AddOneFile("N:\\Test_AR\\PUH-2010-076_07ar.csv");
 
         System.out.println("Main exited, worker running...");
     }
@@ -103,17 +88,7 @@ public class ImportCsvService {
      * @param path File path
      */
     public void AddOneFile(String path) {
-        if (importingLock) return;
-        Path p = Paths.get(path);
-        try {
-            long currS = Files.size(p);
-            totalAllSize.addAndGet(currS);
-            everyFileSize.put(p.toString(), currS);
-            fileQueue.offer(p);
-        } catch (IOException e) {
-            logFailureFiles(p.toString(), e.getLocalizedMessage(), 0, 0);
-            e.printStackTrace();
-        }
+        this.internalAddOne(path, false);
     }
 
     /**
@@ -122,9 +97,25 @@ public class ImportCsvService {
      * @param paths List of files
      */
     public void AddArrayFiles(String[] paths) {
-        if (importingLock) return;
         for (String aPath : paths) {
-            AddOneFile(aPath);
+            this.internalAddOne(aPath, true);
+        }
+        this.startImport();
+    }
+
+    private void internalAddOne(String path, boolean isInternal) {
+        Path p = Paths.get(path);
+        try {
+            long currS = Files.size(p);
+            totalAllSize.addAndGet(currS);
+            everyFileSize.put(p.toString(), currS);
+            fileQueue.offer(p);
+            // If this function is invoked by 'AddArrayFiles', then don't startImport
+            if (!isInternal) this.startImport();
+        } catch (IOException e) {
+            //TODO: A separate log table for system failures
+            //logFailureFiles(p.toString(), e.getLocalizedMessage(), 0, 0);
+            e.printStackTrace();
         }
     }
 
@@ -302,6 +293,30 @@ public class ImportCsvService {
             totalAllSize.addAndGet(procedSize - thisFileSize);
             logFailureFiles(fileFullPath, (String) impStr[0], thisFileSize, procedSize);
         }
+    }
+
+    private void startImport() {
+        if (importingLock.get()) return;
+
+        int paraCount = (int) Math.round(loadFactor * availCores);
+        paraCount = paraCount > 0 ? paraCount : 1;
+        ExecutorService scheduler = Executors.newFixedThreadPool(paraCount);
+
+        Runnable importTask = () -> {
+            Path aFilePath;
+            while ((aFilePath = fileQueue.poll()) != null) {
+                internalImportMain(aFilePath);
+            }
+            //Queue empty now, safe to re-import
+            importingLock.set(false);
+        };
+
+        // importingLock must be false (not locked) to start new threads
+        if (!importingLock.compareAndSet(false, true)) return;
+
+        for (int i = 0; i < paraCount; ++i)
+            scheduler.submit(importTask);
+        scheduler.shutdown();
     }
 
     private void logSuccessFiles(String fn, long thisFileSize, long thisFileProcessedSize) {
