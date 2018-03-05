@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package app.controller;
 
@@ -28,7 +28,6 @@ import java.util.Map;
 
 /**
  * @author Isolachine
- *
  */
 
 @Controller
@@ -63,7 +62,7 @@ public class QueryController {
         // List<Patient> patients = patientService.FindAll();
         // List<OccurenceBean> occurenceBeans = new ArrayList<>();
 
-        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount());
+        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount(), null, null);
         //
         // System.out.println(request.getColumn());
         // for (Patient patient : patients) {
@@ -94,7 +93,7 @@ public class QueryController {
             return map;
         }
 
-        List<QueryResultBean> resultBeans = queriesService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount());
+        List<QueryResultBean> resultBeans = queriesService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount(), null, null);
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
         return map;
@@ -103,7 +102,7 @@ public class QueryController {
     @RequestMapping("raw")
     public Map<String, Object> raw(@RequestBody RawDataRequestBodyBean request, Model model) throws ParseException {
         Map<String, Object> map = new HashedMap<>();
-        
+
         List<RawData> rawData = rawDataService.selectAllRawDataInColumns(request.getTableName(), request.getColumnNames());
 
         List<List<String[]>> rawDataResponse = new ArrayList<>();
@@ -124,7 +123,7 @@ public class QueryController {
             }
         }
         map.put("raw", rawDataResponse);
-        
+
         return map;
     }
 }
