@@ -1,5 +1,6 @@
 package app.controller;
 
+import app.bean.PatientFilterBean;
 import app.bean.Response;
 import app.model.Patient;
 import app.service.PatientFilteringService;
@@ -23,9 +24,8 @@ import java.util.Map;
 @RequestMapping("/apis")
 public class PatientGetController {
 
-    private PatientFilteringService patientFilteringService = new PatientFilteringService();
     @Autowired
-    PatientMetadataService patientMetadataService;
+    PatientMetadataService patientMetadataService = new PatientMetadataService();
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.GET)
     @ResponseBody
@@ -40,15 +40,14 @@ public class PatientGetController {
 
     @RequestMapping(value = "/patients/{idx}", method = RequestMethod.GET)
     public Patient getOnePatientByIndex(@PathVariable String idx) {
-        return patientFilteringService.FindById(idx.toUpperCase()).get(0);
+        return patientMetadataService.GetById(idx.toUpperCase()).get(0);
     }
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.POST)
     public List<Patient> getPatientWithCriteria() {
-        patientFilteringService.AddGenderFilter("F");
-        List<Patient> res = patientFilteringService.FetchResult();
-        patientFilteringService.ClearFilters();
-        return res;
+        PatientFilterBean pfb = new PatientFilterBean();
+        pfb.setGenderFilter("F");
+        return patientMetadataService.FetchResult(pfb);
     }
 
 }

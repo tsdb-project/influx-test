@@ -5,10 +5,7 @@ import app.common.InfluxappConfig;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Utilities for InfluxDB Java Client
@@ -98,15 +95,34 @@ public class InfluxUtil {
     }
 
     /**
-     * Manual table join
+     * Manual table join (Left join)
+     * Avoid using, due to no index
      *
-     * @param t1        Table 1
-     * @param t2        Table 2
-     * @param commonCol Join on which column
+     * @param l    Table left
+     * @param r    Table right
+     * @param colL Join on which column (left)
+     * @param colR Join on which column (right)
      */
-    public static Map<String, List<Object>> ResultTableJoin(Map<String, List<Object>> t1, Map<String, List<Object>> t2, String commonCol) {
-        //TODO: Implement
-        return null;
+    public static Map<String, List<Object>> ResultTableJoin(Map<String, List<Object>> l, Map<String, List<Object>> r, String colL, String colR) {
+        Map<String, List<Object>> result = new TreeMap<>();
+        Map<Integer, Integer> matchList = new HashMap<>(l.size());
+        // No index here, n^2 comp.
+        ArrayList<Object>
+                leftVal = new ArrayList<>(l.get(colL)),
+                rightVal = new ArrayList<>(r.get(colR));
+
+        for (int i = 0; i < leftVal.size(); i++) {
+            int newRightSize = rightVal.size();
+            for (int j = 0; j < newRightSize; j++) {
+                // objL and objR should be some primitive type (InfluxDB doesn't support much data type)
+                if (leftVal.get(i).equals(rightVal.get(j))) {
+                    matchList.put(i, j);
+                    rightVal.remove(j);
+                }
+            }
+        }
+
+        return result;
     }
 
     public static void main(String[] args) {

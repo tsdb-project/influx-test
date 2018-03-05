@@ -61,12 +61,7 @@ public class QueryController {
             return map;
         }
 
-        patientFilteringService.AddGenderFilter(request.getMeta().get("gender"));
-        patientFilteringService.AddAgeLowerFilter(Integer.valueOf(request.getMeta().get("ageLower")));
-        patientFilteringService.AddAgeUpperFilter(Integer.valueOf(request.getMeta().get("ageUpper")));
-        List<String> patientIDs = patientFilteringService.FetchResultPid();
-
-        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount(), patientIDs, null);
+        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount(), null, null);
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
         return map;
