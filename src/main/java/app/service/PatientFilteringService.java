@@ -82,6 +82,9 @@ public class PatientFilteringService {
      * @return Patient Object
      */
     public List<Patient> FindByIds(List<String> pids) {
+        if (pids.size() == 0) {
+            return new ArrayList<Patient>();
+        }
         StringBuilder sb = new StringBuilder(patientQueryStr);
         sb.append(" WHERE");
         for (String pid : pids) {
