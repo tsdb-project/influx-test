@@ -1,85 +1,95 @@
-$(document).ready(function() {
+$(document).ready(
+        function() {
 
-    var files = {
-        "data" : []
-    };
+            var files = {
+                "data" : []
+            };
 
-    var table = $('#patientTable').DataTable({
-        ajax : {
-            "url" : "/apis/patients/find"
-        },
-        data : files.data,
-        columns : [ {
-            data : 'pid'
-        }, {
-            data : 'age',
-        }, {
-            data : 'gender',
-        }, {
-            data : 'imported_time',
-        } ],
-        order : [ [ 0, 'asc' ] ],
-    });
+            var table = $('#patientTable').DataTable({
+                ajax : {
+                    "url" : "/apis/patients/find"
+                },
+                data : files.data,
+                columns : [ {
+                    data : 'pid'
+                }, {
+                    data : 'age',
+                }, {
+                    data : 'gender',
+                }, {
+                    data : 'imported_time',
+                } ],
+                order : [ [ 0, 'asc' ] ],
+            });
 
-    $("#refreshButton").click(function() {
-        table.ajax.reload();
-    });
-
-    $("#importButton").click(function() {
-        $("#importButton").attr('disabled', '');
-
-        var data = {
-            'files' : []
-        };
-        $.each($('.file-checkbox:checked'), function() {
-            data['files'].push($(this).val());
-        });
-
-        var files = data;
-
-        $.ajax({
-            'url' : "/api/data/import",
-            'type' : 'post',
-            'data' : JSON.stringify(files),
-            'contentType' : "application/json",
-            'dataType' : 'json',
-            'success' : function(data) {
-            },
-            'error' : function() {
-            }
-        });
-
-        $("#progressCard").slideDown();
-        var update = setInterval(function() {
+            $("#refreshButton").click(function() {
+                table.ajax.reload();
+            });
 
             $.ajax({
                 'url' : "/api/data/progress",
                 'success' : function(data) {
-                    var percent = data.progress;
-                    var name = data.file;
-                    $("#fileProgress").attr("style", "width: " + percent + "%");
-                    $("#fileProgress").attr("aria-valuenow", "" + percent);
-                    $("#fileName").html(name);
-                    $("#filePercent").html(percent + "%");
+                    var progressHtml = "";
+                    for (i = 0; i < data.filename.length; i++) {
+                        var progress = (data.progress[i] * 100).toFixed(2);
+                        progressHtml += "<div class=\"progress\"><div class=\"progress-bar\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
+                                + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.filename[i] + "</small><small class=\"card-subtitle\">" + progress
+                                + "%</small><br><br>";
+                    }
 
                     var totalPercent = data.total;
                     $("#totalProgress").attr("style", "width: " + totalPercent + "%");
                     $("#totalProgress").attr("aria-valuenow", "" + totalPercent);
                     $("#totalPercent").html(totalPercent + "%");
 
-                    if (data.finished == true) {
+                    $("#fileProgress").html(progressHtml);
+
+                    if (data.total >= 99.9) {
                         clearInterval(update);
-                        $("#importButton").removeAttr('disabled');
-                        alert("Data import finished.");
+                        $("#running").hide();
+                        $("#finished").show();
+                    } else {
+                        $("#running").show();
+                        $("#finished").hide();
                     }
                 },
                 'error' : function() {
                     clearInterval(update);
-                    $("#importButton").removeAttr('disabled');
                 }
             });
 
-        }, 2000);
+            var update = setInterval(function() {
+                $.ajax({
+                    'url' : "/api/data/progress",
+                    'success' : function(data) {
+                        var progressHtml = "";
+                        for (i = 0; i < data.filename.length; i++) {
+                            var progress = (data.progress[i] * 100).toFixed(2);
+                            progressHtml += "<div class=\"progress\"><div class=\"progress-bar\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
+                                    + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.filename[i] + "</small><small class=\"card-subtitle\">&nbsp&nbsp"
+                                    + progress + "%</small><br><br>";
+                        }
 
-    });
-});
+                        var totalPercent = data.total;
+                        $("#totalProgress").attr("style", "width: " + totalPercent + "%");
+                        $("#totalProgress").attr("aria-valuenow", "" + totalPercent);
+                        $("#totalPercent").html(totalPercent + "%");
+
+                        $("#fileProgress").html(progressHtml);
+
+                        if (data.total >= 99.9) {
+                            clearInterval(update);
+                            $("#running").hide();
+                            $("#finished").show();
+                        } else {
+                            $("#running").show();
+                            $("#finished").hide();
+                        }
+                    },
+                    'error' : function() {
+                        clearInterval(update);
+                    }
+                });
+            }, 2000);
+
+        });

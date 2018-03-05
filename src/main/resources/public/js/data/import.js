@@ -81,37 +81,49 @@ $(document).ready(
                     }
                 });
 
-                $("#progressCard").slideDown();
-                var update = setInterval(function() {
-
-                    $.ajax({
-                        'url' : "/api/data/progress",
-                        'success' : function(data) {
-                            var percent = data.progress;
-                            var name = data.file;
-                            $("#fileProgress").attr("style", "width: " + percent + "%");
-                            $("#fileProgress").attr("aria-valuenow", "" + percent);
-                            $("#fileName").html(name);
-                            $("#filePercent").html(percent + "%");
-
-                            var totalPercent = data.total;
-                            $("#totalProgress").attr("style", "width: " + totalPercent + "%");
-                            $("#totalProgress").attr("aria-valuenow", "" + totalPercent);
-                            $("#totalPercent").html(totalPercent + "%");
-
-                            if (data.finished == true) {
-                                clearInterval(update);
-                                $("#importButton").removeAttr('disabled');
-                                alert("Data import finished.");
-                            }
-                        },
-                        'error' : function() {
-                            clearInterval(update);
-                            $("#importButton").removeAttr('disabled');
-                        }
-                    });
-
-                }, 2000);
+                // $("#progressCard").slideDown();
+                // var update = setInterval(function() {
+                // var url = "/api/data/progress";
+                // if (data.files.length != 0) {
+                // url += "?file=" + data.files[0];
+                // }
+                // $.ajax({
+                // 'url' : url,
+                // 'success' : function(data) {
+                // var progressHtml = "";
+                // for (i = 0; i < data.filename.length; i++) {
+                // var progress = (data.progress[i] * 100).toFixed(2);
+                // progressHtml += "<div class=\"progress\"><div
+                // class=\"progress-bar\" role=\"progressbar\" style=\"width: "
+                // + progress + "%\" aria-valuenow=\"" + progress
+                // + "\" aria-valuemin=\"0\"
+                // aria-valuemax=\"100\"></div></div><small
+                // class=\"card-subtitle\">" + data.filename[i]
+                // + "</small><small class=\"card-subtitle\">" + progress +
+                // "%</small><br><br>";
+                // }
+                //
+                // var totalPercent = data.total;
+                // $("#totalProgress").attr("style", "width: " + totalPercent +
+                // "%");
+                // $("#totalProgress").attr("aria-valuenow", "" + totalPercent);
+                // $("#totalPercent").html(totalPercent + "%");
+                //
+                // $("#fileProgress").html(progressHtml);
+                //
+                // if (data.total >= 100) {
+                // clearInterval(update);
+                // $("#importButton").removeAttr('disabled');
+                // alert("Data import finished.");
+                // }
+                // },
+                // 'error' : function() {
+                // clearInterval(update);
+                // $("#importButton").removeAttr('disabled');
+                // }
+                // });
+                //
+                // }, 2000);
 
             });
         });

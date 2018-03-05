@@ -25,25 +25,12 @@
             <header class="content__title">
                 <h1>Import Data</h1>
                 <small>Import data from preprocessed files.</small>
-
-                <div class="actions">
-                    <a href="" class="actions__item zmdi zmdi-trending-up"></a>
-                    <a href="" class="actions__item zmdi zmdi-check-all"></a>
-
-                    <div class="dropdown actions__item">
-                        <i data-toggle="dropdown" class="zmdi zmdi-more-vert"></i>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <a href="" class="dropdown-item">Refresh</a>
-                            <a href="" class="dropdown-item">Manage Widgets</a>
-                            <a href="" class="dropdown-item">Settings</a>
-                        </div>
-                    </div>
-                </div>
             </header>
 
             <div class="card">
-
                 <div class="card-body">
+                    <h3 class="card-title">File Search</h3>
+                    <h3 class="card-subtitle">Type in directory and search for CSV data files.</h3>
                     <div class="row">
                         <div class="col-sm-10 col-md-10">
                             <div class="form-group">
@@ -55,15 +42,7 @@
                             <button class="btn btn-primary btn--icon" id="searchButton">
                                 <i class="zmdi zmdi-search"></i>
                             </button>
-                            <!-- <button class="btn btn-danger btn--icon">
-                                <i class="zmdi zmdi-close"></i>
-                            </button> -->
                         </div>
-                        <!-- <form action="/file-upload" class="dropzone">
-                        <div class="fallback">
-                            <input name="file" type="file" multiple />
-                        </div>
-                    </form> -->
                     </div>
                     <form id="fileForm">
                         <div class="table-responsive">
@@ -91,23 +70,28 @@
                 </div>
             </div>
 
-            <div class="card" style="display: none" id="progressCard">
+            <div class="card" id="progressCard"><!--  style="display: none"> -->
                 <div class="card-body">
                     <h2 class="card-title">Import Progress</h2>
-                    <div class="progress">
-                        <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="fileProgress"></div>
+                    <h2 class="card-subtitle">Track the import progress in <a href="/data/status">Data - Status</a> page. </h2>
+                    <!-- <div id="fileProgress">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="fileProgress"></div>
+                        </div>
+                        <small class="card-subtitle" id="fileName"></small>
+                        <small class="card-subtitle" id="filePercent">0%</small>
+                        <br>
+                        <br>
                     </div>
-                    <small class="card-subtitle" id="fileName"></small>
-                    <small class="card-subtitle" id="filePercent">0%</small>
 
                     <br>
 
                     <div class="progress">
-                        <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="totalProgress"></div>
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="totalProgress"></div>
                     </div>
                     <small class="card-subtitle">Total</small>
                     <small class="card-subtitle" id="totalPercent">0%</small>
-                    <br>
+                    <br> -->
                 </div>
             </div>
 

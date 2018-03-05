@@ -35,7 +35,7 @@ public class DataController {
         model.addAttribute("subnav", "import");
         return model;
     }
-    
+
     @RequestMapping("data/status")
     @ResponseBody
     public Model dataStatus(Model model) {
@@ -81,33 +81,41 @@ public class DataController {
         Map<String, Object> map = new HashMap<>();
 
         String[] allAR = new String[dir.getFiles().size()];
-        
+
         for (int i = 0; i < allAR.length; i++) {
             allAR[i] = dir.getFiles().get(i);
         }
-        
+
         importCsvService.AddArrayFiles(allAR);
-        
+
         return map;
     }
 
     @RequestMapping(value = "api/data/progress")
     @ResponseBody
-    public Map<String, Object> importProgress(Model model) {
-
+    public Map<String, Object> importProgress(@RequestParam(value = "file", required = false, defaultValue = "") String file, Model model) {
         Map<String, Object> map = new HashMap<>();
 
         String uuid = importCsvService.GetUUID();
 
-        map.put("uuid", uuid);
-
-        //TODO: Check the content of allstat
         Map<String, List<Object>> allstat = ImportProgressService.GetTaskAllFileProgress(uuid);
+        for (String key : allstat.keySet()) {
+            map.put(key, allstat.get(key));
+        }
 
-        map.put("file", "Shoud be a list here");
-        map.put("progress", "Shoud be a list here");
-        map.put("total", ImportProgressService.GetTaskOverallProgress(uuid));
-
+        String total = String.format("%.2f", ImportProgressService.GetTaskOverallProgress(uuid) * 100);
+        map.put("total", total);
+        // if (!allstat.get("filename").contains(file)) {
+        // map.put("finished", false);
+        // } else {
+        // for (Object status : allstat.get("status")) {
+        // if (!status.toString().equals("STATUS_FINISHED")) {
+        // map.put("finished", false);
+        // return map;
+        // }
+        // }
+        // }
+        // map.put("finished", true);
         return map;
     }
 }
