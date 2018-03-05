@@ -56,12 +56,7 @@ public class PatientFilteringService {
         Query q = new Query("SHOW TAG VALUES WITH KEY = \"PID\"", dbName);
         QueryResult qr = influxDB.query(q);
 
-        List<List<Object>> vals = qr.getResults().get(0).getSeries().get(0).getValues();
-        List<String> res = new ArrayList<>(vals.size());
-        for (List<Object> o : vals) {
-            res.add((String) o.get(1));
-        }
-        return res;
+        return generatePidList(qr);
     }
 
     /**
@@ -196,12 +191,7 @@ public class PatientFilteringService {
         if (filters.size() == 0) return FindAllPid();
 
         QueryResult qr = finalQuery();
-        List<List<Object>> vals = qr.getResults().get(0).getSeries().get(0).getValues();
-        List<String> res = new ArrayList<>(vals.size());
-        for (List<Object> o : vals) {
-            res.add((String) o.get(1));
-        }
-        return res;
+        return generatePidList(qr);
     }
 
     /**
@@ -215,6 +205,15 @@ public class PatientFilteringService {
         String fullQuery = patientQueryStr + whereAndFiltersGenerator();
         Query q = new Query(fullQuery, dbName);
         return influxDB.query(q);
+    }
+
+    private List<String> generatePidList(QueryResult qr) {
+        List<List<Object>> vals = qr.getResults().get(0).getSeries().get(0).getValues();
+        List<String> res = new ArrayList<>(vals.size());
+        for (List<Object> o : vals) {
+            res.add((String) o.get(1));
+        }
+        return res;
     }
 
     private String whereAndFiltersGenerator() {

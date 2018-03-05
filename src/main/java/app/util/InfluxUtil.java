@@ -2,8 +2,6 @@ package app.util;
 
 import app.common.DBConfiguration;
 import app.common.InfluxappConfig;
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 
@@ -83,9 +81,7 @@ public class InfluxUtil {
     public static boolean hasDuplicateTagKeyValues(String keyName, String toCheckValue, String dbName) {
         Query q = new Query("SHOW TAG VALUES ON \"" + dbName + "\" WITH KEY = \"" + keyName + "\"", dbName);
         Map<String, List<Object>> qr = QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
-        if (qr.size() == 0) return false;
-
-        return qr.get("value").contains(toCheckValue);
+        return qr.size() != 0 && qr.get("value").contains(toCheckValue);
     }
 
     /**
@@ -101,6 +97,17 @@ public class InfluxUtil {
         return (long) qr.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
     }
 
+    /**
+     * Manual table join
+     *
+     * @param t1        Table 1
+     * @param t2        Table 2
+     * @param commonCol Join on which column
+     */
+    public static Map<String, List<Object>> ResultTableJoin(Map<String, List<Object>> t1, Map<String, List<Object>> t2, String commonCol) {
+        //TODO: Implement
+        return null;
+    }
 
     public static void main(String[] args) {
         List<String> s = getAllTables(DBConfiguration.Data.DBNAME);
