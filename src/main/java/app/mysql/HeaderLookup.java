@@ -28,46 +28,115 @@ public class HeaderLookup implements CommandLineRunner {
 
         String userIn;
         Scanner sc = new Scanner(System.in);
-        String tip = "\n\nInput a header name (q to exit): ";
 
-        System.out.println(tip);
+        System.out.println("Select type (0: Mapping; Other: Reverse mapping): ");
 
-        while (!(userIn = sc.nextLine()).toLowerCase().equals("q")) {
+        switch (sc.nextLine()) {
+            case "0":
+                String tip = "\n\nInput a header name (q to exit): ";
+                System.out.println(tip);
 
-            String[] headerName = userIn.toUpperCase().split("_");
-            if (headerName.length != 2) {
-                System.out.println("Malformed input!");
-            } else {
-                List<Mapping> c = jdbcTemplate.query(
-                        "SELECT * FROM `feature_mapping_tmp` WHERE SID = ?", new Object[]{headerName[0]},
-                        (rs, rowNum) -> new Mapping(
-                                rs.getLong("id"), rs.getString("type"),
-                                rs.getString("electrode"),
-                                rs.getDouble("freq_low"), rs.getDouble("freq_high"),
-                                rs.getString("notes"),
-                                rs.getString("SID"), rs.getInt("SID_Count"))
-                );
+                while (!(userIn = sc.nextLine()).toLowerCase().equals("q")) {
 
-                if (c.size() == 0) {
-                    System.out.println("No such SID!");
-                } else {
-                    Mapping m = c.get(0);
-                    if (m.getCount() < Integer.parseInt(headerName[1])) {
-                        System.out.println(String.format("Warning: sub index '%s' does not exist!", headerName[1]));
+                    String[] headerName = userIn.toUpperCase().split("_");
+                    if (headerName.length != 2) {
+                        System.out.println("Malformed input!");
+                    } else {
+                        List<Mapping> c = jdbcTemplate.query(
+                                "SELECT * FROM `feature_mapping_tmp` WHERE SID = ?", new Object[]{headerName[0]},
+                                (rs, rowNum) -> new Mapping(
+                                        rs.getLong("id"), rs.getString("type"),
+                                        rs.getString("electrode"),
+                                        rs.getDouble("freq_low"), rs.getDouble("freq_high"),
+                                        rs.getString("notes"),
+                                        rs.getString("SID"), rs.getInt("SID_Count"))
+                        );
+
+                        if (c.size() == 0) {
+                            System.out.println("No such SID!");
+                        } else {
+                            Mapping m = c.get(0);
+                            if (m.getCount() < Integer.parseInt(headerName[1])) {
+                                System.out.println(String.format("Warning: sub index '%s' does not exist!", headerName[1]));
+                            }
+                            System.out.print(String.format("'%s' is type: %s. ", headerName[0], m.getType()));
+                            if (!m.getElectrode().isEmpty()) {
+                                System.out.print(String.format("Its electrode is: %s. ", m.getElectrode()));
+                            }
+                            if (!m.getNotes().isEmpty()) {
+                                System.out.print(String.format("It has a note: %s. ", m.getNotes()));
+                            }
+                        }
                     }
-                    System.out.print(String.format("'%s' is type: %s. ", headerName[0], m.getType()));
-                    if (!m.getElectrode().isEmpty()) {
-                        System.out.print(String.format("Its electrode is: %s. ", m.getElectrode()));
-                    }
-                    if (!m.getNotes().isEmpty()) {
-                        System.out.print(String.format("It has a note: %s. ", m.getNotes()));
-                    }
+                    System.out.println(tip);
                 }
-            }
-            System.out.println(tip);
+                break;
+            default:
+                String tip1 = "\n\nInput a type (q to exit): ";
+                System.out.println(tip1);
+
+                while (!(userIn = sc.nextLine()).toLowerCase().equals("q")) {
+
+                    String allIn = "%" + userIn + "%";
+                    List<ReverseMapping> c = jdbcTemplate.query(
+                            "SELECT type, SID, MAX(SID_Count) AS B FROM `feature_mapping_tmp` WHERE type LIKE ? GROUP BY SID",
+                            new Object[]{allIn},
+                            (rs, rowNum) -> new ReverseMapping(
+                                    rs.getString("type"), rs.getString("SID"),
+                                    rs.getInt("B"))
+                    );
+
+                    if (c.size() == 0) {
+                        System.out.println("No such type!");
+                    } else {
+                        System.out.println("For type '" + userIn + "':");
+                        c.forEach(rm -> {
+                            System.out.print(rm.getType() + ": ");
+                            System.out.println(String.join(", ", rm.getColumnHeaders()));
+                        });
+                    }
+
+                    System.out.println(tip1);
+                }
+                break;
         }
 
         SpringApplication.exit(context);
+    }
+
+    public class ReverseMapping {
+        private String type, sid;
+        private int sid_count;
+
+        public ReverseMapping(String type, String sid, int sid_count) {
+            this.type = type;
+            this.sid = sid;
+            this.sid_count = sid_count;
+        }
+
+        public String[] getColumnHeaders() {
+            String[] res = new String[sid_count];
+            for (int i = 1; i <= sid_count; i++) {
+                res[i - 1] = sid + "_" + i;
+            }
+            return res;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getSid() {
+            return sid;
+        }
+
+        public void setSid(String sid) {
+            this.sid = sid;
+        }
     }
 
     public class Mapping {
