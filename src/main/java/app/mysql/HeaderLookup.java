@@ -35,30 +35,35 @@ public class HeaderLookup implements CommandLineRunner {
         while (!(userIn = sc.nextLine()).toLowerCase().equals("q")) {
 
             String[] headerName = userIn.toUpperCase().split("_");
-
-            List<Mapping> c = jdbcTemplate.query(
-                    "SELECT * FROM `feature_mapping` WHERE SID = ?", new Object[]{headerName[0]},
-                    (rs, rowNum) -> new Mapping(
-                            rs.getLong("id"), rs.getString("type"), rs.getString("electrode"),
-                            rs.getDouble("freq_low"), rs.getDouble("freq_high"),
-                            rs.getString("brain_location"), rs.getString("notes"),
-                            rs.getString("SID"), rs.getInt("SID_Count"))
-            );
-
-            if (c.size() == 0) {
-                System.out.println("No such SID!");
+            if (headerName.length != 2) {
+                System.out.println("Malformed input!");
             } else {
-                Mapping m = c.get(0);
-                System.out.print(String.format("'%s' is type: %s. ", headerName[0], m.getType()));
-                int subId = Integer.parseInt(headerName[1]);
-                if (!m.getNotes().isEmpty()) {
-                    System.out.print(String.format("It has a note: %s. ", m.getNotes()));
-                }
-                if (m.getCount() < subId) {
-                    System.out.println("However the sub index does not exist!");
+                List<Mapping> c = jdbcTemplate.query(
+                        "SELECT * FROM `feature_mapping_tmp` WHERE SID = ?", new Object[]{headerName[0]},
+                        (rs, rowNum) -> new Mapping(
+                                rs.getLong("id"), rs.getString("type"),
+                                rs.getString("electrode"),
+                                rs.getDouble("freq_low"), rs.getDouble("freq_high"),
+                                rs.getString("notes"),
+                                rs.getString("SID"), rs.getInt("SID_Count"))
+                );
+
+                if (c.size() == 0) {
+                    System.out.println("No such SID!");
+                } else {
+                    Mapping m = c.get(0);
+                    if (m.getCount() < Integer.parseInt(headerName[1])) {
+                        System.out.println(String.format("Warning: sub index '%s' does not exist!", headerName[1]));
+                    }
+                    System.out.print(String.format("'%s' is type: %s. ", headerName[0], m.getType()));
+                    if (!m.getElectrode().isEmpty()) {
+                        System.out.print(String.format("Its electrode is: %s. ", m.getElectrode()));
+                    }
+                    if (!m.getNotes().isEmpty()) {
+                        System.out.print(String.format("It has a note: %s. ", m.getNotes()));
+                    }
                 }
             }
-
             System.out.println(tip);
         }
 
@@ -67,22 +72,20 @@ public class HeaderLookup implements CommandLineRunner {
 
     public class Mapping {
         private long id;
-        private String electrode, brain_location, sid, type, notes;
+        private String electrode, sid, type, notes;
         private int count;
         private double freq_low, freq_high;
 
-        public Mapping(long id, String t, String electrode,
-                       double freq_low, double freq_high, String brain_location, String notes,
+        public Mapping(long id, String t, String electrode, double freq_low, double freq_high, String notes,
                        String sid, int sid_count) {
             this.id = id;
-            this.type = t;
-            this.electrode = electrode;
+            this.type = t.trim();
+            this.electrode = electrode.trim();
             this.freq_high = freq_high;
             this.freq_low = freq_low;
-            this.brain_location = brain_location;
             this.sid = sid;
             this.count = sid_count;
-            this.notes = notes;
+            this.notes = notes.trim();
         }
 
         public String getType() {
@@ -115,14 +118,6 @@ public class HeaderLookup implements CommandLineRunner {
 
         public void setElectrode(String electrode) {
             this.electrode = electrode;
-        }
-
-        public String getBrain_location() {
-            return brain_location;
-        }
-
-        public void setBrain_location(String brain_location) {
-            this.brain_location = brain_location;
         }
 
         public String getSid() {
