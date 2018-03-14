@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.dialect">
+            org.hibernate.dialect.MySQLDialect
+        </property>
+
+        <property name="hibernate.connection.driver_class">
+            com.mysql.jdbc.Driver
+        </property>
+
+        <property name="hibernate.connection.url">
+            jdbc:mysql://dbmproject.ci79c4vuh1nl.us-east-1.rds.amazonaws.com/upmc
+        </property>
+
+        <property name="hibernate.connection.username">
+            yiz141
+        </property>
+
+        <property name="hibernate.connection.password">
+            yiz141
+        </property>
+
+        <property name="hbm2ddl.auto">update</property>
+
+        <mapping resource="Employee.hbm.xml"/>
+
+    </session-factory>
+</hibernate-configuration>
