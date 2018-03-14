@@ -5,6 +5,15 @@ package app.common;
  */
 public class DBConfiguration {
 
+    public class RelationalData {
+        public static final String DBNAME = "upmc";
+
+        /**
+         * Feature <---> Column mapping
+         */
+        public static final String HEADERMAPING = "feature_mapping_tmp";
+    }
+
     /**
      * Measurements in data table
      */

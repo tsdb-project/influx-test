@@ -1,4 +1,4 @@
-package app.model;
+package app.model.TSData;
 
 import app.common.DBConfiguration;
 import org.influxdb.annotation.Column;

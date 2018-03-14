@@ -2,7 +2,7 @@ package app.service;
 
 import app.common.DBConfiguration;
 import app.common.InfluxappConfig;
-import app.model.RawData;
+import app.model.TSData.RawData;
 import app.util.InfluxUtil;
 import app.util.Util;
 import org.influxdb.InfluxDB;

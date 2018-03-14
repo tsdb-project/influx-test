@@ -22,7 +22,7 @@ import app.bean.ExceedRequestBodyBean;
 import app.bean.PatientFilterBean;
 import app.bean.RawDataRequestBodyBean;
 import app.model.QueryResultBean;
-import app.model.RawData;
+import app.model.TSData.RawData;
 import app.service.ColumnService;
 import app.service.PatientFilteringService;
 import app.service.QueriesService;
