@@ -2,7 +2,7 @@ package app.service;
 
 import app.common.DBConfiguration;
 import app.common.InfluxappConfig;
-import app.model.CSVFile;
+import app.model.TSData.CSVFile;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
