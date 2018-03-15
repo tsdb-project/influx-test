@@ -28,3 +28,4 @@ nbdist/
 
 2.csv
 src/main/java/app/Environment.java
+src/main/resources/application.properties
