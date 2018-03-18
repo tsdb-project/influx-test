@@ -30,10 +30,10 @@ public class PatientFilteringService {
     public static void main(String[] args) {
         PatientFilterBean pfb = new PatientFilterBean();
         pfb.setGenderFilter("M");
-        pfb.setAgeLowerFilter(50);
-        pfb.setAgeUpperFilter(55);
-        pfb.setArrestLocationFilter(1);
-        pfb.setSurvivedFilter(0);
+        // pfb.setAgeLowerFilter(50);
+        // pfb.setAgeUpperFilter(55);
+        // pfb.setArrestLocationFilter(1);
+        // pfb.setSurvivedFilter(0);
 
         PatientFilteringService pfs = new PatientFilteringService();
         List<String> s;
@@ -55,14 +55,16 @@ public class PatientFilteringService {
      * @return PID
      */
     public List<String> FetchResultPid(PatientFilterBean pfb) {
-        if (pfb.getNumOfFilters() == 0) return GetAllImportedPid();
+        if (pfb.getNumOfFilters() == 0)
+            return GetAllImportedPid();
         Query q = new Query(this.patientPidStr + pfb.getWhereAndFilters(), dbMetaName);
         return generatePidList(influxDB.query(q));
     }
 
     private List<String> generatePidList(QueryResult qr) {
         List<QueryResult.Series> qrs = qr.getResults().get(0).getSeries();
-        if (qrs == null) return new ArrayList<>(0);
+        if (qrs == null)
+            return new ArrayList<>(0);
 
         List<List<Object>> vals = qrs.get(0).getValues();
         List<String> res = new ArrayList<>(vals.size());

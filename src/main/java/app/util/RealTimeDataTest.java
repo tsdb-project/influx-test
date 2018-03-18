@@ -3,7 +3,6 @@
  */
 package app.util;
 
-import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,7 +39,7 @@ public class RealTimeDataTest {
         BatchPoints batch = BatchPoints.database(dbName).consistency(ConsistencyLevel.ALL).build();
         batch.point(point);
         influxDB.write(batch);
-        System.out.println(LocalDateTime.now() + " Write " + value + " into realtime.");
+        // System.out.println(LocalDateTime.now() + " Write " + value + " into realtime.");
     }
 
     /**
