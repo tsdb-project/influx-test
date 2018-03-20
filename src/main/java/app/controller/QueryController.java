@@ -25,7 +25,7 @@ import app.model.QueryResultBean;
 import app.model.TSData.RawData;
 import app.service.ColumnService;
 import app.service.PatientFilteringService;
-import app.service.QueriesService;
+import app.service.QueryUserDefinedService;
 import app.service.RawDataService;
 
 /**
@@ -37,7 +37,7 @@ import app.service.RawDataService;
 @RequestMapping("query")
 public class QueryController {
     @Autowired
-    QueriesService queriesService;
+    QueryUserDefinedService queryUserDefinedService;
     @Autowired
     ColumnService columnService;
     @Autowired
@@ -75,7 +75,7 @@ public class QueryController {
         }
         List<String> patientIDs = patientFilteringService.FetchResultPid(filter);
 
-        List<QueryResultBean> resultBeans = queriesService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount(), patientIDs, null);
+        List<QueryResultBean> resultBeans = queryUserDefinedService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount(), patientIDs, null);
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
         return map;
@@ -111,7 +111,7 @@ public class QueryController {
         }
         List<String> patientIDs = patientFilteringService.FetchResultPid(filter);
 
-        List<QueryResultBean> resultBeans = queriesService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount(), patientIDs, null);
+        List<QueryResultBean> resultBeans = queryUserDefinedService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount(), patientIDs, null);
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
         return map;

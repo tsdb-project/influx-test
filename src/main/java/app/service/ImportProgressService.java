@@ -1,7 +1,7 @@
-package app.service.util;
+package app.service;
 
-import app.common.DBConfiguration;
-import app.common.InfluxappConfig;
+import app.config.DBConfiguration;
+import app.config.InfluxappConfig;
 import app.util.InfluxUtil;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Import progress service
  */
+//TODO: Operate in MySQL
 public class ImportProgressService {
 
     public enum FileProgressStatus {
@@ -62,6 +63,7 @@ public class ImportProgressService {
                 "SELECT \"filename\", MAX(\"CurrentPercent\") AS progress, \"status\", \"Reason\" FROM "
                         + DBConfiguration.Sys.SYS_FILE_IMPORT_PROGRESS
                         + " WHERE tid = '" + uuid + "' GROUP BY \"filename\";", dbName);
+        //TODO: Convert to List<Progress Object>, result in rows, not columns!!!
         return InfluxUtil.QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
     }
 

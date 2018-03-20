@@ -1,9 +1,8 @@
 package app.service;
 
 
-import app.common.DBConfiguration;
-import app.common.InfluxappConfig;
-import app.service.util.ImportProgressService;
+import app.config.DBConfiguration;
+import app.config.InfluxappConfig;
 import app.util.InfluxUtil;
 import app.util.Util;
 import okhttp3.OkHttpClient;
@@ -278,7 +277,7 @@ public class ImportCsvService {
                     thisFileSize, 0);
             return;
         } else if (fileInfo[2].equals("2")) {
-            //TODO: Clean the failed table?
+            //TODO: Check my notes: Moving to MySQL
             logFailureFiles(fileFullPath, "Corrupted or finished import, TODO.",
                     thisFileSize, 0);
             return;

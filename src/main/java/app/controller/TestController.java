@@ -5,7 +5,7 @@ package app.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import app.service.HeaderLookupServiceDemo;
+import app.deprecated.HeaderLookupServiceDemo;
 
 /**
  * @author Isolachine

@@ -1,20 +1,16 @@
 package app.service;
 
 import app.bean.PatientFilterBean;
-import app.common.DBConfiguration;
-import app.common.InfluxappConfig;
+import app.config.DBConfiguration;
+import app.config.InfluxappConfig;
 import app.model.Patient;
-import app.util.InfluxUtil;
 import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.impl.InfluxDBResultMapper;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Get metadata for patients

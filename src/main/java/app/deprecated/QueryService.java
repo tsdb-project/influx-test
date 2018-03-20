@@ -1,10 +1,10 @@
 /**
  *
  */
-package app.service;
+package app.deprecated;
 
-import app.common.DBConfiguration;
-import app.common.InfluxappConfig;
+import app.config.DBConfiguration;
+import app.config.InfluxappConfig;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.InfluxDBFactory;

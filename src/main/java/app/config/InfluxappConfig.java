@@ -1,6 +1,5 @@
-package app.common;
+package app.config;
 
-import app.Environment;
 import okhttp3.OkHttpClient;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;

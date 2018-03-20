@@ -7,7 +7,7 @@ import app.bean.FileBean;
 import app.bean.Response;
 import app.bean.SearchFileForm;
 import app.service.ImportCsvService;
-import app.service.util.ImportProgressService;
+import app.service.ImportProgressService;
 import app.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

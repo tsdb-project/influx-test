@@ -35,7 +35,7 @@ nbdist/
 
 1.csv
 2.csv
-src/main/java/app/Environment.java
+src/main/java/app/config/Environment.java
 
 ### No longer needed
 application.properties

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package app.util;
+package app.test;
 
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -16,7 +16,7 @@ import org.influxdb.dto.Point;
 import org.influxdb.dto.Point.Builder;
 import org.influxdb.dto.Query;
 
-import app.common.InfluxappConfig;
+import app.config.InfluxappConfig;
 
 /**
  * @author Isolachine

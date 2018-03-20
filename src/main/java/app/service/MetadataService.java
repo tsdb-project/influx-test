@@ -1,7 +1,7 @@
 package app.service;
 
-import app.common.DBConfiguration;
-import app.common.InfluxappConfig;
+import app.config.DBConfiguration;
+import app.config.InfluxappConfig;
 import app.util.Util;
 import com.opencsv.CSVReader;
 import org.influxdb.InfluxDB;

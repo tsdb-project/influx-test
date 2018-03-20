@@ -1,4 +1,4 @@
-package app.common;
+package app.config;
 
 /**
  * DB Names and measurement names

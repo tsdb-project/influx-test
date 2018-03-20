@@ -10,8 +10,8 @@ import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.springframework.stereotype.Service;
 
-import app.common.DBConfiguration;
-import app.common.InfluxappConfig;
+import app.config.DBConfiguration;
+import app.config.InfluxappConfig;
 import app.model.QueryResultBean;
 import app.model.TimeSpan;
 import app.util.InfluxUtil;
@@ -20,7 +20,7 @@ import app.util.InfluxUtil;
  * Query related services
  */
 @Service
-public class QueriesService {
+public class QueryUserDefinedService {
 
     private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
     private final PatientMetadataService patientMetadataService = new PatientMetadataService();
@@ -28,7 +28,7 @@ public class QueriesService {
     private final String dbName = DBConfiguration.Data.DBNAME;
 
     public static void main(String[] args) {
-        QueriesService qs = new QueriesService();
+        QueryUserDefinedService qs = new QueryUserDefinedService();
         List<QueryResultBean> a = qs.TypeAQuery("I100_1", 5, 10, null, null);
         List<QueryResultBean> b = qs.TypeBQuery("I100_1", "I101_1", 3, 5, null, null);
     }

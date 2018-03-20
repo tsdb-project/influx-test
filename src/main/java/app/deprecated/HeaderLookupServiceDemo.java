@@ -1,6 +1,6 @@
-package app.service;
+package app.deprecated;
 
-import app.common.DBConfiguration;
+import app.config.DBConfiguration;
 import app.model.TSData.HeaderMapping;
 import app.model.TSData.HeaderReverseMapping;
 import org.springframework.beans.factory.annotation.Autowired;

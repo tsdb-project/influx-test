@@ -1,7 +1,7 @@
-package app.service;
+package app.deprecated;
 
-import app.common.DBConfiguration;
-import app.common.InfluxappConfig;
+import app.config.DBConfiguration;
+import app.config.InfluxappConfig;
 import app.model.TSData.CSVFile;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;

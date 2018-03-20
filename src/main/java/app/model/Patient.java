@@ -3,7 +3,7 @@
  */
 package app.model;
 
-import app.common.DBConfiguration;
+import app.config.DBConfiguration;
 import org.influxdb.annotation.Column;
 import org.influxdb.annotation.Measurement;
 

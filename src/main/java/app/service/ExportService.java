@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 
 import com.opencsv.CSVWriter;
 
-import app.common.DBConfiguration;
-import app.common.InfluxappConfig;
+import app.config.DBConfiguration;
+import app.config.InfluxappConfig;
 
 /**
  * Export functions

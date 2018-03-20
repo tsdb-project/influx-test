@@ -6,6 +6,7 @@ import java.util.List;
 /**
  * Bean for patient filter
  */
+//TODO: Probably using Map<>?
 public class PatientFilterBean {
 
     private List<String> filters = new LinkedList<>();

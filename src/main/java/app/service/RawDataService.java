@@ -1,7 +1,7 @@
 package app.service;
 
-import app.common.DBConfiguration;
-import app.common.InfluxappConfig;
+import app.config.DBConfiguration;
+import app.config.InfluxappConfig;
 import app.model.TSData.RawData;
 import app.util.InfluxUtil;
 import app.util.Util;

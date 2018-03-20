@@ -1,7 +1,7 @@
 package app.util;
 
-import app.common.DBConfiguration;
-import app.common.InfluxappConfig;
+import app.config.DBConfiguration;
+import app.config.InfluxappConfig;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 
