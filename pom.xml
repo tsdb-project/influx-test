@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>edu.pitt</groupId>
-    <artifactId>influx</artifactId>
+    <artifactId>brain-flux</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>influx</name>
-    <description>test for influx db</description>
+    <name>Brain Flux</name>
+    <description>The data analysis system for School of Medicine and Rehabilitation</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
