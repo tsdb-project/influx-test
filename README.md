@@ -1,6 +1,6 @@
-# influx-test
+# Brain Influx
 
-Eco-sys.
+The data ecosystem for time series data.
 
 ## Dev environment
 
@@ -11,7 +11,7 @@ Some develop environments.
 - Eclipse, Intellij IDEA
 - Java 8+, tested with **OpenJDK 1.8.0-151**
 - Maven 3+, tested with **Maven 3.3.9**
-- **InfluxDB 1.4.3-alpine** in Docker x86_64
+- **InfluxDB 1.5.0**
 - **Grafana** v5.
 
 ### Third party libs
