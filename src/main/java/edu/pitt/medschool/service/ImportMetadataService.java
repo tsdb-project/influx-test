@@ -1,11 +1,9 @@
 package edu.pitt.medschool.service;
 
 import com.opencsv.CSVReader;
-
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.util.Util;
-
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
@@ -23,8 +21,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * Importing patient metadata into InfluxDB Based on mail at 02/21/2018
  */
+//TODO: Switch to MySQL storage
 @Service
-public class MetadataService {
+public class ImportMetadataService {
 
     /**
      * Status code for this service
@@ -207,7 +206,7 @@ public class MetadataService {
     }
 
     public static void main(String[] args) {
-        MetadataService ipms = new MetadataService();
+        ImportMetadataService ipms = new ImportMetadataService();
         long startTime = System.currentTimeMillis();
         StatusCode c = ipms.DoImport("E:\\UPMC\\TSDB\\PCASDatabase_DATA_2018-02-21_0905.csv");
         // StatusCode c = ipms.DoImport("/tsdb/meta/PCASDatabase_DATA_2018-02-21_0905.csv");

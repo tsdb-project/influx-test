@@ -1,20 +1,19 @@
 package edu.pitt.medschool.service;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.Query;
-import org.springframework.stereotype.Service;
-
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.util.InfluxUtil;
 import edu.pitt.medschool.model.QueryResultBean;
 import edu.pitt.medschool.model.TimeSpan;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.Query;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Query related services
@@ -23,7 +22,7 @@ import edu.pitt.medschool.model.TimeSpan;
 public class QueryUserDefinedService {
 
     private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-    private final PatientMetadataService patientMetadataService = new PatientMetadataService();
+    private final PatientFilteringService patientFilteringService = new PatientFilteringService();
 
     private final String dbName = DBConfiguration.Data.DBNAME;
 
@@ -133,7 +132,7 @@ public class QueryUserDefinedService {
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
-        qrb.setInterestPatient(patientMetadataService.GetById(pid.toUpperCase()).get(0));
+        qrb.setInterestPatient(patientFilteringService.GetById(pid.toUpperCase()).get(0));
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
@@ -162,7 +161,7 @@ public class QueryUserDefinedService {
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
-        qrb.setInterestPatient(patientMetadataService.GetById(pid.toUpperCase()).get(0));
+        qrb.setInterestPatient(patientFilteringService.GetById(pid.toUpperCase()).get(0));
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 

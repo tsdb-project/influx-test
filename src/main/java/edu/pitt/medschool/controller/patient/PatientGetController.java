@@ -1,20 +1,15 @@
 package edu.pitt.medschool.controller.patient;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import edu.pitt.medschool.bean.PatientFilterBean;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.Patient;
-import edu.pitt.medschool.service.PatientMetadataService;
+import edu.pitt.medschool.service.PatientFilteringService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Get all patient data in the DB
@@ -23,13 +18,13 @@ import edu.pitt.medschool.service.PatientMetadataService;
 @RequestMapping("/apis")
 public class PatientGetController {
     @Autowired
-    PatientMetadataService patientMetadataService;
+    PatientFilteringService patientFilteringService;
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> getAllPatientInfo() {
         Map<String, Object> map = new HashMap<>();
-        map.put("data", patientMetadataService.GetImportedPatientData());
+        map.put("data", patientFilteringService.GetImportedPatientData());
         RestfulResponse response = new RestfulResponse(1, "success");
         map.put("res", response);
 
@@ -38,14 +33,14 @@ public class PatientGetController {
 
     @RequestMapping(value = "/patients/{idx}", method = RequestMethod.GET)
     public Patient getOnePatientByIndex(@PathVariable String idx) {
-        return patientMetadataService.GetById(idx.toUpperCase()).get(0);
+        return patientFilteringService.GetById(idx.toUpperCase()).get(0);
     }
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.POST)
     public List<Patient> getPatientWithCriteria() {
         PatientFilterBean pfb = new PatientFilterBean();
         pfb.setGenderFilter("F");
-        return patientMetadataService.FetchResult(pfb);
+        return patientFilteringService.FetchResult(pfb);
     }
 
 }
