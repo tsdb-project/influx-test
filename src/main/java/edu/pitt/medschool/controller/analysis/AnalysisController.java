@@ -1,21 +1,28 @@
 /**
  * 
  */
-package edu.pitt.medschool.controller.export;
+package edu.pitt.medschool.controller.analysis;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import edu.pitt.medschool.bean.PatientFilterBean;
+import edu.pitt.medschool.framework.rest.RestfulResponse;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
-import edu.pitt.medschool.service.ExportService;
 import edu.pitt.medschool.service.PatientFilteringService;
 
 /**
@@ -24,22 +31,47 @@ import edu.pitt.medschool.service.PatientFilteringService;
  */
 
 @Controller
-public class ExportController {
+public class AnalysisController {
     @Autowired
     ColumnService columnService;
     @Autowired
     PatientFilteringService patientFilteringService;
     @Autowired
-    ExportService exportService;
+    AnalysisService analysisService;
 
-    @RequestMapping("export/export")
-    public Model page(Model model) {
-        model.addAttribute("nav", "export");
-        model.addAttribute("subnav", "export_sub");
+    @RequestMapping("analysis/export")
+    public Model exportPage(Model model) {
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "export");
         List<String> trends = columnService.selectAllMeasures();
         trends.add(0, "All");
         model.addAttribute("measures", trends);
         return model;
+    }
+
+    @RequestMapping("analysis/builder")
+    public Model builderPage(Model model) {
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "builder");
+        List<Downsample> downsamples = analysisService.selectAll();
+        model.addAttribute("downsamples", downsamples);
+        return model;
+    }
+
+    @RequestMapping({ "/analysis/edit/{id}", "/analysis/edit" })
+    public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
+        modelAndView.addObject("nav", "analysis");
+        modelAndView.addObject("subnav", "edit");
+        List<Downsample> downsamples = analysisService.selectAll();
+        modelAndView.addObject("downsamples", downsamples);
+        modelAndView.setViewName("/analysis/edit");
+        if (id.isPresent()) {
+            modelAndView.addObject("edit", true);
+            modelAndView.addObject("query", analysisService.selectByPrimaryKey(id.get()));
+        } else {
+            modelAndView.addObject("edit", false);
+        }
+        return modelAndView;
     }
 
     @RequestMapping("api/export/electrode")
@@ -93,7 +125,25 @@ public class ExportController {
 
         System.out.println(patientIDs);
         System.out.println(request.interval + "====" + request.time + "======" + request.method);
-        exportService.exportFromPatientsWithDownsampling(patientIDs, request.column, request.method, request.interval, request.time);
+        analysisService.exportFromPatientsWithDownsampling(patientIDs, request.column, request.method, request.interval, request.time);
     }
 
+    @RequestMapping("analysis/all")
+    @ResponseBody
+    public Map<String, Object> allQuery(Model model) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", analysisService.selectAll());
+        RestfulResponse response = new RestfulResponse(1, "success");
+        map.put("res", response);
+        return map;
+    }
+
+    @RequestMapping("analysis/insert")
+    @ResponseBody
+    public Map<String, Object> insert(@RequestBody(required = true) Downsample downsample) throws Exception {
+        analysisService.insert(downsample);
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", analysisService.selectAll());
+        return map;
+    }
 }

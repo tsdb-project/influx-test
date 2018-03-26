@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.pitt.medschool.controller.export.vo;
+package edu.pitt.medschool.controller.analysis.vo;
 
 /**
  * @author Isolachine

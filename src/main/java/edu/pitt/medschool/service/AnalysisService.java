@@ -11,18 +11,23 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.opencsv.CSVWriter;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.model.dao.DownsampleDao;
+import edu.pitt.medschool.model.dto.Downsample;
 
 /**
  * Export functions
  */
 @Service
-public class ExportService {
+public class AnalysisService {
+    @Autowired
+    DownsampleDao downsampleDao;
 
     /*
      * Be able to restrict the epochs for which data are exported (e.g. specify to export up to the first 36 hours of available data, but truncate data thereafter). Be able to specify which columns are exported (e.g.
@@ -82,6 +87,18 @@ public class ExportService {
             }
             writer.close();
         }
+    }
+
+    public int insert(Downsample downsample) throws Exception {
+        return downsampleDao.insert(downsample);
+    }
+
+    public List<Downsample> selectAll() {
+        return downsampleDao.selectAll();
+    }
+
+    public Downsample selectByPrimaryKey(int id) {
+        return downsampleDao.selectByPrimaryKey(id);
     }
 
 }

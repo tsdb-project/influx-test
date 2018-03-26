@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.model.dao.FeatureDao;
 
 /**
  * service for returning column information of data
@@ -27,9 +28,12 @@ import edu.pitt.medschool.config.InfluxappConfig;
 public class ColumnService {
     @Autowired
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    FeatureDao featureDao;
 
     public List<String> selectAllMeasures() {
-        return jdbcTemplate.queryForList("SELECT DISTINCT(f.type) FROM feature f", String.class);
+        return featureDao.selectAllMeasures();
+        // return jdbcTemplate.queryForList("SELECT DISTINCT(f.type) FROM feature f", String.class);
     }
 
     public List<String> selectElectrodesByMeasures(List<String> measures) {
