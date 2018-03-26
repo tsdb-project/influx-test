@@ -20,6 +20,8 @@ import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.model.dao.DownsampleDao;
 import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.DownsampleGroupColumn;
 
 /**
  * Export functions
@@ -99,6 +101,19 @@ public class AnalysisService {
 
     public Downsample selectByPrimaryKey(int id) {
         return downsampleDao.selectByPrimaryKey(id);
+    }
+
+    public int insertAggregationGroup(Downsample query, DownsampleGroup group, List<DownsampleGroupColumn> columns) {
+        // TODO: Implementation of method
+        // should be transactional, a transactional example can be found in DownsampleDao.java, or at
+        // https://spring.io/guides/gs/managing-transactions/
+        return 0;
+    }
+    
+    public int insertMetaFilter(Downsample query, String key, String value) {
+        // TODO: Implementation of method
+        // should be transactional
+        return 0;
     }
 
 }
