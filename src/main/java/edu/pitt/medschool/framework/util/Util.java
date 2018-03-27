@@ -50,10 +50,23 @@ public class Util {
      * @throws ParseException Wrong format
      */
     public static Instant dateTimeFormatToInstant(String dateTime, String format, TimeZone timeZone) throws ParseException {
+        return dateTimeFormatToDate(dateTime, format, timeZone).toInstant();
+    }
+
+    /**
+     * Convert timestamp to date (for DB)
+     *
+     * @param dateTime String
+     * @param format   String format
+     * @param timeZone Null for NY(PGH) timezone
+     * @return Instant
+     * @throws ParseException Wrong format
+     */
+    public static Date dateTimeFormatToDate(String dateTime, String format, TimeZone timeZone) throws ParseException {
         if (timeZone == null) timeZone = TimeZone.getTimeZone("America/New_York");
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         sdf.setTimeZone(timeZone);
-        return sdf.parse(dateTime).toInstant();
+        return sdf.parse(dateTime);
     }
 
     /**

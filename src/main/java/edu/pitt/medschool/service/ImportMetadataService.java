@@ -4,11 +4,6 @@ import com.opencsv.CSVReader;
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.util.Util;
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.BatchPoints;
-import org.influxdb.dto.Point;
-import org.influxdb.dto.Query;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -19,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Importing patient metadata into InfluxDB Based on mail at 02/21/2018
+ * Importing patient metadata into DB Based on mail at 02/21/2018
  */
 //TODO: Switch to MySQL storage
 @Service
@@ -32,9 +27,6 @@ public class ImportMetadataService {
         ALL_GOOD, FILE_IO_ERROR, FILE_NOT_FOUND, FILE_DATE_ERROR, FILE_FORMAT_ERROR
     }
 
-    private final static String tableName = DBConfiguration.Meta.PATIENT;
-    private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-
     /**
      * CSV Header processing
      */
@@ -44,7 +36,12 @@ public class ImportMetadataService {
             throw new RuntimeException();
     }
 
-    private Object genObjFromLine(int i, String val, Map<String, String> tags) throws ParseException {
+    /**
+     * Line data: Could be: util.Date, String, Double or int
+     *
+     * @return An object
+     */
+    private Object genObjFromLine(int i, String val) throws ParseException {
         Object obj = "N/A";
         // Some fields are empty
         if (val.isEmpty()) {
@@ -57,42 +54,42 @@ public class ImportMetadataService {
         }
 
         switch (i) {
-        case 0:
-            tags.put("PID", val.trim().toUpperCase());
-            return null;
-        case 2:
-            tags.put("Gender", val.equals("1") ? "F" : "M");
-            return null;
-        case 3:
-            tags.put("ArrestLocation", val.equals("1") ? "Outside" : "Inside");
-            return null;
-        case 1:
-            obj = Double.parseDouble(val);
-            break;
-        case 175:
-            tags.put("Survived", val.equals("1") ? "Y" : "N");
-            return null;
-        case 11: // Arrest date
-            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
-            break;
-        case 12: // Arrest time
-            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd kk:mm", null).toString();
-            break;
-        case 30: // Arrive date
-            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd kk:mm", null).toString();
-            break;
-        case 174: // date_fol_com
-            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
-            break;
-        case 176: // dischargedate
-            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
-            break;
-        case 177: // deathdate
-            obj = Util.dateTimeFormatToInstant(val, "yyyy-MM-dd", null).toString();
-            break;
-        default:
-            obj = val;
-            break;
+            case 0:
+                tags.put("PID", val.trim().toUpperCase());
+                return null;
+            case 2:
+                tags.put("Gender", val.equals("1") ? "F" : "M");
+                return null;
+            case 3:
+                tags.put("ArrestLocation", val.equals("1") ? "Outside" : "Inside");
+                return null;
+            case 1:
+                obj = Double.parseDouble(val);
+                break;
+            case 175:
+                tags.put("Survived", val.equals("1") ? "Y" : "N");
+                return null;
+            case 11: // Arrest date
+                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
+                break;
+            case 12: // Arrest time
+                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd kk:mm", null).toString();
+                break;
+            case 30: // Arrive date
+                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd kk:mm", null).toString();
+                break;
+            case 174: // date_fol_com
+                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
+                break;
+            case 176: // dischargedate
+                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
+                break;
+            case 177: // deathdate
+                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
+                break;
+            default:
+                obj = val;
+                break;
         }
 
         return obj;
@@ -101,66 +98,38 @@ public class ImportMetadataService {
     /**
      * Process file for importing
      *
-     * @param fReader
-     *            Filereader obj
-     * @param fileTime
-     *            File time
+     * @param fReader  Filereader obj
+     * @param fileTime File time
      */
     private StatusCode processFile(BufferedReader fReader, Instant fileTime) {
-        String dbName = DBConfiguration.Meta.DBNAME;
-        influxDB.query(new Query("create database " + dbName, dbName));
-
-        // Batch records perp
-        BatchPoints records = BatchPoints.database(dbName).consistency(InfluxDB.ConsistencyLevel.ALL).build();
 
         try (CSVReader csvReader = new CSVReader(fReader)) {
             // CSV header
             String[] columnNames = csvReader.readNext();
             processHeader(columnNames);
             int columnCount = columnNames.length;
-            int bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount;
 
             String[] values;
-            int batchCnt = 0;
 
             // Import every line
             while ((values = csvReader.readNext()) != null) {
                 if (columnCount != values.length)
                     throw new RuntimeException(); // Line mismatch
-                Map<String, Object> lineKVMap = new HashMap<>();
-                Map<String, String> tags = new HashMap<>();
 
                 for (int i = 0; i < columnCount; i++) {
-                    Object obj = genObjFromLine(i, values[i], tags);
+                    Object obj = genObjFromLine(i, values[i);
                     if (obj == null) {
-                        // Lines that are tags
                         continue;
                     }
-                    lineKVMap.put(columnNames[i], obj);
                 }
 
-                Point record = Point.measurement(tableName).time(fileTime.toEpochMilli(), TimeUnit.MILLISECONDS).tag(tags).fields(lineKVMap).build();
-                records.point(record);
-                batchCnt++;
+            }
 
-                if (batchCnt > bulkInsertMax) {
-                    influxDB.write(records);
-                    records = BatchPoints.database(dbName).consistency(InfluxDB.ConsistencyLevel.ALL).build();
-                    batchCnt = 0;
-                }
-            }
-            // Last write
-            if (batchCnt != 0) {
-                influxDB.write(records);
-            }
         } catch (IOException ioe) {
             ioe.printStackTrace();
             return StatusCode.FILE_IO_ERROR;
         } catch (RuntimeException re) {
             re.printStackTrace();
-            return StatusCode.FILE_FORMAT_ERROR;
-        } catch (ParseException pe) {
-            pe.printStackTrace();
             return StatusCode.FILE_FORMAT_ERROR;
         }
 
@@ -170,8 +139,7 @@ public class ImportMetadataService {
     /**
      * Invoke importing a PCADatabase file
      *
-     * @param path
-     *            File path
+     * @param path File path
      * @return Status
      */
     public StatusCode DoImport(String path) {

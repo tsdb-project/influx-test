@@ -45,7 +45,7 @@ public class AnalysisService {
         File dir = new File(DIRECTORY + LocalDateTime.now().toString());
         if (!dir.exists()) {
             try {
-                dir.mkdir();
+                dir.mkdirs();
             } catch (SecurityException se) {
                 System.out.println("Failed to create dir \"/results\"");
             }
@@ -114,6 +114,10 @@ public class AnalysisService {
         // TODO: Implementation of method
         // should be transactional
         return 0;
+    }
+
+    public static void main(String[] args) {
+
     }
 
 }
