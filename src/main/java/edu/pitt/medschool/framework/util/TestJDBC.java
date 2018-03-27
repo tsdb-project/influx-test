@@ -1,5 +1,6 @@
 package edu.pitt.medschool.framework.util;
 
+import edu.pitt.medschool.service.ImportMetadataService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,7 +17,7 @@ public class TestJDBC implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-
+        ImportMetadataService.main(args);
     }
 
 }

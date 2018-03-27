@@ -4,6 +4,10 @@ import com.opencsv.CSVReader;
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dao.PatientDao;
+import edu.pitt.medschool.model.dto.Patient;
+import edu.pitt.medschool.model.mapper.PatientMapper;
+import edu.pitt.medschool.model.mapper.PatientSqlProvider;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -27,11 +31,12 @@ public class ImportMetadataService {
         ALL_GOOD, FILE_IO_ERROR, FILE_NOT_FOUND, FILE_DATE_ERROR, FILE_FORMAT_ERROR
     }
 
+    private PatientDao pdo = new PatientDao();
+
     /**
      * CSV Header processing
      */
     private void processHeader(String[] hdr) {
-        // TODO: Need more soild vaildation
         if (hdr.length != 209)
             throw new RuntimeException();
     }
@@ -47,7 +52,7 @@ public class ImportMetadataService {
         if (val.isEmpty()) {
             if (i == 1) {
                 // Special work-around for age
-                return -1.0;
+                return -1;
             } else {
                 return obj;
             }
@@ -55,19 +60,23 @@ public class ImportMetadataService {
 
         switch (i) {
             case 0:
-                tags.put("PID", val.trim().toUpperCase());
+                // PID
+                obj = val.trim().toUpperCase();
                 return null;
             case 2:
-                tags.put("Gender", val.equals("1") ? "F" : "M");
+                // Gender
+                obj = val.equals("1") ? "F" : "M";
                 return null;
             case 3:
-                tags.put("ArrestLocation", val.equals("1") ? "Outside" : "Inside");
+                // ArrestLocation
+                obj = val.equals("1") ? "Outside" : "Inside";
                 return null;
             case 1:
-                obj = Double.parseDouble(val);
+                obj = Integer.parseInt(val);
                 break;
             case 175:
-                tags.put("Survived", val.equals("1") ? "Y" : "N");
+                // Survived
+                obj = val.equals("1") ? "Y" : "N";
                 return null;
             case 11: // Arrest date
                 obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
@@ -116,19 +125,31 @@ public class ImportMetadataService {
                 if (columnCount != values.length)
                     throw new RuntimeException(); // Line mismatch
 
-                for (int i = 0; i < columnCount; i++) {
-                    Object obj = genObjFromLine(i, values[i);
-                    if (obj == null) {
-                        continue;
+                Patient p = new Patient();
+                //TODO: Only support PID/Age/Gender now
+                for (int i = 0; i < 3; i++) {
+                    Object obj = genObjFromLine(i, values[i]);
+                    switch (i) {
+                        case 0:
+                            p.setId((String) obj);
+                            break;
+                        case 1:
+                            p.setAge((int) obj);
+                            break;
+                        case 2:
+                            p.setGender((String) obj);
+                            break;
+                        default:
+                            continue;
                     }
                 }
-
+                pdo.insert(p);
             }
 
         } catch (IOException ioe) {
             ioe.printStackTrace();
             return StatusCode.FILE_IO_ERROR;
-        } catch (RuntimeException re) {
+        } catch (Exception re) {
             re.printStackTrace();
             return StatusCode.FILE_FORMAT_ERROR;
         }
