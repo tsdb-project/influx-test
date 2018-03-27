@@ -8,6 +8,7 @@ import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Patient;
 import edu.pitt.medschool.model.mapper.PatientMapper;
 import edu.pitt.medschool.model.mapper.PatientSqlProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -20,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * Importing patient metadata into DB Based on mail at 02/21/2018
  */
-//TODO: Switch to MySQL storage
 @Service
 public class ImportMetadataService {
 
@@ -31,7 +31,8 @@ public class ImportMetadataService {
         ALL_GOOD, FILE_IO_ERROR, FILE_NOT_FOUND, FILE_DATE_ERROR, FILE_FORMAT_ERROR
     }
 
-    private PatientDao pdo = new PatientDao();
+    @Autowired
+    PatientDao pdo;
 
     /**
      * CSV Header processing
@@ -62,22 +63,22 @@ public class ImportMetadataService {
             case 0:
                 // PID
                 obj = val.trim().toUpperCase();
-                return null;
+                break;
             case 2:
                 // Gender
                 obj = val.equals("1") ? "F" : "M";
-                return null;
+                break;
             case 3:
                 // ArrestLocation
                 obj = val.equals("1") ? "Outside" : "Inside";
-                return null;
+                break;
             case 1:
                 obj = Integer.parseInt(val);
                 break;
             case 175:
                 // Survived
                 obj = val.equals("1") ? "Y" : "N";
-                return null;
+                break;
             case 11: // Arrest date
                 obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
                 break;

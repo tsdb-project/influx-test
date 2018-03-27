@@ -1,6 +1,5 @@
 package edu.pitt.medschool.model.dao;
 
-import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.Patient;
 import edu.pitt.medschool.model.mapper.PatientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
