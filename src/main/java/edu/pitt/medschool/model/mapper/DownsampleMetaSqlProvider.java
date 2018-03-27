@@ -39,9 +39,6 @@ public class DownsampleMetaSqlProvider {
     public String insertSelective(DownsampleMeta record) {
         SQL sql = new SQL();
         sql.INSERT_INTO("downsample_meta");
-        if (record.getId() != null) {
-            sql.VALUES("id", "#{id,jdbcType=INTEGER}");
-        }
         if (record.getQueryId() != null) {
             sql.VALUES("query_id", "#{queryId,jdbcType=INTEGER}");
         }

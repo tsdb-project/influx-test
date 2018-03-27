@@ -293,52 +293,62 @@ public class DownsampleGroupExample {
             return (Criteria) this;
         }
 
-        public Criteria andDownsampleEqualTo(Integer value) {
+        public Criteria andDownsampleEqualTo(String value) {
             addCriterion("downsample =", value, "downsample");
             return (Criteria) this;
         }
 
-        public Criteria andDownsampleNotEqualTo(Integer value) {
+        public Criteria andDownsampleNotEqualTo(String value) {
             addCriterion("downsample <>", value, "downsample");
             return (Criteria) this;
         }
 
-        public Criteria andDownsampleGreaterThan(Integer value) {
+        public Criteria andDownsampleGreaterThan(String value) {
             addCriterion("downsample >", value, "downsample");
             return (Criteria) this;
         }
 
-        public Criteria andDownsampleGreaterThanOrEqualTo(Integer value) {
+        public Criteria andDownsampleGreaterThanOrEqualTo(String value) {
             addCriterion("downsample >=", value, "downsample");
             return (Criteria) this;
         }
 
-        public Criteria andDownsampleLessThan(Integer value) {
+        public Criteria andDownsampleLessThan(String value) {
             addCriterion("downsample <", value, "downsample");
             return (Criteria) this;
         }
 
-        public Criteria andDownsampleLessThanOrEqualTo(Integer value) {
+        public Criteria andDownsampleLessThanOrEqualTo(String value) {
             addCriterion("downsample <=", value, "downsample");
             return (Criteria) this;
         }
 
-        public Criteria andDownsampleIn(List<Integer> values) {
+        public Criteria andDownsampleLike(String value) {
+            addCriterion("downsample like", value, "downsample");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleNotLike(String value) {
+            addCriterion("downsample not like", value, "downsample");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleIn(List<String> values) {
             addCriterion("downsample in", values, "downsample");
             return (Criteria) this;
         }
 
-        public Criteria andDownsampleNotIn(List<Integer> values) {
+        public Criteria andDownsampleNotIn(List<String> values) {
             addCriterion("downsample not in", values, "downsample");
             return (Criteria) this;
         }
 
-        public Criteria andDownsampleBetween(Integer value1, Integer value2) {
+        public Criteria andDownsampleBetween(String value1, String value2) {
             addCriterion("downsample between", value1, value2, "downsample");
             return (Criteria) this;
         }
 
-        public Criteria andDownsampleNotBetween(Integer value1, Integer value2) {
+        public Criteria andDownsampleNotBetween(String value1, String value2) {
             addCriterion("downsample not between", value1, value2, "downsample");
             return (Criteria) this;
         }
@@ -353,52 +363,62 @@ public class DownsampleGroupExample {
             return (Criteria) this;
         }
 
-        public Criteria andAggregationEqualTo(Integer value) {
+        public Criteria andAggregationEqualTo(String value) {
             addCriterion("aggregation =", value, "aggregation");
             return (Criteria) this;
         }
 
-        public Criteria andAggregationNotEqualTo(Integer value) {
+        public Criteria andAggregationNotEqualTo(String value) {
             addCriterion("aggregation <>", value, "aggregation");
             return (Criteria) this;
         }
 
-        public Criteria andAggregationGreaterThan(Integer value) {
+        public Criteria andAggregationGreaterThan(String value) {
             addCriterion("aggregation >", value, "aggregation");
             return (Criteria) this;
         }
 
-        public Criteria andAggregationGreaterThanOrEqualTo(Integer value) {
+        public Criteria andAggregationGreaterThanOrEqualTo(String value) {
             addCriterion("aggregation >=", value, "aggregation");
             return (Criteria) this;
         }
 
-        public Criteria andAggregationLessThan(Integer value) {
+        public Criteria andAggregationLessThan(String value) {
             addCriterion("aggregation <", value, "aggregation");
             return (Criteria) this;
         }
 
-        public Criteria andAggregationLessThanOrEqualTo(Integer value) {
+        public Criteria andAggregationLessThanOrEqualTo(String value) {
             addCriterion("aggregation <=", value, "aggregation");
             return (Criteria) this;
         }
 
-        public Criteria andAggregationIn(List<Integer> values) {
+        public Criteria andAggregationLike(String value) {
+            addCriterion("aggregation like", value, "aggregation");
+            return (Criteria) this;
+        }
+
+        public Criteria andAggregationNotLike(String value) {
+            addCriterion("aggregation not like", value, "aggregation");
+            return (Criteria) this;
+        }
+
+        public Criteria andAggregationIn(List<String> values) {
             addCriterion("aggregation in", values, "aggregation");
             return (Criteria) this;
         }
 
-        public Criteria andAggregationNotIn(List<Integer> values) {
+        public Criteria andAggregationNotIn(List<String> values) {
             addCriterion("aggregation not in", values, "aggregation");
             return (Criteria) this;
         }
 
-        public Criteria andAggregationBetween(Integer value1, Integer value2) {
+        public Criteria andAggregationBetween(String value1, String value2) {
             addCriterion("aggregation between", value1, value2, "aggregation");
             return (Criteria) this;
         }
 
-        public Criteria andAggregationNotBetween(Integer value1, Integer value2) {
+        public Criteria andAggregationNotBetween(String value1, String value2) {
             addCriterion("aggregation not between", value1, value2, "aggregation");
             return (Criteria) this;
         }
@@ -520,6 +540,16 @@ public class DownsampleGroupExample {
 
         public Criteria andUpdateTimeNotBetween(Date value1, Date value2) {
             addCriterion("update_time not between", value1, value2, "updateTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleLikeInsensitive(String value) {
+            addCriterion("upper(downsample) like", value.toUpperCase(), "downsample");
+            return (Criteria) this;
+        }
+
+        public Criteria andAggregationLikeInsensitive(String value) {
+            addCriterion("upper(aggregation) like", value.toUpperCase(), "aggregation");
             return (Criteria) this;
         }
     }

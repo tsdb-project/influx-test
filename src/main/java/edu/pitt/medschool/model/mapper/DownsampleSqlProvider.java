@@ -39,9 +39,6 @@ public class DownsampleSqlProvider {
     public String insertSelective(Downsample record) {
         SQL sql = new SQL();
         sql.INSERT_INTO("downsample");
-        if (record.getId() != null) {
-            sql.VALUES("id", "#{id,jdbcType=INTEGER}");
-        }
         if (record.getAlias() != null) {
             sql.VALUES("alias", "#{alias,jdbcType=VARCHAR}");
         }

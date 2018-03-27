@@ -14,6 +14,7 @@ import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.opencsv.CSVWriter;
 
@@ -21,6 +22,8 @@ import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.model.dao.DownsampleDao;
+import edu.pitt.medschool.model.dao.DownsampleGroupColumnDao;
+import edu.pitt.medschool.model.dao.DownsampleGroupDao;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.DownsampleGroupColumn;
@@ -32,6 +35,10 @@ import edu.pitt.medschool.model.dto.DownsampleGroupColumn;
 public class AnalysisService {
     @Autowired
     DownsampleDao downsampleDao;
+    @Autowired
+    DownsampleGroupDao downsampleGroupDao;
+    @Autowired
+    DownsampleGroupColumnDao downsampleGroupColumnDao;
 
     /*
      * Be able to restrict the epochs for which data are exported (e.g. specify to export up to the first 36 hours of available data, but truncate data thereafter). Be able to specify which columns are exported (e.g.
@@ -127,28 +134,29 @@ public class AnalysisService {
      * @return
      */
     public List<DownsampleGroupVO> selectAllAggregationGroupByQueryId(Integer queryId) {
-        // TODO Auto-generated method stub
-        List<DownsampleGroupVO> groups = new ArrayList<>();
-        DownsampleGroupVO groupVO = new DownsampleGroupVO();
-        String s = "lorem,ipsum,dolor,sit,amet";
-        groupVO.setColumns(new ArrayList<String>(Arrays.asList(s.split(","))));
-        DownsampleGroup group = new DownsampleGroup();
-        group.setAggregation(1);
-        group.setDownsample(2);
-        group.setId(1);
-        group.setQueryId(3);
-        groupVO.setGroup(group);
-        groups.add(groupVO);
-        groups.add(groupVO);
+        List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
         return groups;
     }
 
     /**
      * @param group
      */
+    @Transactional(rollbackFor = Exception.class)
     public boolean insertAggregationGroup(DownsampleGroupVO group) {
-        // TODO Auto-generated method stub
-        return false;
+        try {
+            downsampleGroupDao.insert(group.getGroup());
+            int queryGroupId = group.getGroup().getId();
+            for (String columnName : group.getColumns()) {
+                DownsampleGroupColumn column = new DownsampleGroupColumn();
+                column.setQueryGroupId(queryGroupId);
+                column.setColumnName(columnName);
+                downsampleGroupColumnDao.insert(column);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return true;
     }
 
     /**

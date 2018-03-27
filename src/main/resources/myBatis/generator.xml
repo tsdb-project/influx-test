@@ -28,10 +28,18 @@
             <property name="enableSubPackages" value="true" />
         </javaClientGenerator>
 
-        <table tableName="downsample"></table>
-        <table tableName="downsample_group"></table>
-        <table tableName="downsample_group_column"></table>
-        <table tableName="downsample_meta"></table>
+        <table tableName="downsample">
+            <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
+        </table>
+        <table tableName="downsample_group">
+            <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
+        </table>
+        <table tableName="downsample_group_column">
+            <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
+        </table>
+        <table tableName="downsample_meta">
+            <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
+        </table>
         <table tableName="patient"></table>
         <table tableName="feature"></table>
     </context>

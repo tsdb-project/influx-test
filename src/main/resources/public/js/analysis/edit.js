@@ -111,7 +111,11 @@ $(document).ready(function() {
     }
 
     function localeDateString(date) {
-        return new Date(date).toLocaleString();
+        var options = {
+            hour12 : false,
+            timeZone : "America/Anchorage"
+        };
+        return new Date(date).toLocaleString('en-US', options);
     }
 
     $('#queryTable tbody').on('mouseover', 'tr', function() {
@@ -190,12 +194,33 @@ $(document).ready(function() {
                 var $column = $('#column');
                 $column.attr("size", data.length)
                 $column.empty();
-                // $column.append('<option disabled="disabled"
-                // selected="selected" value="">Select Columns</option>');
                 for (var i = 0; i < data.length; i++) {
                     $column.append('<option value="' + data[i] + '">' + data[i] + '</option>');
                 }
                 $column.change();
+            },
+            'error' : function() {
+            }
+        });
+    });
+
+    $("#addGroupButton").click(function() {
+        var form = {
+            "group" : {
+                "queryId" : $("#id").val(),
+                "downsample" : $("#method").val(),
+                "aggregation" : $("#aggregation").val()
+            },
+            "columns" : $("#column").val()
+        };
+        $.ajax({
+            'url' : "/analysis/group",
+            'type' : 'post',
+            'data' : JSON.stringify(form),
+            'contentType' : "application/json",
+            'dataType' : 'json',
+            'success' : function(data) {
+                groupTable.ajax.reload();
             },
             'error' : function() {
             }

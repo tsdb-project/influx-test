@@ -39,14 +39,11 @@ public class DownsampleGroupColumnSqlProvider {
     public String insertSelective(DownsampleGroupColumn record) {
         SQL sql = new SQL();
         sql.INSERT_INTO("downsample_group_column");
-        if (record.getId() != null) {
-            sql.VALUES("id", "#{id,jdbcType=INTEGER}");
-        }
         if (record.getQueryGroupId() != null) {
             sql.VALUES("query_group_id", "#{queryGroupId,jdbcType=INTEGER}");
         }
-        if (record.getColumn() != null) {
-            sql.VALUES("column", "#{column,jdbcType=VARCHAR}");
+        if (record.getColumnName() != null) {
+            sql.VALUES("column_name", "#{columnName,jdbcType=VARCHAR}");
         }
         return sql.toString();
     }
@@ -63,7 +60,7 @@ public class DownsampleGroupColumnSqlProvider {
             sql.SELECT("id");
         }
         sql.SELECT("query_group_id");
-        sql.SELECT("column");
+        sql.SELECT("column_name");
         sql.FROM("downsample_group_column");
         applyWhere(sql, example, false);
         if (example != null && example.getOrderByClause() != null) {
@@ -87,8 +84,8 @@ public class DownsampleGroupColumnSqlProvider {
         if (record.getQueryGroupId() != null) {
             sql.SET("query_group_id = #{record.queryGroupId,jdbcType=INTEGER}");
         }
-        if (record.getColumn() != null) {
-            sql.SET("column = #{record.column,jdbcType=VARCHAR}");
+        if (record.getColumnName() != null) {
+            sql.SET("column_name = #{record.columnName,jdbcType=VARCHAR}");
         }
         applyWhere(sql, example, true);
         return sql.toString();
@@ -103,7 +100,7 @@ public class DownsampleGroupColumnSqlProvider {
         sql.UPDATE("downsample_group_column");
         sql.SET("id = #{record.id,jdbcType=INTEGER}");
         sql.SET("query_group_id = #{record.queryGroupId,jdbcType=INTEGER}");
-        sql.SET("column = #{record.column,jdbcType=VARCHAR}");
+        sql.SET("column_name = #{record.columnName,jdbcType=VARCHAR}");
         DownsampleGroupColumnExample example = (DownsampleGroupColumnExample) parameter.get("example");
         applyWhere(sql, example, true);
         return sql.toString();
@@ -119,8 +116,8 @@ public class DownsampleGroupColumnSqlProvider {
         if (record.getQueryGroupId() != null) {
             sql.SET("query_group_id = #{queryGroupId,jdbcType=INTEGER}");
         }
-        if (record.getColumn() != null) {
-            sql.SET("column = #{column,jdbcType=VARCHAR}");
+        if (record.getColumnName() != null) {
+            sql.SET("column_name = #{columnName,jdbcType=VARCHAR}");
         }
         sql.WHERE("id = #{id,jdbcType=INTEGER}");
         return sql.toString();

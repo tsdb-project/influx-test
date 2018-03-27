@@ -282,78 +282,78 @@ public class DownsampleGroupColumnExample {
             return (Criteria) this;
         }
 
-        public Criteria andColumnIsNull() {
-            addCriterion("column is null");
+        public Criteria andColumnNameIsNull() {
+            addCriterion("column_name is null");
             return (Criteria) this;
         }
 
-        public Criteria andColumnIsNotNull() {
-            addCriterion("column is not null");
+        public Criteria andColumnNameIsNotNull() {
+            addCriterion("column_name is not null");
             return (Criteria) this;
         }
 
-        public Criteria andColumnEqualTo(String value) {
-            addCriterion("column =", value, "column");
+        public Criteria andColumnNameEqualTo(String value) {
+            addCriterion("column_name =", value, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnNotEqualTo(String value) {
-            addCriterion("column <>", value, "column");
+        public Criteria andColumnNameNotEqualTo(String value) {
+            addCriterion("column_name <>", value, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnGreaterThan(String value) {
-            addCriterion("column >", value, "column");
+        public Criteria andColumnNameGreaterThan(String value) {
+            addCriterion("column_name >", value, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnGreaterThanOrEqualTo(String value) {
-            addCriterion("column >=", value, "column");
+        public Criteria andColumnNameGreaterThanOrEqualTo(String value) {
+            addCriterion("column_name >=", value, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnLessThan(String value) {
-            addCriterion("column <", value, "column");
+        public Criteria andColumnNameLessThan(String value) {
+            addCriterion("column_name <", value, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnLessThanOrEqualTo(String value) {
-            addCriterion("column <=", value, "column");
+        public Criteria andColumnNameLessThanOrEqualTo(String value) {
+            addCriterion("column_name <=", value, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnLike(String value) {
-            addCriterion("column like", value, "column");
+        public Criteria andColumnNameLike(String value) {
+            addCriterion("column_name like", value, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnNotLike(String value) {
-            addCriterion("column not like", value, "column");
+        public Criteria andColumnNameNotLike(String value) {
+            addCriterion("column_name not like", value, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnIn(List<String> values) {
-            addCriterion("column in", values, "column");
+        public Criteria andColumnNameIn(List<String> values) {
+            addCriterion("column_name in", values, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnNotIn(List<String> values) {
-            addCriterion("column not in", values, "column");
+        public Criteria andColumnNameNotIn(List<String> values) {
+            addCriterion("column_name not in", values, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnBetween(String value1, String value2) {
-            addCriterion("column between", value1, value2, "column");
+        public Criteria andColumnNameBetween(String value1, String value2) {
+            addCriterion("column_name between", value1, value2, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnNotBetween(String value1, String value2) {
-            addCriterion("column not between", value1, value2, "column");
+        public Criteria andColumnNameNotBetween(String value1, String value2) {
+            addCriterion("column_name not between", value1, value2, "columnName");
             return (Criteria) this;
         }
 
-        public Criteria andColumnLikeInsensitive(String value) {
-            addCriterion("upper(column) like", value.toUpperCase(), "column");
+        public Criteria andColumnNameLikeInsensitive(String value) {
+            addCriterion("upper(column_name) like", value.toUpperCase(), "columnName");
             return (Criteria) this;
         }
     }

@@ -111,46 +111,28 @@
                 <div class="card-body">
                     <h3 class="card-title">Edit Aggregation Groups</h3>
                     <form role="form" id="parameter-form">
-                        <h4 class="card-title">Constraints</h4>
                         <div class="row">
-                            <div class="col-sm-12 col-md-12">
-                                <div class="row" style="margin: 10px 0 10px 0">
-                                    <h4 class="card-subtitle">Choose Columns</h4>
-                                </div>
+                            <div class="col-sm-4 col-md-4">
                                 <div class="row">
-                                    <div class="col-sm-4 col-md-4">
+                                    <div class="col-sm-12 col-md-12">
                                         <div class="form-group">
+                                            <label>Choose Columns</label>
                                             <select class="select2" data-placeholder="Select Measure" id="measure">
                                                 <option disabled="disabled" selected="selected" value="">Select Measure</option>
                                                 <option th:value="${measure}" th:each="measure : ${measures}" th:text="${measure}"></option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-sm-4 col-md-4">
+                                    <div class="col-sm-12 col-md-12">
                                         <div class="form-group">
                                             <select class="select2" data-placeholder="Select Category" id="electrode">
                                                 <option disabled="disabled" selected="selected" value="">Select Electrodes</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-sm-4 col-md-4">
+                                    <div class="col-sm-12 col-md-12">
                                         <div class="form-group">
-                                            <select class="custom-select" data-placeholder="Select Category" id="column" multiple size="1">
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row" style="margin-top: 20px">
-                            <div class="col-sm-12 col-md-12">
-                                <div class="row" style="margin: 10px 0 10px 0">
-                                    <h4 class="card-subtitle">Downsample Method</h4>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-4 col-md-4">
-                                        <div class="form-group">
+                                            <label>Downsample Method</label>
                                             <select class="select2" data-placeholder="Select Downsample Method" id="method">
                                                 <option disabled="disabled" selected="selected" value="">Select Downsample Method</option>
                                                 <option value="mean">Mean</option>
@@ -164,14 +146,36 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="col-sm-12 col-md-12">
+                                        <div class="form-group">
+                                            <label>Aggregation Method</label>
+                                            <select class="select2" data-placeholder="Select Aggregation Method" id="aggregation">
+                                                <option disabled="disabled" selected="selected" value="">Select Aggregation Method</option>
+                                                <option value="none">Flat Table</option>
+                                                <option value="mean">Mean</option>
+                                                <option value="sum">Sum</option>
+                                                <option value="stddev">Standard Deviation</option>
+                                                <option value="min">Min</option>
+                                                <option value="max">Max</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 col-md-12">
+                                        <div class="form-group">
+                                            <label>&nbsp</label>
+                                            <button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" id="addGroupButton">Add Group</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-4 col-md-3">
-                                <div class="form-group">
-                                    <label>&nbsp</label>
-                                    <button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" id="exportButton">Export</button>
+                            <div class="col-sm-4 col-md-4">
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
+                                        <div class="form-group">
+                                            <select class="custom-select" data-placeholder="Select Category" id="column" multiple size="1">
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -39,17 +39,14 @@ public class DownsampleGroupSqlProvider {
     public String insertSelective(DownsampleGroup record) {
         SQL sql = new SQL();
         sql.INSERT_INTO("downsample_group");
-        if (record.getId() != null) {
-            sql.VALUES("id", "#{id,jdbcType=INTEGER}");
-        }
         if (record.getQueryId() != null) {
             sql.VALUES("query_id", "#{queryId,jdbcType=INTEGER}");
         }
         if (record.getDownsample() != null) {
-            sql.VALUES("downsample", "#{downsample,jdbcType=INTEGER}");
+            sql.VALUES("downsample", "#{downsample,jdbcType=VARCHAR}");
         }
         if (record.getAggregation() != null) {
-            sql.VALUES("aggregation", "#{aggregation,jdbcType=INTEGER}");
+            sql.VALUES("aggregation", "#{aggregation,jdbcType=VARCHAR}");
         }
         if (record.getCreateTime() != null) {
             sql.VALUES("create_time", "#{createTime,jdbcType=TIMESTAMP}");
@@ -100,10 +97,10 @@ public class DownsampleGroupSqlProvider {
             sql.SET("query_id = #{record.queryId,jdbcType=INTEGER}");
         }
         if (record.getDownsample() != null) {
-            sql.SET("downsample = #{record.downsample,jdbcType=INTEGER}");
+            sql.SET("downsample = #{record.downsample,jdbcType=VARCHAR}");
         }
         if (record.getAggregation() != null) {
-            sql.SET("aggregation = #{record.aggregation,jdbcType=INTEGER}");
+            sql.SET("aggregation = #{record.aggregation,jdbcType=VARCHAR}");
         }
         if (record.getCreateTime() != null) {
             sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
@@ -124,8 +121,8 @@ public class DownsampleGroupSqlProvider {
         sql.UPDATE("downsample_group");
         sql.SET("id = #{record.id,jdbcType=INTEGER}");
         sql.SET("query_id = #{record.queryId,jdbcType=INTEGER}");
-        sql.SET("downsample = #{record.downsample,jdbcType=INTEGER}");
-        sql.SET("aggregation = #{record.aggregation,jdbcType=INTEGER}");
+        sql.SET("downsample = #{record.downsample,jdbcType=VARCHAR}");
+        sql.SET("aggregation = #{record.aggregation,jdbcType=VARCHAR}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
         DownsampleGroupExample example = (DownsampleGroupExample) parameter.get("example");
@@ -144,10 +141,10 @@ public class DownsampleGroupSqlProvider {
             sql.SET("query_id = #{queryId,jdbcType=INTEGER}");
         }
         if (record.getDownsample() != null) {
-            sql.SET("downsample = #{downsample,jdbcType=INTEGER}");
+            sql.SET("downsample = #{downsample,jdbcType=VARCHAR}");
         }
         if (record.getAggregation() != null) {
-            sql.SET("aggregation = #{aggregation,jdbcType=INTEGER}");
+            sql.SET("aggregation = #{aggregation,jdbcType=VARCHAR}");
         }
         if (record.getCreateTime() != null) {
             sql.SET("create_time = #{createTime,jdbcType=TIMESTAMP}");

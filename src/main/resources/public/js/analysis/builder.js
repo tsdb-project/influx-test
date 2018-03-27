@@ -97,11 +97,14 @@ $(document).ready(function() {
         }
         return 'N/A';
     }
-    
+
     function localeDateString(date) {
-        return new Date(date).toLocaleString();
+        var options = {
+            hour12 : false,
+            timeZone : "America/Anchorage"
+        };
+        return new Date(date).toLocaleString('en-US', options);
     }
-    
 
     $('#queryTable tbody').on('mouseover', 'tr', function() {
         $(this).attr("style", "background-color:#ffffdd");
