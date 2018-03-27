@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.pitt.medschool.model.dao.DownsampleGroupAggrDao;
+import edu.pitt.medschool.model.dao.DownsampleMetaDao;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
@@ -30,8 +32,15 @@ import edu.pitt.medschool.model.dto.DownsampleGroupColumn;
  */
 @Service
 public class AnalysisService {
+
     @Autowired
     DownsampleDao downsampleDao;
+
+    @Autowired
+    DownsampleMetaDao downsampleMetaDao;
+
+    @Autowired
+    DownsampleGroupAggrDao downsampleGroupAggrDao;
 
     /*
      * Be able to restrict the epochs for which data are exported (e.g. specify to export up to the first 36 hours of available data, but truncate data thereafter). Be able to specify which columns are exported (e.g.
@@ -105,17 +114,16 @@ public class AnalysisService {
         return downsampleDao.selectByPrimaryKey(id);
     }
 
-    public int insertAggregationGroup(Downsample query, DownsampleGroup group, List<DownsampleGroupColumn> columns) {
+    public int insertAggregationGroup(Downsample query, DownsampleGroup group, List<DownsampleGroupColumn> columns) throws Exception {
         // TODO: Implementation of method
-        // should be transactional, a transactional example can be found in DownsampleDao.java, or at
-        // https://spring.io/guides/gs/managing-transactions/
-        return 0;
+        for(DownsampleGroupColumn dgc:columns) {
+        }
+        return downsampleGroupAggrDao.insertGroupAggr(group);
     }
 
-    public int insertMetaFilter(Downsample query, String key, String value) {
+    public int insertMetaFilter(Downsample query, String key, String value) throws Exception {
         // TODO: Implementation of method
-        // should be transactional
-        return 0;
+        return downsampleMetaDao.insertMeta(query, key, value);
     }
 
     public static void main(String[] args) {
