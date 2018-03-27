@@ -21,6 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import edu.pitt.medschool.bean.PatientFilterBean;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
+import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.service.AnalysisService;
@@ -75,6 +76,7 @@ public class AnalysisController {
             List<Downsample> downsamples = analysisService.selectAll();
             modelAndView.addObject("downsamples", downsamples);
         }
+        modelAndView.addObject("measures", columnService.selectAllMeasures());
         return modelAndView;
     }
 
@@ -110,6 +112,40 @@ public class AnalysisController {
         return map;
     }
 
+    @RequestMapping(value = "analysis/group/{queryId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> allQueryGroup(@PathVariable Integer queryId, Model model) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", analysisService.selectAllAggregationGroupByQueryId(queryId));
+        RestfulResponse response = new RestfulResponse(1, "success");
+        map.put("res", response);
+        return map;
+    }
+
+    @RequestMapping(value = "analysis/group", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> insertQueryGroup(@RequestBody(required = true) DownsampleGroupVO group) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        if (analysisService.insertAggregationGroup(group)) {
+            map.put("res", new RestfulResponse(1, "success"));
+        } else {
+            map.put("res", new RestfulResponse(0, "failed"));
+        }
+        return map;
+    }
+
+    @RequestMapping(value = "analysis/group", method = RequestMethod.PUT)
+    @ResponseBody
+    public Map<String, Object> updateQueryGroup(@RequestBody(required = true) DownsampleGroupVO group) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        if (analysisService.updateAggregationGroup(group) == 1) {
+            map.put("res", new RestfulResponse(1, "success"));
+        } else {
+            map.put("res", new RestfulResponse(0, "update failed"));
+        }
+        // map.put("data", analysisService.selectByPrimaryKey(group.getQueryId()));
+        return map;
+    }
 
     @RequestMapping("api/export/electrode")
     @ResponseBody

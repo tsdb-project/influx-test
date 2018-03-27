@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import com.opencsv.CSVWriter;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.model.dao.DownsampleDao;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
@@ -109,7 +111,7 @@ public class AnalysisService {
         // https://spring.io/guides/gs/managing-transactions/
         return 0;
     }
-    
+
     public int insertMetaFilter(Downsample query, String key, String value) {
         // TODO: Implementation of method
         // should be transactional
@@ -118,6 +120,44 @@ public class AnalysisService {
 
     public int updateByPrimaryKey(Downsample downsample) {
         return downsampleDao.updateByPrimaryKey(downsample);
+    }
+
+    /**
+     * @param queryId
+     * @return
+     */
+    public List<DownsampleGroupVO> selectAllAggregationGroupByQueryId(Integer queryId) {
+        // TODO Auto-generated method stub
+        List<DownsampleGroupVO> groups = new ArrayList<>();
+        DownsampleGroupVO groupVO = new DownsampleGroupVO();
+        String s = "lorem,ipsum,dolor,sit,amet";
+        groupVO.setColumns(new ArrayList<String>(Arrays.asList(s.split(","))));
+        DownsampleGroup group = new DownsampleGroup();
+        group.setAggregation(1);
+        group.setDownsample(2);
+        group.setId(1);
+        group.setQueryId(3);
+        groupVO.setGroup(group);
+        groups.add(groupVO);
+        groups.add(groupVO);
+        return groups;
+    }
+
+    /**
+     * @param group
+     */
+    public boolean insertAggregationGroup(DownsampleGroupVO group) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /**
+     * @param group
+     * @return
+     */
+    public int updateAggregationGroup(DownsampleGroupVO group) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }
