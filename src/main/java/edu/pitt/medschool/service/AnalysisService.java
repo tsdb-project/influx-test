@@ -116,4 +116,8 @@ public class AnalysisService {
         return 0;
     }
 
+    public int updateByPrimaryKey(Downsample downsample) {
+        return downsampleDao.updateByPrimaryKey(downsample);
+    }
+
 }

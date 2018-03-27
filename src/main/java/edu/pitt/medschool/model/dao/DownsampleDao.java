@@ -38,4 +38,8 @@ public class DownsampleDao {
         return downsampleMapper.selectByPrimaryKey(id);
     }
 
+    public int updateByPrimaryKey(Downsample downsample) {
+        return downsampleMapper.updateByPrimaryKeySelective(downsample);
+    }
+
 }

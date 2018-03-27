@@ -15,10 +15,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import edu.pitt.medschool.bean.PatientFilterBean;
+import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.service.AnalysisService;
@@ -58,21 +60,56 @@ public class AnalysisController {
         return model;
     }
 
-    @RequestMapping({ "/analysis/edit/{id}", "/analysis/edit" })
+    @RequestMapping(value = { "/analysis/edit/{id}", "/analysis/edit" }, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "edit");
-        List<Downsample> downsamples = analysisService.selectAll();
-        modelAndView.addObject("downsamples", downsamples);
         modelAndView.setViewName("/analysis/edit");
         if (id.isPresent()) {
             modelAndView.addObject("edit", true);
-            modelAndView.addObject("query", analysisService.selectByPrimaryKey(id.get()));
+            Downsample downsample = analysisService.selectByPrimaryKey(id.get());
+            DownsampleEditResponse downsampleEditResponse = new DownsampleEditResponse(downsample);
+            modelAndView.addObject("query", downsampleEditResponse);
         } else {
             modelAndView.addObject("edit", false);
+            List<Downsample> downsamples = analysisService.selectAll();
+            modelAndView.addObject("downsamples", downsamples);
         }
         return modelAndView;
     }
+
+    @RequestMapping(value = "analysis/query", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> allQuery(Model model) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", analysisService.selectAll());
+        RestfulResponse response = new RestfulResponse(1, "success");
+        map.put("res", response);
+        return map;
+    }
+
+    @RequestMapping(value = "analysis/query", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> insert(@RequestBody(required = true) Downsample downsample) throws Exception {
+        analysisService.insert(downsample);
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", analysisService.selectAll());
+        return map;
+    }
+
+    @RequestMapping(value = "analysis/query", method = RequestMethod.PUT)
+    @ResponseBody
+    public Map<String, Object> update(@RequestBody(required = true) Downsample downsample) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        if (analysisService.updateByPrimaryKey(downsample) == 1) {
+            map.put("res", new RestfulResponse(1, "success"));
+        } else {
+            map.put("res", new RestfulResponse(0, "update failed"));
+        }
+        map.put("data", analysisService.selectByPrimaryKey(downsample.getId()));
+        return map;
+    }
+
 
     @RequestMapping("api/export/electrode")
     @ResponseBody
@@ -128,22 +165,4 @@ public class AnalysisController {
         analysisService.exportFromPatientsWithDownsampling(patientIDs, request.column, request.method, request.interval, request.time);
     }
 
-    @RequestMapping("analysis/all")
-    @ResponseBody
-    public Map<String, Object> allQuery(Model model) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("data", analysisService.selectAll());
-        RestfulResponse response = new RestfulResponse(1, "success");
-        map.put("res", response);
-        return map;
-    }
-
-    @RequestMapping("analysis/insert")
-    @ResponseBody
-    public Map<String, Object> insert(@RequestBody(required = true) Downsample downsample) throws Exception {
-        analysisService.insert(downsample);
-        Map<String, Object> map = new HashMap<>();
-        map.put("data", analysisService.selectAll());
-        return map;
-    }
 }

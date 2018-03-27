@@ -5,7 +5,7 @@ $(document).ready(function() {
 
     var table = $('#queryTable').DataTable({
         ajax : {
-            "url" : "/analysis/all"
+            "url" : "/analysis/query"
         },
         data : queries.data,
         columnDefs : [ {
@@ -33,9 +33,15 @@ $(document).ready(function() {
                 return secondsToStr(data.duration);
             }
         }, {
-            data : 'createTime',
+            data : null,
+            render : function(data) {
+                return localeDateString(data.createTime)
+            }
         }, {
-            data : 'updateTime',
+            data : null,
+            render : function(data) {
+                return localeDateString(data.updateTime)
+            }
         } ],
         order : [ [ 5, 'desc' ] ],
     });
@@ -68,6 +74,10 @@ $(document).ready(function() {
         return 'N/A';
     }
 
+    function localeDateString(date) {
+        return new Date(date).toLocaleString();
+    }
+
     $('#queryTable tbody').on('mouseover', 'tr', function() {
         $(this).attr("style", "background-color:#ffffdd");
     });
@@ -79,5 +89,27 @@ $(document).ready(function() {
 
     $('#queryTable tbody').on('click', 'tr', function() {
         window.location.href = '/analysis/edit/' + table.row($(this)).data().id;
+    });
+
+    $("#saveButton").click(function() {
+        var form = {
+            "id" : $("#id").val(),
+            "alias" : $("#alias").val(),
+            "period" : $("#period").val() * $("#period_unit").val(),
+            "origin" : $("#origin").val() * $("#origin_unit").val(),
+            "duration" : $("#duration").val() * $("#duration_unit").val()
+        };
+        $.ajax({
+            'url' : "/analysis/query",
+            'type' : 'put',
+            'data' : JSON.stringify(form),
+            'contentType' : "application/json",
+            'dataType' : 'json',
+            'success' : function(data) {
+                window.location.href = '/analysis/edit/' + $("#id").val();
+            },
+            'error' : function() {
+            }
+        });
     });
 });

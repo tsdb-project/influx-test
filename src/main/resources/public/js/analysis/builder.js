@@ -5,7 +5,7 @@ $(document).ready(function() {
 
     var table = $('#queryTable').DataTable({
         ajax : {
-            "url" : "/analysis/all"
+            "url" : "/analysis/query"
         },
         data : queries.data,
         columnDefs : [ {
@@ -33,9 +33,15 @@ $(document).ready(function() {
                 return secondsToStr(data.duration);
             }
         }, {
-            data : 'createTime',
+            data : null,
+            render : function(data) {
+                return localeDateString(data.createTime)
+            }
         }, {
-            data : 'updateTime',
+            data : null,
+            render : function(data) {
+                return localeDateString(data.updateTime)
+            }
         } ],
         order : [ [ 5, 'desc' ] ],
     });
@@ -48,7 +54,7 @@ $(document).ready(function() {
             "duration" : $("#duration").val() * $("#duration_unit").val()
         };
         $.ajax({
-            'url' : "/analysis/insert",
+            'url' : "/analysis/query",
             'type' : 'post',
             'data' : JSON.stringify(form),
             'contentType' : "application/json",
@@ -91,6 +97,11 @@ $(document).ready(function() {
         }
         return 'N/A';
     }
+    
+    function localeDateString(date) {
+        return new Date(date).toLocaleString();
+    }
+    
 
     $('#queryTable tbody').on('mouseover', 'tr', function() {
         $(this).attr("style", "background-color:#ffffdd");
