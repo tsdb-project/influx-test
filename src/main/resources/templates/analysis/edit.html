@@ -40,7 +40,8 @@
                                     <div class="col-sm-12 col-md-12">
                                         <label>Alias</label>
                                         <div class="input-group mb-3">
-                                            <input type="text" class="form-control" id="alias" th:value="${query.alias}">
+                                            <input type="hidden" id="id" th:value="${query.downsample.id}" />
+                                            <input type="text" class="form-control" id="alias" th:value="${query.downsample.alias}">
                                             <i class="form-group__bar"></i>
                                         </div>
                                     </div>
@@ -49,14 +50,14 @@
                                     <div class="col-sm-4 col-md-4">
                                         <label>Downsample Interval</label>
                                         <div class="input-group mb-3">
-                                            <input type="text" class="form-control" id="period" th:value="${query.period}">
+                                            <input type="text" class="form-control" id="period" th:value="${query.period}" placeholder="Leave empty for no downsampling">
                                             <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Time Unit" id="period_unit" data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled" selected="selected" value="">Select Time Unit</option>
-                                                    <option value="1">Seconds</option>
-                                                    <option value="60">Minutes</option>
-                                                    <option value="3600">Hours</option>
-                                                    <option value="84000">Days</option>
+                                                    <option disabled="disabled" th:selected="${query.periodUnit} == ''" value="">Select Time Unit</option>
+                                                    <option th:selected="${query.periodUnit} == 1" value="1">Seconds</option>
+                                                    <option th:selected="${query.periodUnit} == 60" value="60">Minutes</option>
+                                                    <option th:selected="${query.periodUnit} == 3600" value="3600">Hours</option>
+                                                    <option th:selected="${query.periodUnit} == 86400" value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -64,14 +65,14 @@
                                     <div class="col-sm-4 col-md-4">
                                         <label>Starting Time</label>
                                         <div class="input-group mb-3">
-                                            <input type="text" class="form-control" id="origin" th:value="${query.origin}">
+                                            <input type="text" class="form-control" id="origin" th:value="${query.origin}" placeholder="Leave empty to start at beginning">
                                             <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Time Unit" id="origin_unit" data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled" selected="selected" value="">Select Time Unit</option>
-                                                    <option value="1">Seconds</option>
-                                                    <option value="60">Minutes</option>
-                                                    <option value="3600">Hours</option>
-                                                    <option value="84000">Days</option>
+                                                    <option disabled="disabled" th:selected="${query.originUnit} == ''" value="">Select Time Unit</option>
+                                                    <option th:selected="${query.originUnit} == 1" value="1">Seconds</option>
+                                                    <option th:selected="${query.originUnit} == 60" value="60">Minutes</option>
+                                                    <option th:selected="${query.originUnit} == 3600" value="3600">Hours</option>
+                                                    <option th:selected="${query.originUnit} == 86400" value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -79,14 +80,14 @@
                                     <div class="col-sm-4 col-md-4">
                                         <label>Duration</label>
                                         <div class="input-group mb-3">
-                                            <input type="text" class="form-control" id="duration" th:value="${query.duration}">
+                                            <input type="text" class="form-control" id="duration" th:value="${query.duration}" placeholder="Leave empty for the whole measure process">
                                             <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Time Unit" id="duration_unit" data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled" selected="selected" value="">Select Time Unit</option>
-                                                    <option value="1">Seconds</option>
-                                                    <option value="60">Minutes</option>
-                                                    <option value="3600">Hours</option>
-                                                    <option value="84000">Days</option>
+                                                    <option disabled="disabled" th:selected="${query.durationUnit} == ''" value="">Select Time Unit</option>
+                                                    <option th:selected="${query.durationUnit} == 1" value="1">Seconds</option>
+                                                    <option th:selected="${query.durationUnit} == 60" value="60">Minutes</option>
+                                                    <option th:selected="${query.durationUnit} == 3600" value="3600">Hours</option>
+                                                    <option th:selected="${query.durationUnit} == 86400" value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -105,7 +106,7 @@
                     </form>
                 </div>
             </div>
-            
+
             <div class="card" th:if="${edit} == false">
                 <div class="card-body">
                     <h3 class="card-title">Existing Queries</h3>
@@ -123,7 +124,7 @@
                                     <th>Update Time</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style="cursor: pointer">
                                 <tr>
                                 </tr>
                             </tbody>
@@ -137,6 +138,12 @@
     </main>
 
     <div th:insert="fragments/ie-warning :: div"></div>
+    <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    var query = /*[[${query}]]*/null;
+                    /*]]>*/
+                </script>
+
     <!-- Javascript -->
     <!-- Vendors -->
     <script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>

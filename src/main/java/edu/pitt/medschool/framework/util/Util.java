@@ -63,7 +63,8 @@ public class Util {
      * @throws ParseException Wrong format
      */
     public static Date dateTimeFormatToDate(String dateTime, String format, TimeZone timeZone) throws ParseException {
-        if (timeZone == null) timeZone = TimeZone.getTimeZone("America/New_York");
+        if (timeZone == null)
+            timeZone = TimeZone.getTimeZone("America/New_York");
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         sdf.setTimeZone(timeZone);
         return sdf.parse(dateTime);
@@ -114,7 +115,8 @@ public class Util {
      * @return Apache POI defined timestamp
      */
     public static long serialTimeToLongDate(String serial, TimeZone timeZone) {
-        if (timeZone == null) timeZone = TimeZone.getTimeZone("America/New_York");
+        if (timeZone == null)
+            timeZone = TimeZone.getTimeZone("America/New_York");
         double sTime = Double.valueOf(serial);
         Date d = DateUtil.getJavaDate(sTime, timeZone);
         return d.getTime();
@@ -173,7 +175,6 @@ public class Util {
         return Period.between(dob, now).getYears();
     }
 
-
     public static List<FileBean> filesInFolder(String directory) {
         File folder = new File(directory);
 
@@ -224,19 +225,38 @@ public class Util {
         return sb.toString();
     }
 
+    public static String[] secondToString(int totalSeconds) {
+        if (totalSeconds == 0) {
+            return new String[]{"", ""};
+        }
+        if (totalSeconds % 86400 == 0) {
+            return new String[]{String.valueOf((totalSeconds / 86400)), "86400"};
+        }
+        if (totalSeconds % 3600 == 0) {
+            return new String[]{String.valueOf((totalSeconds / 3600)), "3600"};
+        }
+        if (totalSeconds % 60 == 0) {
+            return new String[]{String.valueOf((totalSeconds / 60)), "60"};
+        }
+        return new String[]{String.valueOf(totalSeconds), "1"};
+    }
+
     public static void main(String[] args) throws ParseException {
-        System.out.println(FileUtils.sizeOf(new File("/tsdb/testing3")));
-//        System.out.println(filesInFolder("/Users/Isolachine/tsdb/testing2"));
-//
-//        System.out.println(dateToTimestamp("1/2/1934"));
-//        System.out.println(timestampToUTCDate(dateToTimestamp("1/1/1934")));
-//        System.out.println(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"));
-//        System.out.println(timestampToUTCDateTimeFormat(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"), "yyyy.MM.dd HH:mm:ss"));
-//        System.out.println(timestampToUTCDateTimeFormat(serialTimeToLongDate("43036.6402314815"), "yyyy-MM-dd HH:mm:ss"));
-//
-//        String[] testF = getAllSpecificFileInDirectory("E:\\Grad@Pitt\\TS ProjectData", "csv");
-//        for (String a : testF) {
-//            System.out.println(a);
-//        }
+        System.out.println(secondToString(30)[0] + ":" + secondToString(30)[1]);
+        System.out.println(secondToString(3600)[0] + ":" + secondToString(3600)[1]);
+        System.out.println(secondToString(18000)[0] + ":" + secondToString(18000)[1]);
+        // System.out.println(FileUtils.sizeOf(new File("/tsdb/testing3")));
+        // System.out.println(filesInFolder("/Users/Isolachine/tsdb/testing2"));
+        //
+        // System.out.println(dateToTimestamp("1/2/1934"));
+        // System.out.println(timestampToUTCDate(dateToTimestamp("1/1/1934")));
+        // System.out.println(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"));
+        // System.out.println(timestampToUTCDateTimeFormat(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"), "yyyy.MM.dd HH:mm:ss"));
+        // System.out.println(timestampToUTCDateTimeFormat(serialTimeToLongDate("43036.6402314815"), "yyyy-MM-dd HH:mm:ss"));
+        //
+        // String[] testF = getAllSpecificFileInDirectory("E:\\Grad@Pitt\\TS ProjectData", "csv");
+        // for (String a : testF) {
+        // System.out.println(a);
+        // }
     }
 }

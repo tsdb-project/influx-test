@@ -120,4 +120,8 @@ public class AnalysisService {
 
     }
 
+    public int updateByPrimaryKey(Downsample downsample) {
+        return downsampleDao.updateByPrimaryKey(downsample);
+    }
+
 }
