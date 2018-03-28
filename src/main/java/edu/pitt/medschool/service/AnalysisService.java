@@ -4,12 +4,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.pitt.medschool.model.dao.DownsampleGroupAggrDao;
-import edu.pitt.medschool.model.dao.DownsampleMetaDao;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
@@ -24,8 +21,10 @@ import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.model.dao.DownsampleDao;
+import edu.pitt.medschool.model.dao.DownsampleGroupAggrDao;
 import edu.pitt.medschool.model.dao.DownsampleGroupColumnDao;
 import edu.pitt.medschool.model.dao.DownsampleGroupDao;
+import edu.pitt.medschool.model.dao.DownsampleMetaDao;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.DownsampleGroupColumn;
@@ -50,8 +49,11 @@ public class AnalysisService {
     DownsampleGroupAggrDao downsampleGroupAggrDao;
 
     /*
-     * Be able to restrict the epochs for which data are exported (e.g. specify to export up to the first 36 hours of available data, but truncate data thereafter). Be able to specify which columns are exported (e.g.
-     * I10_*, I10_2 only, all data, etc) Be able to export down sampled data (e.g. hourly mean, median, variance, etc)
+     * Be able to restrict the epochs for which data are exported (e.g. specify to
+     * export up to the first 36 hours of available data, but truncate data
+     * thereafter). Be able to specify which columns are exported (e.g. I10_*, I10_2
+     * only, all data, etc) Be able to export down sampled data (e.g. hourly mean,
+     * median, variance, etc)
      */
 
     private InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
@@ -123,14 +125,15 @@ public class AnalysisService {
 
     public int insertAggregationGroup(Downsample query, DownsampleGroup group, List<DownsampleGroupColumn> columns) throws Exception {
         // TODO: Implementation of method
-        for(DownsampleGroupColumn dgc:columns) {
+        for (DownsampleGroupColumn dgc : columns) {
+
         }
-        return downsampleGroupAggrDao.insertGroupAggr(group);
+        return 0;
     }
 
     public int insertMetaFilter(Downsample query, String key, String value) throws Exception {
         // TODO: Implementation of method
-        return downsampleMetaDao.insertMeta(query, key, value);
+        return 0;
     }
 
     public static void main(String[] args) {
