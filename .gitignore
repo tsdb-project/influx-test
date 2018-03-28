@@ -69,9 +69,6 @@ cmake-build-release/
 # Mongo Explorer plugin:
 .idea/**/mongoSettings.xml
 
-## File-based project format:
-*.iws
-
 ## Plugin-specific files:
 
 # IntelliJ
@@ -159,9 +156,6 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
-
-# STS (Spring Tool Suite)
-.springBeans
 
 # Code Recommenders
 .recommenders/
