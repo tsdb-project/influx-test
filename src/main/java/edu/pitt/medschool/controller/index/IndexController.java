@@ -6,6 +6,7 @@ package edu.pitt.medschool.controller.index;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Isolachine
@@ -14,23 +15,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class IndexController {
+
     @RequestMapping("template/template")
     public Model template(Model model) {
         return model;
     }
-    
-    @RequestMapping("index/home")
-    public Model index(Model model) {
-        model.addAttribute("nav", "home");
-        model.addAttribute("subnav", "");
-        return model;
-    }
-    
+
     @RequestMapping("/")
-    public String home(Model model) {
-        model.addAttribute("nav", "home");
-        model.addAttribute("subnav", "");
-        return "redirect:/index/home";
+    public ModelAndView index(ModelAndView modelAndView) {
+        modelAndView.addObject("nav", "home");
+        modelAndView.addObject("subnav", "");
+        modelAndView.setViewName("index/home");
+        return modelAndView;
     }
 
 }
