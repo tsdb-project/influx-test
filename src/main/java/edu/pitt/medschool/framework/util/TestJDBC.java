@@ -1,5 +1,6 @@
 package edu.pitt.medschool.framework.util;
 
+import edu.pitt.medschool.service.ImportCsvService;
 import edu.pitt.medschool.service.ImportMetadataService;
 import edu.pitt.medschool.service.ImportProgressService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +25,14 @@ public class TestJDBC implements CommandLineRunner {
     }
 
     @Autowired
-    ImportProgressService is;
+    ImportCsvService ic;
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println(is.getUUID());
-        is._test(false);
+        ic.SetLoadFactor(0.001);
+        ic._test();
         // Exit routine
-        SpringApplication.exit(context);
+        // SpringApplication.exit(context);
     }
 
 }

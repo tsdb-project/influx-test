@@ -8,6 +8,7 @@ import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.pitt.medschool.config.DBConfiguration;
@@ -41,12 +42,14 @@ public class ImportCsvService {
     private final Map<String, Long> everyFileSize = new HashMap<>();
 
     private final String dbName = DBConfiguration.Data.DBNAME;
-    private double loadFactor = 0.6;
+    private double loadFactor = 0.5;
 
     private final AtomicBoolean importingLock = new AtomicBoolean(false);
 
     private final BlockingQueue<Path> fileQueue = new LinkedBlockingQueue<>();
-    private final ImportProgressService ips = new ImportProgressService();
+
+    @Autowired
+    private ImportProgressService ips;
 
     public double GetLoadFactor() {
         return loadFactor;
@@ -63,21 +66,18 @@ public class ImportCsvService {
         return this.taskUUID;
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        ImportCsvService ics = new ImportCsvService();
+    public void _test() throws InterruptedException {
         String[] allNoAr = Util.getAllCsvFileInDirectory("N:\\1\\");
         String[] allAr = Util.getAllCsvFileInDirectory("N:\\2\\");
 
-        ics.AddArrayFiles(allNoAr);
-        ics.AddArrayFiles(allAr);
+        AddArrayFiles(allNoAr);
+        AddArrayFiles(allAr);
 
-        // Wait s to get some results
-        Thread.sleep(8000);
-        //double ovr = ImportProgressService.GetTaskOverallProgress(ics.GetUUID());
-        //Map<String, List<Object>> ss = ImportProgressService.GetTaskAllFileProgress(ics.GetUUID());
+        System.out.println("Sleep 5s...");
+        Thread.sleep(5000);
 
         // Add again
-        ics.AddOneFile("N:\\Test_AR\\PUH-2010-076_07ar.csv");
+        AddOneFile("N:\\Test_AR\\PUH-2010-076_07ar.csv");
 
         System.out.println("Main exited, worker running...");
     }
