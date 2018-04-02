@@ -1,16 +1,19 @@
 package edu.pitt.medschool.framework.util;
 
 import edu.pitt.medschool.service.ImportMetadataService;
+import edu.pitt.medschool.service.ImportProgressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.UUID;
+
 /**
  * Test JDBC related works
  */
-@SpringBootApplication(scanBasePackages = { "edu.pitt.medschool"})
+@SpringBootApplication(scanBasePackages = {"edu.pitt.medschool"})
 public class TestJDBC implements CommandLineRunner {
 
     @Autowired
@@ -21,11 +24,12 @@ public class TestJDBC implements CommandLineRunner {
     }
 
     @Autowired
-    ImportMetadataService importMetadataService;
+    ImportProgressService is;
 
     @Override
-    public void run(String... args) {
-        importMetadataService.DoImport("E:\\UPMC\\TSDB\\PCASDatabase_DATA_2018-02-21_0905.csv");
+    public void run(String... args) throws Exception {
+        System.out.println(is.getUUID());
+        is._test(false);
         // Exit routine
         SpringApplication.exit(context);
     }

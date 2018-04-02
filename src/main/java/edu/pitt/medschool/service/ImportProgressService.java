@@ -1,42 +1,43 @@
 package edu.pitt.medschool.service;
 
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.Point;
-import org.influxdb.dto.Query;
+import edu.pitt.medschool.controller.load.vo.ProgressVO;
+import edu.pitt.medschool.model.dao.ImportProgressDao;
+import edu.pitt.medschool.model.dto.ImportProgress;
 
 import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.util.InfluxUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Import progress service
  */
-//TODO: Operate in MySQL
+@Service
 public class ImportProgressService {
 
     public enum FileProgressStatus {
         STATUS_FINISHED, STATUS_FAIL, STATUS_INPROGRESS
     }
 
-    private final InfluxDB sysMiscIdb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-    private static final String dbName = DBConfiguration.Sys.DBNAME;
+    @Autowired
+    private ImportProgressDao ipo;
+
     private String uuid;
 
     /**
      * Init progress service
      */
-    public ImportProgressService(String uuid) {
-        Objects.requireNonNull(uuid);
-        sysMiscIdb.createDatabase(dbName);
-        this.uuid = uuid;
-        // Init this class for writing
-        sysMiscIdb.setDatabase(dbName);
+    public ImportProgressService() {
+        this.uuid = UUID.randomUUID().toString();
+    }
+
+    public String getUUID() {
+        return this.uuid;
     }
 
     /**
@@ -44,14 +45,8 @@ public class ImportProgressService {
      *
      * @param uuid Task UUID
      */
-    public static double GetTaskOverallProgress(String uuid) {
-        Query q = new Query("SELECT \"AllPercent\" AS C FROM " + DBConfiguration.Sys.SYS_FILE_IMPORT_PROGRESS
-                + " WHERE status != '" + FileProgressStatus.STATUS_FAIL
-                + "' AND tid = '" + uuid + "' ORDER BY time DESC LIMIT 1;", dbName);
-        Map<String, List<Object>> result = InfluxUtil.QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
-        // No data or not started yet
-        if (result.size() == 0) return 0;
-        return (double) result.get("C").get(0);
+    public double GetTaskOverallProgress(String uuid) {
+        return ipo.OverallProgress(uuid);
     }
 
     /**
@@ -59,35 +54,28 @@ public class ImportProgressService {
      *
      * @param uuid Task UUID
      */
-    public static Map<String, List<Object>> GetTaskAllFileProgress(String uuid) {
-        Query q = new Query(
-                "SELECT \"filename\", MAX(\"CurrentPercent\") AS progress, \"status\", \"Reason\" FROM "
-                        + DBConfiguration.Sys.SYS_FILE_IMPORT_PROGRESS
-                        + " WHERE tid = '" + uuid + "' GROUP BY \"filename\";", dbName);
-        //TODO: Convert to List<Progress Object>, result in rows, not columns!!!
-        return InfluxUtil.QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
+    public List<ProgressVO> GetTaskAllFileProgress(String uuid) {
+        return ipo.GetTaskDetailProgress(uuid);
     }
 
-    public static void main(String[] args) {
-        ImportProgressService ips = new ImportProgressService("TESTUUID");
-        boolean loadTestingData = false;
+    public void _test(boolean loadTestingData) {
         if (loadTestingData) {
-            ips.UpdateFileProgress("1.csv", 100, 10, 5, 5, FileProgressStatus.STATUS_INPROGRESS, null);
-            ips.UpdateFileProgress("2.csv", 100, 40, 40, 45, FileProgressStatus.STATUS_FINISHED, null);
-            ips.UpdateFileProgress("3.csv", 100, 20, 3, 48, FileProgressStatus.STATUS_INPROGRESS, null);
-            ips.UpdateFileProgress("3.csv", 100, 20, 10, 55, FileProgressStatus.STATUS_FAIL, "Wrong file format");
-            ips.UpdateFileProgress("1.csv", 100, 10, 6, 56, FileProgressStatus.STATUS_INPROGRESS, null);
-            ips.UpdateFileProgress("1.csv", 100, 10, 10, 60, FileProgressStatus.STATUS_FINISHED, null);
+            this.uuid = "TESTUUID";
+            UpdateFileProgress("1.csv", 100, 10, 5, 5, FileProgressStatus.STATUS_INPROGRESS, null);
+            UpdateFileProgress("2.csv", 100, 40, 40, 45, FileProgressStatus.STATUS_FINISHED, null);
+            UpdateFileProgress("3.csv", 100, 20, 3, 48, FileProgressStatus.STATUS_INPROGRESS, null);
+            UpdateFileProgress("3.csv", 100, 20, 10, 55, FileProgressStatus.STATUS_FAIL, "Wrong file format");
+            UpdateFileProgress("1.csv", 100, 10, 6, 56, FileProgressStatus.STATUS_INPROGRESS, null);
+            UpdateFileProgress("1.csv", 100, 10, 10, 60, FileProgressStatus.STATUS_FINISHED, null);
+            return;
         }
         double s = GetTaskOverallProgress("TESTUUID");
-        Map<String, List<Object>> ss = GetTaskAllFileProgress("TESTUUID");
-        s = GetTaskOverallProgress("f1cabc42-c359-4c7f-885b-bfa35fe64611");
-        ss = GetTaskAllFileProgress("f1cabc42-c359-4c7f-885b-bfa35fe64611");
+        List<ProgressVO> ss = GetTaskAllFileProgress("TESTUUID");
     }
 
-    private void doInsert(Point.Builder p) {
-        p.tag("tid", this.uuid);
-        sysMiscIdb.write(p.build());
+    private void doInsert(ImportProgress ip) throws Exception {
+        ip.setUuid(this.uuid);
+        ipo.insert(ip);
     }
 
     /**
@@ -108,20 +96,26 @@ public class ImportProgressService {
         if (totalFileSize != 0) allPercent = 1.0 * totalProcessedSize / totalFileSize;
         if (fileSize != 0) currPercent = 1.0 * processedSize / fileSize;
 
-        Point.Builder pnt = Point.measurement(DBConfiguration.Sys.SYS_FILE_IMPORT_PROGRESS)
-                .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
-                .tag("status", String.valueOf(status))
-                .tag("filename", fileName)
-                .addField("AllPercent", allPercent)
-                .addField("CurrentPercent", currPercent)
-                .addField("fileAllSz", fileSize)
-                .addField("allFilesSz", totalFileSize);
+        ImportProgress ip = new ImportProgress();
+
+        ip.setStatus(String.valueOf(status));
+        ip.setFilename(fileName);
+        ip.setAllPercent(allPercent);
+        ip.setThisPercent(currPercent);
+        ip.setThisFileSize(fileSize);
+        ip.setAllFileSize(totalFileSize);
+
         if (status == FileProgressStatus.STATUS_FAIL) {
-            pnt.addField("Reason", failReason);
+            ip.setReason(failReason);
         } else {
-            pnt.addField("Reason", "N/A");
+            ip.setReason("N/A");
         }
-        doInsert(pnt);
+
+        try {
+            doInsert(ip);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -32,7 +32,7 @@ public class ImportMetadataService {
     }
 
     @Autowired
-    PatientDao pdo;
+    private PatientDao pdo;
 
     /**
      * CSV Header processing

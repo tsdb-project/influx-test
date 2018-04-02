@@ -99,13 +99,16 @@ public class DataController {
 
         String uuid = importCsvService.GetUUID();
 
-        Map<String, List<Object>> allstat = ImportProgressService.GetTaskAllFileProgress(uuid);
+        //TODO: adjust the code START
+        /*Map<String, List<Object>> allstat = ImportProgressService.GetTaskAllFileProgress(uuid);
         for (String key : allstat.keySet()) {
             map.put(key, allstat.get(key));
         }
 
         String total = String.format("%.2f", ImportProgressService.GetTaskOverallProgress(uuid) * 100);
-        map.put("total", total);
+        map.put("total", total);*/
+        //TODO: adjust the code END
+
         // if (!allstat.get("filename").contains(file)) {
         // map.put("finished", false);
         // } else {

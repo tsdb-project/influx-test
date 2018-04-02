@@ -46,7 +46,7 @@ public class ImportCsvService {
     private final AtomicBoolean importingLock = new AtomicBoolean(false);
 
     private final BlockingQueue<Path> fileQueue = new LinkedBlockingQueue<>();
-    private final ImportProgressService ips = new ImportProgressService(this.taskUUID);
+    private final ImportProgressService ips = new ImportProgressService();
 
     public double GetLoadFactor() {
         return loadFactor;
@@ -73,8 +73,8 @@ public class ImportCsvService {
 
         // Wait s to get some results
         Thread.sleep(8000);
-        double ovr = ImportProgressService.GetTaskOverallProgress(ics.GetUUID());
-        Map<String, List<Object>> ss = ImportProgressService.GetTaskAllFileProgress(ics.GetUUID());
+        //double ovr = ImportProgressService.GetTaskOverallProgress(ics.GetUUID());
+        //Map<String, List<Object>> ss = ImportProgressService.GetTaskAllFileProgress(ics.GetUUID());
 
         // Add again
         ics.AddOneFile("N:\\Test_AR\\PUH-2010-076_07ar.csv");
