@@ -25,6 +25,7 @@ import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
 
@@ -66,7 +67,7 @@ public class AnalysisController {
         return model;
     }
 
-    @RequestMapping(value = {"/analysis/edit/{id}", "/analysis/edit"}, method = RequestMethod.GET)
+    @RequestMapping(value = { "/analysis/edit/{id}", "/analysis/edit" }, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "edit");
@@ -207,9 +208,18 @@ public class AnalysisController {
         analysisService.exportFromPatientsWithDownsampling(patientIDs, request.column, request.method, request.interval, request.time);
     }
 
+    @RequestMapping("api/export/export/{qid}")
+    @ResponseBody
+    public void exportQuery(@PathVariable(required = true) Integer qid) throws IOException {
+        List<String> pids = importedFileDao.getAllImportedPid(uuid);
+        System.out.println(pids);
+        Downsample downsample = analysisService.selectByPrimaryKey(qid);
+        List<DownsampleGroupVO> downsampleGroups = analysisService.selectAllAggregationGroupByQueryId(qid);
+        analysisService.exportFromPatientsWithDownsamplingGroups(pids, downsample, downsampleGroups);
+    }
+
     /**
-     * TODO: Mybatis support for ONLY SELECT PID?
-     * Extract only PID from 'Patient' object
+     * TODO: Mybatis support for ONLY SELECT PID? Extract only PID from 'Patient' object
      */
     private List<String> extractPid(List<Patient> p) {
         if (p == null)

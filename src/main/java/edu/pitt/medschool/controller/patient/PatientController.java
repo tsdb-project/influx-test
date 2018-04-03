@@ -1,23 +1,29 @@
 package edu.pitt.medschool.controller.patient;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Patient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Get all patient data in the DB
  */
 @RestController
 @RequestMapping("/apis")
-public class PatientGetController {
+public class PatientController {
 
     @Value("${machine}")
     private String uuid;
@@ -32,8 +38,13 @@ public class PatientGetController {
     @ResponseBody
     public Map<String, Object> getAllPatientInfo() {
         Map<String, Object> map = new HashMap<>();
-        //TODO: change front-end! new contents in Patient Obj.
-        map.put("data", patientDao.selectByIds(importedFileDao.getAllImportedPid(uuid)));
+        // TODO: change front-end! new contents in Patient Obj.
+        List<String> pids = importedFileDao.getAllImportedPid(uuid);
+        if (pids.isEmpty()) {
+            map.put("data", new ArrayList<>());
+        } else {
+            map.put("data", patientDao.selectByIds(pids));
+        }
         RestfulResponse response = new RestfulResponse(1, "success");
         map.put("res", response);
 

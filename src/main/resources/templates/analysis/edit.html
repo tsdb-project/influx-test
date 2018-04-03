@@ -102,6 +102,12 @@
                                     <button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" id="saveButton">Save</button>
                                 </div>
                             </div>
+                            <div class="col-sm-4 col-md-2">
+                                <div class="form-group">
+                                    <label>&nbsp</label>
+                                    <a role="button" class="btn btn-primary btn-lg btn-block" th:href="@{/api/export/export/{id}(id=${query.downsample.id})}">Export</a>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>

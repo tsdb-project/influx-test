@@ -48,6 +48,11 @@ public class PatientDao {
                 .andIdEqualTo(pid.toUpperCase());
         return patientMapper.selectByExample(pe);
     }
+    
+    public List<Patient> selectAll() {
+        PatientExample pe = new PatientExample();
+        return patientMapper.selectByExample(pe);
+    }
 
     public List<Patient> selectByIds(List<String> ids) {
         ids.replaceAll(String::toUpperCase);

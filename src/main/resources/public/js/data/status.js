@@ -11,13 +11,18 @@ $(document).ready(
                 },
                 data : files.data,
                 columns : [ {
-                    data : 'pid'
+                    data : 'id'
                 }, {
                     data : 'age',
                 }, {
-                    data : 'gender',
-                }, {
-                    data : 'imported_time',
+                    data : null,
+                    render : function(data) {
+                        if (data.female = '0') {
+                            return 'Male';
+                        } else {
+                            return 'Female';
+                        }
+                    }
                 } ],
                 order : [ [ 0, 'asc' ] ],
             });
