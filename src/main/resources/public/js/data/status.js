@@ -36,14 +36,14 @@ $(document).ready(
                                 + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.progress[i].file_name + ' - ' + progress + "%</small><br><br>";
                     }
 
-                    var totalPercent = data.total;
+                    var totalPercent = (data.total * 100).toFixed(2);
                     $("#totalProgress").attr("style", "width: " + totalPercent + "%");
                     $("#totalProgress").attr("aria-valuenow", "" + totalPercent);
                     $("#totalPercent").html(totalPercent + "%");
 
                     $("#fileProgress").html(progressHtml);
 
-                    if (data.total >= 99.9) {
+                    if (totalPercent >= 99.9) {
                         clearInterval(update);
                         $("#running").hide();
                         $("#finished").show();
