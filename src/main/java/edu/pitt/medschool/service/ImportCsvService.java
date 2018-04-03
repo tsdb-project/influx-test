@@ -1,34 +1,35 @@
 package edu.pitt.medschool.service;
 
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dto.ImportedFile;
-import okhttp3.OkHttpClient;
-import org.influxdb.BatchOptions;
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.BatchPoints;
-import org.influxdb.dto.Point;
-import org.influxdb.dto.Query;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.util.InfluxUtil;
-import edu.pitt.medschool.framework.util.Util;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.influxdb.BatchOptions;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.BatchPoints;
+import org.influxdb.dto.Point;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dto.ImportedFile;
+import okhttp3.OkHttpClient;
 
 /**
  * Auto-parallel importing CSV data
@@ -37,7 +38,8 @@ import java.util.concurrent.atomic.AtomicLong;
 public class ImportCsvService {
 
     private final int availCores = Runtime.getRuntime().availableProcessors();
-    private final String taskUUID = UUID.randomUUID().toString();
+    @Value("${machine}")
+    private String taskUUID;
     private final AtomicLong totalAllSize = new AtomicLong(0);
     private final AtomicLong totalProcessedSize = new AtomicLong(0);
     private final Map<String, Long> everyFileSize = new HashMap<>();
@@ -90,7 +92,8 @@ public class ImportCsvService {
     /**
      * Add one file to the queue (Blocking)
      *
-     * @param path File path
+     * @param path
+     *            File path
      */
     public void AddOneFile(String path) {
         this.internalAddOne(path, false);
@@ -99,7 +102,8 @@ public class ImportCsvService {
     /**
      * Add a list of files into the queue (Blocking)
      *
-     * @param paths List of files
+     * @param paths
+     *            List of files
      */
     public void AddArrayFiles(String[] paths) {
         for (String aPath : paths) {
@@ -118,8 +122,8 @@ public class ImportCsvService {
             if (!isInvokedByAddArrayFiles)
                 this.startImport();
         } catch (IOException e) {
-            //TODO: A separate log table for system failures
-            //logFailureFiles(p.toString(), e.getLocalizedMessage(), 0, 0);
+            // TODO: A separate log table for system failures
+            // logFailureFiles(p.toString(), e.getLocalizedMessage(), 0, 0);
             e.printStackTrace();
         }
     }
@@ -190,17 +194,11 @@ public class ImportCsvService {
             // 8th Line is column header line
             String eiL = reader.readLine();
             String[] columnNames = eiL.split(",");
-            int columnCount = columnNames.length,
-                    bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount,
-                    batchCount = 0;
+            int columnCount = columnNames.length, bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount, batchCount = 0;
             currentProcessed += eiL.length();
             totalProcessedSize.addAndGet(eiL.length());
 
-            BatchPoints records = BatchPoints.database(dbName)
-                    .tag("fileUUID", fileUUID)
-                    .tag("arType", ar_type)
-                    .tag("fileName", filename.substring(0, filename.length() - 4))
-                    .build();
+            BatchPoints records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type).tag("fileName", filename.substring(0, filename.length() - 4)).build();
 
             String aLine;
             while ((aLine = reader.readLine()) != null) {
@@ -216,9 +214,7 @@ public class ImportCsvService {
                 }
 
                 // Measurement is PID
-                Point record = Point.measurement(pid)
-                        .time(Util.serialTimeToLongDate(values[0], null), TimeUnit.MILLISECONDS)
-                        .fields(lineKVMap).build();
+                Point record = Point.measurement(pid).time(Util.serialTimeToLongDate(values[0], null), TimeUnit.MILLISECONDS).fields(lineKVMap).build();
                 records.point(record);
                 batchCount++;
                 currentProcessed += aLine.length();
@@ -228,11 +224,7 @@ public class ImportCsvService {
                 if (batchCount >= bulkInsertMax) {
                     idb.write(records);
                     // Reset batch point
-                    records = BatchPoints.database(dbName)
-                            .tag("fileUUID", fileUUID)
-                            .tag("arType", ar_type)
-                            .tag("fileName", filename.substring(0, filename.length() - 4))
-                            .build();
+                    records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type).tag("fileName", filename.substring(0, filename.length() - 4)).build();
                     batchCount = 0;
                     logImportingFile(file.toString(), aFileSize, currentProcessed);
                 }
@@ -244,10 +236,10 @@ public class ImportCsvService {
             idb.close();
 
         } catch (Exception e) {
-            return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
+            return new Object[] { Util.stackTraceErrorToString(e), currentProcessed };
         }
 
-        return new Object[]{"OK", currentProcessed, totalLines};
+        return new Object[] { "OK", currentProcessed, totalLines };
     }
 
     /**
@@ -255,22 +247,19 @@ public class ImportCsvService {
      */
     private void internalImportMain(Path pFile) {
         long thisFileSize = everyFileSize.get(pFile.toString());
-        String fileFullPath = pFile.toString(),
-                fileName = pFile.getFileName().toString();
+        String fileFullPath = pFile.toString(), fileName = pFile.getFileName().toString();
         String[] fileInfo = checkerFromFilename(fileName, thisFileSize);
 
         // Ar/NoAr Check & Response
         if (fileInfo[1] == null) {
-            logFailureFiles(fileFullPath, "Ambiguous Ar/NoAr in file name.",
-                    thisFileSize, 0);
+            logFailureFiles(fileFullPath, "Ambiguous Ar/NoAr in file name.", thisFileSize, 0);
             return;
         }
 
         // Duplication Check
         if (fileInfo[2].equals("1")) {
-            //TODO: If the same file appears already, having a summary of comparing the contents of the new and old
-            logFailureFiles(fileFullPath, "The same file has been imported.",
-                    thisFileSize, 0);
+            // TODO: If the same file appears already, having a summary of comparing the contents of the new and old
+            logFailureFiles(fileFullPath, "The same file has been imported.", thisFileSize, 0);
             return;
         }
 
@@ -310,7 +299,8 @@ public class ImportCsvService {
     }
 
     private void startImport() {
-        if (importingLock.get()) return;
+        if (importingLock.get())
+            return;
 
         int paraCount = (int) Math.round(loadFactor * availCores);
         paraCount = paraCount > 0 ? paraCount : 1;
@@ -321,12 +311,13 @@ public class ImportCsvService {
             while ((aFilePath = fileQueue.poll()) != null) {
                 internalImportMain(aFilePath);
             }
-            //Queue empty now, safe to re-import
+            // Queue empty now, safe to re-import
             importingLock.set(false);
         };
 
         // importingLock must be false (not locked) to start new threads
-        if (!importingLock.compareAndSet(false, true)) return;
+        if (!importingLock.compareAndSet(false, true))
+            return;
 
         for (int i = 0; i < paraCount; ++i)
             scheduler.submit(importTask);
@@ -334,34 +325,26 @@ public class ImportCsvService {
     }
 
     private void logSuccessFiles(String fn, long thisFileSize, long thisFileProcessedSize) {
-        ips.UpdateFileProgress(fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(),
-                ImportProgressService.FileProgressStatus.STATUS_FINISHED, null);
+        ips.UpdateFileProgress(fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FINISHED, null);
     }
 
     private void logImportingFile(String fn, long thisFileSize, long thisFileProcessedSize) {
-        ips.UpdateFileProgress(fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(),
-                ImportProgressService.FileProgressStatus.STATUS_INPROGRESS, null);
+        ips.UpdateFileProgress(fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_INPROGRESS, null);
     }
 
     private void logFailureFiles(String fn, String reason, long thisFileSize, long thisFileProcessedSize) {
         totalAllSize.addAndGet(thisFileProcessedSize - thisFileSize);
-        ips.UpdateFileProgress(fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(),
-                ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
+        ips.UpdateFileProgress(fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
     }
 
     /**
      * Generate IdbClient for Importing CSVs
      */
     private InfluxDB generateIdbClient() {
-        InfluxDB idb = InfluxDBFactory.connect(
-                InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
-                        .readTimeout(60, TimeUnit.SECONDS)
-                        .writeTimeout(60, TimeUnit.SECONDS));
+        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD, new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS));
         // Disable GZip to save CPU
         idb.disableGzip();
-        BatchOptions bo = BatchOptions.DEFAULTS
-                .consistency(InfluxDB.ConsistencyLevel.ALL)
+        BatchOptions bo = BatchOptions.DEFAULTS.consistency(InfluxDB.ConsistencyLevel.ALL)
                 // Flush every 2000 Points, at least every 100ms, buffer for failed oper is 2200
                 .actions(2000).flushDuration(100).bufferLimit(2200);
         idb.enableBatch(bo);

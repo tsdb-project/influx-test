@@ -29,6 +29,7 @@ public class ImportProgressDao {
     public double OverallProgress(String uuid) {
         ImportProgressExample ipe = new ImportProgressExample();
         ipe.createCriteria()
+                .andUuidEqualTo(uuid)
                 .andStatusNotEqualTo(
                         ImportProgressService.FileProgressStatus.STATUS_FAIL.toString());
         ipe.setOrderByClause("timestamp DESC");

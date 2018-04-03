@@ -1,18 +1,14 @@
 package edu.pitt.medschool.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import edu.pitt.medschool.controller.load.vo.ProgressVO;
 import edu.pitt.medschool.model.dao.ImportProgressDao;
 import edu.pitt.medschool.model.dto.ImportProgress;
-
-import edu.pitt.medschool.config.DBConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Import progress service
@@ -27,14 +23,8 @@ public class ImportProgressService {
     @Autowired
     private ImportProgressDao ipo;
 
+    @Value("${machine}")
     private String uuid;
-
-    /**
-     * Init progress service
-     */
-    public ImportProgressService() {
-        this.uuid = UUID.randomUUID().toString();
-    }
 
     public String getUUID() {
         return this.uuid;
@@ -43,7 +33,8 @@ public class ImportProgressService {
     /**
      * Get overall progress for a task
      *
-     * @param uuid Task UUID
+     * @param uuid
+     *            Task UUID
      */
     public double GetTaskOverallProgress(String uuid) {
         return ipo.OverallProgress(uuid);
@@ -52,7 +43,8 @@ public class ImportProgressService {
     /**
      * Get progress data for all files within a task UUID
      *
-     * @param uuid Task UUID
+     * @param uuid
+     *            Task UUID
      */
     public List<ProgressVO> GetTaskAllFileProgress(String uuid) {
         return ipo.GetTaskDetailProgress(uuid);
@@ -81,20 +73,27 @@ public class ImportProgressService {
     /**
      * Insert file progress to db
      *
-     * @param fileName           Current file name
-     * @param totalFileSize      All files' size
-     * @param fileSize           Current file's size
-     * @param processedSize      Current processed size
-     * @param totalProcessedSize All processed size
-     * @param status             Current file status
-     * @param failReason         Reason why failed
+     * @param fileName
+     *            Current file name
+     * @param totalFileSize
+     *            All files' size
+     * @param fileSize
+     *            Current file's size
+     * @param processedSize
+     *            Current processed size
+     * @param totalProcessedSize
+     *            All processed size
+     * @param status
+     *            Current file status
+     * @param failReason
+     *            Reason why failed
      */
-    public void UpdateFileProgress(String fileName, long totalFileSize, long fileSize,
-                                   long processedSize, long totalProcessedSize,
-                                   FileProgressStatus status, String failReason) {
+    public void UpdateFileProgress(String fileName, long totalFileSize, long fileSize, long processedSize, long totalProcessedSize, FileProgressStatus status, String failReason) {
         double allPercent = 0, currPercent = 0;
-        if (totalFileSize != 0) allPercent = 1.0 * totalProcessedSize / totalFileSize;
-        if (fileSize != 0) currPercent = 1.0 * processedSize / fileSize;
+        if (totalFileSize != 0)
+            allPercent = 1.0 * totalProcessedSize / totalFileSize;
+        if (fileSize != 0)
+            currPercent = 1.0 * processedSize / fileSize;
 
         ImportProgress ip = new ImportProgress();
 
