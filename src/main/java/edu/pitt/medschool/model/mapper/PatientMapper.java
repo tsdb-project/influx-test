@@ -98,4 +98,9 @@ public interface PatientMapper {
     @Results({@Result(column = "id", property = "id", jdbcType = JdbcType.VARCHAR)})
     List<String> selectIdAll();
 
+    @SelectProvider(type = PatientSqlProvider.class, method = "selectByExample")
+    @ResultType(String.class)
+    @Results({@Result(column = "id", property = "id", jdbcType = JdbcType.VARCHAR, id = true)})
+    List<String> selectIdByExample(PatientExample example);
+
 }

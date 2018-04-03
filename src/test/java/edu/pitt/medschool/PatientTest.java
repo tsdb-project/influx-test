@@ -36,7 +36,7 @@ public class PatientTest {
         pec.andAgeBetween((byte) 10, (byte) 15);
         pec.andFemaleEqualTo(true);
 
-        List<String> patientIDs = extractPid(pd.selectByCustom(pe));
+        List<String> patientIDs = pd.selectIdByCustom(pe);
         assertEquals(patientIDs.size(), 1);
         assertEquals(patientIDs.get(0), "PUH-2014-103");
     }
@@ -69,16 +69,6 @@ public class PatientTest {
         List<Patient> tmp2 = pd.selectByGender("f");
         assertEquals(tmp1.size(), tmp2.size());
         assertEquals(870, tmp1.size());
-    }
-
-    private List<String> extractPid(List<Patient> p) {
-        if (p == null)
-            return new ArrayList<>(0);
-        List<String> res = new ArrayList<>(p.size());
-        for (Patient ap : p) {
-            res.add(ap.getId());
-        }
-        return res;
     }
 
 }
