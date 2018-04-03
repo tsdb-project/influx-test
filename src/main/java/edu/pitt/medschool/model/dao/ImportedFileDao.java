@@ -35,4 +35,12 @@ public class ImportedFileDao {
         return ifm.selectByExample(ife).size() > 0;
     }
 
+    /**
+     * Get all imported PIDs
+     * @param uuid Machine ID
+     */
+    public List<String> getAllImportedPid(String uuid) {
+        return ifm.selectAllImportedPid(uuid);
+    }
+
 }

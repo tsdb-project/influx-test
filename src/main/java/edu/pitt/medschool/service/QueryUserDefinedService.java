@@ -5,9 +5,11 @@ import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.util.InfluxUtil;
 import edu.pitt.medschool.model.QueryResultBean;
 import edu.pitt.medschool.model.TimeSpan;
+import edu.pitt.medschool.model.dao.PatientDao;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -22,7 +24,9 @@ import java.util.Map;
 public class QueryUserDefinedService {
 
     private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-    private final PatientFilteringService patientFilteringService = new PatientFilteringService();
+
+    @Autowired
+    private PatientDao patientDao;
 
     private final String dbName = DBConfiguration.Data.DBNAME;
 
@@ -132,7 +136,7 @@ public class QueryUserDefinedService {
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
-        qrb.setInterestPatient(patientFilteringService.GetById(pid.toUpperCase()).get(0));
+        qrb.setInterestPatient(patientDao.selectById(pid.toUpperCase()).get(0));
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
@@ -161,7 +165,7 @@ public class QueryUserDefinedService {
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
-        qrb.setInterestPatient(patientFilteringService.GetById(pid.toUpperCase()).get(0));
+        qrb.setInterestPatient(patientDao.selectById(pid.toUpperCase()).get(0));
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 

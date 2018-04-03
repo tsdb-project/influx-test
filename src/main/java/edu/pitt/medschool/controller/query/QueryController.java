@@ -8,8 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import edu.pitt.medschool.model.dao.PatientDao;
+import edu.pitt.medschool.model.dto.Patient;
+import edu.pitt.medschool.model.dto.PatientExample;
 import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,14 +21,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.pitt.medschool.bean.PatientFilterBean;
 import edu.pitt.medschool.controller.query.vo.DifferRequestBodyBean;
 import edu.pitt.medschool.controller.query.vo.ExceedRequestBodyBean;
 import edu.pitt.medschool.controller.query.vo.RawDataRequestBodyBean;
 import edu.pitt.medschool.model.QueryResultBean;
 import edu.pitt.medschool.model.TSData.RawData;
 import edu.pitt.medschool.service.ColumnService;
-import edu.pitt.medschool.service.PatientFilteringService;
 import edu.pitt.medschool.service.QueryUserDefinedService;
 import edu.pitt.medschool.service.RawDataService;
 
@@ -36,12 +38,16 @@ import edu.pitt.medschool.service.RawDataService;
 @RestController
 @RequestMapping("query")
 public class QueryController {
+
+    @Value("${machine}")
+    private String uuid;
+
     @Autowired
     QueryUserDefinedService queryUserDefinedService;
     @Autowired
     ColumnService columnService;
     @Autowired
-    PatientFilteringService patientFilteringService;
+    PatientDao patientDao;
     @Autowired
     RawDataService rawDataService;
 
@@ -61,19 +67,20 @@ public class QueryController {
             map.put("data", new ArrayList<>());
             return map;
         }
-        
+
         Map<String, String> meta = request.getMeta();
-        PatientFilterBean filter = new PatientFilterBean();
+        PatientExample pe = new PatientExample();
+        PatientExample.Criteria pec = pe.createCriteria();
         if (meta.get("ageLower") != null && !meta.get("ageLower").isEmpty()) {
-            filter.setAgeLowerFilter(Integer.valueOf(meta.get("ageLower")));
+            pec.andAgeGreaterThan(Byte.valueOf(meta.get("ageLower")));
         }
         if (meta.get("ageUpper") != null && !meta.get("ageUpper").isEmpty()) {
-            filter.setAgeUpperFilter(Integer.valueOf(meta.get("ageUpper")));
+            pec.andAgeLessThanOrEqualTo(Byte.valueOf(meta.get("ageUpper")));
         }
         if (meta.get("gender") != null && !meta.get("gender").isEmpty()) {
-            filter.setGenderFilter(meta.get("gender"));
+            pec.andFemaleEqualTo(meta.get("gender").toUpperCase().equals("F"));
         }
-        List<String> patientIDs = patientFilteringService.FetchResultPid(filter);
+        List<String> patientIDs = extractPid(patientDao.selectByCustom(pe));
 
         List<QueryResultBean> resultBeans = queryUserDefinedService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount(), patientIDs, null);
         Map<String, Object> map = new HashedMap<>();
@@ -99,17 +106,18 @@ public class QueryController {
         }
 
         Map<String, String> meta = request.getMeta();
-        PatientFilterBean filter = new PatientFilterBean();
+        PatientExample pe = new PatientExample();
+        PatientExample.Criteria pec = pe.createCriteria();
         if (meta.get("ageLower") != null && !meta.get("ageLower").isEmpty()) {
-            filter.setAgeLowerFilter(Integer.valueOf(meta.get("ageLower")));
+            pec.andAgeGreaterThan(Byte.valueOf(meta.get("ageLower")));
         }
         if (meta.get("ageUpper") != null && !meta.get("ageUpper").isEmpty()) {
-            filter.setAgeUpperFilter(Integer.valueOf(meta.get("ageUpper")));
+            pec.andAgeLessThanOrEqualTo(Byte.valueOf(meta.get("ageUpper")));
         }
         if (meta.get("gender") != null && !meta.get("gender").isEmpty()) {
-            filter.setGenderFilter(meta.get("gender"));
+            pec.andFemaleEqualTo(meta.get("gender").toUpperCase().equals("F"));
         }
-        List<String> patientIDs = patientFilteringService.FetchResultPid(filter);
+        List<String> patientIDs = extractPid(patientDao.selectByCustom(pe));
 
         List<QueryResultBean> resultBeans = queryUserDefinedService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount(), patientIDs, null);
         Map<String, Object> map = new HashedMap<>();
@@ -144,4 +152,19 @@ public class QueryController {
 
         return map;
     }
+
+    /**
+     * TODO: Mybatis support?
+     * Extract only PID from 'Patient' object
+     */
+    private List<String> extractPid(List<Patient> p) {
+        if (p == null)
+            return new ArrayList<>(0);
+        List<String> res = new ArrayList<>(p.size());
+        for (Patient ap : p) {
+            res.add(ap.getId());
+        }
+        return res;
+    }
+
 }

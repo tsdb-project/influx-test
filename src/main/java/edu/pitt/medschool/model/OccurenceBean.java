@@ -3,6 +3,8 @@
  */
 package edu.pitt.medschool.model;
 
+import edu.pitt.medschool.model.dto.Patient;
+
 /**
  * @author Isolachine
  *

@@ -42,11 +42,365 @@ public class PatientSqlProvider {
         if (record.getId() != null) {
             sql.VALUES("id", "#{id,jdbcType=VARCHAR}");
         }
-        if (record.getGender() != null) {
-            sql.VALUES("gender", "#{gender,jdbcType=CHAR}");
-        }
         if (record.getAge() != null) {
-            sql.VALUES("age", "#{age,jdbcType=INTEGER}");
+            sql.VALUES("age", "#{age,jdbcType=TINYINT}");
+        }
+        if (record.getFemale() != null) {
+            sql.VALUES("female", "#{female,jdbcType=BIT}");
+        }
+        if (record.getOohca() != null) {
+            sql.VALUES("oohca", "#{oohca,jdbcType=BIT}");
+        }
+        if (record.getIhcaLoc() != null) {
+            sql.VALUES("ihca_loc", "#{ihcaLoc,jdbcType=VARCHAR}");
+        }
+        if (record.getTransfer() != null) {
+            sql.VALUES("transfer", "#{transfer,jdbcType=BIT}");
+        }
+        if (record.getReferringHospital() != null) {
+            sql.VALUES("referring_hospital", "#{referringHospital,jdbcType=VARCHAR}");
+        }
+        if (record.getReferringPhysician() != null) {
+            sql.VALUES("referring_physician", "#{referringPhysician,jdbcType=VARCHAR}");
+        }
+        if (record.getReferringfollowup() != null) {
+            sql.VALUES("referringfollowup", "#{referringfollowup,jdbcType=VARCHAR}");
+        }
+        if (record.getDelayedBug() != null) {
+            sql.VALUES("delayed_bug", "#{delayedBug,jdbcType=VARCHAR}");
+        }
+        if (record.getRhythm() != null) {
+            sql.VALUES("rhythm", "#{rhythm,jdbcType=SMALLINT}");
+        }
+        if (record.getArrestdate() != null) {
+            sql.VALUES("arrestdate", "#{arrestdate,jdbcType=TIMESTAMP}");
+        }
+        if (record.getArresttime() != null) {
+            sql.VALUES("arresttime", "#{arresttime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getDuration() != null) {
+            sql.VALUES("duration", "#{duration,jdbcType=VARCHAR}");
+        }
+        if (record.getEpi() != null) {
+            sql.VALUES("epi", "#{epi,jdbcType=VARCHAR}");
+        }
+        if (record.getShocks() != null) {
+            sql.VALUES("shocks", "#{shocks,jdbcType=VARCHAR}");
+        }
+        if (record.getWitnessed() != null) {
+            sql.VALUES("witnessed", "#{witnessed,jdbcType=VARCHAR}");
+        }
+        if (record.getBystanderCpr() != null) {
+            sql.VALUES("bystander_cpr", "#{bystanderCpr,jdbcType=VARCHAR}");
+        }
+        if (record.getEtiology() != null) {
+            sql.VALUES("etiology", "#{etiology,jdbcType=VARCHAR}");
+        }
+        if (record.getEtiologyOtherunknown() != null) {
+            sql.VALUES("etiology_otherunknown", "#{etiologyOtherunknown,jdbcType=VARCHAR}");
+        }
+        if (record.getPridScene() != null) {
+            sql.VALUES("prid_scene", "#{pridScene,jdbcType=VARCHAR}");
+        }
+        if (record.getServiceScene() != null) {
+            sql.VALUES("service_scene", "#{serviceScene,jdbcType=VARCHAR}");
+        }
+        if (record.getSceneChart() != null) {
+            sql.VALUES("scene_chart", "#{sceneChart,jdbcType=VARCHAR}");
+        }
+        if (record.getSceneProvider() != null) {
+            sql.VALUES("scene_provider", "#{sceneProvider,jdbcType=VARCHAR}");
+        }
+        if (record.getPridInterfacility() != null) {
+            sql.VALUES("prid_interfacility", "#{pridInterfacility,jdbcType=VARCHAR}");
+        }
+        if (record.getServiceInterfacility() != null) {
+            sql.VALUES("service_interfacility", "#{serviceInterfacility,jdbcType=VARCHAR}");
+        }
+        if (record.getInterfacilityChart() != null) {
+            sql.VALUES("interfacility_chart", "#{interfacilityChart,jdbcType=VARCHAR}");
+        }
+        if (record.getInterfacilityProvider() != null) {
+            sql.VALUES("interfacility_provider", "#{interfacilityProvider,jdbcType=VARCHAR}");
+        }
+        if (record.getPrehospitalRosc() != null) {
+            sql.VALUES("prehospital_rosc", "#{prehospitalRosc,jdbcType=VARCHAR}");
+        }
+        if (record.getEmsfollowup() != null) {
+            sql.VALUES("emsfollowup", "#{emsfollowup,jdbcType=VARCHAR}");
+        }
+        if (record.getArrival() != null) {
+            sql.VALUES("arrival", "#{arrival,jdbcType=TIMESTAMP}");
+        }
+        if (record.getCaType() != null) {
+            sql.VALUES("ca_type", "#{caType,jdbcType=VARCHAR}");
+        }
+        if (record.getFourEye0() != null) {
+            sql.VALUES("four_eye_0", "#{fourEye0,jdbcType=VARCHAR}");
+        }
+        if (record.getFourM0() != null) {
+            sql.VALUES("four_m_0", "#{fourM0,jdbcType=VARCHAR}");
+        }
+        if (record.getPupils0() != null) {
+            sql.VALUES("pupils_0", "#{pupils0,jdbcType=VARCHAR}");
+        }
+        if (record.getCorneals0() != null) {
+            sql.VALUES("corneals_0", "#{corneals0,jdbcType=VARCHAR}");
+        }
+        if (record.getCough0() != null) {
+            sql.VALUES("cough_0", "#{cough0,jdbcType=VARCHAR}");
+        }
+        if (record.getGag0() != null) {
+            sql.VALUES("gag_0", "#{gag0,jdbcType=VARCHAR}");
+        }
+        if (record.getFourR0() != null) {
+            sql.VALUES("four_r_0", "#{fourR0,jdbcType=VARCHAR}");
+        }
+        if (record.getTtm() != null) {
+            sql.VALUES("ttm", "#{ttm,jdbcType=VARCHAR}");
+        }
+        if (record.getPmhxUnknown() != null) {
+            sql.VALUES("pmhx_unknown", "#{pmhxUnknown,jdbcType=VARCHAR}");
+        }
+        if (record.getCcimi() != null) {
+            sql.VALUES("ccimi", "#{ccimi,jdbcType=VARCHAR}");
+        }
+        if (record.getCcipvd() != null) {
+            sql.VALUES("ccipvd", "#{ccipvd,jdbcType=VARCHAR}");
+        }
+        if (record.getCcidementia() != null) {
+            sql.VALUES("ccidementia", "#{ccidementia,jdbcType=VARCHAR}");
+        }
+        if (record.getCcicva() != null) {
+            sql.VALUES("ccicva", "#{ccicva,jdbcType=VARCHAR}");
+        }
+        if (record.getCcihemi() != null) {
+            sql.VALUES("ccihemi", "#{ccihemi,jdbcType=VARCHAR}");
+        }
+        if (record.getCcichf() != null) {
+            sql.VALUES("ccichf", "#{ccichf,jdbcType=VARCHAR}");
+        }
+        if (record.getCcicvd() != null) {
+            sql.VALUES("ccicvd", "#{ccicvd,jdbcType=VARCHAR}");
+        }
+        if (record.getCcicld() != null) {
+            sql.VALUES("ccicld", "#{ccicld,jdbcType=VARCHAR}");
+        }
+        if (record.getCcictd() != null) {
+            sql.VALUES("ccictd", "#{ccictd,jdbcType=VARCHAR}");
+        }
+        if (record.getCcipud() != null) {
+            sql.VALUES("ccipud", "#{ccipud,jdbcType=VARCHAR}");
+        }
+        if (record.getCciaids() != null) {
+            sql.VALUES("cciaids", "#{cciaids,jdbcType=VARCHAR}");
+        }
+        if (record.getCcickd() != null) {
+            sql.VALUES("ccickd", "#{ccickd,jdbcType=VARCHAR}");
+        }
+        if (record.getCcielsd() != null) {
+            sql.VALUES("ccielsd", "#{ccielsd,jdbcType=VARCHAR}");
+        }
+        if (record.getCcidm() != null) {
+            sql.VALUES("ccidm", "#{ccidm,jdbcType=VARCHAR}");
+        }
+        if (record.getCcica() != null) {
+            sql.VALUES("ccica", "#{ccica,jdbcType=VARCHAR}");
+        }
+        if (record.getCcileukemia() != null) {
+            sql.VALUES("ccileukemia", "#{ccileukemia,jdbcType=VARCHAR}");
+        }
+        if (record.getCcilymphoma() != null) {
+            sql.VALUES("ccilymphoma", "#{ccilymphoma,jdbcType=VARCHAR}");
+        }
+        if (record.getPfratio0() != null) {
+            sql.VALUES("pfratio_0", "#{pfratio0,jdbcType=VARCHAR}");
+        }
+        if (record.getSofaCv0() != null) {
+            sql.VALUES("sofa_cv_0", "#{sofaCv0,jdbcType=VARCHAR}");
+        }
+        if (record.getBili0() != null) {
+            sql.VALUES("bili_0", "#{bili0,jdbcType=VARCHAR}");
+        }
+        if (record.getPlt0() != null) {
+            sql.VALUES("plt_0", "#{plt0,jdbcType=VARCHAR}");
+        }
+        if (record.getCr0() != null) {
+            sql.VALUES("cr_0", "#{cr0,jdbcType=VARCHAR}");
+        }
+        if (record.getLactate0() != null) {
+            sql.VALUES("lactate_0", "#{lactate0,jdbcType=VARCHAR}");
+        }
+        if (record.getCtbrain() != null) {
+            sql.VALUES("ctbrain", "#{ctbrain,jdbcType=VARCHAR}");
+        }
+        if (record.getCtbrainTime() != null) {
+            sql.VALUES("ctbrain_time", "#{ctbrainTime,jdbcType=VARCHAR}");
+        }
+        if (record.getGwr() != null) {
+            sql.VALUES("gwr", "#{gwr,jdbcType=VARCHAR}");
+        }
+        if (record.getSulci() != null) {
+            sql.VALUES("sulci", "#{sulci,jdbcType=VARCHAR}");
+        }
+        if (record.getCisterns() != null) {
+            sql.VALUES("cisterns", "#{cisterns,jdbcType=VARCHAR}");
+        }
+        if (record.getCath() != null) {
+            sql.VALUES("cath", "#{cath,jdbcType=VARCHAR}");
+        }
+        if (record.getCathdate() != null) {
+            sql.VALUES("cathdate", "#{cathdate,jdbcType=VARCHAR}");
+        }
+        if (record.getCathAcutelesion() != null) {
+            sql.VALUES("cath_acutelesion", "#{cathAcutelesion,jdbcType=VARCHAR}");
+        }
+        if (record.getCathPci() != null) {
+            sql.VALUES("cath_pci", "#{cathPci,jdbcType=VARCHAR}");
+        }
+        if (record.getCathCabg() != null) {
+            sql.VALUES("cath_cabg", "#{cathCabg,jdbcType=VARCHAR}");
+        }
+        if (record.getAlive1() != null) {
+            sql.VALUES("alive_1", "#{alive1,jdbcType=VARCHAR}");
+        }
+        if (record.getFourEye1() != null) {
+            sql.VALUES("four_eye_1", "#{fourEye1,jdbcType=VARCHAR}");
+        }
+        if (record.getFourM1() != null) {
+            sql.VALUES("four_m_1", "#{fourM1,jdbcType=VARCHAR}");
+        }
+        if (record.getPupils1() != null) {
+            sql.VALUES("pupils_1", "#{pupils1,jdbcType=VARCHAR}");
+        }
+        if (record.getCorneals1() != null) {
+            sql.VALUES("corneals_1", "#{corneals1,jdbcType=VARCHAR}");
+        }
+        if (record.getCough1() != null) {
+            sql.VALUES("cough_1", "#{cough1,jdbcType=VARCHAR}");
+        }
+        if (record.getGag1() != null) {
+            sql.VALUES("gag_1", "#{gag1,jdbcType=VARCHAR}");
+        }
+        if (record.getFourR1() != null) {
+            sql.VALUES("four_r_1", "#{fourR1,jdbcType=VARCHAR}");
+        }
+        if (record.getPfratio1() != null) {
+            sql.VALUES("pfratio_1", "#{pfratio1,jdbcType=VARCHAR}");
+        }
+        if (record.getSofaCv1() != null) {
+            sql.VALUES("sofa_cv_1", "#{sofaCv1,jdbcType=VARCHAR}");
+        }
+        if (record.getBili1() != null) {
+            sql.VALUES("bili_1", "#{bili1,jdbcType=VARCHAR}");
+        }
+        if (record.getPlt1() != null) {
+            sql.VALUES("plt_1", "#{plt1,jdbcType=VARCHAR}");
+        }
+        if (record.getCr1() != null) {
+            sql.VALUES("cr_1", "#{cr1,jdbcType=VARCHAR}");
+        }
+        if (record.getLactate1() != null) {
+            sql.VALUES("lactate_1", "#{lactate1,jdbcType=VARCHAR}");
+        }
+        if (record.getAlive2() != null) {
+            sql.VALUES("alive_2", "#{alive2,jdbcType=VARCHAR}");
+        }
+        if (record.getFourEye2() != null) {
+            sql.VALUES("four_eye_2", "#{fourEye2,jdbcType=VARCHAR}");
+        }
+        if (record.getFourM2() != null) {
+            sql.VALUES("four_m_2", "#{fourM2,jdbcType=VARCHAR}");
+        }
+        if (record.getPupils2() != null) {
+            sql.VALUES("pupils_2", "#{pupils2,jdbcType=VARCHAR}");
+        }
+        if (record.getCorneals2() != null) {
+            sql.VALUES("corneals_2", "#{corneals2,jdbcType=VARCHAR}");
+        }
+        if (record.getCough2() != null) {
+            sql.VALUES("cough_2", "#{cough2,jdbcType=VARCHAR}");
+        }
+        if (record.getGag2() != null) {
+            sql.VALUES("gag_2", "#{gag2,jdbcType=VARCHAR}");
+        }
+        if (record.getFourR2() != null) {
+            sql.VALUES("four_r_2", "#{fourR2,jdbcType=VARCHAR}");
+        }
+        if (record.getPfratio2() != null) {
+            sql.VALUES("pfratio_2", "#{pfratio2,jdbcType=VARCHAR}");
+        }
+        if (record.getSofaCv2() != null) {
+            sql.VALUES("sofa_cv_2", "#{sofaCv2,jdbcType=VARCHAR}");
+        }
+        if (record.getBili2() != null) {
+            sql.VALUES("bili_2", "#{bili2,jdbcType=VARCHAR}");
+        }
+        if (record.getPlt2() != null) {
+            sql.VALUES("plt_2", "#{plt2,jdbcType=VARCHAR}");
+        }
+        if (record.getCr2() != null) {
+            sql.VALUES("cr_2", "#{cr2,jdbcType=VARCHAR}");
+        }
+        if (record.getLactate2() != null) {
+            sql.VALUES("lactate_2", "#{lactate2,jdbcType=VARCHAR}");
+        }
+        if (record.getAlive3() != null) {
+            sql.VALUES("alive_3", "#{alive3,jdbcType=VARCHAR}");
+        }
+        if (record.getFourEye3() != null) {
+            sql.VALUES("four_eye_3", "#{fourEye3,jdbcType=VARCHAR}");
+        }
+        if (record.getFourM3() != null) {
+            sql.VALUES("four_m_3", "#{fourM3,jdbcType=VARCHAR}");
+        }
+        if (record.getPupils3() != null) {
+            sql.VALUES("pupils_3", "#{pupils3,jdbcType=VARCHAR}");
+        }
+        if (record.getCorneals3() != null) {
+            sql.VALUES("corneals_3", "#{corneals3,jdbcType=VARCHAR}");
+        }
+        if (record.getCough3() != null) {
+            sql.VALUES("cough_3", "#{cough3,jdbcType=VARCHAR}");
+        }
+        if (record.getGag3() != null) {
+            sql.VALUES("gag_3", "#{gag3,jdbcType=VARCHAR}");
+        }
+        if (record.getFourR3() != null) {
+            sql.VALUES("four_r_3", "#{fourR3,jdbcType=VARCHAR}");
+        }
+        if (record.getPfratio3() != null) {
+            sql.VALUES("pfratio_3", "#{pfratio3,jdbcType=VARCHAR}");
+        }
+        if (record.getSofaCv3() != null) {
+            sql.VALUES("sofa_cv_3", "#{sofaCv3,jdbcType=VARCHAR}");
+        }
+        if (record.getBili3() != null) {
+            sql.VALUES("bili_3", "#{bili3,jdbcType=VARCHAR}");
+        }
+        if (record.getPlt3() != null) {
+            sql.VALUES("plt_3", "#{plt3,jdbcType=VARCHAR}");
+        }
+        if (record.getCr3() != null) {
+            sql.VALUES("cr_3", "#{cr3,jdbcType=VARCHAR}");
+        }
+        if (record.getLactate3() != null) {
+            sql.VALUES("lactate_3", "#{lactate3,jdbcType=VARCHAR}");
+        }
+        if (record.getAlive4() != null) {
+            sql.VALUES("alive_4", "#{alive4,jdbcType=VARCHAR}");
+        }
+        if (record.getFourEye4() != null) {
+            sql.VALUES("four_eye_4", "#{fourEye4,jdbcType=VARCHAR}");
+        }
+        if (record.getFourM4() != null) {
+            sql.VALUES("four_m_4", "#{fourM4,jdbcType=VARCHAR}");
+        }
+        if (record.getPupils4() != null) {
+            sql.VALUES("pupils_4", "#{pupils4,jdbcType=VARCHAR}");
+        }
+        if (record.getCorneals4() != null) {
+            sql.VALUES("corneals_4", "#{corneals4,jdbcType=VARCHAR}");
         }
         return sql.toString();
     }
@@ -62,8 +416,126 @@ public class PatientSqlProvider {
         } else {
             sql.SELECT("id");
         }
-        sql.SELECT("gender");
         sql.SELECT("age");
+        sql.SELECT("female");
+        sql.SELECT("oohca");
+        sql.SELECT("ihca_loc");
+        sql.SELECT("transfer");
+        sql.SELECT("referring_hospital");
+        sql.SELECT("referring_physician");
+        sql.SELECT("referringfollowup");
+        sql.SELECT("delayed_bug");
+        sql.SELECT("rhythm");
+        sql.SELECT("arrestdate");
+        sql.SELECT("arresttime");
+        sql.SELECT("duration");
+        sql.SELECT("epi");
+        sql.SELECT("shocks");
+        sql.SELECT("witnessed");
+        sql.SELECT("bystander_cpr");
+        sql.SELECT("etiology");
+        sql.SELECT("etiology_otherunknown");
+        sql.SELECT("prid_scene");
+        sql.SELECT("service_scene");
+        sql.SELECT("scene_chart");
+        sql.SELECT("scene_provider");
+        sql.SELECT("prid_interfacility");
+        sql.SELECT("service_interfacility");
+        sql.SELECT("interfacility_chart");
+        sql.SELECT("interfacility_provider");
+        sql.SELECT("prehospital_rosc");
+        sql.SELECT("emsfollowup");
+        sql.SELECT("arrival");
+        sql.SELECT("ca_type");
+        sql.SELECT("four_eye_0");
+        sql.SELECT("four_m_0");
+        sql.SELECT("pupils_0");
+        sql.SELECT("corneals_0");
+        sql.SELECT("cough_0");
+        sql.SELECT("gag_0");
+        sql.SELECT("four_r_0");
+        sql.SELECT("ttm");
+        sql.SELECT("pmhx_unknown");
+        sql.SELECT("ccimi");
+        sql.SELECT("ccipvd");
+        sql.SELECT("ccidementia");
+        sql.SELECT("ccicva");
+        sql.SELECT("ccihemi");
+        sql.SELECT("ccichf");
+        sql.SELECT("ccicvd");
+        sql.SELECT("ccicld");
+        sql.SELECT("ccictd");
+        sql.SELECT("ccipud");
+        sql.SELECT("cciaids");
+        sql.SELECT("ccickd");
+        sql.SELECT("ccielsd");
+        sql.SELECT("ccidm");
+        sql.SELECT("ccica");
+        sql.SELECT("ccileukemia");
+        sql.SELECT("ccilymphoma");
+        sql.SELECT("pfratio_0");
+        sql.SELECT("sofa_cv_0");
+        sql.SELECT("bili_0");
+        sql.SELECT("plt_0");
+        sql.SELECT("cr_0");
+        sql.SELECT("lactate_0");
+        sql.SELECT("ctbrain");
+        sql.SELECT("ctbrain_time");
+        sql.SELECT("gwr");
+        sql.SELECT("sulci");
+        sql.SELECT("cisterns");
+        sql.SELECT("cath");
+        sql.SELECT("cathdate");
+        sql.SELECT("cath_acutelesion");
+        sql.SELECT("cath_pci");
+        sql.SELECT("cath_cabg");
+        sql.SELECT("alive_1");
+        sql.SELECT("four_eye_1");
+        sql.SELECT("four_m_1");
+        sql.SELECT("pupils_1");
+        sql.SELECT("corneals_1");
+        sql.SELECT("cough_1");
+        sql.SELECT("gag_1");
+        sql.SELECT("four_r_1");
+        sql.SELECT("pfratio_1");
+        sql.SELECT("sofa_cv_1");
+        sql.SELECT("bili_1");
+        sql.SELECT("plt_1");
+        sql.SELECT("cr_1");
+        sql.SELECT("lactate_1");
+        sql.SELECT("alive_2");
+        sql.SELECT("four_eye_2");
+        sql.SELECT("four_m_2");
+        sql.SELECT("pupils_2");
+        sql.SELECT("corneals_2");
+        sql.SELECT("cough_2");
+        sql.SELECT("gag_2");
+        sql.SELECT("four_r_2");
+        sql.SELECT("pfratio_2");
+        sql.SELECT("sofa_cv_2");
+        sql.SELECT("bili_2");
+        sql.SELECT("plt_2");
+        sql.SELECT("cr_2");
+        sql.SELECT("lactate_2");
+        sql.SELECT("alive_3");
+        sql.SELECT("four_eye_3");
+        sql.SELECT("four_m_3");
+        sql.SELECT("pupils_3");
+        sql.SELECT("corneals_3");
+        sql.SELECT("cough_3");
+        sql.SELECT("gag_3");
+        sql.SELECT("four_r_3");
+        sql.SELECT("pfratio_3");
+        sql.SELECT("sofa_cv_3");
+        sql.SELECT("bili_3");
+        sql.SELECT("plt_3");
+        sql.SELECT("cr_3");
+        sql.SELECT("lactate_3");
+        sql.SELECT("alive_4");
+        sql.SELECT("four_eye_4");
+        sql.SELECT("four_m_4");
+        sql.SELECT("pupils_4");
+        sql.SELECT("corneals_4");
         sql.FROM("patient");
         applyWhere(sql, example, false);
         if (example != null && example.getOrderByClause() != null) {
@@ -75,39 +547,12 @@ public class PatientSqlProvider {
     /**
      * This method was generated by MyBatis Generator. This method corresponds to the database table patient
      * @mbg.generated
-     */
-    public String updateByExampleSelective(Map<String, Object> parameter) {
-        Patient record = (Patient) parameter.get("record");
-        PatientExample example = (PatientExample) parameter.get("example");
-        SQL sql = new SQL();
-        sql.UPDATE("patient");
-        if (record.getId() != null) {
-            sql.SET("id = #{record.id,jdbcType=VARCHAR}");
-        }
-        if (record.getGender() != null) {
-            sql.SET("gender = #{record.gender,jdbcType=CHAR}");
-        }
-        if (record.getAge() != null) {
-            sql.SET("age = #{record.age,jdbcType=INTEGER}");
-        }
-        applyWhere(sql, example, true);
-        return sql.toString();
-    }
+     */public String updateByExampleSelective(Map<String, Object> parameter){Patient record=(Patient)parameter.get("record");PatientExample example=(PatientExample)parameter.get("example");SQL sql=new SQL();sql.UPDATE("patient");if (record.getId() != null){sql.SET("id = #{record.id,jdbcType=VARCHAR}");}if (record.getAge() != null){sql.SET("age = #{record.age,jdbcType=TINYINT}");}if (record.getFemale() != null){sql.SET("female = #{record.female,jdbcType=BIT}");}if (record.getOohca() != null){sql.SET("oohca = #{record.oohca,jdbcType=BIT}");}if (record.getIhcaLoc() != null){sql.SET("ihca_loc = #{record.ihcaLoc,jdbcType=VARCHAR}");}if (record.getTransfer() != null){sql.SET("transfer = #{record.transfer,jdbcType=BIT}");}if (record.getReferringHospital() != null){sql.SET("referring_hospital = #{record.referringHospital,jdbcType=VARCHAR}");}if (record.getReferringPhysician() != null){sql.SET("referring_physician = #{record.referringPhysician,jdbcType=VARCHAR}");}if (record.getReferringfollowup() != null){sql.SET("referringfollowup = #{record.referringfollowup,jdbcType=VARCHAR}");}if (record.getDelayedBug() != null){sql.SET("delayed_bug = #{record.delayedBug,jdbcType=VARCHAR}");}if (record.getRhythm() != null){sql.SET("rhythm = #{record.rhythm,jdbcType=SMALLINT}");}if (record.getArrestdate() != null){sql.SET("arrestdate = #{record.arrestdate,jdbcType=TIMESTAMP}");}if (record.getArresttime() != null){sql.SET("arresttime = #{record.arresttime,jdbcType=TIMESTAMP}");}if (record.getDuration() != null){sql.SET("duration = #{record.duration,jdbcType=VARCHAR}");}if (record.getEpi() != null){sql.SET("epi = #{record.epi,jdbcType=VARCHAR}");}if (record.getShocks() != null){sql.SET("shocks = #{record.shocks,jdbcType=VARCHAR}");}if (record.getWitnessed() != null){sql.SET("witnessed = #{record.witnessed,jdbcType=VARCHAR}");}if (record.getBystanderCpr() != null){sql.SET("bystander_cpr = #{record.bystanderCpr,jdbcType=VARCHAR}");}if (record.getEtiology() != null){sql.SET("etiology = #{record.etiology,jdbcType=VARCHAR}");}if (record.getEtiologyOtherunknown() != null){sql.SET("etiology_otherunknown = #{record.etiologyOtherunknown,jdbcType=VARCHAR}");}if (record.getPridScene() != null){sql.SET("prid_scene = #{record.pridScene,jdbcType=VARCHAR}");}if (record.getServiceScene() != null){sql.SET("service_scene = #{record.serviceScene,jdbcType=VARCHAR}");}if (record.getSceneChart() != null){sql.SET("scene_chart = #{record.sceneChart,jdbcType=VARCHAR}");}if (record.getSceneProvider() != null){sql.SET("scene_provider = #{record.sceneProvider,jdbcType=VARCHAR}");}if (record.getPridInterfacility() != null){sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=VARCHAR}");}if (record.getServiceInterfacility() != null){sql.SET("service_interfacility = #{record.serviceInterfacility,jdbcType=VARCHAR}");}if (record.getInterfacilityChart() != null){sql.SET("interfacility_chart = #{record.interfacilityChart,jdbcType=VARCHAR}");}if (record.getInterfacilityProvider() != null){sql.SET("interfacility_provider = #{record.interfacilityProvider,jdbcType=VARCHAR}");}if (record.getPrehospitalRosc() != null){sql.SET("prehospital_rosc = #{record.prehospitalRosc,jdbcType=VARCHAR}");}if (record.getEmsfollowup() != null){sql.SET("emsfollowup = #{record.emsfollowup,jdbcType=VARCHAR}");}if (record.getArrival() != null){sql.SET("arrival = #{record.arrival,jdbcType=TIMESTAMP}");}if (record.getCaType() != null){sql.SET("ca_type = #{record.caType,jdbcType=VARCHAR}");}if (record.getFourEye0() != null){sql.SET("four_eye_0 = #{record.fourEye0,jdbcType=VARCHAR}");}if (record.getFourM0() != null){sql.SET("four_m_0 = #{record.fourM0,jdbcType=VARCHAR}");}if (record.getPupils0() != null){sql.SET("pupils_0 = #{record.pupils0,jdbcType=VARCHAR}");}if (record.getCorneals0() != null){sql.SET("corneals_0 = #{record.corneals0,jdbcType=VARCHAR}");}if (record.getCough0() != null){sql.SET("cough_0 = #{record.cough0,jdbcType=VARCHAR}");}if (record.getGag0() != null){sql.SET("gag_0 = #{record.gag0,jdbcType=VARCHAR}");}if (record.getFourR0() != null){sql.SET("four_r_0 = #{record.fourR0,jdbcType=VARCHAR}");}if (record.getTtm() != null){sql.SET("ttm = #{record.ttm,jdbcType=VARCHAR}");}if (record.getPmhxUnknown() != null){sql.SET("pmhx_unknown = #{record.pmhxUnknown,jdbcType=VARCHAR}");}if (record.getCcimi() != null){sql.SET("ccimi = #{record.ccimi,jdbcType=VARCHAR}");}if (record.getCcipvd() != null){sql.SET("ccipvd = #{record.ccipvd,jdbcType=VARCHAR}");}if (record.getCcidementia() != null){sql.SET("ccidementia = #{record.ccidementia,jdbcType=VARCHAR}");}if (record.getCcicva() != null){sql.SET("ccicva = #{record.ccicva,jdbcType=VARCHAR}");}if (record.getCcihemi() != null){sql.SET("ccihemi = #{record.ccihemi,jdbcType=VARCHAR}");}if (record.getCcichf() != null){sql.SET("ccichf = #{record.ccichf,jdbcType=VARCHAR}");}if (record.getCcicvd() != null){sql.SET("ccicvd = #{record.ccicvd,jdbcType=VARCHAR}");}if (record.getCcicld() != null){sql.SET("ccicld = #{record.ccicld,jdbcType=VARCHAR}");}if (record.getCcictd() != null){sql.SET("ccictd = #{record.ccictd,jdbcType=VARCHAR}");}if (record.getCcipud() != null){sql.SET("ccipud = #{record.ccipud,jdbcType=VARCHAR}");}if (record.getCciaids() != null){sql.SET("cciaids = #{record.cciaids,jdbcType=VARCHAR}");}if (record.getCcickd() != null){sql.SET("ccickd = #{record.ccickd,jdbcType=VARCHAR}");}if (record.getCcielsd() != null){sql.SET("ccielsd = #{record.ccielsd,jdbcType=VARCHAR}");}if (record.getCcidm() != null){sql.SET("ccidm = #{record.ccidm,jdbcType=VARCHAR}");}if (record.getCcica() != null){sql.SET("ccica = #{record.ccica,jdbcType=VARCHAR}");}if (record.getCcileukemia() != null){sql.SET("ccileukemia = #{record.ccileukemia,jdbcType=VARCHAR}");}if (record.getCcilymphoma() != null){sql.SET("ccilymphoma = #{record.ccilymphoma,jdbcType=VARCHAR}");}if (record.getPfratio0() != null){sql.SET("pfratio_0 = #{record.pfratio0,jdbcType=VARCHAR}");}if (record.getSofaCv0() != null){sql.SET("sofa_cv_0 = #{record.sofaCv0,jdbcType=VARCHAR}");}if (record.getBili0() != null){sql.SET("bili_0 = #{record.bili0,jdbcType=VARCHAR}");}if (record.getPlt0() != null){sql.SET("plt_0 = #{record.plt0,jdbcType=VARCHAR}");}if (record.getCr0() != null){sql.SET("cr_0 = #{record.cr0,jdbcType=VARCHAR}");}if (record.getLactate0() != null){sql.SET("lactate_0 = #{record.lactate0,jdbcType=VARCHAR}");}if (record.getCtbrain() != null){sql.SET("ctbrain = #{record.ctbrain,jdbcType=VARCHAR}");}if (record.getCtbrainTime() != null){sql.SET("ctbrain_time = #{record.ctbrainTime,jdbcType=VARCHAR}");}if (record.getGwr() != null){sql.SET("gwr = #{record.gwr,jdbcType=VARCHAR}");}if (record.getSulci() != null){sql.SET("sulci = #{record.sulci,jdbcType=VARCHAR}");}if (record.getCisterns() != null){sql.SET("cisterns = #{record.cisterns,jdbcType=VARCHAR}");}if (record.getCath() != null){sql.SET("cath = #{record.cath,jdbcType=VARCHAR}");}if (record.getCathdate() != null){sql.SET("cathdate = #{record.cathdate,jdbcType=VARCHAR}");}if (record.getCathAcutelesion() != null){sql.SET("cath_acutelesion = #{record.cathAcutelesion,jdbcType=VARCHAR}");}if (record.getCathPci() != null){sql.SET("cath_pci = #{record.cathPci,jdbcType=VARCHAR}");}if (record.getCathCabg() != null){sql.SET("cath_cabg = #{record.cathCabg,jdbcType=VARCHAR}");}if (record.getAlive1() != null){sql.SET("alive_1 = #{record.alive1,jdbcType=VARCHAR}");}if (record.getFourEye1() != null){sql.SET("four_eye_1 = #{record.fourEye1,jdbcType=VARCHAR}");}if (record.getFourM1() != null){sql.SET("four_m_1 = #{record.fourM1,jdbcType=VARCHAR}");}if (record.getPupils1() != null){sql.SET("pupils_1 = #{record.pupils1,jdbcType=VARCHAR}");}if (record.getCorneals1() != null){sql.SET("corneals_1 = #{record.corneals1,jdbcType=VARCHAR}");}if (record.getCough1() != null){sql.SET("cough_1 = #{record.cough1,jdbcType=VARCHAR}");}if (record.getGag1() != null){sql.SET("gag_1 = #{record.gag1,jdbcType=VARCHAR}");}if (record.getFourR1() != null){sql.SET("four_r_1 = #{record.fourR1,jdbcType=VARCHAR}");}if (record.getPfratio1() != null){sql.SET("pfratio_1 = #{record.pfratio1,jdbcType=VARCHAR}");}if (record.getSofaCv1() != null){sql.SET("sofa_cv_1 = #{record.sofaCv1,jdbcType=VARCHAR}");}if (record.getBili1() != null){sql.SET("bili_1 = #{record.bili1,jdbcType=VARCHAR}");}if (record.getPlt1() != null){sql.SET("plt_1 = #{record.plt1,jdbcType=VARCHAR}");}if (record.getCr1() != null){sql.SET("cr_1 = #{record.cr1,jdbcType=VARCHAR}");}if (record.getLactate1() != null){sql.SET("lactate_1 = #{record.lactate1,jdbcType=VARCHAR}");}if (record.getAlive2() != null){sql.SET("alive_2 = #{record.alive2,jdbcType=VARCHAR}");}if (record.getFourEye2() != null){sql.SET("four_eye_2 = #{record.fourEye2,jdbcType=VARCHAR}");}if (record.getFourM2() != null){sql.SET("four_m_2 = #{record.fourM2,jdbcType=VARCHAR}");}if (record.getPupils2() != null){sql.SET("pupils_2 = #{record.pupils2,jdbcType=VARCHAR}");}if (record.getCorneals2() != null){sql.SET("corneals_2 = #{record.corneals2,jdbcType=VARCHAR}");}if (record.getCough2() != null){sql.SET("cough_2 = #{record.cough2,jdbcType=VARCHAR}");}if (record.getGag2() != null){sql.SET("gag_2 = #{record.gag2,jdbcType=VARCHAR}");}if (record.getFourR2() != null){sql.SET("four_r_2 = #{record.fourR2,jdbcType=VARCHAR}");}if (record.getPfratio2() != null){sql.SET("pfratio_2 = #{record.pfratio2,jdbcType=VARCHAR}");}if (record.getSofaCv2() != null){sql.SET("sofa_cv_2 = #{record.sofaCv2,jdbcType=VARCHAR}");}if (record.getBili2() != null){sql.SET("bili_2 = #{record.bili2,jdbcType=VARCHAR}");}if (record.getPlt2() != null){sql.SET("plt_2 = #{record.plt2,jdbcType=VARCHAR}");}if (record.getCr2() != null){sql.SET("cr_2 = #{record.cr2,jdbcType=VARCHAR}");}if (record.getLactate2() != null){sql.SET("lactate_2 = #{record.lactate2,jdbcType=VARCHAR}");}if (record.getAlive3() != null){sql.SET("alive_3 = #{record.alive3,jdbcType=VARCHAR}");}if (record.getFourEye3() != null){sql.SET("four_eye_3 = #{record.fourEye3,jdbcType=VARCHAR}");}if (record.getFourM3() != null){sql.SET("four_m_3 = #{record.fourM3,jdbcType=VARCHAR}");}if (record.getPupils3() != null){sql.SET("pupils_3 = #{record.pupils3,jdbcType=VARCHAR}");}if (record.getCorneals3() != null){sql.SET("corneals_3 = #{record.corneals3,jdbcType=VARCHAR}");}if (record.getCough3() != null){sql.SET("cough_3 = #{record.cough3,jdbcType=VARCHAR}");}if (record.getGag3() != null){sql.SET("gag_3 = #{record.gag3,jdbcType=VARCHAR}");}if (record.getFourR3() != null){sql.SET("four_r_3 = #{record.fourR3,jdbcType=VARCHAR}");}if (record.getPfratio3() != null){sql.SET("pfratio_3 = #{record.pfratio3,jdbcType=VARCHAR}");}if (record.getSofaCv3() != null){sql.SET("sofa_cv_3 = #{record.sofaCv3,jdbcType=VARCHAR}");}if (record.getBili3() != null){sql.SET("bili_3 = #{record.bili3,jdbcType=VARCHAR}");}if (record.getPlt3() != null){sql.SET("plt_3 = #{record.plt3,jdbcType=VARCHAR}");}if (record.getCr3() != null){sql.SET("cr_3 = #{record.cr3,jdbcType=VARCHAR}");}if (record.getLactate3() != null){sql.SET("lactate_3 = #{record.lactate3,jdbcType=VARCHAR}");}if (record.getAlive4() != null){sql.SET("alive_4 = #{record.alive4,jdbcType=VARCHAR}");}if (record.getFourEye4() != null){sql.SET("four_eye_4 = #{record.fourEye4,jdbcType=VARCHAR}");}if (record.getFourM4() != null){sql.SET("four_m_4 = #{record.fourM4,jdbcType=VARCHAR}");}if (record.getPupils4() != null){sql.SET("pupils_4 = #{record.pupils4,jdbcType=VARCHAR}");}if (record.getCorneals4() != null){sql.SET("corneals_4 = #{record.corneals4,jdbcType=VARCHAR}");}applyWhere(sql,example,true);return sql.toString();}
 
     /**
      * This method was generated by MyBatis Generator. This method corresponds to the database table patient
      * @mbg.generated
-     */
-    public String updateByExample(Map<String, Object> parameter) {
-        SQL sql = new SQL();
-        sql.UPDATE("patient");
-        sql.SET("id = #{record.id,jdbcType=VARCHAR}");
-        sql.SET("gender = #{record.gender,jdbcType=CHAR}");
-        sql.SET("age = #{record.age,jdbcType=INTEGER}");
-        PatientExample example = (PatientExample) parameter.get("example");
-        applyWhere(sql, example, true);
-        return sql.toString();
-    }
+     */public String updateByExample(Map<String, Object> parameter){SQL sql=new SQL();sql.UPDATE("patient");sql.SET("id = #{record.id,jdbcType=VARCHAR}");sql.SET("age = #{record.age,jdbcType=TINYINT}");sql.SET("female = #{record.female,jdbcType=BIT}");sql.SET("oohca = #{record.oohca,jdbcType=BIT}");sql.SET("ihca_loc = #{record.ihcaLoc,jdbcType=VARCHAR}");sql.SET("transfer = #{record.transfer,jdbcType=BIT}");sql.SET("referring_hospital = #{record.referringHospital,jdbcType=VARCHAR}");sql.SET("referring_physician = #{record.referringPhysician,jdbcType=VARCHAR}");sql.SET("referringfollowup = #{record.referringfollowup,jdbcType=VARCHAR}");sql.SET("delayed_bug = #{record.delayedBug,jdbcType=VARCHAR}");sql.SET("rhythm = #{record.rhythm,jdbcType=SMALLINT}");sql.SET("arrestdate = #{record.arrestdate,jdbcType=TIMESTAMP}");sql.SET("arresttime = #{record.arresttime,jdbcType=TIMESTAMP}");sql.SET("duration = #{record.duration,jdbcType=VARCHAR}");sql.SET("epi = #{record.epi,jdbcType=VARCHAR}");sql.SET("shocks = #{record.shocks,jdbcType=VARCHAR}");sql.SET("witnessed = #{record.witnessed,jdbcType=VARCHAR}");sql.SET("bystander_cpr = #{record.bystanderCpr,jdbcType=VARCHAR}");sql.SET("etiology = #{record.etiology,jdbcType=VARCHAR}");sql.SET("etiology_otherunknown = #{record.etiologyOtherunknown,jdbcType=VARCHAR}");sql.SET("prid_scene = #{record.pridScene,jdbcType=VARCHAR}");sql.SET("service_scene = #{record.serviceScene,jdbcType=VARCHAR}");sql.SET("scene_chart = #{record.sceneChart,jdbcType=VARCHAR}");sql.SET("scene_provider = #{record.sceneProvider,jdbcType=VARCHAR}");sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=VARCHAR}");sql.SET("service_interfacility = #{record.serviceInterfacility,jdbcType=VARCHAR}");sql.SET("interfacility_chart = #{record.interfacilityChart,jdbcType=VARCHAR}");sql.SET("interfacility_provider = #{record.interfacilityProvider,jdbcType=VARCHAR}");sql.SET("prehospital_rosc = #{record.prehospitalRosc,jdbcType=VARCHAR}");sql.SET("emsfollowup = #{record.emsfollowup,jdbcType=VARCHAR}");sql.SET("arrival = #{record.arrival,jdbcType=TIMESTAMP}");sql.SET("ca_type = #{record.caType,jdbcType=VARCHAR}");sql.SET("four_eye_0 = #{record.fourEye0,jdbcType=VARCHAR}");sql.SET("four_m_0 = #{record.fourM0,jdbcType=VARCHAR}");sql.SET("pupils_0 = #{record.pupils0,jdbcType=VARCHAR}");sql.SET("corneals_0 = #{record.corneals0,jdbcType=VARCHAR}");sql.SET("cough_0 = #{record.cough0,jdbcType=VARCHAR}");sql.SET("gag_0 = #{record.gag0,jdbcType=VARCHAR}");sql.SET("four_r_0 = #{record.fourR0,jdbcType=VARCHAR}");sql.SET("ttm = #{record.ttm,jdbcType=VARCHAR}");sql.SET("pmhx_unknown = #{record.pmhxUnknown,jdbcType=VARCHAR}");sql.SET("ccimi = #{record.ccimi,jdbcType=VARCHAR}");sql.SET("ccipvd = #{record.ccipvd,jdbcType=VARCHAR}");sql.SET("ccidementia = #{record.ccidementia,jdbcType=VARCHAR}");sql.SET("ccicva = #{record.ccicva,jdbcType=VARCHAR}");sql.SET("ccihemi = #{record.ccihemi,jdbcType=VARCHAR}");sql.SET("ccichf = #{record.ccichf,jdbcType=VARCHAR}");sql.SET("ccicvd = #{record.ccicvd,jdbcType=VARCHAR}");sql.SET("ccicld = #{record.ccicld,jdbcType=VARCHAR}");sql.SET("ccictd = #{record.ccictd,jdbcType=VARCHAR}");sql.SET("ccipud = #{record.ccipud,jdbcType=VARCHAR}");sql.SET("cciaids = #{record.cciaids,jdbcType=VARCHAR}");sql.SET("ccickd = #{record.ccickd,jdbcType=VARCHAR}");sql.SET("ccielsd = #{record.ccielsd,jdbcType=VARCHAR}");sql.SET("ccidm = #{record.ccidm,jdbcType=VARCHAR}");sql.SET("ccica = #{record.ccica,jdbcType=VARCHAR}");sql.SET("ccileukemia = #{record.ccileukemia,jdbcType=VARCHAR}");sql.SET("ccilymphoma = #{record.ccilymphoma,jdbcType=VARCHAR}");sql.SET("pfratio_0 = #{record.pfratio0,jdbcType=VARCHAR}");sql.SET("sofa_cv_0 = #{record.sofaCv0,jdbcType=VARCHAR}");sql.SET("bili_0 = #{record.bili0,jdbcType=VARCHAR}");sql.SET("plt_0 = #{record.plt0,jdbcType=VARCHAR}");sql.SET("cr_0 = #{record.cr0,jdbcType=VARCHAR}");sql.SET("lactate_0 = #{record.lactate0,jdbcType=VARCHAR}");sql.SET("ctbrain = #{record.ctbrain,jdbcType=VARCHAR}");sql.SET("ctbrain_time = #{record.ctbrainTime,jdbcType=VARCHAR}");sql.SET("gwr = #{record.gwr,jdbcType=VARCHAR}");sql.SET("sulci = #{record.sulci,jdbcType=VARCHAR}");sql.SET("cisterns = #{record.cisterns,jdbcType=VARCHAR}");sql.SET("cath = #{record.cath,jdbcType=VARCHAR}");sql.SET("cathdate = #{record.cathdate,jdbcType=VARCHAR}");sql.SET("cath_acutelesion = #{record.cathAcutelesion,jdbcType=VARCHAR}");sql.SET("cath_pci = #{record.cathPci,jdbcType=VARCHAR}");sql.SET("cath_cabg = #{record.cathCabg,jdbcType=VARCHAR}");sql.SET("alive_1 = #{record.alive1,jdbcType=VARCHAR}");sql.SET("four_eye_1 = #{record.fourEye1,jdbcType=VARCHAR}");sql.SET("four_m_1 = #{record.fourM1,jdbcType=VARCHAR}");sql.SET("pupils_1 = #{record.pupils1,jdbcType=VARCHAR}");sql.SET("corneals_1 = #{record.corneals1,jdbcType=VARCHAR}");sql.SET("cough_1 = #{record.cough1,jdbcType=VARCHAR}");sql.SET("gag_1 = #{record.gag1,jdbcType=VARCHAR}");sql.SET("four_r_1 = #{record.fourR1,jdbcType=VARCHAR}");sql.SET("pfratio_1 = #{record.pfratio1,jdbcType=VARCHAR}");sql.SET("sofa_cv_1 = #{record.sofaCv1,jdbcType=VARCHAR}");sql.SET("bili_1 = #{record.bili1,jdbcType=VARCHAR}");sql.SET("plt_1 = #{record.plt1,jdbcType=VARCHAR}");sql.SET("cr_1 = #{record.cr1,jdbcType=VARCHAR}");sql.SET("lactate_1 = #{record.lactate1,jdbcType=VARCHAR}");sql.SET("alive_2 = #{record.alive2,jdbcType=VARCHAR}");sql.SET("four_eye_2 = #{record.fourEye2,jdbcType=VARCHAR}");sql.SET("four_m_2 = #{record.fourM2,jdbcType=VARCHAR}");sql.SET("pupils_2 = #{record.pupils2,jdbcType=VARCHAR}");sql.SET("corneals_2 = #{record.corneals2,jdbcType=VARCHAR}");sql.SET("cough_2 = #{record.cough2,jdbcType=VARCHAR}");sql.SET("gag_2 = #{record.gag2,jdbcType=VARCHAR}");sql.SET("four_r_2 = #{record.fourR2,jdbcType=VARCHAR}");sql.SET("pfratio_2 = #{record.pfratio2,jdbcType=VARCHAR}");sql.SET("sofa_cv_2 = #{record.sofaCv2,jdbcType=VARCHAR}");sql.SET("bili_2 = #{record.bili2,jdbcType=VARCHAR}");sql.SET("plt_2 = #{record.plt2,jdbcType=VARCHAR}");sql.SET("cr_2 = #{record.cr2,jdbcType=VARCHAR}");sql.SET("lactate_2 = #{record.lactate2,jdbcType=VARCHAR}");sql.SET("alive_3 = #{record.alive3,jdbcType=VARCHAR}");sql.SET("four_eye_3 = #{record.fourEye3,jdbcType=VARCHAR}");sql.SET("four_m_3 = #{record.fourM3,jdbcType=VARCHAR}");sql.SET("pupils_3 = #{record.pupils3,jdbcType=VARCHAR}");sql.SET("corneals_3 = #{record.corneals3,jdbcType=VARCHAR}");sql.SET("cough_3 = #{record.cough3,jdbcType=VARCHAR}");sql.SET("gag_3 = #{record.gag3,jdbcType=VARCHAR}");sql.SET("four_r_3 = #{record.fourR3,jdbcType=VARCHAR}");sql.SET("pfratio_3 = #{record.pfratio3,jdbcType=VARCHAR}");sql.SET("sofa_cv_3 = #{record.sofaCv3,jdbcType=VARCHAR}");sql.SET("bili_3 = #{record.bili3,jdbcType=VARCHAR}");sql.SET("plt_3 = #{record.plt3,jdbcType=VARCHAR}");sql.SET("cr_3 = #{record.cr3,jdbcType=VARCHAR}");sql.SET("lactate_3 = #{record.lactate3,jdbcType=VARCHAR}");sql.SET("alive_4 = #{record.alive4,jdbcType=VARCHAR}");sql.SET("four_eye_4 = #{record.fourEye4,jdbcType=VARCHAR}");sql.SET("four_m_4 = #{record.fourM4,jdbcType=VARCHAR}");sql.SET("pupils_4 = #{record.pupils4,jdbcType=VARCHAR}");sql.SET("corneals_4 = #{record.corneals4,jdbcType=VARCHAR}");PatientExample example=(PatientExample)parameter.get("example");applyWhere(sql,example,true);return sql.toString();}
 
     /**
      * This method was generated by MyBatis Generator. This method corresponds to the database table patient
@@ -116,11 +561,365 @@ public class PatientSqlProvider {
     public String updateByPrimaryKeySelective(Patient record) {
         SQL sql = new SQL();
         sql.UPDATE("patient");
-        if (record.getGender() != null) {
-            sql.SET("gender = #{gender,jdbcType=CHAR}");
-        }
         if (record.getAge() != null) {
-            sql.SET("age = #{age,jdbcType=INTEGER}");
+            sql.SET("age = #{age,jdbcType=TINYINT}");
+        }
+        if (record.getFemale() != null) {
+            sql.SET("female = #{female,jdbcType=BIT}");
+        }
+        if (record.getOohca() != null) {
+            sql.SET("oohca = #{oohca,jdbcType=BIT}");
+        }
+        if (record.getIhcaLoc() != null) {
+            sql.SET("ihca_loc = #{ihcaLoc,jdbcType=VARCHAR}");
+        }
+        if (record.getTransfer() != null) {
+            sql.SET("transfer = #{transfer,jdbcType=BIT}");
+        }
+        if (record.getReferringHospital() != null) {
+            sql.SET("referring_hospital = #{referringHospital,jdbcType=VARCHAR}");
+        }
+        if (record.getReferringPhysician() != null) {
+            sql.SET("referring_physician = #{referringPhysician,jdbcType=VARCHAR}");
+        }
+        if (record.getReferringfollowup() != null) {
+            sql.SET("referringfollowup = #{referringfollowup,jdbcType=VARCHAR}");
+        }
+        if (record.getDelayedBug() != null) {
+            sql.SET("delayed_bug = #{delayedBug,jdbcType=VARCHAR}");
+        }
+        if (record.getRhythm() != null) {
+            sql.SET("rhythm = #{rhythm,jdbcType=SMALLINT}");
+        }
+        if (record.getArrestdate() != null) {
+            sql.SET("arrestdate = #{arrestdate,jdbcType=TIMESTAMP}");
+        }
+        if (record.getArresttime() != null) {
+            sql.SET("arresttime = #{arresttime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getDuration() != null) {
+            sql.SET("duration = #{duration,jdbcType=VARCHAR}");
+        }
+        if (record.getEpi() != null) {
+            sql.SET("epi = #{epi,jdbcType=VARCHAR}");
+        }
+        if (record.getShocks() != null) {
+            sql.SET("shocks = #{shocks,jdbcType=VARCHAR}");
+        }
+        if (record.getWitnessed() != null) {
+            sql.SET("witnessed = #{witnessed,jdbcType=VARCHAR}");
+        }
+        if (record.getBystanderCpr() != null) {
+            sql.SET("bystander_cpr = #{bystanderCpr,jdbcType=VARCHAR}");
+        }
+        if (record.getEtiology() != null) {
+            sql.SET("etiology = #{etiology,jdbcType=VARCHAR}");
+        }
+        if (record.getEtiologyOtherunknown() != null) {
+            sql.SET("etiology_otherunknown = #{etiologyOtherunknown,jdbcType=VARCHAR}");
+        }
+        if (record.getPridScene() != null) {
+            sql.SET("prid_scene = #{pridScene,jdbcType=VARCHAR}");
+        }
+        if (record.getServiceScene() != null) {
+            sql.SET("service_scene = #{serviceScene,jdbcType=VARCHAR}");
+        }
+        if (record.getSceneChart() != null) {
+            sql.SET("scene_chart = #{sceneChart,jdbcType=VARCHAR}");
+        }
+        if (record.getSceneProvider() != null) {
+            sql.SET("scene_provider = #{sceneProvider,jdbcType=VARCHAR}");
+        }
+        if (record.getPridInterfacility() != null) {
+            sql.SET("prid_interfacility = #{pridInterfacility,jdbcType=VARCHAR}");
+        }
+        if (record.getServiceInterfacility() != null) {
+            sql.SET("service_interfacility = #{serviceInterfacility,jdbcType=VARCHAR}");
+        }
+        if (record.getInterfacilityChart() != null) {
+            sql.SET("interfacility_chart = #{interfacilityChart,jdbcType=VARCHAR}");
+        }
+        if (record.getInterfacilityProvider() != null) {
+            sql.SET("interfacility_provider = #{interfacilityProvider,jdbcType=VARCHAR}");
+        }
+        if (record.getPrehospitalRosc() != null) {
+            sql.SET("prehospital_rosc = #{prehospitalRosc,jdbcType=VARCHAR}");
+        }
+        if (record.getEmsfollowup() != null) {
+            sql.SET("emsfollowup = #{emsfollowup,jdbcType=VARCHAR}");
+        }
+        if (record.getArrival() != null) {
+            sql.SET("arrival = #{arrival,jdbcType=TIMESTAMP}");
+        }
+        if (record.getCaType() != null) {
+            sql.SET("ca_type = #{caType,jdbcType=VARCHAR}");
+        }
+        if (record.getFourEye0() != null) {
+            sql.SET("four_eye_0 = #{fourEye0,jdbcType=VARCHAR}");
+        }
+        if (record.getFourM0() != null) {
+            sql.SET("four_m_0 = #{fourM0,jdbcType=VARCHAR}");
+        }
+        if (record.getPupils0() != null) {
+            sql.SET("pupils_0 = #{pupils0,jdbcType=VARCHAR}");
+        }
+        if (record.getCorneals0() != null) {
+            sql.SET("corneals_0 = #{corneals0,jdbcType=VARCHAR}");
+        }
+        if (record.getCough0() != null) {
+            sql.SET("cough_0 = #{cough0,jdbcType=VARCHAR}");
+        }
+        if (record.getGag0() != null) {
+            sql.SET("gag_0 = #{gag0,jdbcType=VARCHAR}");
+        }
+        if (record.getFourR0() != null) {
+            sql.SET("four_r_0 = #{fourR0,jdbcType=VARCHAR}");
+        }
+        if (record.getTtm() != null) {
+            sql.SET("ttm = #{ttm,jdbcType=VARCHAR}");
+        }
+        if (record.getPmhxUnknown() != null) {
+            sql.SET("pmhx_unknown = #{pmhxUnknown,jdbcType=VARCHAR}");
+        }
+        if (record.getCcimi() != null) {
+            sql.SET("ccimi = #{ccimi,jdbcType=VARCHAR}");
+        }
+        if (record.getCcipvd() != null) {
+            sql.SET("ccipvd = #{ccipvd,jdbcType=VARCHAR}");
+        }
+        if (record.getCcidementia() != null) {
+            sql.SET("ccidementia = #{ccidementia,jdbcType=VARCHAR}");
+        }
+        if (record.getCcicva() != null) {
+            sql.SET("ccicva = #{ccicva,jdbcType=VARCHAR}");
+        }
+        if (record.getCcihemi() != null) {
+            sql.SET("ccihemi = #{ccihemi,jdbcType=VARCHAR}");
+        }
+        if (record.getCcichf() != null) {
+            sql.SET("ccichf = #{ccichf,jdbcType=VARCHAR}");
+        }
+        if (record.getCcicvd() != null) {
+            sql.SET("ccicvd = #{ccicvd,jdbcType=VARCHAR}");
+        }
+        if (record.getCcicld() != null) {
+            sql.SET("ccicld = #{ccicld,jdbcType=VARCHAR}");
+        }
+        if (record.getCcictd() != null) {
+            sql.SET("ccictd = #{ccictd,jdbcType=VARCHAR}");
+        }
+        if (record.getCcipud() != null) {
+            sql.SET("ccipud = #{ccipud,jdbcType=VARCHAR}");
+        }
+        if (record.getCciaids() != null) {
+            sql.SET("cciaids = #{cciaids,jdbcType=VARCHAR}");
+        }
+        if (record.getCcickd() != null) {
+            sql.SET("ccickd = #{ccickd,jdbcType=VARCHAR}");
+        }
+        if (record.getCcielsd() != null) {
+            sql.SET("ccielsd = #{ccielsd,jdbcType=VARCHAR}");
+        }
+        if (record.getCcidm() != null) {
+            sql.SET("ccidm = #{ccidm,jdbcType=VARCHAR}");
+        }
+        if (record.getCcica() != null) {
+            sql.SET("ccica = #{ccica,jdbcType=VARCHAR}");
+        }
+        if (record.getCcileukemia() != null) {
+            sql.SET("ccileukemia = #{ccileukemia,jdbcType=VARCHAR}");
+        }
+        if (record.getCcilymphoma() != null) {
+            sql.SET("ccilymphoma = #{ccilymphoma,jdbcType=VARCHAR}");
+        }
+        if (record.getPfratio0() != null) {
+            sql.SET("pfratio_0 = #{pfratio0,jdbcType=VARCHAR}");
+        }
+        if (record.getSofaCv0() != null) {
+            sql.SET("sofa_cv_0 = #{sofaCv0,jdbcType=VARCHAR}");
+        }
+        if (record.getBili0() != null) {
+            sql.SET("bili_0 = #{bili0,jdbcType=VARCHAR}");
+        }
+        if (record.getPlt0() != null) {
+            sql.SET("plt_0 = #{plt0,jdbcType=VARCHAR}");
+        }
+        if (record.getCr0() != null) {
+            sql.SET("cr_0 = #{cr0,jdbcType=VARCHAR}");
+        }
+        if (record.getLactate0() != null) {
+            sql.SET("lactate_0 = #{lactate0,jdbcType=VARCHAR}");
+        }
+        if (record.getCtbrain() != null) {
+            sql.SET("ctbrain = #{ctbrain,jdbcType=VARCHAR}");
+        }
+        if (record.getCtbrainTime() != null) {
+            sql.SET("ctbrain_time = #{ctbrainTime,jdbcType=VARCHAR}");
+        }
+        if (record.getGwr() != null) {
+            sql.SET("gwr = #{gwr,jdbcType=VARCHAR}");
+        }
+        if (record.getSulci() != null) {
+            sql.SET("sulci = #{sulci,jdbcType=VARCHAR}");
+        }
+        if (record.getCisterns() != null) {
+            sql.SET("cisterns = #{cisterns,jdbcType=VARCHAR}");
+        }
+        if (record.getCath() != null) {
+            sql.SET("cath = #{cath,jdbcType=VARCHAR}");
+        }
+        if (record.getCathdate() != null) {
+            sql.SET("cathdate = #{cathdate,jdbcType=VARCHAR}");
+        }
+        if (record.getCathAcutelesion() != null) {
+            sql.SET("cath_acutelesion = #{cathAcutelesion,jdbcType=VARCHAR}");
+        }
+        if (record.getCathPci() != null) {
+            sql.SET("cath_pci = #{cathPci,jdbcType=VARCHAR}");
+        }
+        if (record.getCathCabg() != null) {
+            sql.SET("cath_cabg = #{cathCabg,jdbcType=VARCHAR}");
+        }
+        if (record.getAlive1() != null) {
+            sql.SET("alive_1 = #{alive1,jdbcType=VARCHAR}");
+        }
+        if (record.getFourEye1() != null) {
+            sql.SET("four_eye_1 = #{fourEye1,jdbcType=VARCHAR}");
+        }
+        if (record.getFourM1() != null) {
+            sql.SET("four_m_1 = #{fourM1,jdbcType=VARCHAR}");
+        }
+        if (record.getPupils1() != null) {
+            sql.SET("pupils_1 = #{pupils1,jdbcType=VARCHAR}");
+        }
+        if (record.getCorneals1() != null) {
+            sql.SET("corneals_1 = #{corneals1,jdbcType=VARCHAR}");
+        }
+        if (record.getCough1() != null) {
+            sql.SET("cough_1 = #{cough1,jdbcType=VARCHAR}");
+        }
+        if (record.getGag1() != null) {
+            sql.SET("gag_1 = #{gag1,jdbcType=VARCHAR}");
+        }
+        if (record.getFourR1() != null) {
+            sql.SET("four_r_1 = #{fourR1,jdbcType=VARCHAR}");
+        }
+        if (record.getPfratio1() != null) {
+            sql.SET("pfratio_1 = #{pfratio1,jdbcType=VARCHAR}");
+        }
+        if (record.getSofaCv1() != null) {
+            sql.SET("sofa_cv_1 = #{sofaCv1,jdbcType=VARCHAR}");
+        }
+        if (record.getBili1() != null) {
+            sql.SET("bili_1 = #{bili1,jdbcType=VARCHAR}");
+        }
+        if (record.getPlt1() != null) {
+            sql.SET("plt_1 = #{plt1,jdbcType=VARCHAR}");
+        }
+        if (record.getCr1() != null) {
+            sql.SET("cr_1 = #{cr1,jdbcType=VARCHAR}");
+        }
+        if (record.getLactate1() != null) {
+            sql.SET("lactate_1 = #{lactate1,jdbcType=VARCHAR}");
+        }
+        if (record.getAlive2() != null) {
+            sql.SET("alive_2 = #{alive2,jdbcType=VARCHAR}");
+        }
+        if (record.getFourEye2() != null) {
+            sql.SET("four_eye_2 = #{fourEye2,jdbcType=VARCHAR}");
+        }
+        if (record.getFourM2() != null) {
+            sql.SET("four_m_2 = #{fourM2,jdbcType=VARCHAR}");
+        }
+        if (record.getPupils2() != null) {
+            sql.SET("pupils_2 = #{pupils2,jdbcType=VARCHAR}");
+        }
+        if (record.getCorneals2() != null) {
+            sql.SET("corneals_2 = #{corneals2,jdbcType=VARCHAR}");
+        }
+        if (record.getCough2() != null) {
+            sql.SET("cough_2 = #{cough2,jdbcType=VARCHAR}");
+        }
+        if (record.getGag2() != null) {
+            sql.SET("gag_2 = #{gag2,jdbcType=VARCHAR}");
+        }
+        if (record.getFourR2() != null) {
+            sql.SET("four_r_2 = #{fourR2,jdbcType=VARCHAR}");
+        }
+        if (record.getPfratio2() != null) {
+            sql.SET("pfratio_2 = #{pfratio2,jdbcType=VARCHAR}");
+        }
+        if (record.getSofaCv2() != null) {
+            sql.SET("sofa_cv_2 = #{sofaCv2,jdbcType=VARCHAR}");
+        }
+        if (record.getBili2() != null) {
+            sql.SET("bili_2 = #{bili2,jdbcType=VARCHAR}");
+        }
+        if (record.getPlt2() != null) {
+            sql.SET("plt_2 = #{plt2,jdbcType=VARCHAR}");
+        }
+        if (record.getCr2() != null) {
+            sql.SET("cr_2 = #{cr2,jdbcType=VARCHAR}");
+        }
+        if (record.getLactate2() != null) {
+            sql.SET("lactate_2 = #{lactate2,jdbcType=VARCHAR}");
+        }
+        if (record.getAlive3() != null) {
+            sql.SET("alive_3 = #{alive3,jdbcType=VARCHAR}");
+        }
+        if (record.getFourEye3() != null) {
+            sql.SET("four_eye_3 = #{fourEye3,jdbcType=VARCHAR}");
+        }
+        if (record.getFourM3() != null) {
+            sql.SET("four_m_3 = #{fourM3,jdbcType=VARCHAR}");
+        }
+        if (record.getPupils3() != null) {
+            sql.SET("pupils_3 = #{pupils3,jdbcType=VARCHAR}");
+        }
+        if (record.getCorneals3() != null) {
+            sql.SET("corneals_3 = #{corneals3,jdbcType=VARCHAR}");
+        }
+        if (record.getCough3() != null) {
+            sql.SET("cough_3 = #{cough3,jdbcType=VARCHAR}");
+        }
+        if (record.getGag3() != null) {
+            sql.SET("gag_3 = #{gag3,jdbcType=VARCHAR}");
+        }
+        if (record.getFourR3() != null) {
+            sql.SET("four_r_3 = #{fourR3,jdbcType=VARCHAR}");
+        }
+        if (record.getPfratio3() != null) {
+            sql.SET("pfratio_3 = #{pfratio3,jdbcType=VARCHAR}");
+        }
+        if (record.getSofaCv3() != null) {
+            sql.SET("sofa_cv_3 = #{sofaCv3,jdbcType=VARCHAR}");
+        }
+        if (record.getBili3() != null) {
+            sql.SET("bili_3 = #{bili3,jdbcType=VARCHAR}");
+        }
+        if (record.getPlt3() != null) {
+            sql.SET("plt_3 = #{plt3,jdbcType=VARCHAR}");
+        }
+        if (record.getCr3() != null) {
+            sql.SET("cr_3 = #{cr3,jdbcType=VARCHAR}");
+        }
+        if (record.getLactate3() != null) {
+            sql.SET("lactate_3 = #{lactate3,jdbcType=VARCHAR}");
+        }
+        if (record.getAlive4() != null) {
+            sql.SET("alive_4 = #{alive4,jdbcType=VARCHAR}");
+        }
+        if (record.getFourEye4() != null) {
+            sql.SET("four_eye_4 = #{fourEye4,jdbcType=VARCHAR}");
+        }
+        if (record.getFourM4() != null) {
+            sql.SET("four_m_4 = #{fourM4,jdbcType=VARCHAR}");
+        }
+        if (record.getPupils4() != null) {
+            sql.SET("pupils_4 = #{pupils4,jdbcType=VARCHAR}");
+        }
+        if (record.getCorneals4() != null) {
+            sql.SET("corneals_4 = #{corneals4,jdbcType=VARCHAR}");
         }
         sql.WHERE("id = #{id,jdbcType=VARCHAR}");
         return sql.toString();
@@ -129,92 +928,5 @@ public class PatientSqlProvider {
     /**
      * This method was generated by MyBatis Generator. This method corresponds to the database table patient
      * @mbg.generated
-     */
-    protected void applyWhere(SQL sql, PatientExample example, boolean includeExamplePhrase) {
-        if (example == null) {
-            return;
-        }
-        String parmPhrase1;
-        String parmPhrase1_th;
-        String parmPhrase2;
-        String parmPhrase2_th;
-        String parmPhrase3;
-        String parmPhrase3_th;
-        if (includeExamplePhrase) {
-            parmPhrase1 = "%s #{example.oredCriteria[%d].allCriteria[%d].value}";
-            parmPhrase1_th = "%s #{example.oredCriteria[%d].allCriteria[%d].value,typeHandler=%s}";
-            parmPhrase2 = "%s #{example.oredCriteria[%d].allCriteria[%d].value} and #{example.oredCriteria[%d].criteria[%d].secondValue}";
-            parmPhrase2_th = "%s #{example.oredCriteria[%d].allCriteria[%d].value,typeHandler=%s} and #{example.oredCriteria[%d].criteria[%d].secondValue,typeHandler=%s}";
-            parmPhrase3 = "#{example.oredCriteria[%d].allCriteria[%d].value[%d]}";
-            parmPhrase3_th = "#{example.oredCriteria[%d].allCriteria[%d].value[%d],typeHandler=%s}";
-        } else {
-            parmPhrase1 = "%s #{oredCriteria[%d].allCriteria[%d].value}";
-            parmPhrase1_th = "%s #{oredCriteria[%d].allCriteria[%d].value,typeHandler=%s}";
-            parmPhrase2 = "%s #{oredCriteria[%d].allCriteria[%d].value} and #{oredCriteria[%d].criteria[%d].secondValue}";
-            parmPhrase2_th = "%s #{oredCriteria[%d].allCriteria[%d].value,typeHandler=%s} and #{oredCriteria[%d].criteria[%d].secondValue,typeHandler=%s}";
-            parmPhrase3 = "#{oredCriteria[%d].allCriteria[%d].value[%d]}";
-            parmPhrase3_th = "#{oredCriteria[%d].allCriteria[%d].value[%d],typeHandler=%s}";
-        }
-        StringBuilder sb = new StringBuilder();
-        List<Criteria> oredCriteria = example.getOredCriteria();
-        boolean firstCriteria = true;
-        for (int i = 0; i < oredCriteria.size(); i++) {
-            Criteria criteria = oredCriteria.get(i);
-            if (criteria.isValid()) {
-                if (firstCriteria) {
-                    firstCriteria = false;
-                } else {
-                    sb.append(" or ");
-                }
-                sb.append('(');
-                List<Criterion> criterions = criteria.getAllCriteria();
-                boolean firstCriterion = true;
-                for (int j = 0; j < criterions.size(); j++) {
-                    Criterion criterion = criterions.get(j);
-                    if (firstCriterion) {
-                        firstCriterion = false;
-                    } else {
-                        sb.append(" and ");
-                    }
-                    if (criterion.isNoValue()) {
-                        sb.append(criterion.getCondition());
-                    } else if (criterion.isSingleValue()) {
-                        if (criterion.getTypeHandler() == null) {
-                            sb.append(String.format(parmPhrase1, criterion.getCondition(), i, j));
-                        } else {
-                            sb.append(String.format(parmPhrase1_th, criterion.getCondition(), i, j, criterion.getTypeHandler()));
-                        }
-                    } else if (criterion.isBetweenValue()) {
-                        if (criterion.getTypeHandler() == null) {
-                            sb.append(String.format(parmPhrase2, criterion.getCondition(), i, j, i, j));
-                        } else {
-                            sb.append(String.format(parmPhrase2_th, criterion.getCondition(), i, j, criterion.getTypeHandler(), i, j, criterion.getTypeHandler()));
-                        }
-                    } else if (criterion.isListValue()) {
-                        sb.append(criterion.getCondition());
-                        sb.append(" (");
-                        List<?> listItems = (List<?>) criterion.getValue();
-                        boolean comma = false;
-                        for (int k = 0; k < listItems.size(); k++) {
-                            if (comma) {
-                                sb.append(", ");
-                            } else {
-                                comma = true;
-                            }
-                            if (criterion.getTypeHandler() == null) {
-                                sb.append(String.format(parmPhrase3, i, j, k));
-                            } else {
-                                sb.append(String.format(parmPhrase3_th, i, j, k, criterion.getTypeHandler()));
-                            }
-                        }
-                        sb.append(')');
-                    }
-                }
-                sb.append(')');
-            }
-        }
-        if (sb.length() > 0) {
-            sql.WHERE(sb.toString());
-        }
-    }
+     */protected void applyWhere(SQL sql,PatientExample example,boolean includeExamplePhrase){if (example == null){return;}String parmPhrase1;String parmPhrase1_th;String parmPhrase2;String parmPhrase2_th;String parmPhrase3;String parmPhrase3_th;if (includeExamplePhrase){parmPhrase1="%s #{example.oredCriteria[%d].allCriteria[%d].value}";parmPhrase1_th="%s #{example.oredCriteria[%d].allCriteria[%d].value,typeHandler=%s}";parmPhrase2="%s #{example.oredCriteria[%d].allCriteria[%d].value} and #{example.oredCriteria[%d].criteria[%d].secondValue}";parmPhrase2_th="%s #{example.oredCriteria[%d].allCriteria[%d].value,typeHandler=%s} and #{example.oredCriteria[%d].criteria[%d].secondValue,typeHandler=%s}";parmPhrase3="#{example.oredCriteria[%d].allCriteria[%d].value[%d]}";parmPhrase3_th="#{example.oredCriteria[%d].allCriteria[%d].value[%d],typeHandler=%s}";} else {parmPhrase1="%s #{oredCriteria[%d].allCriteria[%d].value}";parmPhrase1_th="%s #{oredCriteria[%d].allCriteria[%d].value,typeHandler=%s}";parmPhrase2="%s #{oredCriteria[%d].allCriteria[%d].value} and #{oredCriteria[%d].criteria[%d].secondValue}";parmPhrase2_th="%s #{oredCriteria[%d].allCriteria[%d].value,typeHandler=%s} and #{oredCriteria[%d].criteria[%d].secondValue,typeHandler=%s}";parmPhrase3="#{oredCriteria[%d].allCriteria[%d].value[%d]}";parmPhrase3_th="#{oredCriteria[%d].allCriteria[%d].value[%d],typeHandler=%s}";}StringBuilder sb=new StringBuilder();List<Criteria> oredCriteria=example.getOredCriteria();boolean firstCriteria=true;for (int i=0;i < oredCriteria.size();i++){Criteria criteria=oredCriteria.get(i);if (criteria.isValid()){if (firstCriteria){firstCriteria=false;} else {sb.append(" or ");}sb.append('(');List<Criterion> criterions=criteria.getAllCriteria();boolean firstCriterion=true;for (int j=0;j < criterions.size();j++){Criterion criterion=criterions.get(j);if (firstCriterion){firstCriterion=false;} else {sb.append(" and ");}if (criterion.isNoValue()){sb.append(criterion.getCondition());} else if (criterion.isSingleValue()){if (criterion.getTypeHandler() == null){sb.append(String.format(parmPhrase1,criterion.getCondition(),i,j));} else {sb.append(String.format(parmPhrase1_th,criterion.getCondition(),i,j,criterion.getTypeHandler()));}} else if (criterion.isBetweenValue()){if (criterion.getTypeHandler() == null){sb.append(String.format(parmPhrase2,criterion.getCondition(),i,j,i,j));} else {sb.append(String.format(parmPhrase2_th,criterion.getCondition(),i,j,criterion.getTypeHandler(),i,j,criterion.getTypeHandler()));}} else if (criterion.isListValue()){sb.append(criterion.getCondition());sb.append(" (");List<?> listItems=(List<?>)criterion.getValue();boolean comma=false;for (int k=0;k < listItems.size();k++){if (comma){sb.append(", ");} else {comma=true;}if (criterion.getTypeHandler() == null){sb.append(String.format(parmPhrase3,i,j,k));} else {sb.append(String.format(parmPhrase3_th,i,j,k,criterion.getTypeHandler()));}}sb.append(')');}}sb.append(')');}}if (sb.length() > 0){sql.WHERE(sb.toString());}}
 }

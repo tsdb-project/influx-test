@@ -1,10 +1,11 @@
 package edu.pitt.medschool.controller.patient;
 
-import edu.pitt.medschool.bean.PatientFilterBean;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
-import edu.pitt.medschool.model.Patient;
-import edu.pitt.medschool.service.PatientFilteringService;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.PatientDao;
+import edu.pitt.medschool.model.dto.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -17,14 +18,22 @@ import java.util.Map;
 @RestController
 @RequestMapping("/apis")
 public class PatientGetController {
+
+    @Value("${machine}")
+    private String uuid;
+
     @Autowired
-    PatientFilteringService patientFilteringService;
+    PatientDao patientDao;
+
+    @Autowired
+    ImportedFileDao importedFileDao;
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> getAllPatientInfo() {
         Map<String, Object> map = new HashMap<>();
-        map.put("data", patientFilteringService.GetImportedPatientData());
+        //TODO: change front-end! new contents in Patient Obj.
+        map.put("data", patientDao.selectByIds(importedFileDao.getAllImportedPid(uuid)));
         RestfulResponse response = new RestfulResponse(1, "success");
         map.put("res", response);
 
@@ -33,14 +42,13 @@ public class PatientGetController {
 
     @RequestMapping(value = "/patients/{idx}", method = RequestMethod.GET)
     public Patient getOnePatientByIndex(@PathVariable String idx) {
-        return patientFilteringService.GetById(idx.toUpperCase()).get(0);
+        List<Patient> p = patientDao.selectById(idx);
+        return p.get(0);
     }
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.POST)
     public List<Patient> getPatientWithCriteria() {
-        PatientFilterBean pfb = new PatientFilterBean();
-        pfb.setGenderFilter("F");
-        return patientFilteringService.FetchResult(pfb);
+        return patientDao.selectByGender("F");
     }
 
 }
