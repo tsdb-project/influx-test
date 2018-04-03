@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import edu.pitt.medschool.bean.FileBean;
+import edu.pitt.medschool.controller.load.vo.ProgressVO;
 import edu.pitt.medschool.controller.load.vo.SearchFileVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.Util;
@@ -28,6 +29,8 @@ public class DataController {
 
     @Autowired
     ImportCsvService importCsvService;
+    @Autowired
+    ImportProgressService importProgressService;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -98,16 +101,17 @@ public class DataController {
         Map<String, Object> map = new HashMap<>();
 
         String uuid = importCsvService.GetUUID();
-
-        //TODO: adjust the code START
-        /*Map<String, List<Object>> allstat = ImportProgressService.GetTaskAllFileProgress(uuid);
-        for (String key : allstat.keySet()) {
-            map.put(key, allstat.get(key));
-        }
-
-        String total = String.format("%.2f", ImportProgressService.GetTaskOverallProgress(uuid) * 100);
-        map.put("total", total);*/
-        //TODO: adjust the code END
+        List<ProgressVO> list = importProgressService.GetTaskAllFileProgress(uuid);
+        map.put("progress", list);
+        map.put("finished", null);
+        map.put("total", importProgressService.GetTaskOverallProgress(uuid));
+        // TODO: adjust the code START
+        /*
+         * Map<String, List<Object>> allstat = ImportProgressService.GetTaskAllFileProgress(uuid); for (String key : allstat.keySet()) { map.put(key, allstat.get(key)); }
+         * 
+         * String total = String.format("%.2f", ImportProgressService.GetTaskOverallProgress(uuid) * 100); map.put("total", total);
+         */
+        // TODO: adjust the code END
 
         // if (!allstat.get("filename").contains(file)) {
         // map.put("finished", false);
