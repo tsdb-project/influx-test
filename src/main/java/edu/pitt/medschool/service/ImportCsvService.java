@@ -41,6 +41,7 @@ public class ImportCsvService {
     private final AtomicLong totalAllSize = new AtomicLong(0);
     private final AtomicLong totalProcessedSize = new AtomicLong(0);
     private final Map<String, Long> everyFileSize = new HashMap<>();
+    private final Map<String, Integer> importFailCounter = new HashMap<>();
 
     private final String dbName = DBConfiguration.Data.DBNAME;
     private double loadFactor = 0.5;
@@ -107,15 +108,15 @@ public class ImportCsvService {
         this.startImport();
     }
 
-    private void internalAddOne(String path, boolean isInternal) {
+    private void internalAddOne(String path, boolean isInvokedByAddArrayFiles) {
         Path p = Paths.get(path);
         try {
             long currS = Files.size(p);
             totalAllSize.addAndGet(currS);
             everyFileSize.put(p.toString(), currS);
             fileQueue.offer(p);
-            // If this function is invoked by 'AddArrayFiles', then don't startImport
-            if (!isInternal) this.startImport();
+            if (!isInvokedByAddArrayFiles)
+                this.startImport();
         } catch (IOException e) {
             //TODO: A separate log table for system failures
             //logFailureFiles(p.toString(), e.getLocalizedMessage(), 0, 0);
@@ -167,6 +168,7 @@ public class ImportCsvService {
     private Object[] fileImport(InfluxDB idb, String ar_type, String pid, Path file, long aFileSize) {
         long currentProcessed = 0;
         String filename = file.getFileName().toString();
+        long totalLines = 0;
 
         try {
             BufferedReader reader = Files.newBufferedReader(file);
@@ -206,6 +208,7 @@ public class ImportCsvService {
                 if (columnCount != values.length)
                     throw new RuntimeException("File content columns length inconsistent!");
 
+                totalLines++;
                 // Set initial capacity for slightly better performance
                 Map<String, Object> lineKVMap = new HashMap<>((int) (columnCount / 0.70));
                 for (int i = 1; i < values.length; i++) {
@@ -244,7 +247,7 @@ public class ImportCsvService {
             return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
         }
 
-        return new Object[]{"OK", currentProcessed};
+        return new Object[]{"OK", currentProcessed, totalLines};
     }
 
     /**
@@ -266,33 +269,43 @@ public class ImportCsvService {
         // Duplication Check
         if (fileInfo[2].equals("1")) {
             //TODO: If the same file appears already, having a summary of comparing the contents of the new and old
-            //TODO: file will be useful.  For example, if I generate a new set of CSVs using a novel signal processing
-            //TODO: technique, I might want to concatenate the results with the existing time series.
             logFailureFiles(fileFullPath, "The same file has been imported.",
                     thisFileSize, 0);
             return;
         }
 
-        ImportedFile iff = new ImportedFile();
-        iff.setFilename(fileName);
-        iff.setFilepath(fileFullPath);
-        iff.setFilesize(thisFileSize);
-        iff.setPid(fileInfo[0]);
-        iff.setIsar(fileInfo[1].equals("noar") ? "0" : "1");
-
         // New file, all good, just import!
         Object[] impStr = fileImport(generateIdbClient(), fileInfo[1], fileInfo[0], pFile, thisFileSize);
         if (impStr[0].equals("OK")) {
-            logSuccessFiles(fileFullPath, thisFileSize, thisFileSize);
             try {
+                ImportedFile iff = new ImportedFile();
+                iff.setFilename(fileName);
+                iff.setFilepath(fileFullPath);
+                iff.setFilesize(thisFileSize);
+                iff.setPid(fileInfo[0]);
+                iff.setIsar(fileInfo[1].equals("noar"));
+                iff.setFilelines(((Long) impStr[2]).intValue());
                 ifd.insert(iff);
             } catch (Exception e) {
+                System.out.println("File name is: " + fileFullPath);
                 e.printStackTrace();
             }
+            logSuccessFiles(fileFullPath, thisFileSize, thisFileSize);
+            importFailCounter.remove(fileFullPath);
         } else {
             long procedSize = (long) impStr[1];
-            totalAllSize.addAndGet(procedSize - thisFileSize);
             logFailureFiles(fileFullPath, (String) impStr[0], thisFileSize, procedSize);
+
+            if (importFailCounter.containsKey(fileFullPath)) {
+                int current_fails = importFailCounter.get(fileFullPath);
+                // Only retry 3 times
+                if (++current_fails <= 3) {
+                    internalAddOne(fileFullPath, false);
+                    importFailCounter.put(fileFullPath, current_fails);
+                }
+            } else {
+                importFailCounter.put(fileFullPath, 1);
+            }
         }
     }
 
@@ -331,6 +344,7 @@ public class ImportCsvService {
     }
 
     private void logFailureFiles(String fn, String reason, long thisFileSize, long thisFileProcessedSize) {
+        totalAllSize.addAndGet(thisFileProcessedSize - thisFileSize);
         ips.UpdateFileProgress(fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(),
                 ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
     }
