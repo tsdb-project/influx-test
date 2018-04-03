@@ -40,7 +40,6 @@
         <table tableName="downsample_meta">
             <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
         </table>
-        <table tableName="patient"></table>
         <table tableName="feature"></table>
     </context>
 </generatorConfiguration>

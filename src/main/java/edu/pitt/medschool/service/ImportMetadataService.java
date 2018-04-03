@@ -135,10 +135,10 @@ public class ImportMetadataService {
                             p.setId((String) obj);
                             break;
                         case 1:
-                            p.setAge((int) obj);
+                            p.setAge((Byte) obj);
                             break;
                         case 2:
-                            p.setGender((String) obj);
+                            p.setFemale(obj.equals("F"));
                             break;
                         default:
                             continue;

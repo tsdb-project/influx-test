@@ -26,12 +26,21 @@ public class ImportedFileDao {
     /**
      * Check based on filename and filesize(bytes)
      */
-    public boolean checkHasImported(String filename, long size) {
+    public boolean checkHasImported(String uuid, String filename, long size) {
         ImportedFileExample ife = new ImportedFileExample();
         ife.createCriteria()
+                .andUuidEqualTo(uuid)
                 .andFilenameEqualTo(filename)
                 .andFilesizeEqualTo(size);
         return ifm.selectByExample(ife).size() > 0;
+    }
+
+    /**
+     * Get all imported PIDs
+     * @param uuid Machine ID
+     */
+    public List<String> getAllImportedPid(String uuid) {
+        return ifm.selectAllImportedPid(uuid);
     }
 
 }

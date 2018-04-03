@@ -1,5 +1,7 @@
 package edu.pitt.medschool.model;
 
+import edu.pitt.medschool.model.dto.Patient;
+
 import java.util.List;
 
 /**

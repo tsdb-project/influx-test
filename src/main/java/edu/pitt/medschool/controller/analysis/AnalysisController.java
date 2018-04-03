@@ -1,15 +1,17 @@
 /**
- * 
+ *
  */
 package edu.pitt.medschool.controller.analysis;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.PatientDao;
+import edu.pitt.medschool.model.dto.Patient;
+import edu.pitt.medschool.model.dto.PatientExample;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,26 +21,29 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import edu.pitt.medschool.bean.PatientFilterBean;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
-import edu.pitt.medschool.service.PatientFilteringService;
 
 /**
  * @author Isolachine
- *
  */
 
 @Controller
 public class AnalysisController {
+
+    @Value("${machine}")
+    private String uuid;
+
     @Autowired
     ColumnService columnService;
     @Autowired
-    PatientFilteringService patientFilteringService;
+    PatientDao patientDao;
+    @Autowired
+    ImportedFileDao importedFileDao;
     @Autowired
     AnalysisService analysisService;
 
@@ -61,7 +66,7 @@ public class AnalysisController {
         return model;
     }
 
-    @RequestMapping(value = { "/analysis/edit/{id}", "/analysis/edit" }, method = RequestMethod.GET)
+    @RequestMapping(value = {"/analysis/edit/{id}", "/analysis/edit"}, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "edit");
@@ -183,22 +188,37 @@ public class AnalysisController {
     @RequestMapping("api/export/export")
     @ResponseBody
     public void export(@RequestBody(required = true) ExportRequest request, Model model) throws IOException {
-        PatientFilterBean filter = new PatientFilterBean();
+        PatientExample pe = new PatientExample();
+        PatientExample.Criteria pec = pe.createCriteria();
         if (request.ageLower != null && !request.ageLower.isEmpty()) {
-            filter.setAgeLowerFilter(Integer.valueOf(request.ageLower));
+            pec.andAgeGreaterThan(Byte.valueOf(request.ageLower));
         }
         if (request.ageUpper != null && !request.ageUpper.isEmpty()) {
-            filter.setAgeUpperFilter(Integer.valueOf(request.ageUpper));
+            pec.andAgeLessThanOrEqualTo(Byte.valueOf(request.ageUpper));
         }
         if (request.gender != null && !request.gender.isEmpty()) {
-            filter.setGenderFilter(request.gender);
+            pec.andFemaleEqualTo(request.gender.toUpperCase().equals("F"));
         }
-        List<String> patientIDs = patientFilteringService.FetchResultPid(filter);
-        patientIDs.retainAll(patientFilteringService.GetAllImportedPid());
+        List<String> patientIDs = extractPid(patientDao.selectByCustom(pe));
+        patientIDs.retainAll(importedFileDao.getAllImportedPid(uuid));
 
         System.out.println(patientIDs);
         System.out.println(request.interval + "====" + request.time + "======" + request.method);
         analysisService.exportFromPatientsWithDownsampling(patientIDs, request.column, request.method, request.interval, request.time);
+    }
+
+    /**
+     * TODO: Mybatis support for ONLY SELECT PID?
+     * Extract only PID from 'Patient' object
+     */
+    private List<String> extractPid(List<Patient> p) {
+        if (p == null)
+            return new ArrayList<>(0);
+        List<String> res = new ArrayList<>(p.size());
+        for (Patient ap : p) {
+            res.add(ap.getId());
+        }
+        return res;
     }
 
 }

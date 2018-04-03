@@ -144,7 +144,7 @@ public class ImportCsvService {
     private String[] checkerFromFilename(String filename, long filesize) {
         String[] res = new String[3];
         // Has been uploaded successfully according to the log?
-        boolean hasImported = ifd.checkHasImported(filename, filesize);
+        boolean hasImported = ifd.checkHasImported(taskUUID, filename, filesize);
         if (!hasImported) {
             // Never updated
             res[2] = "0";
@@ -274,6 +274,7 @@ public class ImportCsvService {
                 iff.setPid(fileInfo[0]);
                 iff.setIsar(fileInfo[1].equals("noar"));
                 iff.setFilelines(((Long) impStr[2]).intValue());
+                iff.setUuid(taskUUID);
                 ifd.insert(iff);
             } catch (Exception e) {
                 System.out.println("File name is: " + fileFullPath);
