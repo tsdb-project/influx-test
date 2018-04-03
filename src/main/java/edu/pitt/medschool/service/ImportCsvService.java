@@ -1,6 +1,7 @@
 package edu.pitt.medschool.service;
 
-
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dto.ImportedFile;
 import okhttp3.OkHttpClient;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
@@ -49,6 +50,9 @@ public class ImportCsvService {
     private final BlockingQueue<Path> fileQueue = new LinkedBlockingQueue<>();
 
     @Autowired
+    private ImportedFileDao ifd;
+
+    @Autowired
     private ImportProgressService ips;
 
     public double GetLoadFactor() {
@@ -73,8 +77,8 @@ public class ImportCsvService {
         AddArrayFiles(allNoAr);
         AddArrayFiles(allAr);
 
-        System.out.println("Sleep 5s...");
-        Thread.sleep(5000);
+        System.out.println("Sleep 3s...");
+        Thread.sleep(3000);
 
         // Add again
         AddOneFile("N:\\Test_AR\\PUH-2010-076_07ar.csv");
@@ -130,29 +134,18 @@ public class ImportCsvService {
     /**
      * Lots of info in Filename
      *
-     * @param p NIO Paths
-     * @return 0: PID; 1: ar/noar; 2: Has been uploaded [0,1,2] (Never, Duplicate, Failed)
+     * @return 0: PID; 1: ar/noar; 2: Has been uploaded [0,1,2] (Never, Duplicate, Failed(ignored))
      */
-    private String[] checkerFromFilename(Path p) {
+    private String[] checkerFromFilename(String filename, long filesize) {
         String[] res = new String[3];
-        String filename = p.getFileName().toString();
         // Has been uploaded successfully according to the log?
-        Query q = new Query(
-                "SELECT MAX(\"CurrentPercent\") AS A, \"status\" AS B FROM \""
-                        + DBConfiguration.Sys.SYS_FILE_IMPORT_PROGRESS + "\" WHERE \"filename\" = '"
-                        + p.toString().replace("\\", "\\\\") + "' GROUP BY \"filename\";", DBConfiguration.Sys.DBNAME);
-        Map<String, List<Object>> tmpQ1 = InfluxUtil.QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
-        if (tmpQ1.size() == 0) {
+        boolean hasImported = ifd.checkHasImported(filename, filesize);
+        if (!hasImported) {
             // Never updated
             res[2] = "0";
         } else {
-            if (!tmpQ1.get("B").get(0).equals(String.valueOf(ImportProgressService.FileProgressStatus.STATUS_FAIL))) {
-                // Already loaded before
-                res[2] = "1";
-            } else {
-                // Uploaded but failed
-                res[2] = "2";
-            }
+            // Ignore fails (res[2]="2")
+            res[2] = "1";
         }
         // PUH-20xx_xxx
         res[0] = filename.substring(0, 12).trim().toUpperCase();
@@ -167,7 +160,7 @@ public class ImportCsvService {
     }
 
     /**
-     * The main importing logic
+     * The main importing logic (In InfluxDB)
      *
      * @return Obj[0]: Err msg; Obj[1]: Processed size.
      */
@@ -259,8 +252,9 @@ public class ImportCsvService {
      */
     private void internalImportMain(Path pFile) {
         long thisFileSize = everyFileSize.get(pFile.toString());
-        String fileFullPath = pFile.toString();
-        String[] fileInfo = checkerFromFilename(pFile);
+        String fileFullPath = pFile.toString(),
+                fileName = pFile.getFileName().toString();
+        String[] fileInfo = checkerFromFilename(fileName, thisFileSize);
 
         // Ar/NoAr Check & Response
         if (fileInfo[1] == null) {
@@ -274,20 +268,27 @@ public class ImportCsvService {
             //TODO: If the same file appears already, having a summary of comparing the contents of the new and old
             //TODO: file will be useful.  For example, if I generate a new set of CSVs using a novel signal processing
             //TODO: technique, I might want to concatenate the results with the existing time series.
-            logFailureFiles(fileFullPath, "Older version (?) for the same file imported.",
-                    thisFileSize, 0);
-            return;
-        } else if (fileInfo[2].equals("2")) {
-            //TODO: Check my notes: Moving to MySQL
-            logFailureFiles(fileFullPath, "Corrupted or finished import, TODO.",
+            logFailureFiles(fileFullPath, "The same file has been imported.",
                     thisFileSize, 0);
             return;
         }
+
+        ImportedFile iff = new ImportedFile();
+        iff.setFilename(fileName);
+        iff.setFilepath(fileFullPath);
+        iff.setFilesize(thisFileSize);
+        iff.setPid(fileInfo[0]);
+        iff.setIsar(fileInfo[1].equals("noar") ? "0" : "1");
 
         // New file, all good, just import!
         Object[] impStr = fileImport(generateIdbClient(), fileInfo[1], fileInfo[0], pFile, thisFileSize);
         if (impStr[0].equals("OK")) {
             logSuccessFiles(fileFullPath, thisFileSize, thisFileSize);
+            try {
+                ifd.insert(iff);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else {
             long procedSize = (long) impStr[1];
             totalAllSize.addAndGet(procedSize - thisFileSize);
@@ -334,6 +335,9 @@ public class ImportCsvService {
                 ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
     }
 
+    /**
+     * Generate IdbClient for Importing CSVs
+     */
     private InfluxDB generateIdbClient() {
         InfluxDB idb = InfluxDBFactory.connect(
                 InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,

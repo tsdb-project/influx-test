@@ -22,7 +22,6 @@ public class TestJDBC implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        ic.SetLoadFactor(0.001);
         ic._test();
         // Exit routine
         // SpringApplication.exit(context);
