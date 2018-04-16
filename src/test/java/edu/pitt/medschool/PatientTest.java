@@ -60,7 +60,7 @@ public class PatientTest {
     @Test
     public void record_number_test() {
         List<String> allImpd = ifd.getAllImportedPid(uuid);
-        assertEquals(allImpd.size(), 5);
+        assertEquals(allImpd.size(), 38);
 
         List<Patient> tmp = pd.selectByGender("m");
         assertEquals(tmp.size(), 1252);
