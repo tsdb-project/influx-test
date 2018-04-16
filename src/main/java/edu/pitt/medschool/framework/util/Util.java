@@ -5,6 +5,8 @@ package edu.pitt.medschool.framework.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,6 +30,16 @@ import edu.pitt.medschool.bean.FileBean;
  * @author Isolachine
  */
 public class Util {
+
+    public static String getIpFromHostname(String host) {
+        String addr = "localhost";
+        try {
+            addr = InetAddress.getByName("upmc_influx_1.dreamprc.com").getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return addr;
+    }
 
     /**
      * Convert a DoB String (e.g. 04/27/1995) to UNIX timestamp
