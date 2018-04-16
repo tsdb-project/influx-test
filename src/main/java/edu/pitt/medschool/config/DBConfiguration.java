@@ -27,18 +27,6 @@ public class DBConfiguration {
     }
 
     /**
-     * Measurements in meta table
-     */
-    public class Meta {
-        public static final String DBNAME = "meta";
-
-        /**
-         * Meta data for patients
-         */
-        public static final String PATIENT = "Patient";
-    }
-
-    /**
      * Measurements in application table
      */
     public class Sys {
@@ -48,12 +36,6 @@ public class DBConfiguration {
          * Table name for files
          */
         public static final String FILE = "File";
-
-
-        /**
-         * File import progress data table
-         */
-        public static final String SYS_FILE_IMPORT_PROGRESS = "ImportProgress";
     }
 
 }

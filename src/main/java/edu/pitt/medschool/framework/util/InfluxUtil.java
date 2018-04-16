@@ -128,7 +128,6 @@ public class InfluxUtil {
 
     public static void main(String[] args) {
         List<String> s = getAllTables(DBConfiguration.Data.DBNAME);
-        System.out.print(getDataTableRows("data_PUH-2010-093_noar"));
     }
 
 }
