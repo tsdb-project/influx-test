@@ -10,6 +10,7 @@ package edu.pitt.medschool.framework.rest;
 public class RestfulResponse {
     private Integer code;
     private String msg;
+    private Object data;
     
     public RestfulResponse(Integer code, String msg) {
         this.code = code;
@@ -39,6 +40,20 @@ public class RestfulResponse {
      */
     public void setMsg(String msg) {
         this.msg = msg;
+    }
+
+    /**
+     * @return the data
+     */
+    public Object getData() {
+        return data;
+    }
+
+    /**
+     * @param data the data to set
+     */
+    public void setData(Object data) {
+        this.data = data;
     }
     
 }

@@ -4,12 +4,12 @@
 package edu.pitt.medschool.controller.analysis;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.PatientDao;
-import edu.pitt.medschool.model.dto.Patient;
-import edu.pitt.medschool.model.dto.PatientExample;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -24,8 +24,11 @@ import org.springframework.web.servlet.ModelAndView;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.Patient;
+import edu.pitt.medschool.model.dto.PatientExample;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
 
@@ -88,12 +91,10 @@ public class AnalysisController {
 
     @RequestMapping(value = "analysis/query", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, Object> allQuery(Model model) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("data", analysisService.selectAll());
+    public RestfulResponse allQuery(Model model) {
         RestfulResponse response = new RestfulResponse(1, "success");
-        map.put("res", response);
-        return map;
+        response.setData(analysisService.selectAll());
+        return response;
     }
 
     @RequestMapping(value = "analysis/query", method = RequestMethod.POST)
