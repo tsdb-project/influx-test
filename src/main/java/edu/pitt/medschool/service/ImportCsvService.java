@@ -20,6 +20,8 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,8 @@ import okhttp3.OkHttpClient;
  */
 @Service
 public class ImportCsvService {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final int availCores = Runtime.getRuntime().availableProcessors();
     @Value("${machine}")
@@ -92,8 +96,7 @@ public class ImportCsvService {
     /**
      * Add one file to the queue (Blocking)
      *
-     * @param path
-     *            File path
+     * @param path File path
      */
     public void AddOneFile(String path) {
         this.internalAddOne(path, false);
@@ -102,8 +105,7 @@ public class ImportCsvService {
     /**
      * Add a list of files into the queue (Blocking)
      *
-     * @param paths
-     *            List of files
+     * @param paths List of files
      */
     public void AddArrayFiles(String[] paths) {
         for (String aPath : paths) {
@@ -122,9 +124,8 @@ public class ImportCsvService {
             if (!isInvokedByAddArrayFiles)
                 this.startImport();
         } catch (IOException e) {
-            // TODO: A separate log table for system failures
             // logFailureFiles(p.toString(), e.getLocalizedMessage(), 0, 0);
-            e.printStackTrace();
+            logger.error(Util.stackTraceErrorToString(e));
         }
     }
 
@@ -236,10 +237,10 @@ public class ImportCsvService {
             idb.close();
 
         } catch (Exception e) {
-            return new Object[] { Util.stackTraceErrorToString(e), currentProcessed };
+            return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
         }
 
-        return new Object[] { "OK", currentProcessed, totalLines };
+        return new Object[]{"OK", currentProcessed, totalLines};
     }
 
     /**
@@ -266,6 +267,7 @@ public class ImportCsvService {
         // New file, all good, just import!
         Object[] impStr = fileImport(generateIdbClient(), fileInfo[1], fileInfo[0], pFile, thisFileSize);
         if (impStr[0].equals("OK")) {
+            // Import success
             try {
                 ImportedFile iff = new ImportedFile();
                 iff.setFilename(fileName);
@@ -277,14 +279,15 @@ public class ImportCsvService {
                 iff.setUuid(taskUUID);
                 ifd.insert(iff);
             } catch (Exception e) {
-                System.out.println("File name is: " + fileFullPath);
-                e.printStackTrace();
+                logger.error("File name is: " + fileFullPath + "\n" + Util.stackTraceErrorToString(e));
             }
             logSuccessFiles(fileFullPath, thisFileSize, thisFileSize);
             importFailCounter.remove(fileFullPath);
         } else {
+            // Import fail
             long procedSize = (long) impStr[1];
             logFailureFiles(fileFullPath, (String) impStr[0], thisFileSize, procedSize);
+            logger.error((String) impStr[0]);
 
             if (importFailCounter.containsKey(fileFullPath)) {
                 int current_fails = importFailCounter.get(fileFullPath);

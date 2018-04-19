@@ -20,8 +20,7 @@ import static org.junit.Assert.assertEquals;
 @SpringBootTest
 public class PatientTest {
 
-    @Value("${machine}")
-    private String uuid;
+    private String uuid = "zyc-hp052";
 
     @Autowired
     PatientDao pd;

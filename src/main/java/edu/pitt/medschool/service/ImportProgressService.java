@@ -2,6 +2,9 @@ package edu.pitt.medschool.service;
 
 import java.util.List;
 
+import edu.pitt.medschool.framework.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,8 @@ import edu.pitt.medschool.model.dto.ImportProgress;
  */
 @Service
 public class ImportProgressService {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public enum FileProgressStatus {
         STATUS_FINISHED, STATUS_FAIL, STATUS_INPROGRESS
@@ -33,8 +38,7 @@ public class ImportProgressService {
     /**
      * Get overall progress for a task
      *
-     * @param uuid
-     *            Task UUID
+     * @param uuid Task UUID
      */
     public double GetTaskOverallProgress(String uuid) {
         return ipo.OverallProgress(uuid);
@@ -43,8 +47,7 @@ public class ImportProgressService {
     /**
      * Get progress data for all files within a task UUID
      *
-     * @param uuid
-     *            Task UUID
+     * @param uuid Task UUID
      */
     public List<ProgressVO> GetTaskAllFileProgress(String uuid) {
         return ipo.GetTaskDetailProgress(uuid);
@@ -73,20 +76,13 @@ public class ImportProgressService {
     /**
      * Insert file progress to db
      *
-     * @param fileName
-     *            Current file name
-     * @param totalFileSize
-     *            All files' size
-     * @param fileSize
-     *            Current file's size
-     * @param processedSize
-     *            Current processed size
-     * @param totalProcessedSize
-     *            All processed size
-     * @param status
-     *            Current file status
-     * @param failReason
-     *            Reason why failed
+     * @param fileName           Current file name
+     * @param totalFileSize      All files' size
+     * @param fileSize           Current file's size
+     * @param processedSize      Current processed size
+     * @param totalProcessedSize All processed size
+     * @param status             Current file status
+     * @param failReason         Reason why failed
      */
     public void UpdateFileProgress(String fileName, long totalFileSize, long fileSize, long processedSize, long totalProcessedSize, FileProgressStatus status, String failReason) {
         double allPercent = 0, currPercent = 0;
@@ -113,7 +109,7 @@ public class ImportProgressService {
         try {
             doInsert(ip);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(Util.stackTraceErrorToString(e));
         }
     }
 
