@@ -272,7 +272,7 @@ public class ImportCsvService {
                 iff.setFilepath(fileFullPath);
                 iff.setFilesize(thisFileSize);
                 iff.setPid(fileInfo[0]);
-                iff.setIsar(fileInfo[1].equals("noar"));
+                iff.setIsar(fileInfo[1].equals("ar"));
                 iff.setFilelines(((Long) impStr[2]).intValue());
                 iff.setUuid(taskUUID);
                 ifd.insert(iff);
