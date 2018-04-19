@@ -80,7 +80,7 @@ public class QueryController {
         if (meta.get("gender") != null && !meta.get("gender").isEmpty()) {
             pec.andFemaleEqualTo(meta.get("gender").toUpperCase().equals("F"));
         }
-        List<String> patientIDs = extractPid(patientDao.selectByCustom(pe));
+        List<String> patientIDs = patientDao.selectIdByCustom(pe);
 
         List<QueryResultBean> resultBeans = queryUserDefinedService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount(), patientIDs, null);
         Map<String, Object> map = new HashedMap<>();
@@ -117,7 +117,7 @@ public class QueryController {
         if (meta.get("gender") != null && !meta.get("gender").isEmpty()) {
             pec.andFemaleEqualTo(meta.get("gender").toUpperCase().equals("F"));
         }
-        List<String> patientIDs = extractPid(patientDao.selectByCustom(pe));
+        List<String> patientIDs = patientDao.selectIdByCustom(pe);
 
         List<QueryResultBean> resultBeans = queryUserDefinedService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount(), patientIDs, null);
         Map<String, Object> map = new HashedMap<>();
@@ -151,20 +151,6 @@ public class QueryController {
         map.put("raw", rawDataResponse);
 
         return map;
-    }
-
-    /**
-     * TODO: Mybatis support?
-     * Extract only PID from 'Patient' object
-     */
-    private List<String> extractPid(List<Patient> p) {
-        if (p == null)
-            return new ArrayList<>(0);
-        List<String> res = new ArrayList<>(p.size());
-        for (Patient ap : p) {
-            res.add(ap.getId());
-        }
-        return res;
     }
 
 }

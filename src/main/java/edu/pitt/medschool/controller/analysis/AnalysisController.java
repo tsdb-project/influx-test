@@ -201,7 +201,7 @@ public class AnalysisController {
         if (request.gender != null && !request.gender.isEmpty()) {
             pec.andFemaleEqualTo(request.gender.toUpperCase().equals("F"));
         }
-        List<String> patientIDs = extractPid(patientDao.selectByCustom(pe));
+        List<String> patientIDs = patientDao.selectIdByCustom(pe);
         patientIDs.retainAll(importedFileDao.getAllImportedPid(uuid));
 
         System.out.println(patientIDs);
@@ -217,19 +217,6 @@ public class AnalysisController {
         Downsample downsample = analysisService.selectByPrimaryKey(qid);
         List<DownsampleGroupVO> downsampleGroups = analysisService.selectAllAggregationGroupByQueryId(qid);
         analysisService.exportFromPatientsWithDownsamplingGroups(pids, downsample, downsampleGroups);
-    }
-
-    /**
-     * TODO: Mybatis support for ONLY SELECT PID? Extract only PID from 'Patient' object
-     */
-    private List<String> extractPid(List<Patient> p) {
-        if (p == null)
-            return new ArrayList<>(0);
-        List<String> res = new ArrayList<>(p.size());
-        for (Patient ap : p) {
-            res.add(ap.getId());
-        }
-        return res;
     }
 
 }

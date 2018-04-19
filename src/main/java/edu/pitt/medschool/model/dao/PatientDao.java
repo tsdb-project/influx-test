@@ -118,4 +118,8 @@ public class PatientDao {
         return patientMapper.selectByExample(pe);
     }
 
+    public List<String> selectIdByCustom(PatientExample pe) {
+        return patientMapper.selectIdByExample(pe);
+    }
+
 }
