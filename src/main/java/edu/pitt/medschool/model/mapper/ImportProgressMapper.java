@@ -3,7 +3,6 @@ package edu.pitt.medschool.model.mapper;
 import edu.pitt.medschool.controller.load.vo.ProgressVO;
 import edu.pitt.medschool.model.dto.ImportProgress;
 import edu.pitt.medschool.model.dto.ImportProgressExample;
-import edu.pitt.medschool.model.dto.ImportProgressKey;
 import java.util.List;
 
 import org.apache.ibatis.annotations.*;

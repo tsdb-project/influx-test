@@ -4,7 +4,6 @@
 package edu.pitt.medschool.controller.analysis;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.Patient;
 import edu.pitt.medschool.model.dto.PatientExample;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;

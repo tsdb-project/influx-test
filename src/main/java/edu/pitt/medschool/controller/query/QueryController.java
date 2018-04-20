@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import edu.pitt.medschool.model.dao.PatientDao;
-import edu.pitt.medschool.model.dto.Patient;
 import edu.pitt.medschool.model.dto.PatientExample;
 import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;

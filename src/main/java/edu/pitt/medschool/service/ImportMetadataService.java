@@ -1,22 +1,15 @@
 package edu.pitt.medschool.service;
 
 import com.opencsv.CSVReader;
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Patient;
-import edu.pitt.medschool.model.mapper.PatientMapper;
-import edu.pitt.medschool.model.mapper.PatientSqlProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Importing patient metadata into DB Based on mail at 02/21/2018

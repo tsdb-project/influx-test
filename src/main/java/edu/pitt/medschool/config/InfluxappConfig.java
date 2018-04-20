@@ -1,14 +1,9 @@
 package edu.pitt.medschool.config;
 
 import edu.pitt.medschool.framework.util.Util;
-import okhttp3.OkHttpClient;
-import okhttp3.OkHttpClient.Builder;
-
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.springframework.boot.system.ApplicationTemp;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Configuration file for InfluxDB connection
