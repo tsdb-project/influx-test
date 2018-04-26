@@ -13,7 +13,7 @@ public final class InfluxappConfig {
     /**
      * Server Address
      */
-    public static final String IFX_ADDR = "http://" + Util.getIpFromHostname("upmc_influx_1.dreamprc.com") + ":8086";
+    public static final String IFX_ADDR = "http://127.0.0.1:8086";
 
     /**
      * Server writable user's name (better to be an admin)
