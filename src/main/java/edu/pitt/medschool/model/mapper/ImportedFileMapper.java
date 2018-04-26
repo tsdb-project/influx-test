@@ -84,7 +84,7 @@ public interface ImportedFileMapper {
      */@Update({"update imported_file","set filepath = #{filepath,jdbcType=VARCHAR},","filename = #{filename,jdbcType=VARCHAR},","filelines = #{filelines,jdbcType=INTEGER},","filesize = #{filesize,jdbcType=BIGINT},","PID = #{pid,jdbcType=VARCHAR},","isAr = #{isar,jdbcType=BIT},","timestamp = #{timestamp,jdbcType=TIMESTAMP},","uuid = #{uuid,jdbcType=VARCHAR}","where id = #{id,jdbcType=INTEGER}"}) int updateByPrimaryKey(ImportedFile record);
 
     @Select({
-            "SELECT PID",
+            "SELECT DISTINCT PID",
             "FROM imported_file",
             "WHERE uuid = #{uid}"
     })
