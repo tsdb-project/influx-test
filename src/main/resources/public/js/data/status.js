@@ -17,7 +17,7 @@ $(document).ready(
                 }, {
                     data : null,
                     render : function(data) {
-                        if (data.female = '0') {
+                        if (data.female == '0') {
                             return 'Male';
                         } else {
                             return 'Female';

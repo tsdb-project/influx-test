@@ -20,6 +20,7 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
+import org.influxdb.dto.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,7 +97,8 @@ public class ImportCsvService {
     /**
      * Add one file to the queue (Blocking)
      *
-     * @param path File path
+     * @param path
+     *            File path
      */
     public void AddOneFile(String path) {
         this.internalAddOne(path, false);
@@ -105,7 +107,8 @@ public class ImportCsvService {
     /**
      * Add a list of files into the queue (Blocking)
      *
-     * @param paths List of files
+     * @param paths
+     *            List of files
      */
     public void AddArrayFiles(String[] paths) {
         for (String aPath : paths) {
@@ -237,10 +240,10 @@ public class ImportCsvService {
             idb.close();
 
         } catch (Exception e) {
-            return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
+            return new Object[] { Util.stackTraceErrorToString(e), currentProcessed };
         }
 
-        return new Object[]{"OK", currentProcessed, totalLines};
+        return new Object[] { "OK", currentProcessed, totalLines };
     }
 
     /**
@@ -345,14 +348,16 @@ public class ImportCsvService {
      * Generate IdbClient for Importing CSVs
      */
     private InfluxDB generateIdbClient() {
-        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD, new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS));
+        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+                new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS));
         // Disable GZip to save CPU
         idb.disableGzip();
         BatchOptions bo = BatchOptions.DEFAULTS.consistency(InfluxDB.ConsistencyLevel.ALL)
                 // Flush every 2000 Points, at least every 100ms, buffer for failed oper is 2200
                 .actions(2000).flushDuration(100).bufferLimit(2200);
         idb.enableBatch(bo);
-        idb.createDatabase(dbName);
+        idb.query(new Query(String.format("CREATE DATABASE \"%s\"", dbName), dbName));
+
         return idb;
     }
 

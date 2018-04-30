@@ -66,6 +66,8 @@ public class ImportProgressService {
         }
         double s = GetTaskOverallProgress("TESTUUID");
         List<ProgressVO> ss = GetTaskAllFileProgress("TESTUUID");
+        System.out.println(s);
+        System.out.println(ss);
     }
 
     private void doInsert(ImportProgress ip) throws Exception {

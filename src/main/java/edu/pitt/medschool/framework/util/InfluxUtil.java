@@ -128,6 +128,7 @@ public class InfluxUtil {
 
     public static void main(String[] args) {
         List<String> s = getAllTables(DBConfiguration.Data.DBNAME);
+        System.out.println(s);
     }
 
 }

@@ -3,10 +3,17 @@
  */
 package edu.pitt.medschool.controller.load;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import edu.pitt.medschool.bean.FileBean;
 import edu.pitt.medschool.controller.load.vo.ProgressVO;
@@ -16,14 +23,9 @@ import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.service.ImportCsvService;
 import edu.pitt.medschool.service.ImportProgressService;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author Isolachine
  */
-@Controller
 @RestController
 public class DataController {
 

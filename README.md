@@ -1,4 +1,4 @@
-# Brain Influx
+# BrainFlux
 
 The data ecosystem for time series data.
 
@@ -11,8 +11,8 @@ Some develop environments.
 - Eclipse, Intellij IDEA
 - Java 8+, tested with **OpenJDK 1.8.0-151**
 - Maven 3+, tested with **Maven 3.3.9**
-- **InfluxDB 1.5.0**
-- **Grafana** v5.
+- **InfluxDB 1.5.2**
+- **Grafana 5.x**
 
 ### Third party libs
 

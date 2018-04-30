@@ -1,6 +1,5 @@
 package edu.pitt.medschool.config;
 
-import edu.pitt.medschool.framework.util.Util;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.springframework.boot.system.ApplicationTemp;
