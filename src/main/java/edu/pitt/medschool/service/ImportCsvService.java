@@ -284,6 +284,8 @@ public class ImportCsvService {
             } catch (Exception e) {
                 logger.error("File name is: " + fileFullPath + "\n" + Util.stackTraceErrorToString(e));
             }
+            // keep processed size consistent with the actual file size once a file is done with the import process
+            totalProcessedSize.addAndGet(thisFileSize - (Long) impStr[1]);
             logSuccessFiles(fileFullPath, thisFileSize, thisFileSize);
             importFailCounter.remove(fileFullPath);
         } else {
