@@ -6,7 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,6 +48,7 @@ public class ImportCsvService {
     private final int availCores = Runtime.getRuntime().availableProcessors();
     @Value("${machine}")
     private String taskUUID;
+    private String batchId = UUID.randomUUID().toString();
     private final AtomicLong totalAllSize = new AtomicLong(0);
     private final AtomicLong totalProcessedSize = new AtomicLong(0);
     private final Map<String, Long> everyFileSize = new HashMap<>();
@@ -56,6 +60,9 @@ public class ImportCsvService {
     private final AtomicBoolean importingLock = new AtomicBoolean(false);
 
     private final BlockingQueue<Path> fileQueue = new LinkedBlockingQueue<>();
+    private final Set<Path> processingSet = new HashSet<>();
+
+    private static final int FAILURE_RETRY = 3;
 
     @Autowired
     private ImportedFileDao ifd;
@@ -76,6 +83,10 @@ public class ImportCsvService {
 
     public String GetUUID() {
         return this.taskUUID;
+    }
+
+    public String getBatchId() {
+        return this.batchId;
     }
 
     public void _test() throws InterruptedException {
@@ -111,6 +122,9 @@ public class ImportCsvService {
      *            List of files
      */
     public void AddArrayFiles(String[] paths) {
+        if (processingSet.isEmpty()) {
+            batchId = UUID.randomUUID().toString();
+        }
         for (String aPath : paths) {
             this.internalAddOne(aPath, true);
         }
@@ -253,10 +267,13 @@ public class ImportCsvService {
         long thisFileSize = everyFileSize.get(pFile.toString());
         String fileFullPath = pFile.toString(), fileName = pFile.getFileName().toString();
         String[] fileInfo = checkerFromFilename(fileName, thisFileSize);
+        logQueuedFile(fileFullPath, thisFileSize);
+        processingSet.add(pFile);
 
         // Ar/NoAr Check & Response
         if (fileInfo[1] == null) {
             logFailureFiles(fileFullPath, "Ambiguous Ar/NoAr in file name.", thisFileSize, 0);
+            processingSet.remove(pFile);
             return;
         }
 
@@ -264,6 +281,7 @@ public class ImportCsvService {
         if (fileInfo[2].equals("1")) {
             // TODO: If the same file appears already, having a summary of comparing the contents of the new and old
             logFailureFiles(fileFullPath, "The same file has been imported.", thisFileSize, 0);
+            processingSet.remove(pFile);
             return;
         }
 
@@ -286,18 +304,20 @@ public class ImportCsvService {
             }
             // keep processed size consistent with the actual file size once a file is done with the import process
             totalProcessedSize.addAndGet(thisFileSize - (Long) impStr[1]);
+            processingSet.remove(pFile);
             logSuccessFiles(fileFullPath, thisFileSize, thisFileSize);
             importFailCounter.remove(fileFullPath);
         } else {
             // Import fail
             long procedSize = (long) impStr[1];
             logFailureFiles(fileFullPath, (String) impStr[0], thisFileSize, procedSize);
+            processingSet.remove(pFile);
             logger.error((String) impStr[0]);
 
             if (importFailCounter.containsKey(fileFullPath)) {
                 int current_fails = importFailCounter.get(fileFullPath);
                 // Only retry 3 times
-                if (++current_fails <= 3) {
+                if (++current_fails <= FAILURE_RETRY) {
                     internalAddOne(fileFullPath, false);
                     importFailCounter.put(fileFullPath, current_fails);
                 }
@@ -314,7 +334,6 @@ public class ImportCsvService {
         int paraCount = (int) Math.round(loadFactor * availCores);
         paraCount = paraCount > 0 ? paraCount : 1;
         ExecutorService scheduler = Executors.newFixedThreadPool(paraCount);
-
         Runnable importTask = () -> {
             Path aFilePath;
             while ((aFilePath = fileQueue.poll()) != null) {
@@ -333,17 +352,21 @@ public class ImportCsvService {
         scheduler.shutdown();
     }
 
+    private void logQueuedFile(String fn, long thisFileSize) {
+        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, 0, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_QUEUED, null);
+    }
+
     private void logSuccessFiles(String fn, long thisFileSize, long thisFileProcessedSize) {
-        ips.UpdateFileProgress(fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FINISHED, null);
+        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FINISHED, null);
     }
 
     private void logImportingFile(String fn, long thisFileSize, long thisFileProcessedSize) {
-        ips.UpdateFileProgress(fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_INPROGRESS, null);
+        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_INPROGRESS, null);
     }
 
     private void logFailureFiles(String fn, String reason, long thisFileSize, long thisFileProcessedSize) {
         totalAllSize.addAndGet(thisFileProcessedSize - thisFileSize);
-        ips.UpdateFileProgress(fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
+        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
     }
 
     /**

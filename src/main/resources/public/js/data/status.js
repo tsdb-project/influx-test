@@ -36,9 +36,10 @@ $(document).ready(
                 'success' : function(data) {
                     var progressHtml = "";
                     for (i = 0; i < data.progress.length; i++) {
-                        var progress = (data.progress[i].progress * 100).toFixed(2);
-                        progressHtml += "<div class=\"progress\"><div class=\"progress-bar\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
-                                + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.progress[i].file_name + ' - ' + progress + "%</small><br><br>";
+                        var progress = (data.progress[i].percent * 100).toFixed(2);
+                        var color = data.progress[i].status == "STATUS_FINISHED" ? " bg-success" : "";
+                        progressHtml += "<div class=\"progress\"><div class=\"progress-bar" + color + "\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
+                                + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.progress[i].filename + ' - ' + progress + "%</small><br><br>";
                     }
 
                     var totalPercent = (data.total * 100).toFixed(2);
@@ -48,11 +49,11 @@ $(document).ready(
 
                     $("#fileProgress").html(progressHtml);
 
-                    if (totalPercent >= 99.9) {
+                    if (totalPercent == 100.00) {
                         clearInterval(update);
-                        $("#running").hide();
-                        $("#finished").show();
-                    } else {
+                        // $("#running").hide();
+                        // $("#finished").show();
+                        //                    } else {
                         $("#running").show();
                         $("#finished").hide();
                     }
@@ -68,9 +69,10 @@ $(document).ready(
                     'success' : function(data) {
                         var progressHtml = "";
                         for (i = 0; i < data.progress.length; i++) {
-                            var progress = (data.progress[i].progress * 100).toFixed(2);
-                            progressHtml += "<div class=\"progress\"><div class=\"progress-bar\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
-                                    + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.progress[i].file_name + ' - ' + progress + "%</small><br><br>";
+                            var progress = (data.progress[i].percent * 100).toFixed(2);
+                            var color = data.progress[i].status == "STATUS_FINISHED" ? " bg-success" : "";
+                            progressHtml += "<div class=\"progress\"><div class=\"progress-bar" + color + "\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
+                                    + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.progress[i].filename + ' - ' + progress + "%</small><br><br>";
                         }
 
                         var totalPercent = (data.total * 100).toFixed(2);
@@ -80,11 +82,11 @@ $(document).ready(
 
                         $("#fileProgress").html(progressHtml);
 
-                        if (totalPercent >= 99.9) {
+                        if (totalPercent == 100.00) {
                             clearInterval(update);
-                            $("#running").hide();
-                            $("#finished").show();
-                        } else {
+                            // $("#running").hide();
+                            // $("#finished").show();
+                            //                        } else {
                             $("#running").show();
                             $("#finished").hide();
                         }

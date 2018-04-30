@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.pitt.medschool.bean.FileBean;
-import edu.pitt.medschool.controller.load.vo.ProgressVO;
 import edu.pitt.medschool.controller.load.vo.SearchFileVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dto.ImportProgress;
 import edu.pitt.medschool.service.ImportCsvService;
 import edu.pitt.medschool.service.ImportProgressService;
 
@@ -103,10 +103,10 @@ public class DataController {
         Map<String, Object> map = new HashMap<>();
 
         String uuid = importCsvService.GetUUID();
-        List<ProgressVO> list = importProgressService.GetTaskAllFileProgress(uuid);
+        String batchId = importCsvService.getBatchId();
+        List<ImportProgress> list = importProgressService.GetTaskAllFileProgress(uuid, batchId);
         map.put("progress", list);
-        map.put("finished", null);
-        map.put("total", importProgressService.GetTaskOverallProgress(uuid));
+        map.put("total", importProgressService.GetTaskOverallProgress(uuid, batchId));
         // TODO: adjust the code START
         /*
          * Map<String, List<Object>> allstat = ImportProgressService.GetTaskAllFileProgress(uuid); for (String key : allstat.keySet()) { map.put(key, allstat.get(key)); }

@@ -2,15 +2,15 @@ package edu.pitt.medschool.service;
 
 import java.util.List;
 
-import edu.pitt.medschool.framework.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import edu.pitt.medschool.controller.load.vo.ProgressVO;
+import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.ImportProgressDao;
+import edu.pitt.medschool.model.dto.ImportLog;
 import edu.pitt.medschool.model.dto.ImportProgress;
 
 /**
@@ -22,7 +22,7 @@ public class ImportProgressService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public enum FileProgressStatus {
-        STATUS_FINISHED, STATUS_FAIL, STATUS_INPROGRESS
+        STATUS_FINISHED, STATUS_FAIL, STATUS_INPROGRESS, STATUS_QUEUED
     }
 
     @Autowired
@@ -38,78 +38,74 @@ public class ImportProgressService {
     /**
      * Get overall progress for a task
      *
-     * @param uuid Task UUID
+     * @param uuid
+     *            Task UUID
+     * @param batchId 
      */
-    public double GetTaskOverallProgress(String uuid) {
-        return ipo.OverallProgress(uuid);
+    public double GetTaskOverallProgress(String uuid, String batchId) {
+        return ipo.OverallProgress(uuid, batchId);
     }
 
     /**
      * Get progress data for all files within a task UUID
      *
-     * @param uuid Task UUID
+     * @param uuid
+     *            Task UUID
+     * @param batchId 
      */
-    public List<ProgressVO> GetTaskAllFileProgress(String uuid) {
-        return ipo.GetTaskDetailProgress(uuid);
+    public List<ImportProgress> GetTaskAllFileProgress(String uuid, String batchId) {
+        return ipo.GetTaskDetailProgress(uuid, batchId);
     }
 
-    public void _test(boolean loadTestingData) {
-        if (loadTestingData) {
-            this.uuid = "TESTUUID";
-            UpdateFileProgress("1.csv", 100, 10, 5, 5, FileProgressStatus.STATUS_INPROGRESS, null);
-            UpdateFileProgress("2.csv", 100, 40, 40, 45, FileProgressStatus.STATUS_FINISHED, null);
-            UpdateFileProgress("3.csv", 100, 20, 3, 48, FileProgressStatus.STATUS_INPROGRESS, null);
-            UpdateFileProgress("3.csv", 100, 20, 10, 55, FileProgressStatus.STATUS_FAIL, "Wrong file format");
-            UpdateFileProgress("1.csv", 100, 10, 6, 56, FileProgressStatus.STATUS_INPROGRESS, null);
-            UpdateFileProgress("1.csv", 100, 10, 10, 60, FileProgressStatus.STATUS_FINISHED, null);
-            return;
-        }
-        double s = GetTaskOverallProgress("TESTUUID");
-        List<ProgressVO> ss = GetTaskAllFileProgress("TESTUUID");
-        System.out.println(s);
-        System.out.println(ss);
-    }
-
-    private void doInsert(ImportProgress ip) throws Exception {
-        ip.setUuid(this.uuid);
-        ipo.insert(ip);
+    private void doInsert(ImportLog importLog) throws Exception {
+        importLog.setUuid(this.uuid);
+        ipo.insert(importLog);
     }
 
     /**
      * Insert file progress to db
      *
-     * @param fileName           Current file name
-     * @param totalFileSize      All files' size
-     * @param fileSize           Current file's size
-     * @param processedSize      Current processed size
-     * @param totalProcessedSize All processed size
-     * @param status             Current file status
-     * @param failReason         Reason why failed
+     * @param fileName
+     *            Current file name
+     * @param fileName 
+     * @param totalFileSize
+     *            All files' size
+     * @param fileSize
+     *            Current file's size
+     * @param processedSize
+     *            Current processed size
+     * @param totalProcessedSize
+     *            All processed size
+     * @param status
+     *            Current file status
+     * @param failReason
+     *            Reason why failed
      */
-    public void UpdateFileProgress(String fileName, long totalFileSize, long fileSize, long processedSize, long totalProcessedSize, FileProgressStatus status, String failReason) {
+    public void UpdateFileProgress(String batchId, String fileName, long totalFileSize, long fileSize, long processedSize, long totalProcessedSize, FileProgressStatus status, String failReason) {
         double allPercent = 0, currPercent = 0;
         if (totalFileSize != 0)
             allPercent = 1.0 * totalProcessedSize / totalFileSize;
         if (fileSize != 0)
             currPercent = 1.0 * processedSize / fileSize;
 
-        ImportProgress ip = new ImportProgress();
+        ImportLog importLog = new ImportLog();
 
-        ip.setStatus(String.valueOf(status));
-        ip.setFilename(fileName);
-        ip.setAllPercent(allPercent);
-        ip.setThisPercent(currPercent);
-        ip.setThisFileSize(fileSize);
-        ip.setAllFileSize(totalFileSize);
+        importLog.setStatus(String.valueOf(status));
+        importLog.setFilename(fileName);
+        importLog.setAllPercent(allPercent);
+        importLog.setThisPercent(currPercent);
+        importLog.setThisFileSize(fileSize);
+        importLog.setAllFileSize(totalFileSize);
+        importLog.setBatchId(batchId);
 
         if (status == FileProgressStatus.STATUS_FAIL) {
-            ip.setReason(failReason);
+            importLog.setReason(failReason);
         } else {
-            ip.setReason("N/A");
+            importLog.setReason("N/A");
         }
 
         try {
-            doInsert(ip);
+            doInsert(importLog);
         } catch (Exception e) {
             logger.error(Util.stackTraceErrorToString(e));
         }

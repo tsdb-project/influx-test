@@ -6,9 +6,11 @@ import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import edu.pitt.medschool.controller.load.vo.ProgressVO;
+import edu.pitt.medschool.model.dto.ImportLog;
+import edu.pitt.medschool.model.dto.ImportLogExample;
 import edu.pitt.medschool.model.dto.ImportProgress;
 import edu.pitt.medschool.model.dto.ImportProgressExample;
+import edu.pitt.medschool.model.mapper.ImportLogMapper;
 import edu.pitt.medschool.model.mapper.ImportProgressMapper;
 import edu.pitt.medschool.service.ImportProgressService;
 
@@ -20,29 +22,29 @@ public class ImportProgressDao {
 
     @Autowired
     ImportProgressMapper iProgessMapper;
+    @Autowired
+    ImportLogMapper importLogMapper;
 
-    public int insert(ImportProgress i) throws Exception {
-        // Timestamp(6) filled by MySQL
-        return iProgessMapper.insertSelective(i);
+    public int insert(ImportLog i) throws Exception {
+        // Timestamp filled by MySQL
+        return importLogMapper.insertSelective(i);
     }
 
-    public double OverallProgress(String uuid) {
-        ImportProgressExample ipe = new ImportProgressExample();
-        ipe.createCriteria()
-                .andUuidEqualTo(uuid)
-                .andStatusNotEqualTo(
-                        ImportProgressService.FileProgressStatus.STATUS_FAIL.toString());
-        ipe.setOrderByClause("timestamp DESC");
-        List<ImportProgress> tmp = iProgessMapper.selectByExampleWithRowbounds(
-                ipe, new RowBounds(0, 1));
+    public double OverallProgress(String uuid, String batchId) {
+        ImportLogExample example = new ImportLogExample();
+        example.createCriteria().andUuidEqualTo(uuid).andStatusNotEqualTo(ImportProgressService.FileProgressStatus.STATUS_FAIL.toString()).andBatchIdEqualTo(batchId);
+        example.setOrderByClause("timestamp DESC");
+        List<ImportLog> tmp = importLogMapper.selectByExampleWithRowbounds(example, new RowBounds(0, 1));
         if (tmp.isEmpty()) {
             return 1.00;
         }
         return tmp.get(0).getAllPercent();
     }
 
-    public List<ProgressVO> GetTaskDetailProgress(String uuid) {
-        return iProgessMapper.selectTaskDetailProgress(uuid);
+    public List<ImportProgress> GetTaskDetailProgress(String uuid, String batchId) {
+        ImportProgressExample example = new ImportProgressExample();
+        example.createCriteria().andUuidEqualTo(uuid).andBatchIdEqualTo(batchId);
+        return iProgessMapper.selectByExample(example);
     }
 
 }
