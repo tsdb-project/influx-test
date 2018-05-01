@@ -55,7 +55,8 @@ public class ImportCsvService {
     private final Map<String, Integer> importFailCounter = new HashMap<>();
 
     private final String dbName = DBConfiguration.Data.DBNAME;
-    private double loadFactor = 0.5;
+    @Value("${load}")
+    private double loadFactor;
 
     private final AtomicBoolean importingLock = new AtomicBoolean(false);
 
@@ -72,13 +73,6 @@ public class ImportCsvService {
 
     public double GetLoadFactor() {
         return loadFactor;
-    }
-
-    /**
-     * Set a load factor for importing
-     */
-    public void SetLoadFactor(double loadFactor) {
-        this.loadFactor = loadFactor;
     }
 
     public String GetUUID() {
