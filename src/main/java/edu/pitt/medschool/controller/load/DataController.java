@@ -50,6 +50,14 @@ public class DataController {
         return model;
     }
 
+    @RequestMapping("data/activity")
+    @ResponseBody
+    public Model dataActivity(Model model) {
+        model.addAttribute("nav", "data");
+        model.addAttribute("subnav", "activity");
+        return model;
+    }
+
     @RequestMapping(value = "data/searchfile")
     @ResponseBody
     public Map<String, Object> searchfile(@RequestBody(required = false) SearchFileVO dir, @RequestParam(value = "dir", required = false, defaultValue = "") String dirString, Model model) {
@@ -95,6 +103,13 @@ public class DataController {
         importCsvService.AddArrayFiles(allAR);
 
         return map;
+    }
+    
+    @RequestMapping(value = "/api/data/activity/list")
+    @ResponseBody
+    public RestfulResponse activityList(RestfulResponse response) {
+        response.setData(importProgressService.getActivityList(importCsvService.GetUUID()));
+        return response;
     }
 
     @RequestMapping(value = "api/data/progress")

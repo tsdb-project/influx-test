@@ -6,6 +6,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import edu.pitt.medschool.controller.load.vo.ActivityVO;
 import edu.pitt.medschool.model.dto.ImportLog;
 import edu.pitt.medschool.model.dto.ImportLogExample;
 import edu.pitt.medschool.model.dto.ImportProgress;
@@ -45,6 +46,14 @@ public class ImportProgressDao {
         ImportProgressExample example = new ImportProgressExample();
         example.createCriteria().andUuidEqualTo(uuid).andBatchIdEqualTo(batchId);
         return iProgessMapper.selectByExample(example);
+    }
+
+    /**
+     * @param uuid 
+     * @return
+     */
+    public List<ActivityVO> getActivityList(String uuid) {
+        return iProgessMapper.getActivityList(uuid);
     }
 
 }

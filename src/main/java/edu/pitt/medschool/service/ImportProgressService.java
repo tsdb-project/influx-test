@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import edu.pitt.medschool.controller.load.vo.ActivityVO;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.ImportProgressDao;
 import edu.pitt.medschool.model.dto.ImportLog;
@@ -109,6 +110,14 @@ public class ImportProgressService {
         } catch (Exception e) {
             logger.error(Util.stackTraceErrorToString(e));
         }
+    }
+
+    /**
+     * @param uuid 
+     * @return
+     */
+    public List<ActivityVO> getActivityList(String uuid) {
+        return ipo.getActivityList(uuid);
     }
 
 }

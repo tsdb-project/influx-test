@@ -1,5 +1,6 @@
 package edu.pitt.medschool.model.mapper;
 
+import edu.pitt.medschool.controller.load.vo.ActivityVO;
 import edu.pitt.medschool.controller.load.vo.ProgressVO;
 import edu.pitt.medschool.model.dto.ImportProgress;
 import edu.pitt.medschool.model.dto.ImportProgressExample;
@@ -181,5 +182,39 @@ public interface ImportProgressMapper {
             @Result(column="reason", property="reason", jdbcType=JdbcType.VARCHAR)
     })
     List<ProgressVO> selectTaskDetailProgress(String uuid, String batchId);
+
+    @Select({
+        "SELECT",
+            "batch_id,",
+            "max(update_time) AS end_time, ",
+            "min(create_time) AS start_time, ",
+            "TIMEDIFF(max(update_time), min(create_time)) AS elapsed_time, ",
+            "sys.format_bytes(sum(size)) AS size, ",
+            "COUNT(*) AS file_count,",
+            "COUNT(IF( `status`='STATUS_FINISHED', `status`, NULL)) AS finished_count,",
+            "COUNT(IF( `status`='STATUS_FAIL', `status`, NULL)) AS fail_count,",
+            "COUNT(IF( `status`='STATUS_INPROGRESS', `status`, NULL)) AS in_progress_count,",
+            "COUNT(IF( `status`='STATUS_QUEUED', `status`, NULL)) AS queued_count,",
+            "IF(COUNT(*)=COUNT(IF( `status`='STATUS_FINISHED', `status`, NULL)) + COUNT(IF( `status`='STATUS_FAIL', `status`, NULL)), TRUE, FALSE) AS finished",
+        "FROM import_progress ",
+        "WHERE uuid = #{uuid}",
+        "GROUP BY batch_id",
+        "ORDER BY end_time DESC;"
+    })
+    @ResultType(ActivityVO.class)
+    @Results({
+        @Result(column="batch_id", property="batchId", jdbcType=JdbcType.VARCHAR),
+        @Result(column="end_time", property="endTime", jdbcType=JdbcType.VARCHAR),
+        @Result(column="start_time", property="startTime", jdbcType=JdbcType.VARCHAR),
+        @Result(column="elapsed_time", property="elapsedTime", jdbcType=JdbcType.VARCHAR),
+        @Result(column="size", property="size", jdbcType=JdbcType.VARCHAR),
+        @Result(column="file_count", property="fileCount", jdbcType=JdbcType.INTEGER),
+        @Result(column="finished_count", property="finishedCount", jdbcType=JdbcType.INTEGER),
+        @Result(column="fail_count", property="failCount", jdbcType=JdbcType.INTEGER),
+        @Result(column="in_progress_count", property="inProgressCount", jdbcType=JdbcType.INTEGER),
+        @Result(column="queued_count", property="queuedCount", jdbcType=JdbcType.INTEGER),
+        @Result(column="finished", property="finished", jdbcType=JdbcType.BOOLEAN)
+    })
+    List<ActivityVO> getActivityList(String uuid);
 
 }
