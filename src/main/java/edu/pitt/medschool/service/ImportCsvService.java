@@ -132,6 +132,8 @@ public class ImportCsvService {
             totalAllSize.addAndGet(currS);
             everyFileSize.put(p.toString(), currS);
             fileQueue.offer(p);
+            logQueuedFile(path, currS);
+            
             if (!isInvokedByAddArrayFiles)
                 this.startImport();
         } catch (IOException e) {
@@ -261,7 +263,6 @@ public class ImportCsvService {
         long thisFileSize = everyFileSize.get(pFile.toString());
         String fileFullPath = pFile.toString(), fileName = pFile.getFileName().toString();
         String[] fileInfo = checkerFromFilename(fileName, thisFileSize);
-        logQueuedFile(fileFullPath, thisFileSize);
         processingSet.add(pFile);
 
         // Ar/NoAr Check & Response
