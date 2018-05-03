@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,8 +33,10 @@ import org.springframework.stereotype.Service;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.util.FileLockUtil;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.InfluxClusterDao;
 import edu.pitt.medschool.model.dto.ImportedFile;
 import okhttp3.OkHttpClient;
 
@@ -70,6 +73,9 @@ public class ImportCsvService {
 
     @Autowired
     private ImportProgressService ips;
+
+    @Autowired
+    InfluxClusterDao influxClusterDao;
 
     public double GetLoadFactor() {
         return loadFactor;
@@ -127,17 +133,26 @@ public class ImportCsvService {
 
     private void internalAddOne(String path, boolean isInvokedByAddArrayFiles) {
         Path p = Paths.get(path);
+
         try {
             long currS = Files.size(p);
-            totalAllSize.addAndGet(currS);
-            everyFileSize.put(p.toString(), currS);
-            fileQueue.offer(p);
-            logQueuedFile(path, currS);
-            
-            if (!isInvokedByAddArrayFiles)
-                this.startImport();
+
+            if (FileLockUtil.isLocked(p.toFile())) {
+                throw new RuntimeException(path + " is currently being imported.");
+            }
+
+            if (FileLockUtil.aquire(p.toFile())) {
+                totalAllSize.addAndGet(currS);
+                everyFileSize.put(p.toString(), currS);
+                fileQueue.offer(p);
+                logQueuedFile(path, currS);
+                if (!isInvokedByAddArrayFiles)
+                    this.startImport();
+            }
         } catch (IOException e) {
-            // logFailureFiles(p.toString(), e.getLocalizedMessage(), 0, 0);
+            logger.error(Util.stackTraceErrorToString(e));
+            FileLockUtil.release(p.toFile());
+        } catch (RuntimeException e) {
             logger.error(Util.stackTraceErrorToString(e));
         }
     }
@@ -268,7 +283,9 @@ public class ImportCsvService {
         // Ar/NoAr Check & Response
         if (fileInfo[1] == null) {
             logFailureFiles(fileFullPath, "Ambiguous Ar/NoAr in file name.", thisFileSize, 0);
+            FileLockUtil.release(fileFullPath);
             processingSet.remove(pFile);
+            transferFailedFiles(pFile);
             return;
         }
 
@@ -276,6 +293,7 @@ public class ImportCsvService {
         if (fileInfo[2].equals("1")) {
             // TODO: If the same file appears already, having a summary of comparing the contents of the new and old
             logFailureFiles(fileFullPath, "The same file has been imported.", thisFileSize, 0);
+            FileLockUtil.release(fileFullPath);
             processingSet.remove(pFile);
             return;
         }
@@ -301,11 +319,13 @@ public class ImportCsvService {
             totalProcessedSize.addAndGet(thisFileSize - (Long) impStr[1]);
             processingSet.remove(pFile);
             logSuccessFiles(fileFullPath, thisFileSize, thisFileSize);
+            FileLockUtil.release(fileFullPath);
             importFailCounter.remove(fileFullPath);
         } else {
             // Import fail
             long procedSize = (long) impStr[1];
             logFailureFiles(fileFullPath, (String) impStr[0], thisFileSize, procedSize);
+            FileLockUtil.release(fileFullPath);
             processingSet.remove(pFile);
             logger.error((String) impStr[0]);
 
@@ -315,6 +335,8 @@ public class ImportCsvService {
                 if (++current_fails <= FAILURE_RETRY) {
                     internalAddOne(fileFullPath, false);
                     importFailCounter.put(fileFullPath, current_fails);
+                } else {
+                    transferFailedFiles(pFile);
                 }
             } else {
                 importFailCounter.put(fileFullPath, 1);
@@ -362,6 +384,16 @@ public class ImportCsvService {
     private void logFailureFiles(String fn, String reason, long thisFileSize, long thisFileProcessedSize) {
         totalAllSize.addAndGet(thisFileProcessedSize - thisFileSize);
         ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
+    }
+
+    private void transferFailedFiles(Path path) {
+        String dumpPath = influxClusterDao.selectByMachineId(taskUUID).getFailPath();
+        try {
+            Path newPath = Paths.get(dumpPath + path.getFileName());
+            Files.move(path, newPath, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

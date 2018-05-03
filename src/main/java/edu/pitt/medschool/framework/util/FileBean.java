@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.pitt.medschool.bean;
+package edu.pitt.medschool.framework.util;
 
 /**
  * @author Isolachine

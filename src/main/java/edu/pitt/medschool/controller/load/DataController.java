@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.pitt.medschool.bean.FileBean;
 import edu.pitt.medschool.controller.load.vo.SearchFileVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
+import edu.pitt.medschool.framework.util.FileBean;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dto.ImportProgress;
 import edu.pitt.medschool.service.ImportCsvService;
@@ -104,7 +104,7 @@ public class DataController {
 
         return map;
     }
-    
+
     @RequestMapping(value = "/api/data/activity/list")
     @ResponseBody
     public RestfulResponse activityList(RestfulResponse response) {
@@ -122,25 +122,6 @@ public class DataController {
         List<ImportProgress> list = importProgressService.GetTaskAllFileProgress(uuid, batchId);
         map.put("progress", list);
         map.put("total", importProgressService.GetTaskOverallProgress(uuid, batchId));
-        // TODO: adjust the code START
-        /*
-         * Map<String, List<Object>> allstat = ImportProgressService.GetTaskAllFileProgress(uuid); for (String key : allstat.keySet()) { map.put(key, allstat.get(key)); }
-         * 
-         * String total = String.format("%.2f", ImportProgressService.GetTaskOverallProgress(uuid) * 100); map.put("total", total);
-         */
-        // TODO: adjust the code END
-
-        // if (!allstat.get("filename").contains(file)) {
-        // map.put("finished", false);
-        // } else {
-        // for (Object status : allstat.get("status")) {
-        // if (!status.toString().equals("STATUS_FINISHED")) {
-        // map.put("finished", false);
-        // return map;
-        // }
-        // }
-        // }
-        // map.put("finished", true);
         return map;
     }
 }
