@@ -30,7 +30,7 @@ public class ImportedFileDao {
         ImportedFileExample ife = new ImportedFileExample();
         ife.createCriteria()
                 .andUuidEqualTo(uuid)
-                .andFilenameEqualTo(filename)
+                .andFilenameLikeInsensitive(filename)
                 .andFilesizeEqualTo(size);
         return ifm.selectByExample(ife).size() > 0;
     }
