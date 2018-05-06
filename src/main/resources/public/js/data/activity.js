@@ -84,7 +84,6 @@ $(document).ready(
                             $("#finished").show();
                         }
                     } else {
-                        console.log('dadasdas');
                         $("#running").show();
                         $("#finished").hide();
                     }
@@ -120,7 +119,6 @@ $(document).ready(
                                 $("#finished").show();
                             }
                         } else {
-                            console.log('dadasdas');
                             $("#running").show();
                             $("#finished").hide();
                         }
