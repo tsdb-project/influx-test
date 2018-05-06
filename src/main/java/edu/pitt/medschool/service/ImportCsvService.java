@@ -1,23 +1,11 @@
 package edu.pitt.medschool.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dto.ImportedFile;
+import okhttp3.OkHttpClient;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -30,12 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dto.ImportedFile;
-import okhttp3.OkHttpClient;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Auto-parallel importing CSV data
@@ -84,17 +75,12 @@ public class ImportCsvService {
     }
 
     public void _test() throws InterruptedException {
-        String[] allNoAr = Util.getAllCsvFileInDirectory("N:\\1\\");
-        String[] allAr = Util.getAllCsvFileInDirectory("N:\\2\\");
+        String[] testFiles = Util.getAllCsvFileInDirectory("/home/tonyz-remote/Desktop/E/je_test_data/");
 
-        AddArrayFiles(allNoAr);
-        AddArrayFiles(allAr);
+        AddArrayFiles(testFiles);
 
         System.out.println("Sleep 3s...");
         Thread.sleep(3000);
-
-        // Add again
-        AddOneFile("N:\\Test_AR\\PUH-2010-076_07ar.csv");
 
         System.out.println("Main exited, worker running...");
     }
@@ -102,8 +88,7 @@ public class ImportCsvService {
     /**
      * Add one file to the queue (Blocking)
      *
-     * @param path
-     *            File path
+     * @param path File path
      */
     public void AddOneFile(String path) {
         this.internalAddOne(path, false);
@@ -112,8 +97,7 @@ public class ImportCsvService {
     /**
      * Add a list of files into the queue (Blocking)
      *
-     * @param paths
-     *            List of files
+     * @param paths List of files
      */
     public void AddArrayFiles(String[] paths) {
         if (processingSet.isEmpty()) {
@@ -215,22 +199,43 @@ public class ImportCsvService {
             String aLine;
             while ((aLine = reader.readLine()) != null) {
                 String[] values = aLine.split(",");
-                if (columnCount != values.length)
-                    throw new RuntimeException("File content columns length inconsistent!");
+                int this_line_length = aLine.length();
 
                 totalLines++;
+
+                if (columnCount != values.length) {
+                    String err_text = String.format("File content columns length inconsistent on line %d!", totalLines + 8);
+                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
+                    currentProcessed += this_line_length;
+                    totalProcessedSize.addAndGet(this_line_length);
+                    continue;
+                }
+
                 // Set initial capacity for slightly better performance
                 Map<String, Object> lineKVMap = new HashMap<>((int) (columnCount / 0.70));
+                boolean gotParseProblem = false;
                 for (int i = 1; i < values.length; i++) {
-                    lineKVMap.put(columnNames[i], Double.valueOf(values[i]));
+                    try {
+                        lineKVMap.put(columnNames[i], Double.valueOf(values[i]));
+                    } catch (NumberFormatException nfe) {
+                        currentProcessed += this_line_length;
+                        totalProcessedSize.addAndGet(this_line_length);
+                        gotParseProblem = true;
+                        break;
+                    }
+                }
+                if (gotParseProblem) {
+                    String err_text = String.format("Failed to parse number on line %d!", totalLines + 8);
+                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
+                    continue;
                 }
 
                 // Measurement is PID
                 Point record = Point.measurement(pid).time(Util.serialTimeToLongDate(values[0], null), TimeUnit.MILLISECONDS).fields(lineKVMap).build();
                 records.point(record);
                 batchCount++;
-                currentProcessed += aLine.length();
-                totalProcessedSize.addAndGet(aLine.length());
+                currentProcessed += this_line_length;
+                totalProcessedSize.addAndGet(this_line_length);
 
                 // Write batch into DB
                 if (batchCount >= bulkInsertMax) {
@@ -238,7 +243,7 @@ public class ImportCsvService {
                     // Reset batch point
                     records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type).tag("fileName", filename.substring(0, filename.length() - 4)).build();
                     batchCount = 0;
-                    logImportingFile(file.toString(), aFileSize, currentProcessed);
+                    logImportingFile(file.toString(), aFileSize, currentProcessed, totalLines);
                 }
             }
 
@@ -248,10 +253,10 @@ public class ImportCsvService {
             idb.close();
 
         } catch (Exception e) {
-            return new Object[] { Util.stackTraceErrorToString(e), currentProcessed };
+            return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
         }
 
-        return new Object[] { "OK", currentProcessed, totalLines };
+        return new Object[]{"OK", currentProcessed, totalLines};
     }
 
     /**
@@ -266,7 +271,7 @@ public class ImportCsvService {
 
         // Ar/NoAr Check & Response
         if (fileInfo[1] == null) {
-            logFailureFiles(fileFullPath, "Ambiguous Ar/NoAr in file name.", thisFileSize, 0);
+            logFailureFiles(fileFullPath, "Ambiguous Ar/NoAr in file name.", thisFileSize, 0, false);
             processingSet.remove(pFile);
             return;
         }
@@ -274,7 +279,7 @@ public class ImportCsvService {
         // Duplication Check
         if (fileInfo[2].equals("1")) {
             // TODO: If the same file appears already, having a summary of comparing the contents of the new and old
-            logFailureFiles(fileFullPath, "The same file has been imported.", thisFileSize, 0);
+            logFailureFiles(fileFullPath, "The same file has been imported.", thisFileSize, 0, false);
             processingSet.remove(pFile);
             return;
         }
@@ -304,7 +309,7 @@ public class ImportCsvService {
         } else {
             // Import fail
             long procedSize = (long) impStr[1];
-            logFailureFiles(fileFullPath, (String) impStr[0], thisFileSize, procedSize);
+            logFailureFiles(fileFullPath, (String) impStr[0], thisFileSize, procedSize, false);
             processingSet.remove(pFile);
             logger.error((String) impStr[0]);
 
@@ -354,12 +359,14 @@ public class ImportCsvService {
         ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FINISHED, null);
     }
 
-    private void logImportingFile(String fn, long thisFileSize, long thisFileProcessedSize) {
-        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_INPROGRESS, null);
+    private void logImportingFile(String fn, long thisFileSize, long thisFileProcessedSize, long currentLine) {
+        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_INPROGRESS, String.valueOf(currentLine));
     }
 
-    private void logFailureFiles(String fn, String reason, long thisFileSize, long thisFileProcessedSize) {
-        totalAllSize.addAndGet(thisFileProcessedSize - thisFileSize);
+    private void logFailureFiles(String fn, String reason, long thisFileSize, long thisFileProcessedSize, boolean isSoftError) {
+        if (!isSoftError) {
+            totalAllSize.addAndGet(thisFileProcessedSize - thisFileSize);
+        }
         ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
     }
 
@@ -368,7 +375,7 @@ public class ImportCsvService {
      */
     private InfluxDB generateIdbClient() {
         InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS));
+                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS));
         // Disable GZip to save CPU
         idb.disableGzip();
         BatchOptions bo = BatchOptions.DEFAULTS.consistency(InfluxDB.ConsistencyLevel.ALL)
