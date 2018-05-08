@@ -109,6 +109,14 @@ public class ImportCsvService {
         this.internalAddOne(path, false);
     }
 
+    private void newBatch () {
+        batchId = UUID.randomUUID().toString();
+        totalAllSize.set(0);
+        totalProcessedSize.set(0);
+        everyFileSize.clear();
+        importFailCounter.clear();
+    }
+    
     /**
      * Add a list of files into the queue (Blocking)
      *
@@ -116,7 +124,7 @@ public class ImportCsvService {
      */
     public void AddArrayFiles(String[] paths) {
         if (processingSet.isEmpty()) {
-            batchId = UUID.randomUUID().toString();
+            newBatch();
         }
         for (String aPath : paths) {
             this.internalAddOne(aPath, true);
