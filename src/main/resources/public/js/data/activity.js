@@ -65,7 +65,12 @@ $(document).ready(
                     var progressHtml = "";
                     for (i = 0; i < data.progress.length; i++) {
                         var progress = (data.progress[i].percent * 100).toFixed(2);
-                        var color = data.progress[i].status == "STATUS_FINISHED" ? " bg-success" : "";
+                        var color = "";
+                        if (data.progress[i].status == "STATUS_FINISHED") {
+                            color = " bg-success";
+                        } else if (data.progress[i].status == "STATUS_FAIL") {
+                            color = " bg-danger";
+                        }
                         progressHtml += "<div class=\"progress\"><div class=\"progress-bar" + color + "\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
                                 + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.progress[i].filename + ' - ' + progress + "%</small><br><br>";
                     }
@@ -100,7 +105,12 @@ $(document).ready(
                         var progressHtml = "";
                         for (i = 0; i < data.progress.length; i++) {
                             var progress = (data.progress[i].percent * 100).toFixed(2);
-                            var color = data.progress[i].status == "STATUS_FINISHED" ? " bg-success" : "";
+                            var color = "";
+                            if (data.progress[i].status == "STATUS_FINISHED") {
+                                color = " bg-success";
+                            } else if (data.progress[i].status == "STATUS_FAIL") {
+                                color = " bg-danger";
+                            }
                             progressHtml += "<div class=\"progress\"><div class=\"progress-bar" + color + "\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
                                     + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.progress[i].filename + ' - ' + progress + "%</small><br><br>";
                         }

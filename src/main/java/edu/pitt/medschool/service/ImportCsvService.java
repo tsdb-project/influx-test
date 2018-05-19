@@ -60,13 +60,17 @@ public class ImportCsvService {
     private final String dbName = DBConfiguration.Data.DBNAME;
     @Value("${load}")
     private double loadFactor;
+    @Value("${soft-timeout}")
+    private int softTimeout;
+    @Value("${soft-timeout-sleep}")
+    private long timeoutSleep;
 
     private final AtomicBoolean importingLock = new AtomicBoolean(false);
 
     private final BlockingQueue<Path> fileQueue = new LinkedBlockingQueue<>();
     private final Set<Path> processingSet = new HashSet<>();
 
-    private static final int FAILURE_RETRY = 3;
+    // private static final int FAILURE_RETRY = 3;
 
     @Autowired
     private ImportedFileDao ifd;
@@ -103,24 +107,26 @@ public class ImportCsvService {
     /**
      * Add one file to the queue (Blocking)
      *
-     * @param path File path
+     * @param path
+     *            File path
      */
     public void AddOneFile(String path) {
         this.internalAddOne(path, false);
     }
 
-    private void newBatch () {
+    private void newBatch() {
         batchId = UUID.randomUUID().toString();
         totalAllSize.set(0);
         totalProcessedSize.set(0);
         everyFileSize.clear();
         importFailCounter.clear();
     }
-    
+
     /**
      * Add a list of files into the queue (Blocking)
      *
-     * @param paths List of files
+     * @param paths
+     *            List of files
      */
     public void AddArrayFiles(String[] paths) {
         if (processingSet.isEmpty()) {
@@ -273,11 +279,20 @@ public class ImportCsvService {
 
                 // Write batch into DB
                 if (batchCount >= bulkInsertMax) {
+                    long start = System.currentTimeMillis();
                     idb.write(records);
+                    long end = System.currentTimeMillis();
+                    logger.debug("used " + (end - start) / 1000.0 + "s");
+
                     // Reset batch point
                     records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type).tag("fileName", filename.substring(0, filename.length() - 4)).build();
                     batchCount = 0;
                     logImportingFile(file.toString(), aFileSize, currentProcessed, totalLines);
+
+                    if (end - start > softTimeout) {
+                        logger.debug("Sleeping for " + timeoutSleep + " seconds");
+                        TimeUnit.SECONDS.sleep(timeoutSleep);
+                    }
                 }
             }
 
@@ -287,10 +302,16 @@ public class ImportCsvService {
             idb.close();
 
         } catch (Exception e) {
-            return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
+            try {
+                logger.debug("Sleeping for " + timeoutSleep + " seconds");
+                TimeUnit.SECONDS.sleep(timeoutSleep);
+            } catch (InterruptedException e1) {
+                logger.error(Util.stackTraceErrorToString(e1));
+            }
+            return new Object[] { Util.stackTraceErrorToString(e), currentProcessed };
         }
 
-        return new Object[]{"OK", currentProcessed, totalLines};
+        return new Object[] { "OK", currentProcessed, totalLines };
     }
 
     /**
@@ -350,19 +371,20 @@ public class ImportCsvService {
             FileLockUtil.release(fileFullPath);
             processingSet.remove(pFile);
             logger.error((String) impStr[0]);
+            transferFailedFiles(pFile);
 
-            if (importFailCounter.containsKey(fileFullPath)) {
-                int current_fails = importFailCounter.get(fileFullPath);
-                // Only retry 3 times
-                if (++current_fails <= FAILURE_RETRY) {
-                    internalAddOne(fileFullPath, false);
-                    importFailCounter.put(fileFullPath, current_fails);
-                } else {
-                    transferFailedFiles(pFile);
-                }
-            } else {
-                importFailCounter.put(fileFullPath, 1);
-            }
+            // if (importFailCounter.containsKey(fileFullPath)) {
+            // int current_fails = importFailCounter.get(fileFullPath);
+            // // Only retry 3 times
+            // if (++current_fails <= FAILURE_RETRY) {
+            // internalAddOne(fileFullPath, false);
+            // importFailCounter.put(fileFullPath, current_fails);
+            // } else {
+            // transferFailedFiles(pFile);
+            // }
+            // } else {
+            // importFailCounter.put(fileFullPath, 1);
+            // }
         }
     }
 
@@ -400,7 +422,8 @@ public class ImportCsvService {
     }
 
     private void logImportingFile(String fn, long thisFileSize, long thisFileProcessedSize, long currentLine) {
-        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_INPROGRESS, String.valueOf(currentLine));
+        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_INPROGRESS,
+                String.valueOf(currentLine));
     }
 
     private void logFailureFiles(String fn, String reason, long thisFileSize, long thisFileProcessedSize, boolean isSoftError) {
@@ -416,7 +439,7 @@ public class ImportCsvService {
             Path newPath = Paths.get(dumpPath + path.getFileName());
             Files.move(path, newPath, StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(Util.stackTraceErrorToString(e));
         }
     }
 
