@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -41,6 +42,13 @@ public class ImportedFileDao {
      */
     public List<String> getAllImportedPid(String uuid) {
         return ifm.selectAllImportedPid(uuid);
+    }
+
+    /**
+     * @return
+     */
+    public List<String> selectAllImportedPidPSC() {
+        return ifm.selectAllImportedPidPSC();
     }
 
 }
