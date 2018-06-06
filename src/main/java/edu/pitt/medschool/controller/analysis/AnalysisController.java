@@ -207,17 +207,28 @@ public class AnalysisController {
         analysisService.exportFromPatientsWithDownsampling(patientIDs, request.column, request.method, request.interval, request.time);
     }
 
-    @RequestMapping("api/export/export/a")
+    @RequestMapping("api/export/export/uc1")
     @ResponseBody
-    public void export(Model model) throws IOException {
+    public void exportUC1(Model model) throws IOException {
         // List<String> patientIDs = patientDao.selectIdAll();
         // patientIDs.retainAll(importedFileDao.selectAllImportedPidPSC());
-        
 
         List<String> patientIDs = importedFileDao.selectAllImportedPidPSC();
 
         System.out.println(patientIDs);
         analysisService.useCaseOne();
+    }
+
+    @RequestMapping("api/export/export/uc2")
+    @ResponseBody
+    public void exportUC2(Model model) throws IOException {
+        // List<String> patientIDs = patientDao.selectIdAll();
+        // patientIDs.retainAll(importedFileDao.selectAllImportedPidPSC());
+
+        List<String> patientIDs = importedFileDao.selectAllImportedPidPSC();
+
+        System.out.println(patientIDs);
+        analysisService.useCaseTwo();
     }
 
     @RequestMapping("api/export/export/{qid}")

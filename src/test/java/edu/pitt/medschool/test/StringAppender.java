@@ -6,16 +6,13 @@ package edu.pitt.medschool.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.influxdb.dto.Query;
-import org.influxdb.dto.QueryResult;
-
 /**
  * @author Isolachine
  *
  */
 public class StringAppender {
     public static void main(String[] args) {
-        // List<String> list = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         // for (int i = 194; i < 231; i++) {
         // list.add("\"I" + i + "_1" + "\"");
         // }
@@ -23,17 +20,17 @@ public class StringAppender {
         // line = "(" + line + ") / " + list.size();
         // System.out.println(line);
         //
-        // list = new ArrayList<>();
-        // for (int i = 43; i <= 81; i++) {
-        // list.add("\"I" + i + "_1" + "\"");
-        // list.add("\"I" + i + "_2" + "\"");
-        // list.add("\"I" + i + "_3" + "\"");
-        // list.add("\"I" + i + "_4" + "\"");
-        // list.add("\"I" + i + "_5" + "\"");
-        // }
-        // line = String.join(" + ", list);
-        // line = "(" + line + ") / " + list.size();
-        // System.out.println(line);
+        list = new ArrayList<>();
+        for (int i = 64; i <= 81; i++) {
+            list.add("\"I" + i + "_1" + "\"");
+            list.add("\"I" + i + "_2" + "\"");
+            list.add("\"I" + i + "_3" + "\"");
+            list.add("\"I" + i + "_4" + "\"");
+            list.add("\"I" + i + "_5" + "\"");
+        }
+        String line = String.join(" + ", list);
+        line = "(" + line + ") / " + list.size();
+        System.out.println(line);
         //
         // String ll = "2010-06-20T17:15:01Z";
         // String template = "select median(SR) as SR, median(aEEG) as aEEG, median(SZProb) as SZProb from (select (\"I194_1\" + \"I195_1\" + \"I196_1\" + \"I197_1\" + \"I198_1\" + \"I199_1\" + \"I200_1\" + \"I201_1\" +

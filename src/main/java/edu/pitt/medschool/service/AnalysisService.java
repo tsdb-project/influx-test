@@ -67,6 +67,116 @@ public class AnalysisService {
 
     }
 
+    public void useCaseTwo() throws IOException {
+        File dir = new File(DIRECTORY + "UC2_" + LocalDateTime.now().toString());
+        if (!dir.exists()) {
+            try {
+                dir.mkdirs();
+            } catch (SecurityException se) {
+                System.out.println("Failed to create dir \"/results\"");
+            }
+        }
+
+        List<String> patientIDs = importedFileDao.selectAllImportedPidPSC();
+
+        // List<String> patientIDs = patientDao.selectIdAll();
+        // patientIDs.retainAll(importedFileDao.getAllImportedPid("quz3"));
+        // patientIDs.clear();
+        // patientIDs.add("PUH-2010-014");
+        // patientIDs.add("PUH-2010-064");
+        // patientIDs.add("PUH-2010-068");
+        // patientIDs.add("PUH-2010-087");
+
+        idQueue = new LinkedBlockingQueue<>(patientIDs);
+
+        System.out.println(dir.getAbsolutePath() + '/');
+        CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/output.csv"));
+        String[] cols = new String[] { "ID", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9", "aEEG10", "aEEG11", "aEEG12", "aEEG13", "aEEG14",
+                "aEEG15", "aEEG16", "aEEG17", "aEEG18", "aEEG19", "aEEG20", "aEEG21", "aEEG22", "aEEG23", "aEEG24", "aEEG25", "aEEG26", "aEEG27", "aEEG28", "aEEG29", "aEEG30",
+                "aEEG31", "aEEG32", "aEEG33", "aEEG34", "aEEG35", "aEEG36", "aEEG37", "aEEG38", "aEEG39", "aEEG40", "aEEG41", "aEEG42", "aEEG43", "aEEG44", "aEEG45", "aEEG46",
+                "aEEG47", "aEEG48" };
+        writer.writeNext(cols);
+        Runnable queryTask = () -> {
+            String patientId;
+            while ((patientId = idQueue.poll()) != null) {
+                try {
+                    String monitorTimeQuery = "select count(\"I3_1\") from \"" + patientId + "\" where arType = 'ar'";
+
+                    QueryResult timeRes = influxDB.query(new Query(monitorTimeQuery, dbName));
+
+                    String monitorTime = "0";
+                    if (timeRes.getResults().get(0).getSeries() != null) {
+                        monitorTime = timeRes.getResults().get(0).getSeries().get(0).getValues().get(0).get(1).toString();
+                    }
+                    if (Double.valueOf(monitorTime).intValue() >= 6 * 3600) {
+
+                        CSVWriter writerSeparate = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/" + patientId + ".csv"));
+                        writerSeparate.writeNext(cols);
+
+                        String template = "select median(avg) as MEDIAN, count(avg) as COUNT from (select (\"I64_1\" + \"I64_2\" + \"I64_3\" + \"I64_4\" + \"I64_5\" + \"I65_1\" + \"I65_2\" + \"I65_3\" + \"I65_4\" + \"I65_5\" + \"I66_1\" + \"I66_2\" + \"I66_3\" + \"I66_4\" + \"I66_5\" + \"I67_1\" + \"I67_2\" + \"I67_3\" + \"I67_4\" + \"I67_5\" + \"I68_1\" + \"I68_2\" + \"I68_3\" + \"I68_4\" + \"I68_5\" + \"I69_1\" + \"I69_2\" + \"I69_3\" + \"I69_4\" + \"I69_5\" + \"I70_1\" + \"I70_2\" + \"I70_3\" + \"I70_4\" + \"I70_5\" + \"I71_1\" + \"I71_2\" + \"I71_3\" + \"I71_4\" + \"I71_5\" + \"I72_1\" + \"I72_2\" + \"I72_3\" + \"I72_4\" + \"I72_5\" + \"I73_1\" + \"I73_2\" + \"I73_3\" + \"I73_4\" + \"I73_5\" + \"I74_1\" + \"I74_2\" + \"I74_3\" + \"I74_4\" + \"I74_5\" + \"I75_1\" + \"I75_2\" + \"I75_3\" + \"I75_4\" + \"I75_5\" + \"I76_1\" + \"I76_2\" + \"I76_3\" + \"I76_4\" + \"I76_5\" + \"I77_1\" + \"I77_2\" + \"I77_3\" + \"I77_4\" + \"I77_5\" + \"I78_1\" + \"I78_2\" + \"I78_3\" + \"I78_4\" + \"I78_5\" + \"I79_1\" + \"I79_2\" + \"I79_3\" + \"I79_4\" + \"I79_5\" + \"I80_1\" + \"I80_2\" + \"I80_3\" + \"I80_4\" + \"I80_5\" + \"I81_1\" + \"I81_2\" + \"I81_3\" + \"I81_4\" + \"I81_5\") / 90 as avg from \"%s\" where arType = 'ar' LIMIT 172800) where time >= '%s' and time < '%s' + 48h and avg > 2 group by time(1h, %ss)";
+
+                        String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId + "\" where arType = 'ar' limit 1";
+                        QueryResult recordResult = influxDB.query(new Query(firstRecordTimeQuery, dbName));
+                        String firstRecordTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+
+                        int offset = Integer.valueOf(firstRecordTime.substring(14, 16)) * 60 + Integer.valueOf(firstRecordTime.substring(17, 19));
+
+                        String queryString = String.format(template, patientId, firstRecordTime, firstRecordTime, offset);
+                        logger.debug(patientId + " :\n" + queryString);
+
+                        Query query = new Query(queryString, dbName);
+                        QueryResult result = influxDB.query(query);
+
+                        logger.debug(patientId + " :\n" + result.toString());
+
+                        String[] row = new String[1 + 48];
+                        row[0] = patientId;
+
+                        List<List<Object>> res = result.getResults().get(0).getSeries().get(0).getValues();
+                        logger.debug(patientId + " : " + String.valueOf(res.size()));
+
+                        for (int i = 0; i < 48; i++) {
+                            if (res.size() > i) {
+                                List<Object> vals = res.get(i);
+                                System.out.println(vals.toString());
+                                if (Double.valueOf(vals.get(2).toString()).intValue() < 60 && Double.valueOf(vals.get(2).toString()).intValue() > 0) {
+                                    row[1 + i] = "Insuff. Data";
+                                } else if (vals.get(1) == null) {
+                                    row[1 + i] = "N/A";
+                                } else {
+                                    row[1 + i] = vals.get(1).toString();
+                                }
+                            } else {
+                                row[1 + i] = "";
+                            }
+                        }
+                        writer.writeNext(row);
+                        writerSeparate.writeNext(row);
+                        writerSeparate.close();
+                    } else {
+                        logger.debug(patientId + " : Not enough data, only " + Double.valueOf(monitorTime).intValue() + " seconds");
+                    }
+                } catch (Exception e) {
+                    logger.error(patientId + " : " + Util.stackTraceErrorToString(e));
+                    idQueue.offer(patientId);
+                }
+            }
+        };
+
+        for (
+
+                int i = 0; i < 8; ++i)
+            scheduler.submit(queryTask);
+        scheduler.shutdown();
+        try {
+            scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+            writer.close();
+        } catch (InterruptedException e) {
+            logger.error(Util.stackTraceErrorToString(e));
+            writer.close();
+        }
+    }
+
     public void useCaseOne() throws IOException {
         File dir = new File(DIRECTORY + LocalDateTime.now().toString());
         if (!dir.exists()) {
