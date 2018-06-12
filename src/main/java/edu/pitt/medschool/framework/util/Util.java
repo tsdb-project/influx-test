@@ -126,7 +126,7 @@ public class Util {
      */
     public static long serialTimeToLongDate(String serial, TimeZone timeZone) {
         if (timeZone == null)
-            timeZone = TimeZone.getTimeZone("America/New_York");
+            timeZone = TimeZone.getTimeZone("UTC");
         double sTime = Double.valueOf(serial);
         Date d = DateUtil.getJavaDate(sTime, timeZone);
         return d.getTime();
