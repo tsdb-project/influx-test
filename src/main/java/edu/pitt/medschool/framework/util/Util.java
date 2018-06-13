@@ -3,8 +3,7 @@
  */
 package edu.pitt.medschool.framework.util;
 
-import java.io.File;
-import java.io.FilenameFilter;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
@@ -197,7 +196,9 @@ public class Util {
 
         if (listOfFiles != null) {
             for (File listOfFile : listOfFiles) {
-                if (listOfFile.isFile() && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals("csv")) {
+                if (listOfFile.isFile()
+                        && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals("csv")
+                        && !listOfFile.getName().startsWith(".")) {
                     FileBean fileBean = new FileBean();
                     fileBean.setName(listOfFile.getName());
                     fileBean.setDirectory(directory);
@@ -217,22 +218,9 @@ public class Util {
      * @return String
      */
     public static String stackTraceErrorToString(Exception e) {
-        StringBuilder sb = new StringBuilder("Error message: ");
-        sb.append(e.getMessage());
-        sb.append(".\n Stack trace:\n");
-        StackTraceElement[] ste = e.getStackTrace();
-        for (StackTraceElement aste : ste) {
-            sb.append("  Source file: '");
-            sb.append(aste.getFileName());
-            sb.append("', class name: '");
-            sb.append(aste.getClassName());
-            sb.append("'. On method '");
-            sb.append(aste.getMethodName());
-            sb.append("' line: ");
-            sb.append(aste.getLineNumber());
-            sb.append(".\n");
-        }
-        return sb.toString();
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 
     public static String[] secondToString(int totalSeconds) {
