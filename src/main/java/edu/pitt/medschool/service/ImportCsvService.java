@@ -219,11 +219,21 @@ public class ImportCsvService {
             currentProcessed = firstLine.length();
             totalProcessedSize.addAndGet(firstLine.length());
 
-            // Next 6 lines no use.
+            // Next 6 lines no use expect time date
             long tmp_size = 0;
+            String test_date="";
             for (int i = 0; i < 6; i++) {
-                tmp_size += reader.readLine().length();
+                String tmp = reader.readLine();
+                tmp_size += tmp.length();
+                switch (i) {
+                    case 3:
+                    case 4:
+                        test_date += tmp.split(",")[1].trim();
+                        break;
+                }
             }
+            long test_start_time = Util.dateTimeFormatToTimestamp(test_date, "yyyy.MM.ddHH:mm:ss", null);
+
             currentProcessed += tmp_size;
             totalProcessedSize.addAndGet(tmp_size);
 
@@ -231,6 +241,12 @@ public class ImportCsvService {
             String eiL = reader.readLine();
             String[] columnNames = eiL.split(",");
             int columnCount = columnNames.length, bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount, batchCount = 0;
+
+            // More integrity checking
+            if(!columnNames[0].toLowerCase().equals("clockdatetime")) {
+                throw new RuntimeException("Wriong first column!");
+            }
+
             currentProcessed += eiL.length();
             totalProcessedSize.addAndGet(eiL.length());
 
@@ -248,6 +264,14 @@ public class ImportCsvService {
                     logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
                     currentProcessed += this_line_length;
                     totalProcessedSize.addAndGet(this_line_length);
+                    continue;
+                }
+
+                // Measurement time should be later than test start time
+                long measurement_epoch_time = Util.serialTimeToLongDate(values[0], null);
+                if (measurement_epoch_time < test_start_time) {
+                    String err_text = String.format("Measurement time ealier than test start time on line %d!", totalLines + 8);
+                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
                     continue;
                 }
 
@@ -271,7 +295,7 @@ public class ImportCsvService {
                 }
 
                 // Measurement is PID
-                Point record = Point.measurement(pid).time(Util.serialTimeToLongDate(values[0], null), TimeUnit.MILLISECONDS).fields(lineKVMap).build();
+                Point record = Point.measurement(pid).time(measurement_epoch_time, TimeUnit.MILLISECONDS).fields(lineKVMap).build();
                 records.point(record);
                 batchCount++;
                 currentProcessed += this_line_length;
