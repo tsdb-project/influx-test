@@ -68,11 +68,11 @@ public class AnalysisController {
         return model;
     }
 
-    @RequestMapping(value = { "/analysis/edit/{id}", "/analysis/edit" }, method = RequestMethod.GET)
+    @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "edit");
-        modelAndView.setViewName("/analysis/edit");
+        modelAndView.setViewName("analysis/edit");
         if (id.isPresent()) {
             modelAndView.addObject("edit", true);
             Downsample downsample = analysisService.selectByPrimaryKey(id.get());
