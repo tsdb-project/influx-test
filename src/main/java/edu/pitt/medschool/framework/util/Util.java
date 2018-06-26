@@ -6,6 +6,7 @@ package edu.pitt.medschool.framework.util;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,11 +14,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -27,6 +24,9 @@ import org.apache.poi.ss.usermodel.DateUtil;
  * @author Isolachine
  */
 public class Util {
+
+    public static TimeZone nycTimeZone = TimeZone.getTimeZone("America/New_York");
+    public static TimeZone dstTimeZone = TimeZone.getTimeZone("UTC");
 
     public static String getIpFromHostname(String host) {
         String addr = "localhost";
@@ -54,7 +54,7 @@ public class Util {
      *
      * @param dateTime String
      * @param format   String format
-     * @param timeZone Null for NY(PGH) timezone
+     * @param timeZone Null for UTC timezone
      * @return Instant
      * @throws ParseException Wrong format
      */
@@ -67,13 +67,13 @@ public class Util {
      *
      * @param dateTime String
      * @param format   String format
-     * @param timeZone Null for NY(PGH) timezone
+     * @param timeZone Null for UTC timezone
      * @return Instant
      * @throws ParseException Wrong format
      */
     public static Date dateTimeFormatToDate(String dateTime, String format, TimeZone timeZone) throws ParseException {
         if (timeZone == null)
-            timeZone = TimeZone.getTimeZone("America/New_York");
+            timeZone = dstTimeZone;
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         sdf.setTimeZone(timeZone);
         return sdf.parse(dateTime);
@@ -84,7 +84,7 @@ public class Util {
      *
      * @param dateTime String
      * @param format   String format
-     * @param timeZone Null for NY(PGH) timezone
+     * @param timeZone Null for UTC timezone
      * @return long UNIX Timestamp
      * @throws ParseException Wrong format
      */
@@ -110,7 +110,7 @@ public class Util {
      * @return
      */
     public static String timestampToUTCDateTimeFormat(long unixTime, String format) {
-        TimeZone timeZone = TimeZone.getTimeZone("UTC");
+        TimeZone timeZone = dstTimeZone;
         DateFormat formatter = new SimpleDateFormat(format);
         formatter.setTimeZone(timeZone);
         return formatter.format(new Date(unixTime));
@@ -120,12 +120,12 @@ public class Util {
      * Convert serial# time to a specific timestamp
      *
      * @param serial   String Serial number
-     * @param timeZone Null for NY(PGH) timezone
+     * @param timeZone Null for UTC timezone
      * @return Apache POI defined timestamp
      */
     public static long serialTimeToLongDate(String serial, TimeZone timeZone) {
         if (timeZone == null)
-            timeZone = TimeZone.getTimeZone("UTC");
+            timeZone = dstTimeZone;
         double sTime = Double.valueOf(serial);
         Date d = DateUtil.getJavaDate(sTime, timeZone);
         return d.getTime();
@@ -239,22 +239,28 @@ public class Util {
         return new String[]{String.valueOf(totalSeconds), "1"};
     }
 
+    /**
+     * Is a given date a DST shift date?
+     */
+    public static boolean isThisDayOnDstShift(TimeZone tz, Date now) {
+        Calendar c = Calendar.getInstance(tz);
+        c.setTime(now);
+        c.set(Calendar.HOUR_OF_DAY, 12); // We want to ignore 2am-3am as we only care dates
+        Date normalized_now = c.getTime();
+        c.add(Calendar.DATE, -1);
+        Date dayBefore = c.getTime();
+        return tz.inDaylightTime(dayBefore) != tz.inDaylightTime(normalized_now);
+    }
+
     public static void main(String[] args) throws ParseException {
         System.out.println(secondToString(30)[0] + ":" + secondToString(30)[1]);
         System.out.println(secondToString(3600)[0] + ":" + secondToString(3600)[1]);
         System.out.println(secondToString(18000)[0] + ":" + secondToString(18000)[1]);
-        // System.out.println(FileUtils.sizeOf(new File("/tsdb/testing3")));
-        // System.out.println(filesInFolder("/Users/Isolachine/tsdb/testing2"));
-        //
-        // System.out.println(dateToTimestamp("1/2/1934"));
-        // System.out.println(timestampToUTCDate(dateToTimestamp("1/1/1934")));
-        // System.out.println(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"));
-        // System.out.println(timestampToUTCDateTimeFormat(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss"), "yyyy.MM.dd HH:mm:ss"));
-        // System.out.println(timestampToUTCDateTimeFormat(serialTimeToLongDate("43036.6402314815"), "yyyy-MM-dd HH:mm:ss"));
-        //
-        // String[] testF = getAllSpecificFileInDirectory("E:\\Grad@Pitt\\TS ProjectData", "csv");
-        // for (String a : testF) {
-        // System.out.println(a);
-        // }
+
+        System.out.println(dateToTimestamp("1/2/1934"));
+        System.out.println(timestampToUTCDate(dateToTimestamp("1/1/1934")));
+        System.out.println(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss", null));
+        System.out.println(timestampToUTCDateTimeFormat(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss", null), "yyyy.MM.dd HH:mm:ss"));
+        System.out.println(timestampToUTCDateTimeFormat(serialTimeToLongDate("43036.6402314815", null), "yyyy-MM-dd HH:mm:ss"));
     }
 }

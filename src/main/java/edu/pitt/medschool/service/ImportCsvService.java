@@ -6,11 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -232,7 +228,7 @@ public class ImportCsvService {
                         break;
                 }
             }
-            long test_start_time = Util.dateTimeFormatToTimestamp(test_date, "yyyy.MM.ddHH:mm:ss", null);
+            long test_start_time = Util.dateTimeFormatToTimestamp(test_date, "yyyy.MM.ddHH:mm:ss", Util.nycTimeZone);
 
             currentProcessed += tmp_size;
             totalProcessedSize.addAndGet(tmp_size);

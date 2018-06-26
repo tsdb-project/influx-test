@@ -13,8 +13,10 @@ import java.time.Instant;
 
 /**
  * Importing patient metadata into DB Based on mail at 02/21/2018
+ * @deprecated Unchecked Time zone problems and this file not necessary
  */
 @Service
+@Deprecated
 public class ImportMetadataService {
 
     /**
