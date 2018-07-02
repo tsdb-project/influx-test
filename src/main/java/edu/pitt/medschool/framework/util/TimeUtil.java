@@ -1,5 +1,6 @@
 package edu.pitt.medschool.framework.util;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 
 import java.text.DateFormat;
@@ -103,18 +104,27 @@ public class TimeUtil {
     }
 
     /**
+     * Serial time to a Date object
+     *
+     * @param sTime Serial number
+     * @param tz    Null for UTC timezone
+     * @return Java Date Obj
+     */
+    public static Date serialTimeToDate(double sTime, TimeZone tz) {
+        if (tz == null)
+            tz = utcTimeZone;
+        return DateUtil.getJavaDate(sTime, tz);
+    }
+
+    /**
      * Convert serial# time to a specific timestamp
      *
-     * @param serial   String Serial number
+     * @param serial   Serial number
      * @param timeZone Null for UTC timezone
      * @return Apache POI defined timestamp
      */
-    public static long serialTimeToLongDate(String serial, TimeZone timeZone) {
-        if (timeZone == null)
-            timeZone = utcTimeZone;
-        double sTime = Double.valueOf(serial);
-        Date d = DateUtil.getJavaDate(sTime, timeZone);
-        return d.getTime();
+    public static long serialTimeToLongDate(double serial, TimeZone timeZone) {
+        return serialTimeToDate(serial, timeZone).getTime();
     }
 
     public static int timestampToAge(long birthDate) {
@@ -161,6 +171,10 @@ public class TimeUtil {
         return ts - oneHourMil;
     }
 
+    public static boolean dateIsSameDay(Date a, Date b) {
+        return DateUtils.isSameDay(a, b);
+    }
+
     public static void main(String[] args) throws ParseException {
         SOP(secondToString(30)[0] + ":" + secondToString(30)[1]);
         SOP(secondToString(3600)[0] + ":" + secondToString(3600)[1]);
@@ -174,7 +188,7 @@ public class TimeUtil {
                 subOneHourToTimestamp(dateTimeFormatToTimestamp("2017.03.01 00:45:11", "yyyy.MM.dd HH:mm:ss", null)), "yyyy.MM.dd HH:mm:ss"));
         SOP(timestampToUTCDateTimeFormat(
                 addOneHourToTimestamp(dateTimeFormatToTimestamp("2017.12.31 23:55:22", "yyyy.MM.dd HH:mm:ss", null)), "yyyy.MM.dd HH:mm:ss"));
-        SOP(timestampToUTCDateTimeFormat(serialTimeToLongDate("43036.6402314815", null), "yyyy-MM-dd HH:mm:ss"));
+        SOP(timestampToUTCDateTimeFormat(serialTimeToLongDate(43036.6402314815, null), "yyyy-MM-dd HH:mm:ss"));
 
         SOP(null);
         Calendar c = Calendar.getInstance(nycTimeZone);
@@ -182,6 +196,7 @@ public class TimeUtil {
         for (int i = 0; i < 365; i++) {
             if (isThisDayOnDstShift(nycTimeZone, c.getTime())) {
                 SOP("DST on: " + c.getTime());
+                SOP("Month: " + c.getTime().getMonth());
             }
             c.add(Calendar.DAY_OF_YEAR, 1);
         }

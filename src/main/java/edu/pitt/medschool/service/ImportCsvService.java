@@ -99,8 +99,7 @@ public class ImportCsvService {
     /**
      * Add one file to the queue (Blocking)
      *
-     * @param path
-     *            File path
+     * @param path File path
      */
     public void AddOneFile(String path) {
         this.internalAddOne(path, false);
@@ -117,8 +116,7 @@ public class ImportCsvService {
     /**
      * Add a list of files into the queue (Blocking)
      *
-     * @param paths
-     *            List of files
+     * @param paths List of files
      */
     public void AddArrayFiles(String[] paths) {
         if (processingSet.isEmpty()) {
@@ -213,7 +211,7 @@ public class ImportCsvService {
 
             // Next 6 lines no use expect time date
             long tmp_size = 0;
-            String test_date="";
+            String test_date = "";
             for (int i = 0; i < 6; i++) {
                 String tmp = reader.readLine();
                 tmp_size += tmp.length();
@@ -224,7 +222,9 @@ public class ImportCsvService {
                         break;
                 }
             }
-            long test_start_time = TimeUtil.dateTimeFormatToTimestamp(test_date, "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
+            Date testStartDate = TimeUtil.dateTimeFormatToDate(test_date, "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
+            long test_start_time = testStartDate.getTime();
+            boolean isTestOnDstShift = TimeUtil.isThisDayOnDstShift(TimeUtil.nycTimeZone, testStartDate);
 
             currentProcessed += tmp_size;
             totalProcessedSize.addAndGet(tmp_size);
@@ -235,7 +235,7 @@ public class ImportCsvService {
             int columnCount = columnNames.length, bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount, batchCount = 0;
 
             // More integrity checking
-            if(!columnNames[0].toLowerCase().equals("clockdatetime")) {
+            if (!columnNames[0].toLowerCase().equals("clockdatetime")) {
                 throw new RuntimeException("Wriong first column!");
             }
 
@@ -245,6 +245,7 @@ public class ImportCsvService {
             BatchPoints records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type).tag("fileName", filename.substring(0, filename.length() - 4)).build();
 
             String aLine;
+            // Process every data lines
             while ((aLine = reader.readLine()) != null) {
                 String[] values = aLine.split(",");
                 int this_line_length = aLine.length();
@@ -259,10 +260,27 @@ public class ImportCsvService {
                     continue;
                 }
 
+                // Compare date on every measures (They are all UTCs)
+                double sTime = Double.valueOf(values[0]);
+                Date measurement_date = TimeUtil.serialTimeToDate(sTime, null);
+                long measurement_epoch_time = measurement_date.getTime();
+                if (!TimeUtil.dateIsSameDay(measurement_date, testStartDate)) {
+                    // To avoid some problematic files, that measurement date is not reliable
+                    String err_text = String.format("Measurement date differs from test start date on line %d!", totalLines + 8);
+                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
+                    continue;
+                }
+                // At this time, we can arbitrarily add or sub one hour
+                if (isTestOnDstShift) {
+                    // IT'S THE US LAW
+                    if (measurement_date.getMonth() == Calendar.MARCH)
+                        measurement_epoch_time = TimeUtil.addOneHourToTimestamp(measurement_epoch_time);
+                    else if (measurement_date.getMonth() == Calendar.NOVEMBER)
+                        measurement_epoch_time = TimeUtil.subOneHourToTimestamp(measurement_epoch_time);
+                }
                 // Measurement time should be later than test start time
-                long measurement_epoch_time = TimeUtil.serialTimeToLongDate(values[0], null);
                 if (measurement_epoch_time < test_start_time) {
-                    String err_text = String.format("Measurement time ealier than test start time on line %d!", totalLines + 8);
+                    String err_text = String.format("Measurement time earlier than test start time on line %d!", totalLines + 8);
                     logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
                     continue;
                 }
@@ -324,10 +342,10 @@ public class ImportCsvService {
             } catch (InterruptedException e1) {
                 logger.error(Util.stackTraceErrorToString(e1));
             }
-            return new Object[] { Util.stackTraceErrorToString(e), currentProcessed };
+            return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
         }
 
-        return new Object[] { "OK", currentProcessed, totalLines };
+        return new Object[]{"OK", currentProcessed, totalLines};
     }
 
     /**
