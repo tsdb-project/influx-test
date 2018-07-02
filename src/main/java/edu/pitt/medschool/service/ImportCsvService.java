@@ -1,20 +1,14 @@
 package edu.pitt.medschool.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.util.FileLockUtil;
+import edu.pitt.medschool.framework.util.TimeUtil;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.InfluxClusterDao;
+import edu.pitt.medschool.model.dto.ImportedFile;
+import okhttp3.OkHttpClient;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -27,14 +21,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.util.FileLockUtil;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.InfluxClusterDao;
-import edu.pitt.medschool.model.dto.ImportedFile;
-import okhttp3.OkHttpClient;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Auto-parallel importing CSV data
@@ -228,7 +224,7 @@ public class ImportCsvService {
                         break;
                 }
             }
-            long test_start_time = Util.dateTimeFormatToTimestamp(test_date, "yyyy.MM.ddHH:mm:ss", Util.nycTimeZone);
+            long test_start_time = TimeUtil.dateTimeFormatToTimestamp(test_date, "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
 
             currentProcessed += tmp_size;
             totalProcessedSize.addAndGet(tmp_size);
@@ -264,7 +260,7 @@ public class ImportCsvService {
                 }
 
                 // Measurement time should be later than test start time
-                long measurement_epoch_time = Util.serialTimeToLongDate(values[0], null);
+                long measurement_epoch_time = TimeUtil.serialTimeToLongDate(values[0], null);
                 if (measurement_epoch_time < test_start_time) {
                     String err_text = String.format("Measurement time ealier than test start time on line %d!", totalLines + 8);
                     logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);

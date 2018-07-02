@@ -1,7 +1,7 @@
 package edu.pitt.medschool.service;
 
 import com.opencsv.CSVReader;
-import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,22 +75,22 @@ public class ImportMetadataService {
                 obj = val.equals("1") ? "Y" : "N";
                 break;
             case 11: // Arrest date
-                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
+                obj = TimeUtil.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
                 break;
             case 12: // Arrest time
-                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd kk:mm", null).toString();
+                obj = TimeUtil.dateTimeFormatToDate(val, "yyyy-MM-dd kk:mm", null).toString();
                 break;
             case 30: // Arrive date
-                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd kk:mm", null).toString();
+                obj = TimeUtil.dateTimeFormatToDate(val, "yyyy-MM-dd kk:mm", null).toString();
                 break;
             case 174: // date_fol_com
-                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
+                obj = TimeUtil.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
                 break;
             case 176: // dischargedate
-                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
+                obj = TimeUtil.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
                 break;
             case 177: // deathdate
-                obj = Util.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
+                obj = TimeUtil.dateTimeFormatToDate(val, "yyyy-MM-dd", null).toString();
                 break;
             default:
                 obj = val;
@@ -171,7 +171,7 @@ public class ImportMetadataService {
         try {
             // Main import progress
             fr = new BufferedReader(new FileReader(fileI));
-            flag = processFile(fr, Util.dateTimeFormatToInstant(fileTime, "yyyy-MM-dd_kkmm", null));
+            flag = processFile(fr, TimeUtil.dateTimeFormatToInstant(fileTime, "yyyy-MM-dd_kkmm", null));
             // Below are error processing
         } catch (ParseException e) {
             flag = StatusCode.FILE_DATE_ERROR;

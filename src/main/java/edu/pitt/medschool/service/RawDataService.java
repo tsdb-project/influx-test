@@ -1,15 +1,14 @@
 package edu.pitt.medschool.service;
 
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.util.InfluxUtil;
+import edu.pitt.medschool.framework.util.TimeUtil;
+import edu.pitt.medschool.model.TSData.RawData;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.springframework.stereotype.Service;
-
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.util.InfluxUtil;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.TSData.RawData;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -56,7 +55,7 @@ public class RawDataService {
         if (!result.hasError() && !result.getResults().get(0).hasError()) {
             for (List<Object> res : result.getResults().get(0).getSeries().get(0).getValues()) {
                 RawData aRow = new RawData();
-                aRow.setTime(Instant.ofEpochMilli(Util.dateTimeFormatToTimestamp(res.get(0).toString(), "yyyy-MM-dd'T'HH:mm:ss'Z'", null)));
+                aRow.setTime(Instant.ofEpochMilli(TimeUtil.dateTimeFormatToTimestamp(res.get(0).toString(), "yyyy-MM-dd'T'HH:mm:ss'Z'", null)));
                 aRow.setColumnNames(columnNames);
                 List<Double> values = new ArrayList<>();
                 for (int i = 1; i < res.size(); i++) {
