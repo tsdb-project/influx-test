@@ -188,7 +188,7 @@ public interface ImportProgressMapper {
             "batch_id,",
             "max(update_time) AS end_time, ",
             "min(create_time) AS start_time, ",
-            "TIMEDIFF(max(update_time), min(create_time)) AS elapsed_time, ",
+            "concat('', TIMEDIFF(max(update_time), min(create_time))) AS elapsed_time, ",
             "sys.format_bytes(sum(size)) AS size, ",
             "COUNT(*) AS file_count,",
             "COUNT(IF( `status`='STATUS_FINISHED', `status`, NULL)) AS finished_count,",
