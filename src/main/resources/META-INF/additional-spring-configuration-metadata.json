@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "load",
+    "type": "java.lang.String",
+    "description": "A description for 'load'"
+  },
+  {
+    "name": "machine",
+    "type": "java.lang.String",
+    "description": "A description for 'machine'"
+  },
+  {
+    "name": "soft-timeout",
+    "type": "java.lang.String",
+    "description": "A description for 'soft-timeout'"
+  },
+  {
+    "name": "soft-timeout-sleep",
+    "type": "java.lang.String",
+    "description": "A description for 'soft-timeout-sleep'"
+  }
+]}
