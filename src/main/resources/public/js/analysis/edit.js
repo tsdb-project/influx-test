@@ -1,196 +1,163 @@
 $(document).ready(function() {
-    var queries = {
-        "data" : []
-    };
-
-    var table = $('#queryTable').DataTable({
-        ajax : {
-            "url" : "/analysis/query"
-        },
-        data : queries.data,
-        columnDefs : [ {
-            "targets" : [ 0 ],
-            "visible" : false,
-            "searchable" : false
-        } ],
-        columns : [ {
-            data : 'id'
-        }, {
-            data : 'alias'
-        }, {
-            data : null,
-            render : function(data) {
-                return secondsToStr(data.period);
-            }
-        }, {
-            data : null,
-            render : function(data) {
-                return secondsToStr(data.origin);
-            }
-        }, {
-            data : null,
-            render : function(data) {
-                return secondsToStr(data.duration);
-            }
-        }, {
-            data : null,
-            render : function(data) {
-                return localeDateString(data.createTime)
-            }
-        }, {
-            data : null,
-            render : function(data) {
-                return localeDateString(data.updateTime)
-            }
-        } ],
-        order : [ [ 5, 'desc' ] ],
-    });
-
     var groups = {
-        "data" : []
+        "data": []
     };
 
     var groupTable = $('#groupTable').DataTable({
-        ajax : {
-            "url" : "/analysis/group/" + $("#id").val()
+        ajax: {
+            "url": "/analysis/group/" + $("#id").val()
         },
-        data : groups.data,
-        columnDefs : [ {
-            "targets" : [ 0 ],
-            "visible" : false,
-            "searchable" : false
+        data: groups.data,
+        columnDefs: [{
+            "targets": [0, 1],
+            "visible": false,
+            "searchable": false
+        }],
+        paging : false,
+        columns: [{
+            data: 'group.id'
         }, {
-            "targets" : [ 1 ],
-            "visible" : false,
-            "searchable" : false
-        } ],
-        columns : [ {
-            data : 'group.id'
+            data: 'group.queryId'
         }, {
-            data : 'group.queryId'
+            data: 'group.label'
         }, {
-            data : 'group.downsample',
+            data: 'group.downsample'
         }, {
-            data : 'group.aggregation',
+            data: 'group.aggregation'
         }, {
-            data : 'columns',
+            data: 'columns'
         }, {
-            data : 'group.id',
-            render : function(data) {
-                return "<th><a class=\"btn btn-outline-danger btn-sm\" href=\"/analysis/group/delete/" + data + "\" role=\"button\"><i class=\"zmdi zmdi-close\"></i></a></th>";
+            "width": "20%",
+            data: 'group.id',
+            render: function(data) {
+                return "<th><a class=\"btn btn-primary btn-sm\" role=\"button\" data-toggle=\"modal\" data-target=\"#edit-group-modal\" data-id=\"" + data + "\"><i class=\"zmdi zmdi-edit\"></i> Edit</a> " +
+                       "<a class=\"btn btn-danger btn-sm\" role=\"button\" href=\"/analysis/group/delete/" + data + "\"><i class=\"zmdi zmdi-close\"></i> Delete</a></th>";
             }
-        } ]
-    });
-
-    function secondsToStr(seconds) {
-        function numberEnding(number) {
-            return (number > 1) ? 's' : '';
-        }
-        var temp = Math.floor(seconds);
-        var years = Math.floor(temp / 31536000);
-        if (years) {
-            return years + ' year' + numberEnding(years);
-        }
-        var days = Math.floor((temp %= 31536000) / 86400);
-        if (days) {
-            return days + ' day' + numberEnding(days);
-        }
-        var hours = Math.floor((temp %= 86400) / 3600);
-        if (hours) {
-            return hours + ' hour' + numberEnding(hours);
-        }
-        var minutes = Math.floor((temp %= 3600) / 60);
-        if (minutes) {
-            return minutes + ' minute' + numberEnding(minutes);
-        }
-        var seconds = temp % 60;
-        if (seconds) {
-            return seconds + ' second' + numberEnding(seconds);
-        }
-        return 'N/A';
-    }
-
-    function localeDateString(date) {
-        var options = {
-            hour12 : false,
-            timeZone : "America/Anchorage"
-        };
-        return new Date(date).toLocaleString('en-US', options);
-    }
-
-    $('#queryTable tbody').on('mouseover', 'tr', function() {
-        $(this).attr("style", "background-color:#ffffdd");
-    });
-
-    $('#queryTable tbody').on('mouseout', 'tr', function() {
-        $(this).removeAttr('style');
-        ;
-    });
-
-    $('#queryTable tbody').on('click', 'tr', function() {
-        window.location.href = '/analysis/edit/' + table.row($(this)).data().id;
+        }]
     });
 
     $("#saveButton").click(function() {
+
+        if ($('#parameter-form')[0].checkValidity()) {
+            var form = {
+                "id": $("#id").val(),
+                "alias": $("#alias").val(),
+                "period": $("#period").val() * $("#period_unit").val(),
+                "origin": $("#origin").val() * $("#origin_unit").val(),
+                "duration": $("#duration").val() * $("#duration_unit").val()
+            };
+            $.ajax({
+                'url': "/analysis/query",
+                'type': 'put',
+                'data': JSON.stringify(form),
+                'contentType': "application/json",
+                'dataType': 'json',
+                'success': function(data) {
+                    window.location.href = '/analysis/edit/' + $("#id").val();
+                },
+                'error': function() {}
+            });
+            return false;
+        } else {
+            console.log("invalid form");
+            return true;
+        }
+    });
+
+    $("#deleteButton").click(function() {
         var form = {
-            "id" : $("#id").val(),
-            "alias" : $("#alias").val(),
-            "period" : $("#period").val() * $("#period_unit").val(),
-            "origin" : $("#origin").val() * $("#origin_unit").val(),
-            "duration" : $("#duration").val() * $("#duration_unit").val()
+            "id": $("#id").val(),
         };
         $.ajax({
-            'url' : "/analysis/query",
-            'type' : 'put',
-            'data' : JSON.stringify(form),
-            'contentType' : "application/json",
-            'dataType' : 'json',
-            'success' : function(data) {
-                window.location.href = '/analysis/edit/' + $("#id").val();
+            'url': "/analysis/query",
+            'type': 'delete',
+            'data': JSON.stringify(form),
+            'contentType': "application/json",
+            'dataType': 'json',
+            'success': function(data) {
+                window.location.href = '/analysis/builder';
             },
-            'error' : function() {
-            }
+            'error': function() {}
         });
     });
 
     $("#measure").change(function() {
         console.log($("#measure").val());
-        var form = [ $("#measure").val() ];
+        var form = [$("#measure").val()];
         $.ajax({
-            'url' : "/api/export/electrode",
-            'type' : 'post',
-            'data' : JSON.stringify(form),
-            'contentType' : "application/json",
-            'dataType' : 'json',
-            'success' : function(data) {
+            'url': "/api/export/electrode",
+            'type': 'post',
+            'data': JSON.stringify(form),
+            'contentType': "application/json",
+            'dataType': 'json',
+            'success': function(data) {
                 console.log(data);
                 var $electrode = $('#electrode');
+                $electrode.attr("size", data.length + 1);
+                $electrode.removeAttr('multiple');
                 $electrode.empty();
                 $('#column').empty();
+                $('#column').attr("size", 1);
                 $electrode.append('<option disabled="disabled" selected="selected" value="">Select Electrodes</option>');
                 for (var i = 0; i < data.length; i++) {
                     var html = '<option value="' + data[i] + '">' + data[i] + '</option>';
                     $electrode.append(html);
                 }
             },
-            'error' : function() {
-            }
+            'error': function() {}
         });
+    });
+
+    $("#addButton").click(function() {
+        var form = $("#column").val();
+        var $columnsInGroup = $('#columnsInGroup');
+        var set = new Set();
+        $("#columnsInGroup option").each(function() {
+            set.add($(this).val());
+        });
+        form.forEach(function(e) {
+            set.add(e);
+        });
+        $columnsInGroup.empty();
+        set.forEach(function(e) {
+            var html = '<option value="' + e + '">' + e + '</option>';
+            $columnsInGroup.append(html);
+        });
+        $columnsInGroup.attr('size', $('#columnsInGroup').children('option').length);
+    });
+
+    $("#clearButton").click(function() {
+        var form = $("#columnsInGroup").val();
+        var $columnsInGroup = $('#columnsInGroup');
+        var set = new Set();
+        $("#columnsInGroup option").each(function() {
+            set.add($(this).val());
+        });
+        form.forEach(function(e) {
+            set.delete(e);
+        });
+        $columnsInGroup.empty();
+        set.forEach(function(e) {
+            var html = '<option value="' + e + '">' + e + '</option>';
+            $columnsInGroup.append(html);
+        });
+        var length = $('#columnsInGroup').children('option').length;
+        $columnsInGroup.attr('size', length > 0 ? length : 1);
     });
 
     $("#electrode").change(function() {
         console.log($("#electrode").val());
         var form = {
-            "measure" : $("#measure").val(),
-            "electrode" : [ $("#electrode").val() ]
+            "measure": [$("#measure").val()],
+            "electrode": [$("#electrode").val()]
         };
         $.ajax({
-            'url' : "/api/export/column",
-            'type' : 'post',
-            'data' : JSON.stringify(form),
-            'contentType' : "application/json",
-            'dataType' : 'json',
-            'success' : function(data) {
+            'url': "/api/export/column",
+            'type': 'post',
+            'data': JSON.stringify(form),
+            'contentType': "application/json",
+            'dataType': 'json',
+            'success': function(data) {
                 var $column = $('#column');
                 $column.attr("size", data.length)
                 $column.empty();
@@ -199,31 +166,54 @@ $(document).ready(function() {
                 }
                 $column.change();
             },
-            'error' : function() {
-            }
+            'error': function() {}
         });
     });
 
     $("#addGroupButton").click(function() {
-        var form = {
-            "group" : {
-                "queryId" : $("#id").val(),
-                "downsample" : $("#method").val(),
-                "aggregation" : $("#aggregation").val()
-            },
-            "columns" : $("#column").val()
-        };
-        $.ajax({
-            'url' : "/analysis/group",
-            'type' : 'post',
-            'data' : JSON.stringify(form),
-            'contentType' : "application/json",
-            'dataType' : 'json',
-            'success' : function(data) {
-                groupTable.ajax.reload();
-            },
-            'error' : function() {
-            }
+        var columns = [];
+        $("#columnsInGroup option").each(function() {
+            columns.push($(this).val());
         });
+        if ($('#aggregation-form')[0].checkValidity()) {
+            if (columns.length == 0) {
+                $("#modal-empty").modal();
+                return false;
+            }
+            var form = {
+                "group": {
+                    "label": $("#label").val(),
+                    "queryId": $("#id").val(),
+                    "downsample": $("#method").val(),
+                    "aggregation": $("#aggregation").val()
+                },
+                "columns": columns
+            };
+            $.ajax({
+                'url': "/analysis/group",
+                'type': 'post',
+                'data': JSON.stringify(form),
+                'contentType': "application/json",
+                'dataType': 'json',
+                'success': function(data) {
+                    groupTable.ajax.reload();
+                    $("#add-success-modal").modal();
+                },
+                'error': function() {}
+            });
+            return false;
+        } else {
+            console.log("invalid form");
+            return true;
+        }
     });
+    
+    $('#edit-group-modal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) 
+        var id = button.data('id') 
+        var modal = $(this)
+// modal.find('.modal-body').html(id)
+      })
+
+    
 });
