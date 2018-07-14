@@ -42,4 +42,8 @@ public class DownsampleDao {
         return downsampleMapper.updateByPrimaryKeySelective(downsample);
     }
 
+    public int deleteByPrimaryKey(int id) {
+        return downsampleMapper.deleteByPrimaryKey(id);
+    }
+
 }

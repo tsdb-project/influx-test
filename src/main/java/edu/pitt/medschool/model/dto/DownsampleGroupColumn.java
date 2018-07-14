@@ -88,7 +88,9 @@ public class DownsampleGroupColumn {
             return false;
         }
         DownsampleGroupColumn other = (DownsampleGroupColumn) that;
-        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId())) && (this.getQueryGroupId() == null ? other.getQueryGroupId() == null : this.getQueryGroupId().equals(other.getQueryGroupId())) && (this.getColumnName() == null ? other.getColumnName() == null : this.getColumnName().equals(other.getColumnName()));
+        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
+                && (this.getQueryGroupId() == null ? other.getQueryGroupId() == null : this.getQueryGroupId().equals(other.getQueryGroupId()))
+                && (this.getColumnName() == null ? other.getColumnName() == null : this.getColumnName().equals(other.getColumnName()));
     }
 
     /**

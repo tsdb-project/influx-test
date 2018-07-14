@@ -88,7 +88,9 @@ public class FeatureKey {
             return false;
         }
         FeatureKey other = (FeatureKey) that;
-        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId())) && (this.getSid() == null ? other.getSid() == null : this.getSid().equals(other.getSid())) && (this.getSidCount() == null ? other.getSidCount() == null : this.getSidCount().equals(other.getSidCount()));
+        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
+                && (this.getSid() == null ? other.getSid() == null : this.getSid().equals(other.getSid()))
+                && (this.getSidCount() == null ? other.getSidCount() == null : this.getSidCount().equals(other.getSidCount()));
     }
 
     /**

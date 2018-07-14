@@ -159,8 +159,12 @@ public class DownsampleMeta {
             return false;
         }
         DownsampleMeta other = (DownsampleMeta) that;
-        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId())) && (this.getQueryId() == null ? other.getQueryId() == null : this.getQueryId().equals(other.getQueryId())) && (this.getKey() == null ? other.getKey() == null : this.getKey().equals(other.getKey())) && (this.getValue() == null ? other.getValue() == null : this.getValue().equals(other.getValue()))
-                && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime())) && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()));
+        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
+                && (this.getQueryId() == null ? other.getQueryId() == null : this.getQueryId().equals(other.getQueryId()))
+                && (this.getKey() == null ? other.getKey() == null : this.getKey().equals(other.getKey()))
+                && (this.getValue() == null ? other.getValue() == null : this.getValue().equals(other.getValue()))
+                && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
+                && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()));
     }
 
     /**

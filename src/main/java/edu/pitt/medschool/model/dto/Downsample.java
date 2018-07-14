@@ -182,8 +182,13 @@ public class Downsample {
             return false;
         }
         Downsample other = (Downsample) that;
-        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId())) && (this.getAlias() == null ? other.getAlias() == null : this.getAlias().equals(other.getAlias())) && (this.getPeriod() == null ? other.getPeriod() == null : this.getPeriod().equals(other.getPeriod())) && (this.getDuration() == null ? other.getDuration() == null : this.getDuration().equals(other.getDuration()))
-                && (this.getOrigin() == null ? other.getOrigin() == null : this.getOrigin().equals(other.getOrigin())) && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime())) && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()));
+        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
+                && (this.getAlias() == null ? other.getAlias() == null : this.getAlias().equals(other.getAlias()))
+                && (this.getPeriod() == null ? other.getPeriod() == null : this.getPeriod().equals(other.getPeriod()))
+                && (this.getDuration() == null ? other.getDuration() == null : this.getDuration().equals(other.getDuration()))
+                && (this.getOrigin() == null ? other.getOrigin() == null : this.getOrigin().equals(other.getOrigin()))
+                && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
+                && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()));
     }
 
     /**

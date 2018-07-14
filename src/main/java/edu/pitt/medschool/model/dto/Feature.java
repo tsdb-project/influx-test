@@ -157,8 +157,14 @@ public class Feature extends FeatureKey {
             return false;
         }
         Feature other = (Feature) that;
-        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId())) && (this.getSid() == null ? other.getSid() == null : this.getSid().equals(other.getSid())) && (this.getSidCount() == null ? other.getSidCount() == null : this.getSidCount().equals(other.getSidCount())) && (this.getType() == null ? other.getType() == null : this.getType().equals(other.getType()))
-                && (this.getElectrode() == null ? other.getElectrode() == null : this.getElectrode().equals(other.getElectrode())) && (this.getFreqLow() == null ? other.getFreqLow() == null : this.getFreqLow().equals(other.getFreqLow())) && (this.getFreqHigh() == null ? other.getFreqHigh() == null : this.getFreqHigh().equals(other.getFreqHigh())) && (this.getBrainLocation() == null ? other.getBrainLocation() == null : this.getBrainLocation().equals(other.getBrainLocation()))
+        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
+                && (this.getSid() == null ? other.getSid() == null : this.getSid().equals(other.getSid()))
+                && (this.getSidCount() == null ? other.getSidCount() == null : this.getSidCount().equals(other.getSidCount()))
+                && (this.getType() == null ? other.getType() == null : this.getType().equals(other.getType()))
+                && (this.getElectrode() == null ? other.getElectrode() == null : this.getElectrode().equals(other.getElectrode()))
+                && (this.getFreqLow() == null ? other.getFreqLow() == null : this.getFreqLow().equals(other.getFreqLow()))
+                && (this.getFreqHigh() == null ? other.getFreqHigh() == null : this.getFreqHigh().equals(other.getFreqHigh()))
+                && (this.getBrainLocation() == null ? other.getBrainLocation() == null : this.getBrainLocation().equals(other.getBrainLocation()))
                 && (this.getNotes() == null ? other.getNotes() == null : this.getNotes().equals(other.getNotes()));
     }
 

@@ -283,6 +283,76 @@ public class DownsampleGroupExample {
             return (Criteria) this;
         }
 
+        public Criteria andLabelIsNull() {
+            addCriterion("label is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelIsNotNull() {
+            addCriterion("label is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelEqualTo(String value) {
+            addCriterion("label =", value, "label");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelNotEqualTo(String value) {
+            addCriterion("label <>", value, "label");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelGreaterThan(String value) {
+            addCriterion("label >", value, "label");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelGreaterThanOrEqualTo(String value) {
+            addCriterion("label >=", value, "label");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelLessThan(String value) {
+            addCriterion("label <", value, "label");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelLessThanOrEqualTo(String value) {
+            addCriterion("label <=", value, "label");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelLike(String value) {
+            addCriterion("label like", value, "label");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelNotLike(String value) {
+            addCriterion("label not like", value, "label");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelIn(List<String> values) {
+            addCriterion("label in", values, "label");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelNotIn(List<String> values) {
+            addCriterion("label not in", values, "label");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelBetween(String value1, String value2) {
+            addCriterion("label between", value1, value2, "label");
+            return (Criteria) this;
+        }
+
+        public Criteria andLabelNotBetween(String value1, String value2) {
+            addCriterion("label not between", value1, value2, "label");
+            return (Criteria) this;
+        }
+
         public Criteria andDownsampleIsNull() {
             addCriterion("downsample is null");
             return (Criteria) this;
@@ -423,6 +493,76 @@ public class DownsampleGroupExample {
             return (Criteria) this;
         }
 
+        public Criteria andColumnsIsNull() {
+            addCriterion("columns is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsIsNotNull() {
+            addCriterion("columns is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsEqualTo(String value) {
+            addCriterion("columns =", value, "columns");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsNotEqualTo(String value) {
+            addCriterion("columns <>", value, "columns");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsGreaterThan(String value) {
+            addCriterion("columns >", value, "columns");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsGreaterThanOrEqualTo(String value) {
+            addCriterion("columns >=", value, "columns");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsLessThan(String value) {
+            addCriterion("columns <", value, "columns");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsLessThanOrEqualTo(String value) {
+            addCriterion("columns <=", value, "columns");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsLike(String value) {
+            addCriterion("columns like", value, "columns");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsNotLike(String value) {
+            addCriterion("columns not like", value, "columns");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsIn(List<String> values) {
+            addCriterion("columns in", values, "columns");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsNotIn(List<String> values) {
+            addCriterion("columns not in", values, "columns");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsBetween(String value1, String value2) {
+            addCriterion("columns between", value1, value2, "columns");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsNotBetween(String value1, String value2) {
+            addCriterion("columns not between", value1, value2, "columns");
+            return (Criteria) this;
+        }
+
         public Criteria andCreateTimeIsNull() {
             addCriterion("create_time is null");
             return (Criteria) this;
@@ -543,6 +683,11 @@ public class DownsampleGroupExample {
             return (Criteria) this;
         }
 
+        public Criteria andLabelLikeInsensitive(String value) {
+            addCriterion("upper(label) like", value.toUpperCase(), "label");
+            return (Criteria) this;
+        }
+
         public Criteria andDownsampleLikeInsensitive(String value) {
             addCriterion("upper(downsample) like", value.toUpperCase(), "downsample");
             return (Criteria) this;
@@ -550,6 +695,11 @@ public class DownsampleGroupExample {
 
         public Criteria andAggregationLikeInsensitive(String value) {
             addCriterion("upper(aggregation) like", value.toUpperCase(), "aggregation");
+            return (Criteria) this;
+        }
+
+        public Criteria andColumnsLikeInsensitive(String value) {
+            addCriterion("upper(columns) like", value.toUpperCase(), "columns");
             return (Criteria) this;
         }
     }
