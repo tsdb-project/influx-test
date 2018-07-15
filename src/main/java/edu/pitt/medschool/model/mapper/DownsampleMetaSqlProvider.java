@@ -218,7 +218,8 @@ public class DownsampleMetaSqlProvider {
                         if (criterion.getTypeHandler() == null) {
                             sb.append(String.format(parmPhrase2, criterion.getCondition(), i, j, i, j));
                         } else {
-                            sb.append(String.format(parmPhrase2_th, criterion.getCondition(), i, j, criterion.getTypeHandler(), i, j, criterion.getTypeHandler()));
+                            sb.append(String.format(parmPhrase2_th, criterion.getCondition(), i, j, criterion.getTypeHandler(), i, j,
+                                    criterion.getTypeHandler()));
                         }
                     } else if (criterion.isListValue()) {
                         sb.append(criterion.getCondition());
