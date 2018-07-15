@@ -36,85 +36,10 @@
             </header>
             <div class="card">
                 <div class="card-body">
-                    <form role="form" id="parameter-form">
-                        <h4 class="card-title">Create New Query</h4>
-                        <div class="row">
-                            <div class="col-sm-12 col-md-12">
-                                <div class="row">
-                                    <div class="col-sm-12 col-md-12">
-                                        <label>Alias</label>
-                                        <div class="input-group mb-3">
-                                            <input type="text" class="form-control" id="alias">
-                                            <i class="form-group__bar"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-4 col-md-4">
-                                        <label>Downsample Interval</label>
-                                        <div class="input-group mb-3">
-                                            <input type="text" class="form-control" id="period" placeholder="Leave empty for no downsampling">
-                                            <div class="input-group-append">
-                                                <select class="select2" data-placeholder="Time Unit" id="period_unit" data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled" selected="selected" value="">Select Time Unit</option>
-                                                    <option value="1">Seconds</option>
-                                                    <option value="60">Minutes</option>
-                                                    <option value="3600">Hours</option>
-                                                    <option value="86400">Days</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4 col-md-4">
-                                        <label>Starting Time</label>
-                                        <div class="input-group mb-3">
-                                            <input type="text" class="form-control" id="origin" placeholder="Leave empty to start at beginning">
-                                            <div class="input-group-append">
-                                                <select class="select2" data-placeholder="Time Unit" id="origin_unit" data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled" selected="selected" value="">Select Time Unit</option>
-                                                    <option value="1">Seconds</option>
-                                                    <option value="60">Minutes</option>
-                                                    <option value="3600">Hours</option>
-                                                    <option value="86400">Days</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4 col-md-4">
-                                        <label>Duration</label>
-                                        <div class="input-group mb-3">
-                                            <input type="text" class="form-control" id="duration" placeholder="Leave empty for the whole measure process">
-                                            <div class="input-group-append">
-                                                <select class="select2" data-placeholder="Time Unit" id="duration_unit" data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled" selected="selected" value="">Select Time Unit</option>
-                                                    <option value="1">Seconds</option>
-                                                    <option value="60">Minutes</option>
-                                                    <option value="3600">Hours</option>
-                                                    <option value="86400">Days</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-4 col-md-2">
-                                <div class="form-group">
-                                    <label>&nbsp</label>
-                                    <button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" id="createButton">Create</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-
-            <div class="card">
-                <div class="card-body">
-                    <h3 class="card-title">Existing Queries</h3>
-                    <h4 class="card-subtitle">Choose a query template to edit.</h4>
+                    <h3 class="card-title">
+                        Choose a query template to edit or
+                        <a href="/analysis/create">CREATE A NEW QUERY</a>
+                    </h3>
                     <div class="table-responsive">
                         <table id="queryTable" class="table table-bordered">
                             <thead class="thead-default">

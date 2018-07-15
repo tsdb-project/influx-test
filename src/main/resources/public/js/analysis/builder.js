@@ -47,27 +47,33 @@ $(document).ready(function() {
     });
 
     $("#createButton").click(function() {
-        var form = {
-            "alias" : $("#alias").val(),
-            "period" : $("#period").val() * $("#period_unit").val(),
-            "origin" : $("#origin").val() * $("#origin_unit").val(),
-            "duration" : $("#duration").val() * $("#duration_unit").val()
-        };
-        $.ajax({
-            'url' : "/analysis/query",
-            'type' : 'post',
-            'data' : JSON.stringify(form),
-            'contentType' : "application/json",
-            'dataType' : 'json',
-            'success' : function(data) {
-                queries = data;
-                table.clear().draw();
-                table.rows.add(queries.data); // Add new data
-                table.columns.adjust().draw();
-            },
-            'error' : function() {
-            }
-        });
+
+        if ($('#parameter-form')[0].checkValidity()) {
+            var form = {
+                "alias" : $("#alias").val(),
+                "period" : $("#period").val() * $("#period_unit").val(),
+                "origin" : $("#origin").val() * $("#origin_unit").val(),
+                "duration" : $("#duration").val() * $("#duration_unit").val()
+            };
+            $.ajax({
+                'url' : "/analysis/query",
+                'type' : 'post',
+                'data' : JSON.stringify(form),
+                'contentType' : "application/json",
+                'dataType' : 'json',
+                'success' : function(data) {
+                    queries = data;
+                    table.clear().draw();
+                    table.rows.add(queries.data); // Add new data
+                    table.columns.adjust().draw();
+                },
+                'error' : function() {
+                }
+            });
+        } else {
+            console.log("invalid form");
+        }
+
     });
 
     function secondsToStr(seconds) {
@@ -100,8 +106,8 @@ $(document).ready(function() {
 
     function localeDateString(date) {
         var options = {
-            hour12 : false,
-            timeZone : "America/Anchorage"
+            hour12 : true,
+            timeZone : "America/New_York"
         };
         return new Date(date).toLocaleString('en-US', options);
     }
