@@ -68,10 +68,19 @@ public class AnalysisController {
         return model;
     }
 
+    @RequestMapping("analysis/create")
+    public Model createPage(Model model) {
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "builder");
+        List<Downsample> downsamples = analysisService.selectAll();
+        model.addAttribute("downsamples", downsamples);
+        return model;
+    }
+
     @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
-        modelAndView.addObject("subnav", "edit");
+        modelAndView.addObject("subnav", "builder");
         modelAndView.setViewName("analysis/edit");
         if (id.isPresent()) {
             modelAndView.addObject("edit", true);
@@ -97,11 +106,15 @@ public class AnalysisController {
 
     @RequestMapping(value = "analysis/query", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> insert(@RequestBody(required = true) Downsample downsample) throws Exception {
-        analysisService.insert(downsample);
-        Map<String, Object> map = new HashMap<>();
-        map.put("data", analysisService.selectAll());
-        return map;
+    public RestfulResponse insert(@RequestBody(required = true) Downsample downsample) throws Exception {
+        RestfulResponse response;
+        if (analysisService.insert(downsample) == 1) {
+            response = new RestfulResponse(1, "success");
+            response.setData(downsample);
+        } else {
+            response = new RestfulResponse(0, "insert failed");
+        }
+        return response;
     }
 
     @RequestMapping(value = "analysis/query", method = RequestMethod.PUT)
@@ -117,11 +130,34 @@ public class AnalysisController {
         return map;
     }
 
+    @RequestMapping(value = "analysis/query", method = RequestMethod.DELETE)
+    @ResponseBody
+    public Map<String, Object> delete(@RequestBody(required = true) Downsample downsample) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        if (analysisService.deleteByPrimaryKey(downsample.getId()) == 1) {
+            map.put("res", new RestfulResponse(1, "success"));
+        } else {
+            map.put("res", new RestfulResponse(0, "deletion failed"));
+        }
+        map.put("data", null);
+        return map;
+    }
+
     @RequestMapping(value = "analysis/group/{queryId}", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> allQueryGroup(@PathVariable Integer queryId, Model model) {
         Map<String, Object> map = new HashMap<>();
         map.put("data", analysisService.selectAllAggregationGroupByQueryId(queryId));
+        RestfulResponse response = new RestfulResponse(1, "success");
+        map.put("res", response);
+        return map;
+    }
+
+    @RequestMapping(value = "analysis/group/group/{groupId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> aQueryGroup(@PathVariable Integer groupId, Model model) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", analysisService.selectAggregationGroupByGroupId(groupId));
         RestfulResponse response = new RestfulResponse(1, "success");
         map.put("res", response);
         return map;
@@ -152,6 +188,18 @@ public class AnalysisController {
         return map;
     }
 
+    @RequestMapping(value = "analysis/group", method = RequestMethod.DELETE)
+    @ResponseBody
+    public Map<String, Object> deleteQueryGroup(@RequestBody(required = true) Integer groupId) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        if (analysisService.deleteGroupByPrimaryKey(groupId) == 1) {
+            map.put("res", new RestfulResponse(1, "success"));
+        } else {
+            map.put("res", new RestfulResponse(0, "delete failed"));
+        }
+        return map;
+    }
+
     @RequestMapping("api/export/electrode")
     @ResponseBody
     public List<String> electrode(@RequestBody(required = true) List<String> measures, Model model) {
@@ -159,7 +207,7 @@ public class AnalysisController {
     }
 
     public static class ColumnRequest {
-        public String measure;
+        public List<String> measure;
         public List<String> electrode;
     }
 

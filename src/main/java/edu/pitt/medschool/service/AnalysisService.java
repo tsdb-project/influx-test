@@ -49,8 +49,11 @@ public class AnalysisService {
     DownsampleGroupAggrDao downsampleGroupAggrDao;
 
     /*
-     * Be able to restrict the epochs for which data are exported (e.g. specify to export up to the first 36 hours of available data, but truncate data thereafter). Be able to specify which columns are exported (e.g.
-     * I10_*, I10_2 only, all data, etc) Be able to export down sampled data (e.g. hourly mean, median, variance, etc)
+     * Be able to restrict the epochs for which data are exported (e.g. specify to
+     * export up to the first 36 hours of available data, but truncate data
+     * thereafter). Be able to specify which columns are exported (e.g. I10_*, I10_2
+     * only, all data, etc) Be able to export down sampled data (e.g. hourly mean,
+     * median, variance, etc)
      */
     @Autowired
     PatientDao patientDao;
@@ -91,10 +94,10 @@ public class AnalysisService {
 
         System.out.println(dir.getAbsolutePath() + '/');
         CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/output.csv"));
-        String[] cols = new String[] { "ID", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9", "aEEG10", "aEEG11", "aEEG12", "aEEG13", "aEEG14",
-                "aEEG15", "aEEG16", "aEEG17", "aEEG18", "aEEG19", "aEEG20", "aEEG21", "aEEG22", "aEEG23", "aEEG24", "aEEG25", "aEEG26", "aEEG27", "aEEG28", "aEEG29", "aEEG30",
-                "aEEG31", "aEEG32", "aEEG33", "aEEG34", "aEEG35", "aEEG36", "aEEG37", "aEEG38", "aEEG39", "aEEG40", "aEEG41", "aEEG42", "aEEG43", "aEEG44", "aEEG45", "aEEG46",
-                "aEEG47", "aEEG48" };
+        String[] cols = new String[] { "ID", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9", "aEEG10", "aEEG11",
+                "aEEG12", "aEEG13", "aEEG14", "aEEG15", "aEEG16", "aEEG17", "aEEG18", "aEEG19", "aEEG20", "aEEG21", "aEEG22", "aEEG23", "aEEG24",
+                "aEEG25", "aEEG26", "aEEG27", "aEEG28", "aEEG29", "aEEG30", "aEEG31", "aEEG32", "aEEG33", "aEEG34", "aEEG35", "aEEG36", "aEEG37",
+                "aEEG38", "aEEG39", "aEEG40", "aEEG41", "aEEG42", "aEEG43", "aEEG44", "aEEG45", "aEEG46", "aEEG47", "aEEG48" };
         writer.writeNext(cols);
         Runnable queryTask = () -> {
             String patientId;
@@ -113,7 +116,19 @@ public class AnalysisService {
                         CSVWriter writerSeparate = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/" + patientId + ".csv"));
                         writerSeparate.writeNext(cols);
 
-                        String template = "select median(avg) as MEDIAN, count(avg) as COUNT from (select (\"I64_1\" + \"I64_2\" + \"I64_3\" + \"I64_4\" + \"I64_5\" + \"I65_1\" + \"I65_2\" + \"I65_3\" + \"I65_4\" + \"I65_5\" + \"I66_1\" + \"I66_2\" + \"I66_3\" + \"I66_4\" + \"I66_5\" + \"I67_1\" + \"I67_2\" + \"I67_3\" + \"I67_4\" + \"I67_5\" + \"I68_1\" + \"I68_2\" + \"I68_3\" + \"I68_4\" + \"I68_5\" + \"I69_1\" + \"I69_2\" + \"I69_3\" + \"I69_4\" + \"I69_5\" + \"I70_1\" + \"I70_2\" + \"I70_3\" + \"I70_4\" + \"I70_5\" + \"I71_1\" + \"I71_2\" + \"I71_3\" + \"I71_4\" + \"I71_5\" + \"I72_1\" + \"I72_2\" + \"I72_3\" + \"I72_4\" + \"I72_5\" + \"I73_1\" + \"I73_2\" + \"I73_3\" + \"I73_4\" + \"I73_5\" + \"I74_1\" + \"I74_2\" + \"I74_3\" + \"I74_4\" + \"I74_5\" + \"I75_1\" + \"I75_2\" + \"I75_3\" + \"I75_4\" + \"I75_5\" + \"I76_1\" + \"I76_2\" + \"I76_3\" + \"I76_4\" + \"I76_5\" + \"I77_1\" + \"I77_2\" + \"I77_3\" + \"I77_4\" + \"I77_5\" + \"I78_1\" + \"I78_2\" + \"I78_3\" + \"I78_4\" + \"I78_5\" + \"I79_1\" + \"I79_2\" + \"I79_3\" + \"I79_4\" + \"I79_5\" + \"I80_1\" + \"I80_2\" + \"I80_3\" + \"I80_4\" + \"I80_5\" + \"I81_1\" + \"I81_2\" + \"I81_3\" + \"I81_4\" + \"I81_5\") / 90 as avg from \"%s\" where arType = 'ar' LIMIT 172800) where time >= '%s' and time < '%s' + 48h and avg > 2 group by time(1h, %ss)";
+                        String template = "select median(avg) as MEDIAN, count(avg) as COUNT from "
+                                + "(select (\"I64_1\" + \"I64_2\" + \"I64_3\" + \"I64_4\" + \"I64_5\" + \"I65_1\" + \"I65_2\" + \"I65_3\" + "
+                                + "\"I65_4\" + \"I65_5\" + \"I66_1\" + \"I66_2\" + \"I66_3\" + \"I66_4\" + \"I66_5\" + \"I67_1\" + \"I67_2\" + "
+                                + "\"I67_3\" + \"I67_4\" + \"I67_5\" + \"I68_1\" + \"I68_2\" + \"I68_3\" + \"I68_4\" + \"I68_5\" + \"I69_1\" + "
+                                + "\"I69_2\" + \"I69_3\" + \"I69_4\" + \"I69_5\" + \"I70_1\" + \"I70_2\" + \"I70_3\" + \"I70_4\" + \"I70_5\" + "
+                                + "\"I71_1\" + \"I71_2\" + \"I71_3\" + \"I71_4\" + \"I71_5\" + \"I72_1\" + \"I72_2\" + \"I72_3\" + \"I72_4\" + "
+                                + "\"I72_5\" + \"I73_1\" + \"I73_2\" + \"I73_3\" + \"I73_4\" + \"I73_5\" + \"I74_1\" + \"I74_2\" + \"I74_3\" + "
+                                + "\"I74_4\" + \"I74_5\" + \"I75_1\" + \"I75_2\" + \"I75_3\" + \"I75_4\" + \"I75_5\" + \"I76_1\" + \"I76_2\" + "
+                                + "\"I76_3\" + \"I76_4\" + \"I76_5\" + \"I77_1\" + \"I77_2\" + \"I77_3\" + \"I77_4\" + \"I77_5\" + \"I78_1\" + "
+                                + "\"I78_2\" + \"I78_3\" + \"I78_4\" + \"I78_5\" + \"I79_1\" + \"I79_2\" + \"I79_3\" + \"I79_4\" + \"I79_5\" + "
+                                + "\"I80_1\" + \"I80_2\" + \"I80_3\" + \"I80_4\" + \"I80_5\" + \"I81_1\" + \"I81_2\" + \"I81_3\" + \"I81_4\" + "
+                                + "\"I81_5\") / 90 as avg from \"%s\" where arType = 'ar' LIMIT 172800) where time >= '%s' and time < '%s' + 48h "
+                                + "and avg > 2 group by time(1h, %ss)";
 
                         String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId + "\" where arType = 'ar' limit 1";
                         QueryResult recordResult = influxDB.query(new Query(firstRecordTimeQuery, dbName));
@@ -198,15 +213,17 @@ public class AnalysisService {
 
         System.out.println(dir.getAbsolutePath() + '/');
         CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/output.csv"));
-        String[] cols = new String[] { "ID", "SR1", "SR2", "SR3", "SR4", "SR5", "SR6", "SR7", "SR8", "SR9", "SR10", "SR11", "SR12", "SR13", "SR14", "SR15", "SR16", "SR17", "SR18",
-                "SR19", "SR20", "SR21", "SR22", "SR23", "SR24", "SR25", "SR26", "SR27", "SR28", "SR29", "SR30", "SR31", "SR32", "SR33", "SR34", "SR35", "SR36", "SR37", "SR38",
-                "SR39", "SR40", "SR41", "SR42", "SR43", "SR44", "SR45", "SR46", "SR47", "SR48", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9",
-                "aEEG10", "aEEG11", "aEEG12", "aEEG13", "aEEG14", "aEEG15", "aEEG16", "aEEG17", "aEEG18", "aEEG19", "aEEG20", "aEEG21", "aEEG22", "aEEG23", "aEEG24", "aEEG25",
-                "aEEG26", "aEEG27", "aEEG28", "aEEG29", "aEEG30", "aEEG31", "aEEG32", "aEEG33", "aEEG34", "aEEG35", "aEEG36", "aEEG37", "aEEG38", "aEEG39", "aEEG40", "aEEG41",
-                "aEEG42", "aEEG43", "aEEG44", "aEEG45", "aEEG46", "aEEG47", "aEEG48", "SZProb1", "SZProb2", "SZProb3", "SZProb4", "SZProb5", "SZProb6", "SZProb7", "SZProb8",
-                "SZProb9", "SZProb10", "SZProb11", "SZProb12", "SZProb13", "SZProb14", "SZProb15", "SZProb16", "SZProb17", "SZProb18", "SZProb19", "SZProb20", "SZProb21",
-                "SZProb22", "SZProb23", "SZProb24", "SZProb25", "SZProb26", "SZProb27", "SZProb28", "SZProb29", "SZProb30", "SZProb31", "SZProb32", "SZProb33", "SZProb34",
-                "SZProb35", "SZProb36", "SZProb37", "SZProb38", "SZProb39", "SZProb40", "SZProb41", "SZProb42", "SZProb43", "SZProb44", "SZProb45", "SZProb46", "SZProb47",
+        String[] cols = new String[] { "ID", "SR1", "SR2", "SR3", "SR4", "SR5", "SR6", "SR7", "SR8", "SR9", "SR10", "SR11", "SR12", "SR13", "SR14",
+                "SR15", "SR16", "SR17", "SR18", "SR19", "SR20", "SR21", "SR22", "SR23", "SR24", "SR25", "SR26", "SR27", "SR28", "SR29", "SR30",
+                "SR31", "SR32", "SR33", "SR34", "SR35", "SR36", "SR37", "SR38", "SR39", "SR40", "SR41", "SR42", "SR43", "SR44", "SR45", "SR46",
+                "SR47", "SR48", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9", "aEEG10", "aEEG11", "aEEG12",
+                "aEEG13", "aEEG14", "aEEG15", "aEEG16", "aEEG17", "aEEG18", "aEEG19", "aEEG20", "aEEG21", "aEEG22", "aEEG23", "aEEG24", "aEEG25",
+                "aEEG26", "aEEG27", "aEEG28", "aEEG29", "aEEG30", "aEEG31", "aEEG32", "aEEG33", "aEEG34", "aEEG35", "aEEG36", "aEEG37", "aEEG38",
+                "aEEG39", "aEEG40", "aEEG41", "aEEG42", "aEEG43", "aEEG44", "aEEG45", "aEEG46", "aEEG47", "aEEG48", "SZProb1", "SZProb2", "SZProb3",
+                "SZProb4", "SZProb5", "SZProb6", "SZProb7", "SZProb8", "SZProb9", "SZProb10", "SZProb11", "SZProb12", "SZProb13", "SZProb14",
+                "SZProb15", "SZProb16", "SZProb17", "SZProb18", "SZProb19", "SZProb20", "SZProb21", "SZProb22", "SZProb23", "SZProb24", "SZProb25",
+                "SZProb26", "SZProb27", "SZProb28", "SZProb29", "SZProb30", "SZProb31", "SZProb32", "SZProb33", "SZProb34", "SZProb35", "SZProb36",
+                "SZProb37", "SZProb38", "SZProb39", "SZProb40", "SZProb41", "SZProb42", "SZProb43", "SZProb44", "SZProb45", "SZProb46", "SZProb47",
                 "SZProb48" };
         writer.writeNext(cols);
         Runnable queryTask = () -> {
@@ -226,7 +243,21 @@ public class AnalysisService {
                         CSVWriter writerSeparate = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/" + patientId + ".csv"));
                         writerSeparate.writeNext(cols);
 
-                        String template = "select median(SR) as SR, median(aEEG) as aEEG, median(SZProb) as SZProb, count(SZProb) as count from (select (\"I213_1\" + \"I214_1\" + \"I215_1\" + \"I216_1\" + \"I217_1\" + \"I218_1\" + \"I219_1\" + \"I220_1\" + \"I221_1\" + \"I222_1\" + \"I223_1\" + \"I224_1\" + \"I225_1\" + \"I226_1\" + \"I227_1\" + \"I228_1\" + \"I229_1\" + \"I230_1\") / 18 as SR, (\"I64_1\" + \"I64_2\" + \"I64_3\" + \"I64_4\" + \"I64_5\" + \"I65_1\" + \"I65_2\" + \"I65_3\" + \"I65_4\" + \"I65_5\" + \"I66_1\" + \"I66_2\" + \"I66_3\" + \"I66_4\" + \"I66_5\" + \"I67_1\" + \"I67_2\" + \"I67_3\" + \"I67_4\" + \"I67_5\" + \"I68_1\" + \"I68_2\" + \"I68_3\" + \"I68_4\" + \"I68_5\" + \"I69_1\" + \"I69_2\" + \"I69_3\" + \"I69_4\" + \"I69_5\" + \"I70_1\" + \"I70_2\" + \"I70_3\" + \"I70_4\" + \"I70_5\" + \"I71_1\" + \"I71_2\" + \"I71_3\" + \"I71_4\" + \"I71_5\" + \"I72_1\" + \"I72_2\" + \"I72_3\" + \"I72_4\" + \"I72_5\" + \"I73_1\" + \"I73_2\" + \"I73_3\" + \"I73_4\" + \"I73_5\" + \"I74_1\" + \"I74_2\" + \"I74_3\" + \"I74_4\" + \"I74_5\" + \"I75_1\" + \"I75_2\" + \"I75_3\" + \"I75_4\" + \"I75_5\" + \"I76_1\" + \"I76_2\" + \"I76_3\" + \"I76_4\" + \"I76_5\" + \"I77_1\" + \"I77_2\" + \"I77_3\" + \"I77_4\" + \"I77_5\" + \"I78_1\" + \"I78_2\" + \"I78_3\" + \"I78_4\" + \"I78_5\" + \"I79_1\" + \"I79_2\" + \"I79_3\" + \"I79_4\" + \"I79_5\" + \"I80_1\" + \"I80_2\" + \"I80_3\" + \"I80_4\" + \"I80_5\" + \"I81_1\" + \"I81_2\" + \"I81_3\" + \"I81_4\" + \"I81_5\") / 90 as aEEG, \"I3_1\" as SZProb from \"%s\" where arType = 'ar' LIMIT 172800) where time >= '%s' and time < '%s' + 48h group by time(1h, %ss)";
+                        String template = "select median(SR) as SR, median(aEEG) as aEEG, median(SZProb) as SZProb, count(SZProb) as count from "
+                                + "(select (\"I213_1\" + \"I214_1\" + \"I215_1\" + \"I216_1\" + \"I217_1\" + \"I218_1\" + \"I219_1\" + "
+                                + "\"I220_1\" + \"I221_1\" + \"I222_1\" + \"I223_1\" + \"I224_1\" + \"I225_1\" + \"I226_1\" + \"I227_1\" + "
+                                + "\"I228_1\" + \"I229_1\" + \"I230_1\") / 18 as SR, (\"I64_1\" + \"I64_2\" + \"I64_3\" + \"I64_4\" + \"I64_5\" + "
+                                + "\"I65_1\" + \"I65_2\" + \"I65_3\" + \"I65_4\" + \"I65_5\" + \"I66_1\" + \"I66_2\" + \"I66_3\" + \"I66_4\" + "
+                                + "\"I66_5\" + \"I67_1\" + \"I67_2\" + \"I67_3\" + \"I67_4\" + \"I67_5\" + \"I68_1\" + \"I68_2\" + \"I68_3\" + "
+                                + "\"I68_4\" + \"I68_5\" + \"I69_1\" + \"I69_2\" + \"I69_3\" + \"I69_4\" + \"I69_5\" + \"I70_1\" + \"I70_2\" + "
+                                + "\"I70_3\" + \"I70_4\" + \"I70_5\" + \"I71_1\" + \"I71_2\" + \"I71_3\" + \"I71_4\" + \"I71_5\" + \"I72_1\" + "
+                                + "\"I72_2\" + \"I72_3\" + \"I72_4\" + \"I72_5\" + \"I73_1\" + \"I73_2\" + \"I73_3\" + \"I73_4\" + \"I73_5\" + "
+                                + "\"I74_1\" + \"I74_2\" + \"I74_3\" + \"I74_4\" + \"I74_5\" + \"I75_1\" + \"I75_2\" + \"I75_3\" + \"I75_4\" + "
+                                + "\"I75_5\" + \"I76_1\" + \"I76_2\" + \"I76_3\" + \"I76_4\" + \"I76_5\" + \"I77_1\" + \"I77_2\" + \"I77_3\" + "
+                                + "\"I77_4\" + \"I77_5\" + \"I78_1\" + \"I78_2\" + \"I78_3\" + \"I78_4\" + \"I78_5\" + \"I79_1\" + \"I79_2\" + "
+                                + "\"I79_3\" + \"I79_4\" + \"I79_5\" + \"I80_1\" + \"I80_2\" + \"I80_3\" + \"I80_4\" + \"I80_5\" + \"I81_1\" + "
+                                + "\"I81_2\" + \"I81_3\" + \"I81_4\" + \"I81_5\") / 90 as aEEG, \"I3_1\" as SZProb from \"%s\" where arType = 'ar' LIMIT 172800) "
+                                + "where time >= '%s' and time < '%s' + 48h group by time(1h, %ss)";
 
                         String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId + "\" where arType = 'ar' limit 1";
                         QueryResult recordResult = influxDB.query(new Query(firstRecordTimeQuery, dbName));
@@ -252,7 +283,8 @@ public class AnalysisService {
                             if (res.size() > i) {
                                 List<Object> vals = res.get(i);
                                 for (int j = 1; j <= 3; j++) {
-                                    if (Double.valueOf(vals.get(4).toString()).intValue() < 600 && Double.valueOf(vals.get(4).toString()).intValue() > 0) {
+                                    if (Double.valueOf(vals.get(4).toString()).intValue() < 600
+                                            && Double.valueOf(vals.get(4).toString()).intValue() > 0) {
                                         row[1 + (j - 1) * 48 + i] = "Insuff. Data";
                                     } else if (vals.get(j) == null) {
                                         row[1 + (j - 1) * 48 + i] = "N/A";
@@ -291,7 +323,8 @@ public class AnalysisService {
         }
     }
 
-    public void exportFromPatientsWithDownsampling(List<String> patients, String column, String method, String interval, String time) throws IOException {
+    public void exportFromPatientsWithDownsampling(List<String> patients, String column, String method, String interval, String time)
+            throws IOException {
         File dir = new File(DIRECTORY + LocalDateTime.now().toString());
         if (!dir.exists()) {
             try {
@@ -370,6 +403,10 @@ public class AnalysisService {
         return downsampleDao.updateByPrimaryKey(downsample);
     }
 
+    public int deleteByPrimaryKey(int id) {
+        return downsampleDao.deleteByPrimaryKey(id);
+    }
+
     /**
      * @param queryId
      * @return
@@ -385,14 +422,15 @@ public class AnalysisService {
     @Transactional(rollbackFor = Exception.class)
     public boolean insertAggregationGroup(DownsampleGroupVO group) {
         try {
+            group.getGroup().setColumns(group.getColumns());
             downsampleGroupDao.insert(group.getGroup());
-            int queryGroupId = group.getGroup().getId();
-            for (String columnName : group.getColumns()) {
-                DownsampleGroupColumn column = new DownsampleGroupColumn();
-                column.setQueryGroupId(queryGroupId);
-                column.setColumnName(columnName);
-                downsampleGroupColumnDao.insert(column);
-            }
+            // int queryGroupId = group.getGroup().getId();
+            // for (String columnName : group.getColumns().split(", ")) {
+            // DownsampleGroupColumn column = new DownsampleGroupColumn();
+            // column.setQueryGroupId(queryGroupId);
+            // column.setColumnName(columnName);
+            // downsampleGroupColumnDao.insert(column);
+            // }
         } catch (Exception e) {
             System.out.println(e);
             return false;
@@ -405,8 +443,7 @@ public class AnalysisService {
      * @return
      */
     public int updateAggregationGroup(DownsampleGroupVO group) {
-        // TODO Auto-generated method stub
-        return 0;
+        return downsampleGroupDao.updateByPrimaryKeyWithBLOBs(group.getGroup());
     }
 
     /**
@@ -415,7 +452,8 @@ public class AnalysisService {
      * @param downsampleGroups
      * @throws IOException
      */
-    public void exportFromPatientsWithDownsamplingGroups(List<String> pids, Downsample downsample, List<DownsampleGroupVO> downsampleGroups) throws IOException {
+    public void exportFromPatientsWithDownsamplingGroups(List<String> pids, Downsample downsample, List<DownsampleGroupVO> downsampleGroups)
+            throws IOException {
         File dir = new File(DIRECTORY + LocalDateTime.now().toString());
         if (!dir.exists()) {
             try {
@@ -429,11 +467,11 @@ public class AnalysisService {
         List<String> fieldList = new ArrayList<>();
         for (DownsampleGroupVO downsampleGroupVO : downsampleGroups) {
             String field = "";// downsampleGroupVO.getGroup().getAggregation();
-            for (String column : downsampleGroupVO.getColumns()) {
+            for (String column : downsampleGroupVO.getColumns().split(", ")) {
                 field += "mean" + "(\"" + column + "\")" + "+";
             }
-            field = field.substring(0, field.length() - 1) + " as \"" + downsampleGroupVO.getGroup().getAggregation() + "(" + String.join(", ", downsampleGroupVO.getColumns())
-                    + ")\"";
+            field = field.substring(0, field.length() - 1) + " as \"" + downsampleGroupVO.getGroup().getAggregation() + "("
+                    + String.join(", ", downsampleGroupVO.getColumns()) + ")\"";
             fieldList.add(field);
         }
         fields = String.join(", ", fieldList);
@@ -478,6 +516,14 @@ public class AnalysisService {
             logger.debug("EXPORT JOB FINISHED");
         }
 
+    }
+
+    public DownsampleGroupVO selectAggregationGroupByGroupId(Integer groupId) {
+        return downsampleGroupDao.selectDownsampleGroupVO(groupId);
+    }
+
+    public int deleteGroupByPrimaryKey(Integer groupId) {
+        return downsampleGroupDao.deleteByPrimaryKey(groupId);
     }
 
 }
