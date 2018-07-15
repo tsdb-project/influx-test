@@ -23,20 +23,44 @@ public class QueryTemplate {
      * @param description Brief info about it
      */
     public QueryTemplate(String sql, String description) {
-        this._sqlTemplate = sql;
-        this._sqlDescription = description;
+        this.set_sqlTemplate(sql);
+        this.set_sqlDescription(description);
     }
 
     public void updateSqlTemplate(String newSql) {
-        this._sqlTemplate = newSql;
+        this.set_sqlTemplate(newSql);
     }
 
     public void updateTemplateDescription(String newDesc) {
-        this._sqlDescription = newDesc;
+        this.set_sqlDescription(newDesc);
     }
 
-    private void analyzeVars(String sqlT) {
+    void analyzeVars(String sqlT) {
 
+    }
+
+    public String get_sqlTemplate() {
+        return _sqlTemplate;
+    }
+
+    public void set_sqlTemplate(String _sqlTemplate) {
+        this._sqlTemplate = _sqlTemplate;
+    }
+
+    public String get_sqlDescription() {
+        return _sqlDescription;
+    }
+
+    public void set_sqlDescription(String _sqlDescription) {
+        this._sqlDescription = _sqlDescription;
+    }
+
+    public Map<String, String> get_variables() {
+        return _variables;
+    }
+
+    public void set_variables(Map<String, String> _variables) {
+        this._variables = _variables;
     }
 
 }
