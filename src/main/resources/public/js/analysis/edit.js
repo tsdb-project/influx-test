@@ -78,7 +78,6 @@ $(document).ready(function() {
     });
 
     $("#saveButton").click(function() {
-
         if ($('#parameter-form')[0].checkValidity()) {
             var form = {
                 "id": $("#id").val(),
@@ -148,6 +147,41 @@ $(document).ready(function() {
         });
     });
 
+    $("#electrode").change(function() {
+        console.log($("#electrode").val());
+        var form = {
+            "measure": [$("#measure").val()],
+            "electrode": [$("#electrode").val()]
+        };
+        $.ajax({
+            'url': "/api/export/column",
+            'type': 'post',
+            'data': JSON.stringify(form),
+            'contentType': "application/json",
+            'dataType': 'json',
+            'success': function(data) {
+                var $column = $('#column');
+                // $column.attr("size", data.length);
+                $column.empty();
+                for (var i = 0; i < data.length; i++) {
+                    $column.append('<option value="' + data[i] + '">' + data[i] + '</option>');
+                }
+                $column.change();
+            },
+            'error': function() {}
+        });
+    });
+    
+    $("#method").select2({
+        width: "100%",
+        dropdownCssClass: "custom-dropdown"
+    });
+
+    $("#aggregation").select2({
+        width: "100%",
+        dropdownCssClass: "custom-dropdown"
+    });
+    
     $("#addButton").click(function() {
         var form = $("#column").val();
         var $columnsInGroup = $('#columnsInGroup');
@@ -181,55 +215,23 @@ $(document).ready(function() {
     $("#clearButton").click(function() {
         var form = $("#columnsInGroup").val();
         var $columnsInGroup = $('#columnsInGroup');
-        var set = new Set();
+        var set = new Object();
         $("#columnsInGroup option").each(function() {
-            set.add($(this).val());
+            set[$(this).val()] = true;
         });
+        console.log(set);
         form.forEach(function(e) {
-            set.delete(e);
+            delete set[e];
         });
+        console.log(set);
         $columnsInGroup.empty();
-        set.forEach(function(e) {
-            var html = '<option value="' + e + '">' + e + '</option>';
-            $columnsInGroup.append(html);
-        });
+        var html = ""
+        for (var e in set) {
+            html += '<option value="' + e + '">' + e + '</option>';
+        }
+        $columnsInGroup.append(html);
         // var length = $('#columnsInGroup').children('option').length;
         // $columnsInGroup.attr('size', length > 0 ? length : 1);
-    });
-
-    $("#electrode").change(function() {
-        console.log($("#electrode").val());
-        var form = {
-            "measure": [$("#measure").val()],
-            "electrode": [$("#electrode").val()]
-        };
-        $.ajax({
-            'url': "/api/export/column",
-            'type': 'post',
-            'data': JSON.stringify(form),
-            'contentType': "application/json",
-            'dataType': 'json',
-            'success': function(data) {
-                var $column = $('#column');
-                // $column.attr("size", data.length);
-                $column.empty();
-                for (var i = 0; i < data.length; i++) {
-                    $column.append('<option value="' + data[i] + '">' + data[i] + '</option>');
-                }
-                $column.change();
-            },
-            'error': function() {}
-        });
-    });
-
-    $("#method").select2({
-        width: "100%",
-        dropdownCssClass: "custom-dropdown"
-    });
-
-    $("#aggregation").select2({
-        width: "100%",
-        dropdownCssClass: "custom-dropdown"
     });
 
     $("#deleteGroupButton").click(function() {
