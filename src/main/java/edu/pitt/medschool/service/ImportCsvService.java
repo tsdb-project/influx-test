@@ -1,24 +1,14 @@
 package edu.pitt.medschool.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.util.FileLockUtil;
+import edu.pitt.medschool.framework.util.TimeUtil;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.InfluxClusterDao;
+import edu.pitt.medschool.model.dto.ImportedFile;
+import okhttp3.OkHttpClient;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -31,14 +21,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.util.FileLockUtil;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.InfluxClusterDao;
-import edu.pitt.medschool.model.dto.ImportedFile;
-import okhttp3.OkHttpClient;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Auto-parallel importing CSV data
@@ -107,8 +99,7 @@ public class ImportCsvService {
     /**
      * Add one file to the queue (Blocking)
      *
-     * @param path
-     *            File path
+     * @param path File path
      */
     public void AddOneFile(String path) {
         this.internalAddOne(path, false);
@@ -125,8 +116,7 @@ public class ImportCsvService {
     /**
      * Add a list of files into the queue (Blocking)
      *
-     * @param paths
-     *            List of files
+     * @param paths List of files
      */
     public void AddArrayFiles(String[] paths) {
         if (processingSet.isEmpty()) {
@@ -221,7 +211,7 @@ public class ImportCsvService {
 
             // Next 6 lines no use expect time date
             long tmp_size = 0;
-            String test_date="";
+            String test_date = "";
             for (int i = 0; i < 6; i++) {
                 String tmp = reader.readLine();
                 tmp_size += tmp.length();
@@ -232,7 +222,23 @@ public class ImportCsvService {
                         break;
                 }
             }
-            long test_start_time = Util.dateTimeFormatToTimestamp(test_date, "yyyy.MM.ddHH:mm:ss", null);
+            // Test date in the headers is in PGH Time
+            Date testStartDate = TimeUtil.dateTimeFormatToDate(test_date, "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
+            long testStartTimeEpoch = testStartDate.getTime();
+
+            // Special operations when on DST shifting days
+            if (TimeUtil.isThisDayOnDstShift(TimeUtil.nycTimeZone, testStartDate)) {
+                String errTemp = "%s hour on DST shift days";
+                String oper = "Add";
+                // Auto-fix the time according to month
+                if (testStartDate.getMonth() < Calendar.JUNE) {
+                    testStartTimeEpoch = TimeUtil.addOneHourToTimestamp(testStartTimeEpoch); // Mar
+                } else {
+                    testStartTimeEpoch = TimeUtil.subOneHourToTimestamp(testStartTimeEpoch); // Nov
+                    oper = "Sub";
+                }
+                logFailureFiles(file.toString(), String.format(errTemp, oper), aFileSize, currentProcessed, true);
+            }
 
             currentProcessed += tmp_size;
             totalProcessedSize.addAndGet(tmp_size);
@@ -243,8 +249,8 @@ public class ImportCsvService {
             int columnCount = columnNames.length, bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount, batchCount = 0;
 
             // More integrity checking
-            if(!columnNames[0].toLowerCase().equals("clockdatetime")) {
-                throw new RuntimeException("Wriong first column!");
+            if (!columnNames[0].toLowerCase().equals("clockdatetime")) {
+                throw new RuntimeException("Wrong first column!");
             }
 
             currentProcessed += eiL.length();
@@ -253,6 +259,7 @@ public class ImportCsvService {
             BatchPoints records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type).tag("fileName", filename.substring(0, filename.length() - 4)).build();
 
             String aLine;
+            // Process every data lines
             while ((aLine = reader.readLine()) != null) {
                 String[] values = aLine.split(",");
                 int this_line_length = aLine.length();
@@ -267,10 +274,20 @@ public class ImportCsvService {
                     continue;
                 }
 
+                // Compare date on every measures (They are all UTCs)
+                double sTime = Double.valueOf(values[0]);
+                Date measurement_date = TimeUtil.serialTimeToDate(sTime, null);
+                long measurement_epoch_time = measurement_date.getTime();
+                // To avoid some problematic files, that measurement date is not reliable
+                if (!TimeUtil.dateIsSameDay(measurement_date, testStartDate)) {
+                    String err_text = String.format("Measurement date differs from test start date on line %d!", totalLines + 8);
+                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
+                    continue;
+                }
+
                 // Measurement time should be later than test start time
-                long measurement_epoch_time = Util.serialTimeToLongDate(values[0], null);
-                if (measurement_epoch_time < test_start_time) {
-                    String err_text = String.format("Measurement time ealier than test start time on line %d!", totalLines + 8);
+                if (measurement_epoch_time < testStartTimeEpoch) {
+                    String err_text = String.format("Measurement time earlier than test start time on line %d!", totalLines + 8);
                     logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
                     continue;
                 }
@@ -332,10 +349,10 @@ public class ImportCsvService {
             } catch (InterruptedException e1) {
                 logger.error(Util.stackTraceErrorToString(e1));
             }
-            return new Object[] { Util.stackTraceErrorToString(e), currentProcessed };
+            return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
         }
 
-        return new Object[] { "OK", currentProcessed, totalLines };
+        return new Object[]{"OK", currentProcessed, totalLines};
     }
 
     /**

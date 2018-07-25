@@ -3,7 +3,7 @@
  */
 package edu.pitt.medschool.controller.analysis.vo;
 
-import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.model.dto.Downsample;
 
 /**
@@ -21,15 +21,15 @@ public class DownsampleEditResponse {
     
     public DownsampleEditResponse(Downsample downsample) {
         this.downsample = downsample;
-        String[] periodArr = Util.secondToString(downsample.getPeriod());
+        String[] periodArr = TimeUtil.secondToString(downsample.getPeriod());
         this.period = periodArr[0];
         this.periodUnit = periodArr[1];
 
-        String[] durationArr = Util.secondToString(downsample.getDuration());
+        String[] durationArr = TimeUtil.secondToString(downsample.getDuration());
         this.duration = durationArr[0];
         this.durationUnit = durationArr[1];
 
-        String[] originArr = Util.secondToString(downsample.getOrigin());
+        String[] originArr = TimeUtil.secondToString(downsample.getOrigin());
         this.origin = originArr[0];
         this.originUnit = originArr[1];
     }
