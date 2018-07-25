@@ -191,6 +191,9 @@ public class TimeUtil {
         SOP(timestampToUTCDateTimeFormat(serialTimeToLongDate(43036.6402314815, null), "yyyy-MM-dd HH:mm:ss"));
 
         SOP(null);
+        Date testStartDate = TimeUtil.dateTimeFormatToDate("2011.03.1323:22:33", "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
+        SOP(TimeUtil.isThisDayOnDstShift(TimeUtil.nycTimeZone, testStartDate));
+
         Calendar c = Calendar.getInstance(nycTimeZone);
         c.set(2011, Calendar.JANUARY, 1, 15, 0); // 3.13 and 11.6
         for (int i = 0; i < 365; i++) {

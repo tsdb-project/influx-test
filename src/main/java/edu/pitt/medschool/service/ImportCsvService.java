@@ -222,9 +222,23 @@ public class ImportCsvService {
                         break;
                 }
             }
+            // Test date in the headers is in PGH Time
             Date testStartDate = TimeUtil.dateTimeFormatToDate(test_date, "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
-            long test_start_time = testStartDate.getTime();
-            boolean isTestOnDstShift = TimeUtil.isThisDayOnDstShift(TimeUtil.nycTimeZone, testStartDate);
+            long testStartTimeEpoch = testStartDate.getTime();
+
+            // Special operations when on DST shifting days
+            if (TimeUtil.isThisDayOnDstShift(TimeUtil.nycTimeZone, testStartDate)) {
+                String errTemp = "%s hour on DST shift days";
+                String oper = "Add";
+                // Auto-fix the time according to month
+                if (testStartDate.getMonth() < Calendar.JUNE) {
+                    testStartTimeEpoch = TimeUtil.addOneHourToTimestamp(testStartTimeEpoch); // Mar
+                } else {
+                    testStartTimeEpoch = TimeUtil.subOneHourToTimestamp(testStartTimeEpoch); // Nov
+                    oper = "Sub";
+                }
+                logFailureFiles(file.toString(), String.format(errTemp, oper), aFileSize, currentProcessed, true);
+            }
 
             currentProcessed += tmp_size;
             totalProcessedSize.addAndGet(tmp_size);
@@ -236,7 +250,7 @@ public class ImportCsvService {
 
             // More integrity checking
             if (!columnNames[0].toLowerCase().equals("clockdatetime")) {
-                throw new RuntimeException("Wriong first column!");
+                throw new RuntimeException("Wrong first column!");
             }
 
             currentProcessed += eiL.length();
@@ -264,22 +278,15 @@ public class ImportCsvService {
                 double sTime = Double.valueOf(values[0]);
                 Date measurement_date = TimeUtil.serialTimeToDate(sTime, null);
                 long measurement_epoch_time = measurement_date.getTime();
+                // To avoid some problematic files, that measurement date is not reliable
                 if (!TimeUtil.dateIsSameDay(measurement_date, testStartDate)) {
-                    // To avoid some problematic files, that measurement date is not reliable
                     String err_text = String.format("Measurement date differs from test start date on line %d!", totalLines + 8);
                     logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
                     continue;
                 }
-                // At this time, we can arbitrarily add or sub one hour
-                if (isTestOnDstShift) {
-                    // IT'S THE US LAW
-                    if (measurement_date.getMonth() == Calendar.MARCH)
-                        measurement_epoch_time = TimeUtil.addOneHourToTimestamp(measurement_epoch_time);
-                    else if (measurement_date.getMonth() == Calendar.NOVEMBER)
-                        measurement_epoch_time = TimeUtil.subOneHourToTimestamp(measurement_epoch_time);
-                }
+
                 // Measurement time should be later than test start time
-                if (measurement_epoch_time < test_start_time) {
+                if (measurement_epoch_time < testStartTimeEpoch) {
                     String err_text = String.format("Measurement time earlier than test start time on line %d!", totalLines + 8);
                     logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
                     continue;
