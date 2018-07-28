@@ -20,6 +20,12 @@ public class FeatureDao {
     FeatureMapper featureMapper;
 
     public List<String> selectAllMeasures() {
-        return featureMapper.selectAllMeasures();
+        List<String> list = featureMapper.selectAllMeasures();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).equals("Time")) {
+                list.remove(i);
+            }
+        }
+        return list;
     }
 }
