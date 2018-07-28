@@ -101,4 +101,14 @@ public interface ImportedFileMapper {
     @ResultType(String.class)
     @Results({@Result(column = "PID", property = "PID", jdbcType = JdbcType.VARCHAR)})
     List<String> selectAllImportedPidPSC();
+
+    @Select({
+            "SELECT DISTINCT PID",
+            "FROM imported_file",
+            "WHERE uuid = #{machineId}",
+            "ORDER BY PID ASC"
+    })
+    @ResultType(String.class)
+    @Results({@Result(column = "PID", property = "PID", jdbcType = JdbcType.VARCHAR)})
+    List<String> selectAllImportedPidOnMachine(String machineId);
 }

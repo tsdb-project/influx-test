@@ -282,11 +282,14 @@ public class AnalysisController {
     @RequestMapping("api/export/export/{qid}")
     @ResponseBody
     public void exportQuery(@PathVariable(required = true) Integer qid) throws IOException {
-        List<String> pids = importedFileDao.getAllImportedPid(uuid);
-        System.out.println(pids);
-        Downsample downsample = analysisService.selectByPrimaryKey(qid);
-        List<DownsampleGroupVO> downsampleGroups = analysisService.selectAllAggregationGroupByQueryId(qid);
-        analysisService.exportFromPatientsWithDownsamplingGroups(pids, downsample, downsampleGroups);
+        // List<String> pids = importedFileDao.getAllImportedPid(uuid);
+        // System.out.println(pids);
+        // Downsample downsample = analysisService.selectByPrimaryKey(qid);
+        // List<DownsampleGroupVO> downsampleGroups = analysisService.selectAllAggregationGroupByQueryId(qid);
+        // analysisService.exportFromPatientsWithDownsamplingGroups(pids, downsample, downsampleGroups);
+
+        analysisService.exportToFile(qid, true);
+
     }
 
 }

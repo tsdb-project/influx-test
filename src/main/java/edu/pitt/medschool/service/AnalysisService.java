@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * Export functions
@@ -49,16 +50,15 @@ public class AnalysisService {
     DownsampleGroupAggrDao downsampleGroupAggrDao;
 
     /*
-     * Be able to restrict the epochs for which data are exported (e.g. specify to
-     * export up to the first 36 hours of available data, but truncate data
-     * thereafter). Be able to specify which columns are exported (e.g. I10_*, I10_2
-     * only, all data, etc) Be able to export down sampled data (e.g. hourly mean,
-     * median, variance, etc)
+     * Be able to restrict the epochs for which data are exported (e.g. specify to export up to the first 36 hours of available data, but truncate
+     * data thereafter). Be able to specify which columns are exported (e.g. I10_*, I10_2 only, all data, etc) Be able to export down sampled data
+     * (e.g. hourly mean, median, variance, etc)
      */
     @Autowired
     PatientDao patientDao;
     @Autowired
     ImportedFileDao importedFileDao;
+
     private InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
             new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(300, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS));
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -68,6 +68,168 @@ public class AnalysisService {
 
     public static void main(String[] args) {
 
+    }
+
+    public void exportToFile(Integer queryId, Boolean testRun) throws IOException {
+        // Create Folder
+        Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
+        File dir = new File(DIRECTORY + exportQuery.getAlias() + LocalDateTime.now().toString());
+        if (!dir.exists()) {
+            try {
+                dir.mkdirs();
+            } catch (SecurityException se) {
+                System.out.println("Failed to create dir \"/results\"");
+            }
+        }
+
+        // Get Patient List
+        List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine(testRun ? "jetest" : "realpsc");
+        idQueue = new LinkedBlockingQueue<>(patientIDs);
+
+        // List<String> patientIDs = patientDao.selectIdAll();
+        // patientIDs.clear();
+        // patientIDs.add("PUH-2010-014");
+        // patientIDs.add("PUH-2010-064");
+        // patientIDs.add("PUH-2010-068");
+        // idQueue = new LinkedBlockingQueue<>(patientIDs);
+
+        // Construct & Write CSV Column Header
+        CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/output.csv"));
+        List<String> colsList = new ArrayList<>();
+        colsList.add("ID");
+        List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
+        int intervals = Double.valueOf(Math.ceil(exportQuery.getDuration() * 1.0 / exportQuery.getPeriod())).intValue();
+        for (DownsampleGroupVO group : groups) {
+            String groupName = group.getGroup().getLabel();
+            for (int i = 1; i <= intervals; i++) {
+                if (i == 1) {
+                    colsList.add(groupName + ' ' + i);
+                } else {
+                    colsList.add("" + i);
+                }
+            }
+        }
+        String[] cols = colsList.stream().toArray(String[]::new);
+        writer.writeNext(cols);
+
+        // Query Task
+        Runnable queryTask = () -> {
+            String patientId;
+            while ((patientId = idQueue.poll()) != null) {
+                try {
+                    String monitorTimeQuery = "select count(\"I3_1\") from \"" + patientId + "\" where arType = 'ar'";
+
+                    QueryResult timeRes = influxDB.query(new Query(monitorTimeQuery, dbName));
+
+                    String monitorTime = "0";
+                    if (timeRes.getResults().get(0).getSeries() != null) {
+                        monitorTime = timeRes.getResults().get(0).getSeries().get(0).getValues().get(0).get(1).toString();
+                    }
+
+                    if (Double.valueOf(monitorTime).intValue() >= 6 * 0) {
+
+                        CSVWriter writerSeparate = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/" + patientId + ".csv"));
+                        writerSeparate.writeNext(cols);
+
+                        StringBuffer subQuery = new StringBuffer();
+                        subQuery.append("SELECT ");
+
+                        for (DownsampleGroupVO group : groups) {
+                            List<String> columnAggregation = Arrays.asList(group.getGroup().getColumns().split(", "));
+                            String columnAggregationComplete = columnAggregation.stream().map(s -> "\"" + s + "\"")
+                                    .collect(Collectors.joining(" + "));
+                            columnAggregationComplete = "(" + columnAggregationComplete + ")";
+                            switch (group.getGroup().getAggregation()) {
+                                case "mean":
+                                    columnAggregationComplete += " / " + columnAggregation.size();
+                                    break;
+                                default:
+                                    break;
+                            }
+                            columnAggregationComplete += " AS label" + group.getGroup().getId();
+                            subQuery.append(columnAggregationComplete).append(", ");
+                        }
+                        subQuery = new StringBuffer(subQuery.substring(0, subQuery.length() - 2));
+                        subQuery.append(" FROM \"" + patientId + "\"");
+                        subQuery.append(" WHERE arType = 'ar'");
+                        subQuery.append(" LIMIT ").append(exportQuery.getDuration());
+
+                        // TODO number of aggregation groups needs to be dynamically coded
+                        
+                        String template = "select median(label45) as LABEL45, mean(label46) as LABEL46, count(label45) as COUNT from ("
+                                + subQuery.toString() + ") where time >= '%s' and time < '%s' + " + exportQuery.getDuration() + "s "
+                                + "group by time(%ss, %ss)";
+
+                        String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId + "\" where arType = 'ar' limit 1";
+                        QueryResult recordResult = influxDB.query(new Query(firstRecordTimeQuery, dbName));
+                        String firstRecordTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+
+                        int offset = Integer.valueOf(firstRecordTime.substring(14, 16)) * 60 + Integer.valueOf(firstRecordTime.substring(17, 19));
+
+                        String queryString = String.format(template, firstRecordTime, firstRecordTime, exportQuery.getPeriod(), offset);
+                        logger.debug(patientId + " :\n" + queryString);
+
+                        Query query = new Query(queryString, dbName);
+                        QueryResult result = influxDB.query(query);
+
+                        logger.debug(patientId + " :\n" + result.toString());
+
+                        String[] row = new String[1 + intervals * groups.size()];
+                        row[0] = patientId;
+
+                        List<List<Object>> res = result.getResults().get(0).getSeries().get(0).getValues();
+                        logger.debug(patientId + " : " + String.valueOf(res.size()));
+
+                        for (int i = 0; i < intervals; i++) {
+                            if (res.size() > i) {
+                                List<Object> vals = res.get(i);
+                                int resultSize = vals.size();
+                                for (int j = 1; j <= groups.size(); j++) {
+                                    if (Double.valueOf(vals.get(resultSize - 1).toString()).intValue() < 600
+                                            && Double.valueOf(vals.get(resultSize - 1).toString()).intValue() > 0) {
+                                        row[1 + (j - 1) * intervals + i] = "Insuff. Data";
+                                    } else if (vals.get(j) == null) {
+                                        row[1 + (j - 1) * intervals + i] = "N/A";
+                                    } else {
+                                        row[1 + (j - 1) * intervals + i] = vals.get(j).toString();
+                                    }
+                                }
+                            } else {
+                                for (int j = 1; j <= groups.size(); j++) {
+                                    row[1 + (j - 1) * intervals + i] = "";
+                                }
+                            }
+                        }
+                        writer.writeNext(row);
+                        writerSeparate.writeNext(row);
+                        writerSeparate.close();
+                    } else {
+                        logger.debug(patientId + " : Not enough data, only " + Double.valueOf(monitorTime).intValue() + " seconds");
+                    }
+                } catch (Exception e) {
+                    logger.error(patientId + " : " + Util.stackTraceErrorToString(e));
+                    idQueue.offer(patientId);
+                }
+            }
+        };
+
+        for (int i = 0; i < 8; ++i) {
+            scheduler.submit(queryTask);
+        }
+        scheduler.shutdown();
+        try {
+            scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+            writer.close();
+        } catch (InterruptedException e) {
+            logger.error(Util.stackTraceErrorToString(e));
+            writer.close();
+        }
+
+        try {
+            Runtime.getRuntime().exec("open " + dir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void useCaseTwo() throws IOException {
@@ -81,18 +243,8 @@ public class AnalysisService {
         }
 
         List<String> patientIDs = importedFileDao.selectAllImportedPidPSC();
-
-        // List<String> patientIDs = patientDao.selectIdAll();
-        // patientIDs.retainAll(importedFileDao.getAllImportedPid("quz3"));
-        // patientIDs.clear();
-        // patientIDs.add("PUH-2010-014");
-        // patientIDs.add("PUH-2010-064");
-        // patientIDs.add("PUH-2010-068");
-        // patientIDs.add("PUH-2010-087");
-
         idQueue = new LinkedBlockingQueue<>(patientIDs);
 
-        System.out.println(dir.getAbsolutePath() + '/');
         CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/output.csv"));
         String[] cols = new String[] { "ID", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9", "aEEG10", "aEEG11",
                 "aEEG12", "aEEG13", "aEEG14", "aEEG15", "aEEG16", "aEEG17", "aEEG18", "aEEG19", "aEEG20", "aEEG21", "aEEG22", "aEEG23", "aEEG24",
@@ -178,10 +330,9 @@ public class AnalysisService {
             }
         };
 
-        for (
-
-                int i = 0; i < 8; ++i)
+        for (int i = 0; i < 8; ++i) {
             scheduler.submit(queryTask);
+        }
         scheduler.shutdown();
         try {
             scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);

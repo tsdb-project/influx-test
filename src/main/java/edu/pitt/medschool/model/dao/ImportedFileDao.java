@@ -29,15 +29,13 @@ public class ImportedFileDao {
      */
     public boolean checkHasImported(String uuid, String filename, long size) {
         ImportedFileExample ife = new ImportedFileExample();
-        ife.createCriteria()
-                .andUuidEqualTo(uuid)
-                .andFilenameLikeInsensitive(filename)
-                .andFilesizeEqualTo(size);
+        ife.createCriteria().andUuidEqualTo(uuid).andFilenameLikeInsensitive(filename).andFilesizeEqualTo(size);
         return ifm.selectByExample(ife).size() > 0;
     }
 
     /**
      * Get all imported PIDs
+     * 
      * @param uuid Machine ID
      */
     public List<String> getAllImportedPid(String uuid) {
@@ -49,6 +47,10 @@ public class ImportedFileDao {
      */
     public List<String> selectAllImportedPidPSC() {
         return ifm.selectAllImportedPidPSC();
+    }
+
+    public List<String> selectAllImportedPidOnMachine(String machineId) {
+        return ifm.selectAllImportedPidOnMachine(machineId);
     }
 
 }
