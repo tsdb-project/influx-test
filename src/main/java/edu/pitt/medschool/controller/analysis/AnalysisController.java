@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
+import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
@@ -202,7 +204,7 @@ public class AnalysisController {
 
     @RequestMapping("api/export/electrode")
     @ResponseBody
-    public List<String> electrode(@RequestBody(required = true) List<String> measures, Model model) {
+    public ElectrodeVO electrode(@RequestBody(required = true) List<String> measures, Model model) {
         return columnService.selectElectrodesByMeasures(measures);
     }
 
@@ -213,7 +215,7 @@ public class AnalysisController {
 
     @RequestMapping("api/export/column")
     @ResponseBody
-    public List<String> column(@RequestBody(required = true) ColumnRequest params, Model model) {
+    public List<ColumnVO> column(@RequestBody(required = true) ColumnRequest params, Model model) {
         return columnService.selectColumnsByMeasuresAndElectrodes(params.measure, params.electrode);
     }
 

@@ -8,6 +8,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
+import edu.pitt.medschool.model.dto.Feature;
+import edu.pitt.medschool.model.dto.FeatureExample;
 import edu.pitt.medschool.model.mapper.FeatureMapper;
 
 /**
@@ -28,4 +31,16 @@ public class FeatureDao {
         }
         return list;
     }
+
+    public List<ColumnVO> selectColumnVOsBySet(String electrode) {
+        return featureMapper.selectColumnVOsBySet(electrode);
+    }
+
+    public List<Feature> selectByMeasure(String measure) {
+        FeatureExample example = new FeatureExample();
+        example.createCriteria().andTypeEqualTo(measure);
+        return featureMapper.selectByExample(example);
+    }
+    
+    
 }

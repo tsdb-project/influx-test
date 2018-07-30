@@ -1,5 +1,6 @@
 package edu.pitt.medschool.model.mapper;
 
+import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
 import edu.pitt.medschool.model.dto.Feature;
 import edu.pitt.medschool.model.dto.FeatureExample;
 import edu.pitt.medschool.model.dto.FeatureKey;
@@ -152,4 +153,18 @@ public interface FeatureMapper {
         @Result(column="type", property="type", jdbcType=JdbcType.VARCHAR)
     })
     List<String> selectAllMeasures();
+
+    @Select({
+        "SELECT", 
+        "m.suffix AS `column`,",
+        "(CASE",
+        "WHEN m.comment IS NULL THEN CONCAT(ROUND(m.range_low, 3), ' ~ ', ROUND(m.range_high, 3))",
+        "ELSE m.comment",
+        "END) AS representation",
+        "FROM feature f, feature_mapping m",
+        "WHERE f.SID = #{electrode} AND f.type = m.type"
+    })
+    @Results({ @Result(column = "column", property = "column", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "representation", property = "representation", jdbcType = JdbcType.VARCHAR) })
+    List<ColumnVO> selectColumnVOsBySet(String electrode);
 }

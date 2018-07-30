@@ -123,6 +123,9 @@ $(document).ready(function() {
 
     $("#measure").change(function() {
         console.log($("#measure").val());
+        if ($("#measure").val() == null) {
+            return;
+        }
         var form = [$("#measure").val()];
         $.ajax({
             'url': "/api/export/electrode",
@@ -133,14 +136,25 @@ $(document).ready(function() {
             'success': function(data) {
                 console.log(data);
                 var $electrode = $('#electrode');
+                var $predefined = $('#predefined');
+                
                 // $electrode.attr("size", data.length + 1);
-                $electrode.removeAttr('multiple');
+                // $electrode.removeAttr('multiple');
                 $electrode.empty();
+                $predefined.empty();
                 $('#column').empty();
                 // $('#column').attr("size", 1);
-                for (var i = 0; i < data.length; i++) {
-                    var html = '<option value="' + data[i] + '">' + data[i] + '</option>';
+                $electrode.append('<option value="" disabled>Single Electrodes</option>');
+                $predefined.append('<option value="" disabled>Predefined Sets</option>');
+                
+                for (var i = 0; i < data.electrodes.length; i++) {
+                    var html = '<option value="' + data.electrodes[i].sid + '">' + data.electrodes[i].electrode + '</option>';
                     $electrode.append(html);
+                }
+
+                for (var i = 0; i < data.predefined.length; i++) {
+                    var html = '<option value="' + data.predefined[i] + '">' + data.predefined[i] + '</option>';
+                    $predefined.append(html);
                 }
             },
             'error': function() {}
@@ -151,8 +165,9 @@ $(document).ready(function() {
         console.log($("#electrode").val());
         var form = {
             "measure": [$("#measure").val()],
-            "electrode": [$("#electrode").val()]
+            "electrode": $("#electrode").val()
         };
+        $("#predefined").val([]);
         $.ajax({
             'url': "/api/export/column",
             'type': 'post',
@@ -164,7 +179,33 @@ $(document).ready(function() {
                 // $column.attr("size", data.length);
                 $column.empty();
                 for (var i = 0; i < data.length; i++) {
-                    $column.append('<option value="' + data[i] + '">' + data[i] + '</option>');
+                    $column.append('<option value="' + data[i].column + '">' + data[i].representation + '</option>');
+                }
+                $column.change();
+            },
+            'error': function() {}
+        });
+    });
+    
+    $("#predefined").change(function() {
+        console.log($("#predefined").val());
+        var form = {
+            "measure": [$("#measure").val()],
+            "electrode": [$("#predefined").val()]
+        };
+        $("#electrode").val([]);
+        $.ajax({
+            'url': "/api/export/column",
+            'type': 'post',
+            'data': JSON.stringify(form),
+            'contentType': "application/json",
+            'dataType': 'json',
+            'success': function(data) {
+                var $column = $('#column');
+                // $column.attr("size", data.length);
+                $column.empty();
+                for (var i = 0; i < data.length; i++) {
+                    $column.append('<option value="' + data[i].column + '">' + data[i].representation + '</option>');
                 }
                 $column.change();
             },
@@ -189,20 +230,27 @@ $(document).ready(function() {
         $("#columnsInGroup option").each(function() {
             set.add($(this).val());
         });
-        form.forEach(function(e) {
-            if (e.startsWith('Ix')) {
-                var electrode = $("#electrode").val();
+        if ($("#predefined").val() != null) {
+            form.forEach(function(e) {
+                var electrode = $("#predefined").val();
                 var start = electrode.split(' ')[2];
                 var end = electrode.split(' ')[4];
                 console.log(start + ' ' + end);
                 for (i = parseInt(start.substring(1)); i <= parseInt(end.substring(1)); i++) {
                     console.log(i);
-                    set.add('I' + i + '_' + e.substring(3));
+                    set.add('I' + i + e);
                 }
-            } else {
-                set.add(e);
-            }
-        });
+            });
+        } else {
+            form.forEach(function(e) {
+                var electrode = $("#electrode").val();
+                electrode.forEach(function(element) {
+                    console.log(element);
+                    set.add(element + e);
+                });
+            });
+        }
+        
         $columnsInGroup.empty();
         set.forEach(function(e) {
             var html = '<option value="' + e + '">' + e + '</option>';
@@ -316,6 +364,7 @@ $(document).ready(function() {
         }
         $('#measure').val('');
         $('#measure').trigger('change');
+        $('#predefined').empty();
         $('#electrode').empty();
         $('#column').empty();
     });

@@ -20,7 +20,10 @@ import org.springframework.stereotype.Service;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
+import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.model.dao.FeatureDao;
+import edu.pitt.medschool.model.dto.Feature;
 
 /**
  * service for returning column information of data
@@ -41,56 +44,42 @@ public class ColumnService {
         return featureDao.selectAllMeasures();
     }
 
-    public List<String> selectElectrodesByMeasures(List<String> measures) {
+    public ElectrodeVO selectElectrodesByMeasures(List<String> measures) {
         String measure = measures.get(0);
 
-        List<String> list = new ArrayList<>();
+        List<String> predefined = new ArrayList<>();
         if (electrodeMeasures.contains(measures.get(0))) {
             String intervalsSql = String
                     .format("SELECT MIN(SID) AS avMin, MAX(SID) AS avMax FROM " + "(SELECT CONVERT(SUBSTRING(SID, 2), SIGNED INTEGER) AS SID "
                             + "FROM feature f WHERE f.type = '%s' AND f.electrode LIKE '%%-Av17') AS T", measure);
             Map<String, Object> map = jdbcTemplate.queryForMap(intervalsSql);
-            list.add("* [X-Av] I" + map.get("avMin") + " ~ I" + map.get("avMax"));
+            String xAv = "* [X-Av] I" + map.get("avMin") + " ~ I" + map.get("avMax");
+            predefined.add(xAv);
 
             intervalsSql = String
                     .format("SELECT MIN(SID) AS avMin, MAX(SID) AS avMax FROM " + "(SELECT CONVERT(SUBSTRING(SID, 2), SIGNED INTEGER) AS SID "
                             + "FROM feature f WHERE f.type = '%s' AND f.electrode LIKE '%%-%%' AND f.electrode NOT LIKE '%%-Av17') AS T", measure);
             map = jdbcTemplate.queryForMap(intervalsSql);
-            list.add("* [Bipolar] I" + map.get("avMin") + " ~ I" + map.get("avMax"));
+            String bipolar = "* [Bipolar] I" + map.get("avMin") + " ~ I" + map.get("avMax");
+            predefined.add(bipolar);
         }
-        for (int i = 0; i < measures.size(); i++) {
-            measures.set(i, "'" + measures.get(i) + "'");
-        }
-        String sql = String.format("SELECT electrode FROM feature f WHERE f.type IN ('%s')", measure);
 
-        list.addAll(jdbcTemplate.queryForList(sql, String.class));
-        return list;
+        List<Feature> list = featureDao.selectByMeasure(measure);
+
+        ElectrodeVO electrodeVO = new ElectrodeVO();
+        electrodeVO.setPredefined(predefined);
+        electrodeVO.setElectrodes(list);
+        return electrodeVO;
     }
 
-    public List<String> selectColumnsByMeasuresAndElectrodes(List<String> measures, List<String> electrodes) {
-        List<String> result = new ArrayList<>();
+    public List<ColumnVO> selectColumnsByMeasuresAndElectrodes(List<String> measures, List<String> electrodes) {
+        List<ColumnVO> result = new ArrayList<>();
         String electrode = electrodes.get(0);
         if (electrode.startsWith("* ")) {
             String[] components = electrode.split(" ");
-            String countSql = String.format("SELECT SID_Count FROM feature f WHERE f.SID = '%s';", components[2]);
-            int count = jdbcTemplate.queryForObject(countSql, Integer.class);
-            for (int i = 1; i <= count; i++) {
-                result.add("Ix_" + i);
-            }
+            result = featureDao.selectColumnVOsBySet(components[2]);
         } else {
-            for (int i = 0; i < electrodes.size(); i++) {
-                electrodes.set(i, "'" + electrodes.get(i) + "'");
-            }
-            String electrodeString = String.join(",", electrodes);
-            String measureString = String.join(",", measures);
-            String sql = String.format("SELECT SID, SID_count FROM feature f WHERE f.type = '%s' AND f.electrode IN (%s)", measureString,
-                    electrodeString);
-            System.out.println(sql);
-
-            Map<String, Object> map = jdbcTemplate.queryForMap(sql);
-            for (int i = 1; i <= (int) map.get("SID_count"); i++) {
-                result.add(map.get("SID").toString() + "_" + i);
-            }
+            result = featureDao.selectColumnVOsBySet(electrode);
         }
         return result;
     }
