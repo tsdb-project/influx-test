@@ -139,7 +139,8 @@ public class ImportMetadataService {
                             continue;
                     }
                 }
-                pdo.insert(p);
+                // TODO: Support insert patient
+                // pdo.insert(p);
             }
 
         } catch (IOException ioe) {

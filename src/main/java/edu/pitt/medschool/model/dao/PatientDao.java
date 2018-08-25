@@ -2,6 +2,7 @@ package edu.pitt.medschool.model.dao;
 
 import edu.pitt.medschool.model.dto.Patient;
 import edu.pitt.medschool.model.dto.PatientExample;
+import edu.pitt.medschool.model.dto.PatientWithBLOBs;
 import edu.pitt.medschool.model.mapper.PatientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -18,7 +19,7 @@ public class PatientDao {
     PatientMapper patientMapper;
 
     @Transactional(rollbackFor = Exception.class)
-    public int insert(Patient p) throws Exception {
+    public int insert(PatientWithBLOBs p) throws Exception {
         return patientMapper.insert(p);
     }
 
@@ -102,10 +103,10 @@ public class PatientDao {
         PatientExample pe = new PatientExample();
         switch (loc) {
             case 0:
-                pe.createCriteria().andOohcaEqualTo(false);
+                pe.createCriteria().andOohcaEqualTo(0);
                 break;
             case 1:
-                pe.createCriteria().andOohcaEqualTo(true);
+                pe.createCriteria().andOohcaEqualTo(1);
                 break;
             default:
                 pe.createCriteria().andOohcaIsNull();

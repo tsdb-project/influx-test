@@ -28,9 +28,7 @@
             <property name="enableSubPackages" value="true" />
         </javaClientGenerator>
 
-        <table tableName="import_progress"></table>
         <table tableName="imported_file"></table>
         <table tableName="patient"></table>
-        <table tableName="influx_cluster"></table>
     </context>
 </generatorConfiguration>
