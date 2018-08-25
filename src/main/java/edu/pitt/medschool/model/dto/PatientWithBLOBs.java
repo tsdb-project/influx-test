@@ -4609,7 +4609,7 @@ public class PatientWithBLOBs extends Patient {
             && (this.getStudyEnrollments7() == null ? other.getStudyEnrollments7() == null : this.getStudyEnrollments7().equals(other.getStudyEnrollments7()))
             && (this.getStudyEnrollments8() == null ? other.getStudyEnrollments8() == null : this.getStudyEnrollments8().equals(other.getStudyEnrollments8()))
             && (this.getStudyEnrollments9() == null ? other.getStudyEnrollments9() == null : this.getStudyEnrollments9().equals(other.getStudyEnrollments9()))
-            && (this.getStudyEnrollments1() == null ? other.getStudyEnrollments1() == null : this.getStudyEnrollments1().equals(other.getStudyEnrollments1()))
+            && (this.getStudyEnrollmentsA() == null ? other.getStudyEnrollmentsA() == null : this.getStudyEnrollmentsA().equals(other.getStudyEnrollmentsA()))
             && (this.getCaBiomarkerId() == null ? other.getCaBiomarkerId() == null : this.getCaBiomarkerId().equals(other.getCaBiomarkerId()))
             && (this.getCoreDatasetComplete() == null ? other.getCoreDatasetComplete() == null : this.getCoreDatasetComplete().equals(other.getCoreDatasetComplete()))
             && (this.getReferringHospital() == null ? other.getReferringHospital() == null : this.getReferringHospital().equals(other.getReferringHospital()))
@@ -4830,7 +4830,7 @@ public class PatientWithBLOBs extends Patient {
         result = prime * result + ((getStudyEnrollments7() == null) ? 0 : getStudyEnrollments7().hashCode());
         result = prime * result + ((getStudyEnrollments8() == null) ? 0 : getStudyEnrollments8().hashCode());
         result = prime * result + ((getStudyEnrollments9() == null) ? 0 : getStudyEnrollments9().hashCode());
-        result = prime * result + ((getStudyEnrollments1() == null) ? 0 : getStudyEnrollments1().hashCode());
+        result = prime * result + ((getStudyEnrollmentsA() == null) ? 0 : getStudyEnrollmentsA().hashCode());
         result = prime * result + ((getCaBiomarkerId() == null) ? 0 : getCaBiomarkerId().hashCode());
         result = prime * result + ((getCoreDatasetComplete() == null) ? 0 : getCoreDatasetComplete().hashCode());
         result = prime * result + ((getReferringHospital() == null) ? 0 : getReferringHospital().hashCode());

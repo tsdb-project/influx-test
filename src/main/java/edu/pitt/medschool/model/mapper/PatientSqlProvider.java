@@ -247,8 +247,8 @@ public class PatientSqlProvider {
         if (record.getStudyEnrollments9() != null) {
             sql.VALUES("study_enrollments___9", "#{studyEnrollments9,jdbcType=INTEGER}");
         }
-        if (record.getStudyEnrollments1() != null) {
-            sql.VALUES("study_enrollments____1", "#{studyEnrollments1,jdbcType=INTEGER}");
+        if (record.getStudyEnrollmentsA() != null) {
+            sql.VALUES("study_enrollments____a", "#{studyEnrollmentsA,jdbcType=INTEGER}");
         }
         if (record.getCaBiomarkerId() != null) {
             sql.VALUES("ca_biomarker_id", "#{caBiomarkerId,jdbcType=INTEGER}");
@@ -749,7 +749,7 @@ public class PatientSqlProvider {
         sql.SELECT("study_enrollments___7");
         sql.SELECT("study_enrollments___8");
         sql.SELECT("study_enrollments___9");
-        sql.SELECT("study_enrollments____1");
+        sql.SELECT("study_enrollments____a");
         sql.SELECT("ca_biomarker_id");
         sql.SELECT("core_dataset_complete");
         sql.SELECT("referring_hospital");
@@ -976,7 +976,7 @@ public class PatientSqlProvider {
         sql.SELECT("study_enrollments___7");
         sql.SELECT("study_enrollments___8");
         sql.SELECT("study_enrollments___9");
-        sql.SELECT("study_enrollments____1");
+        sql.SELECT("study_enrollments____a");
         sql.SELECT("ca_biomarker_id");
         sql.SELECT("core_dataset_complete");
         sql.FROM("patient");
@@ -1203,8 +1203,8 @@ public class PatientSqlProvider {
         if (record.getStudyEnrollments9() != null) {
             sql.SET("study_enrollments___9 = #{record.studyEnrollments9,jdbcType=INTEGER}");
         }
-        if (record.getStudyEnrollments1() != null) {
-            sql.SET("study_enrollments____1 = #{record.studyEnrollments1,jdbcType=INTEGER}");
+        if (record.getStudyEnrollmentsA() != null) {
+            sql.SET("study_enrollments____a = #{record.studyEnrollmentsA,jdbcType=INTEGER}");
         }
         if (record.getCaBiomarkerId() != null) {
             sql.SET("ca_biomarker_id = #{record.caBiomarkerId,jdbcType=INTEGER}");
@@ -1703,7 +1703,7 @@ public class PatientSqlProvider {
         sql.SET("study_enrollments___7 = #{record.studyEnrollments7,jdbcType=INTEGER}");
         sql.SET("study_enrollments___8 = #{record.studyEnrollments8,jdbcType=INTEGER}");
         sql.SET("study_enrollments___9 = #{record.studyEnrollments9,jdbcType=INTEGER}");
-        sql.SET("study_enrollments____1 = #{record.studyEnrollments1,jdbcType=INTEGER}");
+        sql.SET("study_enrollments____a = #{record.studyEnrollmentsA,jdbcType=INTEGER}");
         sql.SET("ca_biomarker_id = #{record.caBiomarkerId,jdbcType=INTEGER}");
         sql.SET("core_dataset_complete = #{record.coreDatasetComplete,jdbcType=INTEGER}");
         sql.SET("referring_hospital = #{record.referringHospital,jdbcType=LONGVARCHAR}");
@@ -1924,7 +1924,7 @@ public class PatientSqlProvider {
         sql.SET("study_enrollments___7 = #{record.studyEnrollments7,jdbcType=INTEGER}");
         sql.SET("study_enrollments___8 = #{record.studyEnrollments8,jdbcType=INTEGER}");
         sql.SET("study_enrollments___9 = #{record.studyEnrollments9,jdbcType=INTEGER}");
-        sql.SET("study_enrollments____1 = #{record.studyEnrollments1,jdbcType=INTEGER}");
+        sql.SET("study_enrollments____a = #{record.studyEnrollmentsA,jdbcType=INTEGER}");
         sql.SET("ca_biomarker_id = #{record.caBiomarkerId,jdbcType=INTEGER}");
         sql.SET("core_dataset_complete = #{record.coreDatasetComplete,jdbcType=INTEGER}");
         PatientExample example = (PatientExample) parameter.get("example");
@@ -2143,8 +2143,8 @@ public class PatientSqlProvider {
         if (record.getStudyEnrollments9() != null) {
             sql.SET("study_enrollments___9 = #{studyEnrollments9,jdbcType=INTEGER}");
         }
-        if (record.getStudyEnrollments1() != null) {
-            sql.SET("study_enrollments____1 = #{studyEnrollments1,jdbcType=INTEGER}");
+        if (record.getStudyEnrollmentsA() != null) {
+            sql.SET("study_enrollments____a = #{studyEnrollmentsA,jdbcType=INTEGER}");
         }
         if (record.getCaBiomarkerId() != null) {
             sql.SET("ca_biomarker_id = #{caBiomarkerId,jdbcType=INTEGER}");
