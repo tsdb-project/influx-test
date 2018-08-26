@@ -1,15 +1,21 @@
 package edu.pitt.medschool.service;
 
-import com.opencsv.CSVReader;
-import edu.pitt.medschool.framework.util.TimeUtil;
-import edu.pitt.medschool.model.dao.PatientDao;
-import edu.pitt.medschool.model.dto.Patient;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.text.ParseException;
+import java.time.Instant;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
-import java.text.ParseException;
-import java.time.Instant;
+import com.opencsv.CSVReader;
+
+import edu.pitt.medschool.framework.util.TimeUtil;
+import edu.pitt.medschool.model.dao.PatientDao;
+import edu.pitt.medschool.model.dto.PatientWithBLOBs;
 
 /**
  * Importing patient metadata into DB Based on mail at 02/21/2018
@@ -121,7 +127,7 @@ public class ImportMetadataService {
                 if (columnCount != values.length)
                     throw new RuntimeException(); // Line mismatch
 
-                Patient p = new Patient();
+                PatientWithBLOBs p = new PatientWithBLOBs();
                 //TODO: Only support PID/Age/Gender now
                 for (int i = 0; i < 3; i++) {
                     Object obj = genObjFromLine(i, values[i]);
