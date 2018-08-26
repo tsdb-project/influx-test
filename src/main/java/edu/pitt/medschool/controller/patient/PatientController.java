@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.pitt.medschool.framework.rest.RestfulResponse;
+import edu.pitt.medschool.framework.util.MysqlColumnBean;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Patient;
+import edu.pitt.medschool.service.PatientService;
 
 /**
  * Get all patient data in the DB
@@ -28,6 +30,8 @@ public class PatientController {
     @Value("${machine}")
     private String uuid;
 
+    @Autowired
+    PatientService patientService;
     @Autowired
     PatientDao patientDao;
 
@@ -58,8 +62,14 @@ public class PatientController {
     }
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.POST)
-    public List<Patient> getPatientWithCriteria() {
-        return patientDao.selectByGender("F");
+    public RestfulResponse getPatientWithCriteria() {
+        RestfulResponse response = new RestfulResponse(1, "success");
+        response.setData(patientDao.selectAll());
+        return response;
     }
 
+    @RequestMapping(value = "/patients/columns", method = RequestMethod.GET)
+    public List<MysqlColumnBean> getColumnInfo() {
+        return patientService.getColumnInfo();
+    }
 }

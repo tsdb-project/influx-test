@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import edu.pitt.medschool.controller.load.vo.SearchFileVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
@@ -22,6 +23,7 @@ import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dto.ImportProgress;
 import edu.pitt.medschool.service.ImportCsvService;
 import edu.pitt.medschool.service.ImportProgressService;
+import edu.pitt.medschool.service.PatientService;
 
 /**
  * @author Isolachine
@@ -33,6 +35,8 @@ public class DataController {
     ImportCsvService importCsvService;
     @Autowired
     ImportProgressService importProgressService;
+    @Autowired
+    PatientService patientService;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -50,6 +54,15 @@ public class DataController {
         return model;
     }
 
+    @RequestMapping("data/patients")
+    @ResponseBody
+    public ModelAndView patients(ModelAndView model) {
+        model.addObject("nav", "data");
+        model.addObject("subnav", "patients");
+        model.addObject("columns", patientService.getColumnInfo());
+        return model;
+    }
+
     @RequestMapping("data/activity")
     @ResponseBody
     public Model dataActivity(Model model) {
@@ -60,7 +73,8 @@ public class DataController {
 
     @RequestMapping(value = "data/searchfile")
     @ResponseBody
-    public Map<String, Object> searchfile(@RequestBody(required = false) SearchFileVO dir, @RequestParam(value = "dir", required = false, defaultValue = "") String dirString, Model model) {
+    public Map<String, Object> searchfile(@RequestBody(required = false) SearchFileVO dir,
+            @RequestParam(value = "dir", required = false, defaultValue = "") String dirString, Model model) {
         Map<String, Object> map = new HashMap<>();
 
         String directory;

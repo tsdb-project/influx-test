@@ -1,5 +1,6 @@
 package edu.pitt.medschool.model.dao;
 
+import edu.pitt.medschool.framework.util.MysqlColumnBean;
 import edu.pitt.medschool.model.dto.Patient;
 import edu.pitt.medschool.model.dto.PatientExample;
 import edu.pitt.medschool.model.mapper.PatientMapper;
@@ -120,6 +121,10 @@ public class PatientDao {
 
     public List<String> selectIdByCustom(PatientExample pe) {
         return patientMapper.selectIdByExample(pe);
+    }
+
+    public List<MysqlColumnBean> getColumnInfo() {
+        return patientMapper.getColumnInfo();
     }
 
 }
