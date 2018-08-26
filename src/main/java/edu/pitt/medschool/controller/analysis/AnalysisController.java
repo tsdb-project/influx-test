@@ -61,8 +61,10 @@ public class AnalysisController {
         return model;
     }
 
-    @RequestMapping("analysis/builder")
-    public Model builderPage(Model model) {
+    /**
+     * Generate model object for analysis service
+     */
+    private Model analysisGenerateModel(Model model) {
         model.addAttribute("nav", "analysis");
         model.addAttribute("subnav", "builder");
         List<Downsample> downsamples = analysisService.selectAll();
@@ -70,13 +72,14 @@ public class AnalysisController {
         return model;
     }
 
+    @RequestMapping("analysis/builder")
+    public Model builderPage(Model model) {
+        return analysisGenerateModel(model);
+    }
+
     @RequestMapping("analysis/create")
     public Model createPage(Model model) {
-        model.addAttribute("nav", "analysis");
-        model.addAttribute("subnav", "builder");
-        List<Downsample> downsamples = analysisService.selectAll();
-        model.addAttribute("downsamples", downsamples);
-        return model;
+        return analysisGenerateModel(model);
     }
 
     @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
