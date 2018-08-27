@@ -293,6 +293,7 @@ public class AnalysisController {
         // List<DownsampleGroupVO> downsampleGroups = analysisService.selectAllAggregationGroupByQueryId(qid);
         // analysisService.exportFromPatientsWithDownsamplingGroups(pids, downsample, downsampleGroups);
 
+        //TODO: Remove or change the TestRun parameter
         analysisService.exportToFile(qid, true);
 
     }
