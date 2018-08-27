@@ -73,7 +73,7 @@ public class AnalysisService {
     public void exportToFile(Integer queryId, Boolean testRun) throws IOException {
         // Create Folder
         Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
-        File dir = new File(DIRECTORY + exportQuery.getAlias() + LocalDateTime.now().toString());
+        File dir = new File(DIRECTORY + exportQuery.getAlias() + LocalDateTime.now().toString().replace(':', '.'));
         if (!dir.exists()) {
             try {
                 dir.mkdirs();
