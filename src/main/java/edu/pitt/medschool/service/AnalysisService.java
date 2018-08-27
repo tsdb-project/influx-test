@@ -194,8 +194,9 @@ public class AnalysisService {
 
                         Query query = new Query(queryString, dbName);
                         QueryResult result = influxDB.query(query);
+                        Map<String, List<Object>> resultKV = InfluxUtil.QueryResultToKV(result);
 
-                        logger.debug(patientId + " :\n" + result.toString());
+                        // logger.debug(patientId + " :\n" + result.toString());
 
                         // Construct the result to write to CSV files
                         String[] row = new String[1 + intervals * groups.size()];
