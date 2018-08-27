@@ -84,7 +84,7 @@ public class AnalysisService {
         Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
 
         // Create Folder
-        File outputDir = generateOutputDir(DIRECTORY + exportQuery.getAlias() + " (" + LocalDateTime.now().toString() + ")");
+        File outputDir = generateOutputDir(exportQuery.getAlias());
         if (outputDir == null) return;
 
         // Get Patient List by 'test' or uuid
@@ -237,7 +237,7 @@ public class AnalysisService {
      * Traditional use case 1, don't improve unless JE stats
      */
     public void useCaseTwo() throws IOException {
-        File dir = generateOutputDir(DIRECTORY + "UC2_" + LocalDateTime.now().toString());
+        File dir = generateOutputDir("UC2");
         if (dir == null) return;
 
         // Get Patient List by uuid
@@ -349,7 +349,7 @@ public class AnalysisService {
      * Traditional use case 2, don't improve unless JE stats
      */
     public void useCaseOne() throws IOException {
-        File dir = generateOutputDir(DIRECTORY + "UC1_" + LocalDateTime.now().toString());
+        File dir = generateOutputDir("UC1");
         if (dir == null) return;
 
         // Get Patient List by uuid
@@ -473,7 +473,7 @@ public class AnalysisService {
 
     public void exportFromPatientsWithDownsampling(List<String> patients, String column, String method, String interval, String time)
             throws IOException {
-        File dir = generateOutputDir(DIRECTORY + LocalDateTime.now().toString());
+        File dir = generateOutputDir("");
         if (dir == null) return;
 
         for (String patientId : patients) {
@@ -596,7 +596,7 @@ public class AnalysisService {
      */
     public void exportFromPatientsWithDownsamplingGroups(List<String> pids, Downsample downsample, List<DownsampleGroupVO> downsampleGroups)
             throws IOException {
-        File dir = generateOutputDir(DIRECTORY + LocalDateTime.now().toString());
+        File dir = generateOutputDir("");
         if (dir == null) return;
 
         String fields = "mean(\"I1_1\")";
@@ -665,8 +665,10 @@ public class AnalysisService {
     /**
      * Generate an object for output directory class
      */
-    private File generateOutputDir(String path) {
-        path = path.replace(':', '.'); // Workaround for Windows name restriction
+    private File generateOutputDir(String purpose) {
+        String rfc3339 = "_(" + LocalDateTime.now().toString() + ")";
+        // Workaround for Windows name restriction
+        String path = DIRECTORY + purpose + rfc3339.replace(':', '.');
         File outputDir = new File(path);
         boolean dirCreationSuccess = true;
 
