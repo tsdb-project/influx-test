@@ -75,10 +75,15 @@ public class AnalysisService {
         Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
         File dir = new File(DIRECTORY + exportQuery.getAlias() + LocalDateTime.now().toString().replace(':', '.'));
         if (!dir.exists()) {
+            String err = "Failed to create 'Results' dir.";
             try {
-                dir.mkdirs();
+                if(!dir.mkdirs()) {
+                    logger.error(err);
+                    return;
+                }
             } catch (SecurityException se) {
-                System.out.println("Failed to create dir \"/results\"");
+                logger.error(err, se);
+                return;
             }
         }
 
