@@ -4,6 +4,7 @@ import com.opencsv.CSVWriter;
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
+import edu.pitt.medschool.framework.util.InfluxUtil;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.Downsample;
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -125,16 +127,16 @@ public class AnalysisService {
             String patientId;
             while ((patientId = idQueue.poll()) != null) {
                 try {
-                    String monitorTimeQuery = "select count(\"I3_1\") from \"" + patientId + "\" where arType = 'ar'";
-
+                    //TODO: Only doing ARs here
+                    String monitorTimeQuery = "select count(\"Time\") AS C from \"" + patientId + "\" where arType = 'ar'";
                     QueryResult timeRes = influxDB.query(new Query(monitorTimeQuery, dbName));
-
-                    String monitorTime = "0";
+                    Double monitorTime = -1.0;
                     if (timeRes.getResults().get(0).getSeries() != null) {
-                        monitorTime = timeRes.getResults().get(0).getSeries().get(0).getValues().get(0).get(1).toString();
+                        monitorTime = Double.valueOf(timeRes.getResults().get(0).getSeries().get(0).getValues().get(0).get(1).toString());
                     }
 
-                    if (Double.valueOf(monitorTime).intValue() >= 6 * 0) {
+                    // What is this?
+                    if (monitorTime.intValue() >= 6 * 0) {
 
                         CSVWriter writerSeparate = new CSVWriter(new FileWriter(outputDir.getAbsolutePath() + "/" + patientId + ".csv"));
                         writerSeparate.writeNext(cols);
@@ -212,9 +214,10 @@ public class AnalysisService {
                         writerSeparate.writeNext(row);
                         writerSeparate.close();
                     } else {
-                        logger.debug(patientId + " : Not enough data, only " + Double.valueOf(monitorTime).intValue() + " seconds");
+                        logger.debug(patientId + " : Not enough data, only " + monitorTime.intValue() + " seconds");
                     }
                 } catch (Exception e) {
+                    // Reinsert failed user into queue
                     logger.error(patientId + " : " + Util.stackTraceErrorToString(e));
                     idQueue.offer(patientId);
                 }
@@ -227,9 +230,9 @@ public class AnalysisService {
         scheduler.shutdown();
         try {
             scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-            writer.close();
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
+        } finally {
             writer.close();
         }
     }
@@ -590,6 +593,7 @@ public class AnalysisService {
     }
 
     //TODO: Add some comments about this function?
+
     /**
      * @param pids
      * @param downsample

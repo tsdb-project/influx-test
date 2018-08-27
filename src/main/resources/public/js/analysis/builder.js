@@ -42,6 +42,11 @@ $(document).ready(function() {
             render : function(data) {
                 return localeDateString(data.updateTime)
             }
+        }, {
+            data : null,
+            render : function(data) {
+                return '~Minutes'
+            }
         } ],
         order : [ [ 5, 'desc' ] ],
     });
