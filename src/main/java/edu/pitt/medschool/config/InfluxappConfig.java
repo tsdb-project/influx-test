@@ -10,6 +10,11 @@ import org.springframework.boot.system.ApplicationTemp;
 public final class InfluxappConfig {
 
     /**
+     * Available cores on this system
+     */
+    public static final int AvailableCores = Runtime.getRuntime().availableProcessors();
+
+    /**
      * Server Address
      */
     public static final String IFX_ADDR = "http://127.0.0.1:8086";

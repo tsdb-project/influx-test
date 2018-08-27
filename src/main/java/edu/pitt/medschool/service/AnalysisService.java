@@ -17,12 +17,14 @@ import org.influxdb.dto.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +37,12 @@ import java.util.stream.Collectors;
  */
 @Service
 public class AnalysisService {
+
+    @Value("${machine}")
+    private String uuid;
+
+    @Value("${load}")
+    private double loadFactor;
 
     private final static String dbName = DBConfiguration.Data.DBNAME;
     private final static String DIRECTORY = "/tsdb/output/";
@@ -62,7 +70,6 @@ public class AnalysisService {
     private InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
             new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(300, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS));
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private ExecutorService scheduler = Executors.newFixedThreadPool(8);
 
     private BlockingQueue<String> idQueue = new LinkedBlockingQueue<>();
 
@@ -70,20 +77,18 @@ public class AnalysisService {
 
     }
 
+    /**
+     * Export (downsample) a single query to files (Could be called mutiple times)
+     */
     public void exportToFile(Integer queryId, Boolean testRun) throws IOException {
-        // Create Folder
         Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
-        File dir = new File(DIRECTORY + exportQuery.getAlias() + LocalDateTime.now().toString());
-        if (!dir.exists()) {
-            try {
-                dir.mkdirs();
-            } catch (SecurityException se) {
-                System.out.println("Failed to create dir \"/results\"");
-            }
-        }
 
-        // Get Patient List
-        List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine(testRun ? "jetest" : "realpsc");
+        // Create Folder
+        File outputDir = generateOutputDir(DIRECTORY + exportQuery.getAlias() + " (" + LocalDateTime.now().toString() + ")");
+        if (outputDir == null) return;
+
+        // Get Patient List by 'test' or uuid
+        List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine(testRun ? "jetest" : uuid);
         idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         // List<String> patientIDs = patientDao.selectIdAll();
@@ -94,7 +99,7 @@ public class AnalysisService {
         // idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         // Construct & Write CSV Column Header
-        CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/output.csv"));
+        CSVWriter writer = new CSVWriter(new FileWriter(outputDir.getAbsolutePath() + "/output.csv"));
         List<String> colsList = new ArrayList<>();
         colsList.add("ID");
         List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
@@ -109,10 +114,12 @@ public class AnalysisService {
                 }
             }
         }
-        String[] cols = colsList.stream().toArray(String[]::new);
+        String[] cols = colsList.toArray(new String[0]);
         writer.writeNext(cols);
 
         // Query Task
+        int paraCount = determineParaNumber();
+        ExecutorService scheduler = generateNewThreadPool(paraCount);
         Runnable queryTask = () -> {
             String patientId;
             while ((patientId = idQueue.poll()) != null) {
@@ -128,7 +135,7 @@ public class AnalysisService {
 
                     if (Double.valueOf(monitorTime).intValue() >= 6 * 0) {
 
-                        CSVWriter writerSeparate = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/" + patientId + ".csv"));
+                        CSVWriter writerSeparate = new CSVWriter(new FileWriter(outputDir.getAbsolutePath() + "/" + patientId + ".csv"));
                         writerSeparate.writeNext(cols);
 
                         StringBuffer subQuery = new StringBuffer();
@@ -155,7 +162,7 @@ public class AnalysisService {
                         subQuery.append(" LIMIT ").append(exportQuery.getDuration());
 
                         // TODO number of aggregation groups needs to be dynamically coded
-                        
+
                         String template = "select median(label45) as LABEL45, mean(label46) as LABEL46, count(label45) as COUNT from ("
                                 + subQuery.toString() + ") where time >= '%s' and time < '%s' + " + exportQuery.getDuration() + "s "
                                 + "group by time(%ss, %ss)";
@@ -213,7 +220,7 @@ public class AnalysisService {
             }
         };
 
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < paraCount; ++i) {
             scheduler.submit(queryTask);
         }
         scheduler.shutdown();
@@ -224,33 +231,28 @@ public class AnalysisService {
             logger.error(Util.stackTraceErrorToString(e));
             writer.close();
         }
-
-        try {
-            Runtime.getRuntime().exec("open " + dir);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
+    /**
+     * Traditional use case 1, don't improve unless JE stats
+     */
     public void useCaseTwo() throws IOException {
-        File dir = new File(DIRECTORY + "UC2_" + LocalDateTime.now().toString());
-        if (!dir.exists()) {
-            try {
-                dir.mkdirs();
-            } catch (SecurityException se) {
-                System.out.println("Failed to create dir \"/results\"");
-            }
-        }
+        File dir = generateOutputDir(DIRECTORY + "UC2_" + LocalDateTime.now().toString());
+        if (dir == null) return;
 
-        List<String> patientIDs = importedFileDao.selectAllImportedPidPSC();
+        // Get Patient List by uuid
+        List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine(uuid);
         idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/output.csv"));
-        String[] cols = new String[] { "ID", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9", "aEEG10", "aEEG11",
+        String[] cols = new String[]{"ID", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9", "aEEG10", "aEEG11",
                 "aEEG12", "aEEG13", "aEEG14", "aEEG15", "aEEG16", "aEEG17", "aEEG18", "aEEG19", "aEEG20", "aEEG21", "aEEG22", "aEEG23", "aEEG24",
                 "aEEG25", "aEEG26", "aEEG27", "aEEG28", "aEEG29", "aEEG30", "aEEG31", "aEEG32", "aEEG33", "aEEG34", "aEEG35", "aEEG36", "aEEG37",
-                "aEEG38", "aEEG39", "aEEG40", "aEEG41", "aEEG42", "aEEG43", "aEEG44", "aEEG45", "aEEG46", "aEEG47", "aEEG48" };
+                "aEEG38", "aEEG39", "aEEG40", "aEEG41", "aEEG42", "aEEG43", "aEEG44", "aEEG45", "aEEG46", "aEEG47", "aEEG48"};
         writer.writeNext(cols);
+
+        int paraCount = determineParaNumber();
+        ExecutorService scheduler = generateNewThreadPool(paraCount);
         Runnable queryTask = () -> {
             String patientId;
             while ((patientId = idQueue.poll()) != null) {
@@ -330,7 +332,7 @@ public class AnalysisService {
             }
         };
 
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < paraCount; ++i) {
             scheduler.submit(queryTask);
         }
         scheduler.shutdown();
@@ -343,28 +345,20 @@ public class AnalysisService {
         }
     }
 
+    /**
+     * Traditional use case 2, don't improve unless JE stats
+     */
     public void useCaseOne() throws IOException {
-        File dir = new File(DIRECTORY + LocalDateTime.now().toString());
-        if (!dir.exists()) {
-            try {
-                dir.mkdirs();
-            } catch (SecurityException se) {
-                System.out.println("Failed to create dir \"/results\"");
-            }
-        }
+        File dir = generateOutputDir(DIRECTORY + "UC1_" + LocalDateTime.now().toString());
+        if (dir == null) return;
 
-        List<String> patientIDs = importedFileDao.selectAllImportedPidPSC();
-
-        // List<String> patientIDs = patientDao.selectIdAll();
-        // patientIDs.retainAll(importedFileDao.getAllImportedPid("quz3"));
-        // patientIDs.clear();
-        // patientIDs.add("PUH-2011-170");
-        // patientIDs.add("PUH-2012-120");
+        // Get Patient List by uuid
+        List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine(uuid);
         idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         System.out.println(dir.getAbsolutePath() + '/');
         CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/output.csv"));
-        String[] cols = new String[] { "ID", "SR1", "SR2", "SR3", "SR4", "SR5", "SR6", "SR7", "SR8", "SR9", "SR10", "SR11", "SR12", "SR13", "SR14",
+        String[] cols = new String[]{"ID", "SR1", "SR2", "SR3", "SR4", "SR5", "SR6", "SR7", "SR8", "SR9", "SR10", "SR11", "SR12", "SR13", "SR14",
                 "SR15", "SR16", "SR17", "SR18", "SR19", "SR20", "SR21", "SR22", "SR23", "SR24", "SR25", "SR26", "SR27", "SR28", "SR29", "SR30",
                 "SR31", "SR32", "SR33", "SR34", "SR35", "SR36", "SR37", "SR38", "SR39", "SR40", "SR41", "SR42", "SR43", "SR44", "SR45", "SR46",
                 "SR47", "SR48", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9", "aEEG10", "aEEG11", "aEEG12",
@@ -375,8 +369,11 @@ public class AnalysisService {
                 "SZProb15", "SZProb16", "SZProb17", "SZProb18", "SZProb19", "SZProb20", "SZProb21", "SZProb22", "SZProb23", "SZProb24", "SZProb25",
                 "SZProb26", "SZProb27", "SZProb28", "SZProb29", "SZProb30", "SZProb31", "SZProb32", "SZProb33", "SZProb34", "SZProb35", "SZProb36",
                 "SZProb37", "SZProb38", "SZProb39", "SZProb40", "SZProb41", "SZProb42", "SZProb43", "SZProb44", "SZProb45", "SZProb46", "SZProb47",
-                "SZProb48" };
+                "SZProb48"};
         writer.writeNext(cols);
+
+        int paraCount = determineParaNumber();
+        ExecutorService scheduler = generateNewThreadPool(paraCount);
         Runnable queryTask = () -> {
             String patientId;
             while ((patientId = idQueue.poll()) != null) {
@@ -462,7 +459,7 @@ public class AnalysisService {
             }
         };
 
-        for (int i = 0; i < 8; ++i)
+        for (int i = 0; i < paraCount; ++i)
             scheduler.submit(queryTask);
         scheduler.shutdown();
         try {
@@ -476,14 +473,8 @@ public class AnalysisService {
 
     public void exportFromPatientsWithDownsampling(List<String> patients, String column, String method, String interval, String time)
             throws IOException {
-        File dir = new File(DIRECTORY + LocalDateTime.now().toString());
-        if (!dir.exists()) {
-            try {
-                dir.mkdirs();
-            } catch (SecurityException se) {
-                System.out.println("Failed to create dir \"/results\"");
-            }
-        }
+        File dir = generateOutputDir(DIRECTORY + LocalDateTime.now().toString());
+        if (dir == null) return;
 
         for (String patientId : patients) {
             String queryString = "SELECT " + method + "(\"" + column + "\")" + " FROM \"" + patientId + "\" ";
@@ -506,7 +497,7 @@ public class AnalysisService {
             System.out.println(dir.getAbsolutePath() + '/');
             CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + '/' + patientId + ".csv"));
             Object[] columns = result.getResults().get(0).getSeries().get(0).getColumns().toArray();
-            String[] entries = Arrays.asList(columns).toArray(new String[columns.length]);
+            String[] entries = Arrays.asList(columns).toArray(new String[0]);
             writer.writeNext(entries);
 
             List<List<Object>> res = result.getResults().get(0).getSeries().get(0).getValues();
@@ -605,14 +596,8 @@ public class AnalysisService {
      */
     public void exportFromPatientsWithDownsamplingGroups(List<String> pids, Downsample downsample, List<DownsampleGroupVO> downsampleGroups)
             throws IOException {
-        File dir = new File(DIRECTORY + LocalDateTime.now().toString());
-        if (!dir.exists()) {
-            try {
-                dir.mkdirs();
-            } catch (SecurityException se) {
-                System.out.println("Failed to create dir \"/results\"");
-            }
-        }
+        File dir = generateOutputDir(DIRECTORY + LocalDateTime.now().toString());
+        if (dir == null) return;
 
         String fields = "mean(\"I1_1\")";
         List<String> fieldList = new ArrayList<>();
@@ -675,6 +660,52 @@ public class AnalysisService {
 
     public int deleteGroupByPrimaryKey(Integer groupId) {
         return downsampleGroupDao.deleteByPrimaryKey(groupId);
+    }
+
+    /**
+     * Generate an object for output directory class
+     */
+    private File generateOutputDir(String path) {
+        path = path.replace(':', '.'); // Workaround for Windows name restriction
+        File outputDir = new File(path);
+        boolean dirCreationSuccess = true;
+
+        if (!outputDir.exists()) {
+            String err = "Failed to create 'Results' dir. ";
+            try {
+                if (!outputDir.mkdirs()) {
+                    dirCreationSuccess = false;
+                }
+            } catch (SecurityException se) {
+                err += se.getLocalizedMessage();
+                dirCreationSuccess = false;
+            }
+            // Use a flag for flexible work flow
+            if (!dirCreationSuccess) {
+                logger.error(err);
+                return null;
+            }
+            return outputDir;
+        }
+        // If the directory already exists (bad for us), we should consider this operation failed
+        return null;
+    }
+
+    /**
+     * How parallel should we go?
+     */
+    private int determineParaNumber() {
+        int paraCount = (int) Math.round(loadFactor * InfluxappConfig.AvailableCores);
+        return paraCount > 0 ? paraCount : 1;
+    }
+
+    /**
+     * Generate a new threadpool (when new request comes)
+     *
+     * @param i Number of threads
+     */
+    private ExecutorService generateNewThreadPool(int i) {
+        return Executors.newFixedThreadPool(i);
     }
 
 }

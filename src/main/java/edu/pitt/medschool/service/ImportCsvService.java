@@ -40,7 +40,6 @@ public class ImportCsvService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private final int availCores = Runtime.getRuntime().availableProcessors();
     @Value("${machine}")
     private String taskUUID;
     private String batchId = UUID.randomUUID().toString();
@@ -433,7 +432,7 @@ public class ImportCsvService {
         if (importingLock.get())
             return;
 
-        int paraCount = (int) Math.round(loadFactor * availCores);
+        int paraCount = (int) Math.round(loadFactor * InfluxappConfig.AvailableCores);
         paraCount = paraCount > 0 ? paraCount : 1;
         ExecutorService scheduler = Executors.newFixedThreadPool(paraCount);
         Runnable importTask = () -> {
