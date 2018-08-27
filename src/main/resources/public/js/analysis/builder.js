@@ -45,7 +45,7 @@ $(document).ready(function() {
         }, {
             data : null,
             render : function(data) {
-                return '~Minutes'
+                return ['~Seconds', '~Minutes', '~Hours', '>12 Hours'][Math.floor(Math.random() * 4)]
             }
         } ],
         order : [ [ 5, 'desc' ] ],

@@ -27,10 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -141,9 +138,9 @@ public class AnalysisService {
                         CSVWriter writerSeparate = new CSVWriter(new FileWriter(outputDir.getAbsolutePath() + "/" + patientId + ".csv"));
                         writerSeparate.writeNext(cols);
 
-                        StringBuffer subQuery = new StringBuffer();
-                        subQuery.append("SELECT ");
+                        StringBuffer subQuery = new StringBuffer("SELECT ");
 
+                        // Iter through every downsample group to form the query
                         for (DownsampleGroupVO group : groups) {
                             List<String> columnAggregation = Arrays.asList(group.getGroup().getColumns().split(", "));
                             String columnAggregationComplete = columnAggregation.stream().map(s -> "\"" + s + "\"")
@@ -156,27 +153,43 @@ public class AnalysisService {
                                 default:
                                     break;
                             }
-                            columnAggregationComplete += " AS label" + group.getGroup().getId();
+                            String gpId = "label" + group.getGroup().getId();
+                            columnAggregationComplete += " AS " + gpId;
                             subQuery.append(columnAggregationComplete).append(", ");
                         }
+                        // Remove the last two char: ", "
                         subQuery = new StringBuffer(subQuery.substring(0, subQuery.length() - 2));
                         subQuery.append(" FROM \"" + patientId + "\"");
+                        //TODO: Only doing ARs here
                         subQuery.append(" WHERE arType = 'ar'");
                         subQuery.append(" LIMIT ").append(exportQuery.getDuration());
 
                         // TODO number of aggregation groups needs to be dynamically coded
+                        // Is this right?
+                        StringBuffer aggrQuery = new StringBuffer("SELECT ");
+                        int labelCount = 0;
+                        for (DownsampleGroupVO g : groups) {
+                            String gid = String.valueOf(g.getGroup().getId()).trim();
+                            String gpId = "label" + gid;
+                            String operation = g.getGroup().getDownsample().trim();
+                            aggrQuery.append(operation + "(" + gpId + ") as label" + labelCount + gid + ", ");
+                        }
+                        // Remove the last two char: ", "
+                        aggrQuery = new StringBuffer(aggrQuery.substring(0, aggrQuery.length() - 2));
+                        aggrQuery.append(" FROM (");
+                        aggrQuery.append(subQuery.toString());
+                        aggrQuery.append(") where time >= '%s' and time < '%s' + ");
+                        aggrQuery.append(exportQuery.getDuration());
+                        aggrQuery.append("s group by time(%ss, %ss)");
 
-                        String template = "select median(label45) as LABEL45, mean(label46) as LABEL46, count(label45) as COUNT from ("
-                                + subQuery.toString() + ") where time >= '%s' and time < '%s' + " + exportQuery.getDuration() + "s "
-                                + "group by time(%ss, %ss)";
-
+                        //TODO: Only doing ARs here
                         String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId + "\" where arType = 'ar' limit 1";
                         QueryResult recordResult = influxDB.query(new Query(firstRecordTimeQuery, dbName));
                         String firstRecordTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
 
                         int offset = Integer.valueOf(firstRecordTime.substring(14, 16)) * 60 + Integer.valueOf(firstRecordTime.substring(17, 19));
 
-                        String queryString = String.format(template, firstRecordTime, firstRecordTime, exportQuery.getPeriod(), offset);
+                        String queryString = String.format(aggrQuery.toString(), firstRecordTime, firstRecordTime, exportQuery.getPeriod(), offset);
                         logger.debug(patientId + " :\n" + queryString);
 
                         Query query = new Query(queryString, dbName);
@@ -184,6 +197,7 @@ public class AnalysisService {
 
                         logger.debug(patientId + " :\n" + result.toString());
 
+                        // Construct the result to write to CSV files
                         String[] row = new String[1 + intervals * groups.size()];
                         row[0] = patientId;
 
@@ -216,9 +230,12 @@ public class AnalysisService {
                     } else {
                         logger.debug(patientId + " : Not enough data, only " + monitorTime.intValue() + " seconds");
                     }
-                } catch (Exception e) {
-                    // Reinsert failed user into queue
+                } catch (NullPointerException e) {
+                    // As for now, null pointer could be a glitch in the logic of the code
                     logger.error(patientId + " : " + Util.stackTraceErrorToString(e));
+                } catch (Exception ee) {
+                    logger.error(patientId + " : " + Util.stackTraceErrorToString(ee));
+                    // Reinsert failed user into queue
                     idQueue.offer(patientId);
                 }
             }
