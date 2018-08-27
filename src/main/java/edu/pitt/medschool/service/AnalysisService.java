@@ -116,6 +116,7 @@ public class AnalysisService {
         }
         String[] cols = colsList.toArray(new String[0]);
         writer.writeNext(cols);
+        writer.flush();
 
         // Query Task
         int paraCount = determineParaNumber();
@@ -464,9 +465,9 @@ public class AnalysisService {
         scheduler.shutdown();
         try {
             scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-            writer.close();
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
+        } finally {
             writer.close();
         }
     }
@@ -588,6 +589,7 @@ public class AnalysisService {
         return downsampleGroupDao.updateByPrimaryKeyWithBLOBs(group.getGroup());
     }
 
+    //TODO: Add some comments about this function?
     /**
      * @param pids
      * @param downsample
