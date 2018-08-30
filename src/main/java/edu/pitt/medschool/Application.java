@@ -1,5 +1,6 @@
 package edu.pitt.medschool;
 
+import edu.pitt.medschool.framework.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -8,6 +9,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.TimeZone;
 
 @SpringBootApplication
 public class Application implements ApplicationRunner {
@@ -20,6 +23,9 @@ public class Application implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        TimeZone.setDefault(TimeUtil.nycTimeZone);
+        logger.warn("BrainFlux start time: " + new Date());
+
         logger.info("Application started with command-line arguments: {}", Arrays.toString(args.getSourceArgs()));
         logger.info("NonOptionArgs: {}", args.getNonOptionArgs());
         logger.info("OptionNames: {}", args.getOptionNames());
