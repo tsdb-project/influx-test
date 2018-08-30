@@ -1,78 +1,78 @@
-$(document).ready(function() {
+$(document).ready(function () {
     var queries = {
-        "data" : []
+        "data": []
     };
 
     var table = $('#queryTable').DataTable({
-        ajax : {
-            "url" : "/analysis/query"
+        ajax: {
+            "url": "/analysis/query"
         },
-        data : queries.data,
-        columnDefs : [ {
-            "targets" : [ 0 ],
-            "visible" : false,
-            "searchable" : false
-        } ],
-        columns : [ {
-            data : 'id'
+        data: queries.data,
+        columnDefs: [{
+            "targets": [0],
+            "visible": false,
+            "searchable": false
+        }],
+        columns: [{
+            data: 'id'
         }, {
-            data : 'alias'
+            data: 'alias'
         }, {
-            data : null,
-            render : function(data) {
+            data: null,
+            render: function (data) {
                 return secondsToStr(data.period);
             }
         }, {
-            data : null,
-            render : function(data) {
+            data: null,
+            render: function (data) {
                 return secondsToStr(data.origin);
             }
         }, {
-            data : null,
-            render : function(data) {
+            data: null,
+            render: function (data) {
                 return secondsToStr(data.duration);
             }
         }, {
-            data : null,
-            render : function(data) {
+            data: null,
+            render: function (data) {
                 return localeDateString(data.createTime)
             }
         }, {
-            data : null,
-            render : function(data) {
+            data: null,
+            render: function (data) {
                 return localeDateString(data.updateTime)
             }
         }, {
-            data : null,
-            render : function(data) {
-                return ['~Seconds', '~Minutes', '~Hours', '>12 Hours'][Math.floor(Math.random() * 4)]
+            data: null,
+            render: function (data) {
+                return ['~Seconds', '~Minutes', '~Hours', '>12 Hours', 'N/A'][estimateExecTime(data.duration, data.period)]
             }
-        } ],
-        order : [ [ 5, 'desc' ] ],
+        }],
+        order: [[5, 'desc']],
     });
 
-    $("#createButton").click(function() {
+    $("#createButton").click(function () {
 
         if ($('#parameter-form')[0].checkValidity()) {
             var form = {
-                "alias" : $("#alias").val(),
-                "period" : $("#period").val() * $("#period_unit").val(),
-                "origin" : $("#origin").val() * $("#origin_unit").val(),
-                "duration" : $("#duration").val() * $("#duration_unit").val()
+                "alias": $("#alias").val(),
+                "period": $("#period").val() * $("#period_unit").val(),
+                "origin": $("#origin").val() * $("#origin_unit").val(),
+                "duration": $("#duration").val() * $("#duration_unit").val()
             };
             $.ajax({
-                'url' : "/analysis/query",
-                'type' : 'post',
-                'data' : JSON.stringify(form),
-                'contentType' : "application/json",
-                'dataType' : 'json',
-                'success' : function(data) {
+                'url': "/analysis/query",
+                'type': 'post',
+                'data': JSON.stringify(form),
+                'contentType': "application/json",
+                'dataType': 'json',
+                'success': function (data) {
                     queries = data;
                     table.clear().draw();
                     table.rows.add(queries.data); // Add new data
                     table.columns.adjust().draw();
                 },
-                'error' : function() {
+                'error': function () {
                 }
             });
         } else {
@@ -85,6 +85,7 @@ $(document).ready(function() {
         function numberEnding(number) {
             return (number > 1) ? 's' : '';
         }
+
         var temp = Math.floor(seconds);
         var years = Math.floor(temp / 31536000);
         if (years) {
@@ -109,24 +110,34 @@ $(document).ready(function() {
         return 'N/A';
     }
 
+    function estimateExecTime(dur, interval) {
+        if (dur === undefined || interval === undefined) return 4;
+        if (dur === 0 || interval === 0) return 4;
+        var idx1 = dur / interval;
+        if (idx1 < 16) return 0;
+        else if (idx1 < 24) return 1;
+        else if (idx1 < 32) return 2;
+        else return 3;
+    }
+
     function localeDateString(date) {
         var options = {
-            hour12 : true,
-            timeZone : "America/New_York"
+            hour12: true,
+            timeZone: "America/New_York"
         };
         return new Date(date).toLocaleString('en-US', options);
     }
 
-    $('#queryTable tbody').on('mouseover', 'tr', function() {
+    $('#queryTable tbody').on('mouseover', 'tr', function () {
         $(this).attr("style", "background-color:#ffffdd");
     });
 
-    $('#queryTable tbody').on('mouseout', 'tr', function() {
+    $('#queryTable tbody').on('mouseout', 'tr', function () {
         $(this).removeAttr('style');
         ;
     });
 
-    $('#queryTable tbody').on('click', 'tr', function() {
+    $('#queryTable tbody').on('click', 'tr', function () {
         window.location.href = '/analysis/edit/' + table.row($(this)).data().id;
     });
 });
