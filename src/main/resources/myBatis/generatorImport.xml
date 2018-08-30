@@ -30,7 +30,6 @@
 
         <table tableName="import_progress"></table>
         <table tableName="imported_file"></table>
-        <table tableName="patient"></table>
-        <table tableName="influx_cluster"></table>
+        <table tableName="import_log"></table>
     </context>
 </generatorConfiguration>
