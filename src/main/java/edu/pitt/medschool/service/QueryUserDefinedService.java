@@ -2,14 +2,13 @@ package edu.pitt.medschool.service;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.influxdb.DictionaryResultTable;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.model.QueryResultBean;
 import edu.pitt.medschool.model.TimeSpan;
 import edu.pitt.medschool.model.dao.PatientDao;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -128,11 +127,10 @@ public class QueryUserDefinedService {
      * @return Query execuation results
      */
     private QueryResultBean checkOnePatientA(String queryString, String pid, String queryN, int thrSec, boolean isAr) {
-        Query q = new Query(queryString, dbName);
-        List<DictionaryResultTable> res = InfluxUtil.queryResultToKV(influxDB.query(q));
+        ResultTable[] res = InfluxUtil.justQueryData(this.influxDB, true, queryString);
 
         // This patient doesn't need to be included.
-        if (res.size() == 0)
+        if (res.length == 0)
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
@@ -140,7 +138,7 @@ public class QueryUserDefinedService {
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
-        List<Object> occTime = res.get(0).getDatalistByColumnName("time");
+        List<Object> occTime = res[0].getDatalistByColumnName("time");
         qrb.setOccurTimes(occTime.size());
 
         // Do a type convert (Object -> Instant)
@@ -157,11 +155,10 @@ public class QueryUserDefinedService {
     }
 
     private QueryResultBean checkOnePatientB(String queryString, String pid, String queryN, int he, boolean isAr) {
-        Query q = new Query(queryString, dbName);
-        List<DictionaryResultTable> res = InfluxUtil.queryResultToKV(influxDB.query(q));
+        ResultTable[] res = InfluxUtil.justQueryData(this.influxDB, true, queryString);
 
         // This patient doesn't need to be included.
-        if (res.size() == 0)
+        if (res.length == 0)
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
@@ -169,7 +166,7 @@ public class QueryUserDefinedService {
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
-        List<Object> occTime = res.get(0).getDatalistByColumnName("time");
+        List<Object> occTime = res[0].getDatalistByColumnName("time");
         qrb.setOccurTimes(occTime.size());
 
         List<TimeSpan> occTimes = new ArrayList<>(occTime.size());
