@@ -176,6 +176,8 @@ public class TimeUtil {
     }
 
     public static void main(String[] args) throws ParseException {
+        SOP(Date.from(Instant.parse("2018-09-02T09:18:11.563847612Z")));
+
         SOP(secondToString(30)[0] + ":" + secondToString(30)[1]);
         SOP(secondToString(3600)[0] + ":" + secondToString(3600)[1]);
         SOP(secondToString(18000)[0] + ":" + secondToString(18000)[1]);
