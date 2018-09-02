@@ -99,13 +99,14 @@
     <orderEntry type="library" name="Maven: com.zaxxer:HikariCP:2.7.8" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-jdbc:5.0.4.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-tx:5.0.4.RELEASE" level="project" />
-    <orderEntry type="library" name="Maven: org.influxdb:influxdb-java:2.9" level="project" />
-    <orderEntry type="library" name="Maven: com.squareup.retrofit2:retrofit:2.3.0" level="project" />
-    <orderEntry type="library" name="Maven: com.squareup.retrofit2:converter-moshi:2.3.0" level="project" />
-    <orderEntry type="library" name="Maven: com.squareup.moshi:moshi:1.4.0" level="project" />
-    <orderEntry type="library" name="Maven: com.squareup.okhttp3:okhttp:3.9.1" level="project" />
-    <orderEntry type="library" name="Maven: com.squareup.okio:okio:1.13.0" level="project" />
-    <orderEntry type="library" name="Maven: com.squareup.okhttp3:logging-interceptor:3.9.1" level="project" />
+    <orderEntry type="library" name="Maven: org.influxdb:influxdb-java:2.12" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.retrofit2:retrofit:2.4.0" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.retrofit2:converter-moshi:2.4.0" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.moshi:moshi:1.5.0" level="project" />
+    <orderEntry type="library" name="Maven: org.msgpack:msgpack-core:0.8.16" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.okhttp3:okhttp:3.11.0" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.okio:okio:1.14.0" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.okhttp3:logging-interceptor:3.11.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.poi:poi:3.17" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.11" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-collections4:4.1" level="project" />
