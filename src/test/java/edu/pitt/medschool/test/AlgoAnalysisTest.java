@@ -8,6 +8,7 @@ public class AlgoAnalysisTest {
     public static void main(String... args) {
         InfluxDB i = InfluxappConfig.INFLUX_DB;
 
-        Analysis.getPatientAllDataSpan(i, "PUH-2010-141");
+        Analysis.getPatientAllDataSpan(i, null, "PUH-2010-141");
+        Analysis.getPatientAllDataSpan(i, null, "PUH-2010-127");
     }
 }
