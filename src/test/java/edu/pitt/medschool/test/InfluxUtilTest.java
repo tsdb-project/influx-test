@@ -5,7 +5,8 @@ import edu.pitt.medschool.framework.influxdb.ResultTable;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 
-import static edu.pitt.medschool.framework.influxdb.InfluxUtil.QueryResultToKV;
+import static edu.pitt.medschool.framework.influxdb.InfluxUtil.queryResultToKV;
+import static edu.pitt.medschool.framework.influxdb.InfluxUtil.queryResultToTable;
 
 /**
  * Test for InfluxDB Util
@@ -15,7 +16,9 @@ public class InfluxUtilTest {
     private static void doQuery(String d, String db) {
         Query q = new Query(d, db);
         QueryResult qr = InfluxappConfig.INFLUX_DB.query(q);
-        ResultTable[] data = QueryResultToKV(qr).toArray(new ResultTable[0]);
+        ResultTable[] data;
+        data = queryResultToKV(qr).toArray(new ResultTable[0]);
+        data = queryResultToTable(qr).toArray(new ResultTable[0]);
         System.err.println(data.length);
     }
 

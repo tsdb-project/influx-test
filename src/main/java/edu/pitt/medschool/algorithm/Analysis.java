@@ -22,23 +22,24 @@ public class Analysis {
     public static List<DataTimeSpanBean> getPatientAllDataSpan(InfluxDB i, Logger logger, String pid) {
         pid = pid.toUpperCase().trim();
         String uuidSearchQuery = "show tag values from \"" + pid + "\" with key = fileUUID";
-        List<Object> uuids = justQueryData(i, uuidSearchQuery).get(0).getDatalistByColumnName("value");
+        List<Object> uuids = justQueryData(i, true, uuidSearchQuery)[0].getDatalistByColumnName("value");
 
         List<DataTimeSpanBean> res = new ArrayList<>(uuids.size());
         for (Object uuid : uuids) {
-            // Query 3 at same time to save some requests
+            // Query 4 at the same time to save some requests
             String template = "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1; ";
             template += "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1; ";
             template += "show tag values from \"" + pid + "\" with key = arType where fileUUID = '%s';";
-            template += "SELECT count(Time) AS C FROM \"" + pid + "\" WHERE fileUUID = '%s';";
+            template += "SELECT count(Time) FROM \"" + pid + "\" WHERE fileUUID = '%s';";
 
             DataTimeSpanBean dts = new DataTimeSpanBean();
-            List<ResultTable> table = justQueryData(i, String.format(template, uuid, "ASC", uuid, "DESC", uuid, uuid));
+            ResultTable[] table = justQueryData(i, true,
+                    String.format(template, uuid, "ASC", uuid, "DESC", uuid, uuid));
 
-            Instant start = Instant.parse((CharSequence) table.get(0).getDatalistByColumnName("time").get(0)),
-                    end = Instant.parse((CharSequence) table.get(1).getDatalistByColumnName("time").get(0));
-            List<Object> arType = table.get(2).getDatalistByColumnName("value");
-            long count = Math.round((double) table.get(3).getDatalistByColumnName("C").get(0)),
+            Instant start = Instant.parse((CharSequence) table[0].getDataByColAndRow(0, 0)),
+                    end = Instant.parse((CharSequence) table[1].getDataByColAndRow(0, 0));
+            List<Object> arType = table[2].getDatalistByColumnName("value");
+            long count = Math.round((double) table[3].getDataByColAndRow(1, 0)),
                     timeDelta = end.toEpochMilli() - start.toEpochMilli();
 
             // Determine Ar/NoAr status
@@ -66,7 +67,7 @@ public class Analysis {
             res.add(dts);
         }
 
-        // Cache this res if necessary
+        // Cache this object into MySQL if necessary
         return res;
     }
 

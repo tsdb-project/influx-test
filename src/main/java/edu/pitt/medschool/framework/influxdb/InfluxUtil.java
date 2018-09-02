@@ -19,26 +19,48 @@ public class InfluxUtil {
 
     /**
      * Method for lazy man, just query the 'data' database and get the result
+     * Just use fast method for general queries
      */
-    public static List<ResultTable> justQueryData(InfluxDB i, String query) {
-        return QueryResultToKV(i.query(new Query(query, "data")));
+    public static ResultTable[] justQueryData(InfluxDB i, boolean fastMethod, String query) {
+        String dbName = DBConfiguration.Data.DBNAME;
+        if (fastMethod) return queryResultToTable(i.query(new Query(query, dbName))).toArray(new ResultTable[0]);
+        else return queryResultToKV(i.query(new Query(query, dbName))).toArray(new ResultTable[0]);
     }
 
     /**
-     * Query results to a dictionary like struct, in most cases it should only have one series
+     * Query results to a table, fast conversion but not safe to modify anything
      */
-    public static List<ResultTable> QueryResultToKV(QueryResult results) {
-        List<ResultTable> res = new LinkedList<>();
+    public static List<FastResultTable> queryResultToTable(QueryResult results) {
+        List<FastResultTable> res = new LinkedList<>();
 
         if (results.hasError()) return res;
         if (results.getResults().isEmpty()) return res;
 
-        // Most queries should have one result, but we have to handle multi-results queries anyway
+        // Most queries should have one result,
         for (QueryResult.Result qr : results.getResults()) {
             if (qr.getSeries() == null) continue;
             for (QueryResult.Series sr : qr.getSeries()) {
-                if (sr == null) res.add(new ResultTable()); // This result is empty
-                else res.add(new ResultTable(sr));
+                res.add(new FastResultTable(sr));
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     * Query results to a more user-friendly struct, could be dictionary like
+     */
+    public static List<DictionaryResultTable> queryResultToKV(QueryResult results) {
+        List<DictionaryResultTable> res = new LinkedList<>();
+
+        if (results.hasError()) return res;
+        if (results.getResults().isEmpty()) return res;
+
+        // but we have to handle multi-results queries anyway
+        for (QueryResult.Result qr : results.getResults()) {
+            if (qr.getSeries() == null) continue;
+            for (QueryResult.Series sr : qr.getSeries()) {
+                res.add(new DictionaryResultTable(sr));
             }
         }
 
@@ -73,8 +95,8 @@ public class InfluxUtil {
      */
     public static boolean hasDuplicateTagKeyValues(String keyName, String toCheckValue, String dbName) {
         Query q = new Query("SHOW TAG VALUES ON \"" + dbName + "\" WITH KEY = \"" + keyName + "\"", dbName);
-        ResultTable[] qr = QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q)).toArray(new ResultTable[0]);
-        return qr[0].getRowCount() != 0 && qr[0].getDatalistByColumnName("value").contains(toCheckValue);
+        List<DictionaryResultTable> qr = queryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
+        return qr.get(0).getRowCount() != 0 && qr.get(0).getDatalistByColumnName("value").contains(toCheckValue);
     }
 
     /**
@@ -90,38 +112,6 @@ public class InfluxUtil {
         return (long) qr.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
     }
 
-    /**
-     * Manual table join (Left join)
-     * Avoid using, due to no index
-     *
-     * @param l    Table left
-     * @param r    Table right
-     * @param colL Join on which column (left)
-     * @param colR Join on which column (right)
-     */
-/*
-    public static Map<String, List<Object>> ResultTableJoin(Map<String, List<Object>> l, Map<String, List<Object>> r, String colL, String colR) {
-        Map<String, List<Object>> result = new TreeMap<>();
-        Map<Integer, Integer> matchList = new HashMap<>(l.size());
-        // No index here, n^2 comp.
-        ArrayList<Object>
-                leftVal = new ArrayList<>(l.get(colL)),
-                rightVal = new ArrayList<>(r.get(colR));
-
-        for (int i = 0; i < leftVal.size(); i++) {
-            int newRightSize = rightVal.size();
-            for (int j = 0; j < newRightSize; j++) {
-                // objL and objR should be some primitive type (InfluxDB doesn't support much data type)
-                if (leftVal.get(i).equals(rightVal.get(j))) {
-                    matchList.put(i, j);
-                    rightVal.remove(j);
-                }
-            }
-        }
-
-        return result;
-    }
-*/
     public static void main(String[] args) {
         List<String> s = getAllTables(DBConfiguration.Data.DBNAME);
         System.out.println(s);

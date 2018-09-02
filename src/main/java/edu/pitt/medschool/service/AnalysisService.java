@@ -6,8 +6,8 @@ import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
+import edu.pitt.medschool.framework.influxdb.DictionaryResultTable;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
-import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.Downsample;
@@ -202,7 +202,7 @@ public class AnalysisService {
 
                         Query query = new Query(queryString, dbName);
                         QueryResult result = influxDB.query(query);
-                        List<ResultTable> resultKV = InfluxUtil.QueryResultToKV(result);
+                        List<DictionaryResultTable> resultKV = InfluxUtil.queryResultToKV(result);
 
                         // logger.debug(patientId + " :\n" + result.toString());
 
