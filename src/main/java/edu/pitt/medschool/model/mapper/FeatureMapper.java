@@ -1,10 +1,7 @@
 package edu.pitt.medschool.model.mapper;
 
-import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
-import edu.pitt.medschool.model.dto.Feature;
-import edu.pitt.medschool.model.dto.FeatureExample;
-import edu.pitt.medschool.model.dto.FeatureKey;
 import java.util.List;
+
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.DeleteProvider;
 import org.apache.ibatis.annotations.Insert;
@@ -20,6 +17,11 @@ import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.JdbcType;
+
+import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
+import edu.pitt.medschool.model.dto.Feature;
+import edu.pitt.medschool.model.dto.FeatureExample;
+import edu.pitt.medschool.model.dto.FeatureKey;
 
 @Mapper
 public interface FeatureMapper {
@@ -167,4 +169,18 @@ public interface FeatureMapper {
     @Results({ @Result(column = "column", property = "column", jdbcType = JdbcType.VARCHAR),
             @Result(column = "representation", property = "representation", jdbcType = JdbcType.VARCHAR) })
     List<ColumnVO> selectColumnVOsBySet(String electrode);
+
+    @Select({
+        "SELECT CONCAT(f.SID, m.suffix) AS col",
+        "FROM feature f",
+        "LEFT JOIN feature_mapping m ON f.type = m.type",
+        "WHERE f.`type` = #{type} ",
+        "AND electrode IN (${elecString})",
+        "AND (CASE WHEN m.comment IS NULL THEN range_low IN (${colString}) ELSE m.comment IN (${colString}) END)"
+    })
+    @ResultType(String.class)
+    @Results({
+        @Result(column="col", property="col", jdbcType=JdbcType.VARCHAR)
+    })
+    List<String> selectColumnsByAggregationGroupColumns(String type, String elecString, String colString);
 }
