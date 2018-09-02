@@ -4,7 +4,8 @@ import com.opencsv.CSVWriter;
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
-import edu.pitt.medschool.framework.util.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.Downsample;
@@ -25,9 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -194,7 +196,7 @@ public class AnalysisService {
 
                         Query query = new Query(queryString, dbName);
                         QueryResult result = influxDB.query(query);
-                        Map<String, List<Object>> resultKV = InfluxUtil.QueryResultToKV(result);
+                        List<ResultTable> resultKV = InfluxUtil.QueryResultToKV(result);
 
                         // logger.debug(patientId + " :\n" + result.toString());
 
