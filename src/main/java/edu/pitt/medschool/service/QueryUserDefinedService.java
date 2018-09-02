@@ -2,8 +2,8 @@ package edu.pitt.medschool.service;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.influxdb.DictionaryResultTable;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
-import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.model.QueryResultBean;
 import edu.pitt.medschool.model.TimeSpan;
 import edu.pitt.medschool.model.dao.PatientDao;
@@ -129,7 +129,7 @@ public class QueryUserDefinedService {
      */
     private QueryResultBean checkOnePatientA(String queryString, String pid, String queryN, int thrSec, boolean isAr) {
         Query q = new Query(queryString, dbName);
-        List<ResultTable> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
+        List<DictionaryResultTable> res = InfluxUtil.queryResultToKV(influxDB.query(q));
 
         // This patient doesn't need to be included.
         if (res.size() == 0)
@@ -158,7 +158,7 @@ public class QueryUserDefinedService {
 
     private QueryResultBean checkOnePatientB(String queryString, String pid, String queryN, int he, boolean isAr) {
         Query q = new Query(queryString, dbName);
-        List<ResultTable> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
+        List<DictionaryResultTable> res = InfluxUtil.queryResultToKV(influxDB.query(q));
 
         // This patient doesn't need to be included.
         if (res.size() == 0)

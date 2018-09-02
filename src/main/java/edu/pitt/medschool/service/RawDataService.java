@@ -71,12 +71,12 @@ public class RawDataService {
     }
 
     private Instant availDataTimeQ(String qT, String pid, boolean hasAr) {
-        Query q = new Query(String.format(qT, pid, hasAr ? "ar" : "noar"), dbDataName);
-        List<ResultTable> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
+        ResultTable[] res = InfluxUtil.justQueryData(this.influxDB, true,
+                String.format(qT, pid, hasAr ? "ar" : "noar"));
 
         // Table does not exist
-        if (res.size() == 0) return null;
-        return Instant.parse(res.get(0).getDatalistByColumnName("time").get(0).toString());
+        if (res.length == 0) return null;
+        return Instant.parse(res[0].getDataByColAndRow(0, 0).toString());
     }
 
     public static void main(String[] args) throws ParseException {

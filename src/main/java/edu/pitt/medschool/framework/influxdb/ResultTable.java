@@ -2,92 +2,71 @@ package edu.pitt.medschool.framework.influxdb;
 
 import org.influxdb.dto.QueryResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Dictionary-like result (a table) for a single InfluxDB query series
+ * Common abstract class of result table, for a single InfluxDB query series
+ * Born for the analysis sub-system
  */
-public class ResultTable {
-    private Map<String, List<Object>> dataKV;
-    private List<String> dataColumns; // For immutable order
-    private int rowCount = 0;
-    private int colCount = 0;
+public abstract class ResultTable {
+
+    List<String> dataColumns; // For immutable order
+    int rowCount = 0;
+    int colCount = 0;
 
     /**
-     * Generates an empty result set
+     * Get the column name by giving index
      */
-    public ResultTable() {
-        this.dataKV = new HashMap<>(0);
-        this.dataColumns = new ArrayList<>(0);
-    }
-
-    public ResultTable(QueryResult.Series r) {
-        formDictionary(r);
-        this.colCount = this.dataColumns.size();
+    public int getColumnIndexByName(String name) {
+        return dataColumns.indexOf(name);
     }
 
     /**
-     * Line and row starts from 0
+     * Get the index of given column name
      */
-    public Object getDataByColAndNum(int colNum, int rowNum) {
-        return dataKV.get(dataColumns.get(colNum)).get(rowNum);
+    public String getColumnNameWithIndex(int colIdx) {
+        return dataColumns.get(colIdx);
     }
 
     /**
-     * Line starts from 0
+     * Get data by column# and row#
+     * # Starts from 0
      */
-    public Object getDataByColumnNameAndRow(String columnName, int rowNum) {
-        return dataKV.get(columnName).get(rowNum);
-    }
+    public abstract Object getDataByColAndRow(int colNum, int rowNum);
 
-    public List<Object> getDatalistByColumnName(String columnName) {
-        return dataKV.get(columnName);
-    }
+    /**
+     * Get data by column name and row#
+     * # Starts from 0
+     */
+    public abstract Object getDataByColumnNameAndRow(String columnName, int rowNum);
 
-    public List<Object> getDatalistByRow(int rowNum) {
-        List<Object> res = new ArrayList<>(this.colCount);
-        for (int i = 0; i < this.colCount; i++) {
-            res.add(dataKV.get(dataColumns.get(i)).get(rowNum));
-        }
-        return res;
-    }
+    /**
+     * Get data list with the column name
+     */
+    public abstract List<Object> getDatalistByColumnName(String columnName);
 
-    public Class getDataTypeByColumnName(String columnName) {
-        return dataKV.get(columnName).get(0).getClass();
-    }
+    /**
+     * Get data list with the row number
+     */
+    public abstract List<Object> getDatalistByRow(int rowNum);
 
+    /**
+     * Total row count in this series
+     */
     public int getRowCount() {
         return this.rowCount;
     }
 
+    /**
+     * Total column count in this series
+     */
     public int getColCount() {
         return this.colCount;
     }
 
-    /**
-     * Extract query result series and form a map
-     */
-    private void formDictionary(QueryResult.Series resSer) {
-        List<String> columnsData = resSer.getColumns();
-        int cols = columnsData.size(), rows = resSer.getValues().size();
-        this.rowCount = rows;
-
-        // Convert to a dictionary-like structure
-        this.dataKV = new HashMap<>(rows);
-        this.dataColumns = new ArrayList<>(cols);
-        // Fill this by column
-        for (int i = 0; i < cols; ++i) {
-            String colName = columnsData.get(i);
-            List<Object> dataList = new ArrayList<>(rows);
-            for (int j = 0; j < rows; j++) {
-                Object value = resSer.getValues().get(j).get(i);
-                dataList.add(value);
-            }
-            this.dataColumns.add(colName);
-            this.dataKV.put(colName, dataList);
-        }
+    void extractResultColRowNumber(QueryResult.Series sr) {
+        this.rowCount = sr.getValues().size();
+        this.colCount = sr.getColumns().size();
     }
+
 }
