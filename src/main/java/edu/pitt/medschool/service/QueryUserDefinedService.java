@@ -2,7 +2,8 @@ package edu.pitt.medschool.service;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.util.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.model.QueryResultBean;
 import edu.pitt.medschool.model.TimeSpan;
 import edu.pitt.medschool.model.dao.PatientDao;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Query related services
@@ -129,7 +129,7 @@ public class QueryUserDefinedService {
      */
     private QueryResultBean checkOnePatientA(String queryString, String pid, String queryN, int thrSec, boolean isAr) {
         Query q = new Query(queryString, dbName);
-        Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
+        List<ResultTable> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
 
         // This patient doesn't need to be included.
         if (res.size() == 0)
@@ -140,7 +140,7 @@ public class QueryUserDefinedService {
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
-        List<Object> occTime = res.get("time");
+        List<Object> occTime = res.get(0).getDatalistByColumnName("time");
         qrb.setOccurTimes(occTime.size());
 
         // Do a type convert (Object -> Instant)
@@ -158,7 +158,7 @@ public class QueryUserDefinedService {
 
     private QueryResultBean checkOnePatientB(String queryString, String pid, String queryN, int he, boolean isAr) {
         Query q = new Query(queryString, dbName);
-        Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
+        List<ResultTable> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
 
         // This patient doesn't need to be included.
         if (res.size() == 0)
@@ -169,7 +169,7 @@ public class QueryUserDefinedService {
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
-        List<Object> occTime = res.get("time");
+        List<Object> occTime = res.get(0).getDatalistByColumnName("time");
         qrb.setOccurTimes(occTime.size());
 
         List<TimeSpan> occTimes = new ArrayList<>(occTime.size());

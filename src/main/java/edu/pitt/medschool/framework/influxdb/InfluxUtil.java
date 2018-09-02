@@ -1,53 +1,48 @@
-package edu.pitt.medschool.framework.util;
-
-import org.influxdb.dto.Query;
-import org.influxdb.dto.QueryResult;
+package edu.pitt.medschool.framework.influxdb;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
+import org.influxdb.InfluxDB;
+import org.influxdb.dto.Query;
+import org.influxdb.dto.QueryResult;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Utilities for InfluxDB Java Client
+ *
+ * @author tonyz
  */
 public class InfluxUtil {
 
     /**
-     * Reshape InfluxDB Java Client result to a "Dictionary"
-     *
-     * @param results Influx Query result
-     * @return KV-Map (Size = 0 if no result)
+     * Method for lazy man, just query the 'data' database and get the result
      */
-    public static Map<String, List<Object>> QueryResultToKV(QueryResult results) {
-        if (results.hasError()) throw new RuntimeException(results.getError());
+    public static List<ResultTable> justQueryData(InfluxDB i, String query) {
+        return QueryResultToKV(i.query(new Query(query, "data")));
+    }
 
-        List<QueryResult.Series> resSer = results.getResults().get(0).getSeries();
-        // No results
-        if (resSer == null) return new HashMap<>(0);
+    /**
+     * Query results to a dictionary like struct, in most cases it should only have one series
+     */
+    public static List<ResultTable> QueryResultToKV(QueryResult results) {
+        List<ResultTable> res = new LinkedList<>();
 
-        List<String> columnsData = resSer.get(0).getColumns();
+        if (results.hasError()) return res;
+        if (results.getResults().isEmpty()) return res;
 
-        int a = resSer.size(), b = resSer.get(0).getValues().size();
-        int cols = columnsData.size(),
-                rows = a > b ? a : b;
-
-        Map<String, List<Object>> finalKV = new HashMap<>((int) (rows / 0.75));
-
-        for (int i = 0; i < cols; ++i) {
-            String colName = columnsData.get(i);
-            List<Object> dataList = new ArrayList<>(rows);
-            for (int j = 0; j < rows; j++) {
-                if (a > b) {
-                    dataList.add(resSer.get(j).getValues().get(0).get(i));
-                } else {
-                    dataList.add(resSer.get(0).getValues().get(j).get(i));
-                }
+        // Most queries should have one result, but we have to handle multi-results queries anyway
+        for (QueryResult.Result qr : results.getResults()) {
+            if (qr.getSeries() == null) continue;
+            for (QueryResult.Series sr : qr.getSeries()) {
+                if (sr == null) res.add(new ResultTable()); // This result is empty
+                else res.add(new ResultTable(sr));
             }
-            finalKV.put(colName, dataList);
         }
 
-        return finalKV;
+        return res;
     }
 
     /**
@@ -78,8 +73,8 @@ public class InfluxUtil {
      */
     public static boolean hasDuplicateTagKeyValues(String keyName, String toCheckValue, String dbName) {
         Query q = new Query("SHOW TAG VALUES ON \"" + dbName + "\" WITH KEY = \"" + keyName + "\"", dbName);
-        Map<String, List<Object>> qr = QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
-        return qr.size() != 0 && qr.get("value").contains(toCheckValue);
+        ResultTable[] qr = QueryResultToKV(InfluxappConfig.INFLUX_DB.query(q)).toArray(new ResultTable[0]);
+        return qr[0].getRowCount() != 0 && qr[0].getDatalistByColumnName("value").contains(toCheckValue);
     }
 
     /**
@@ -104,6 +99,7 @@ public class InfluxUtil {
      * @param colL Join on which column (left)
      * @param colR Join on which column (right)
      */
+/*
     public static Map<String, List<Object>> ResultTableJoin(Map<String, List<Object>> l, Map<String, List<Object>> r, String colL, String colR) {
         Map<String, List<Object>> result = new TreeMap<>();
         Map<Integer, Integer> matchList = new HashMap<>(l.size());
@@ -125,7 +121,7 @@ public class InfluxUtil {
 
         return result;
     }
-
+*/
     public static void main(String[] args) {
         List<String> s = getAllTables(DBConfiguration.Data.DBNAME);
         System.out.println(s);

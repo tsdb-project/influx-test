@@ -1,20 +1,19 @@
 package edu.pitt.medschool.service;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVWriter;
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
+import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dao.*;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.DownsampleGroupColumn;
+import okhttp3.OkHttpClient;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
@@ -26,26 +25,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVWriter;
-
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
-import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
-import edu.pitt.medschool.framework.util.InfluxUtil;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dao.DownsampleDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupAggrDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupColumnDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupDao;
-import edu.pitt.medschool.model.dao.DownsampleMetaDao;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.PatientDao;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.DownsampleGroupColumn;
-import okhttp3.OkHttpClient;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * Export functions
@@ -89,10 +77,6 @@ public class AnalysisService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private BlockingQueue<String> idQueue = new LinkedBlockingQueue<>();
-
-    public static void main(String[] args) {
-
-    }
 
     /**
      * Export (downsample) a single query to files (Could be called mutiple times)
@@ -195,10 +179,10 @@ public class AnalysisService {
                             labelCount++;
                             countId = gid;
                         }
-                        
+
                         // Adding COUNT label to track the existence of insufficient data
                         aggrQuery.append("count(label" + countId + ") as COUNT");
-                        
+
                         // Start of Subquery
                         aggrQuery.append(" FROM (");
                         aggrQuery.append(subQuery.toString());
@@ -218,7 +202,7 @@ public class AnalysisService {
 
                         Query query = new Query(queryString, dbName);
                         QueryResult result = influxDB.query(query);
-                        Map<String, List<Object>> resultKV = InfluxUtil.QueryResultToKV(result);
+                        List<ResultTable> resultKV = InfluxUtil.QueryResultToKV(result);
 
                         // logger.debug(patientId + " :\n" + result.toString());
 
@@ -292,10 +276,10 @@ public class AnalysisService {
         idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/output.csv"));
-        String[] cols = new String[] { "ID", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9", "aEEG10", "aEEG11",
+        String[] cols = new String[]{"ID", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9", "aEEG10", "aEEG11",
                 "aEEG12", "aEEG13", "aEEG14", "aEEG15", "aEEG16", "aEEG17", "aEEG18", "aEEG19", "aEEG20", "aEEG21", "aEEG22", "aEEG23", "aEEG24",
                 "aEEG25", "aEEG26", "aEEG27", "aEEG28", "aEEG29", "aEEG30", "aEEG31", "aEEG32", "aEEG33", "aEEG34", "aEEG35", "aEEG36", "aEEG37",
-                "aEEG38", "aEEG39", "aEEG40", "aEEG41", "aEEG42", "aEEG43", "aEEG44", "aEEG45", "aEEG46", "aEEG47", "aEEG48" };
+                "aEEG38", "aEEG39", "aEEG40", "aEEG41", "aEEG42", "aEEG43", "aEEG44", "aEEG45", "aEEG46", "aEEG47", "aEEG48"};
         writer.writeNext(cols);
 
         int paraCount = determineParaNumber();
@@ -406,7 +390,7 @@ public class AnalysisService {
 
         System.out.println(dir.getAbsolutePath() + '/');
         CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/output.csv"));
-        String[] cols = new String[] { "ID", "SR1", "SR2", "SR3", "SR4", "SR5", "SR6", "SR7", "SR8", "SR9", "SR10", "SR11", "SR12", "SR13", "SR14",
+        String[] cols = new String[]{"ID", "SR1", "SR2", "SR3", "SR4", "SR5", "SR6", "SR7", "SR8", "SR9", "SR10", "SR11", "SR12", "SR13", "SR14",
                 "SR15", "SR16", "SR17", "SR18", "SR19", "SR20", "SR21", "SR22", "SR23", "SR24", "SR25", "SR26", "SR27", "SR28", "SR29", "SR30",
                 "SR31", "SR32", "SR33", "SR34", "SR35", "SR36", "SR37", "SR38", "SR39", "SR40", "SR41", "SR42", "SR43", "SR44", "SR45", "SR46",
                 "SR47", "SR48", "aEEG1", "aEEG2", "aEEG3", "aEEG4", "aEEG5", "aEEG6", "aEEG7", "aEEG8", "aEEG9", "aEEG10", "aEEG11", "aEEG12",
@@ -417,7 +401,7 @@ public class AnalysisService {
                 "SZProb15", "SZProb16", "SZProb17", "SZProb18", "SZProb19", "SZProb20", "SZProb21", "SZProb22", "SZProb23", "SZProb24", "SZProb25",
                 "SZProb26", "SZProb27", "SZProb28", "SZProb29", "SZProb30", "SZProb31", "SZProb32", "SZProb33", "SZProb34", "SZProb35", "SZProb36",
                 "SZProb37", "SZProb38", "SZProb39", "SZProb40", "SZProb41", "SZProb42", "SZProb43", "SZProb44", "SZProb45", "SZProb46", "SZProb47",
-                "SZProb48" };
+                "SZProb48"};
         writer.writeNext(cols);
 
         int paraCount = determineParaNumber();
@@ -519,6 +503,16 @@ public class AnalysisService {
         }
     }
 
+    /**
+     * TODO: Add documents
+     *
+     * @param patients
+     * @param column
+     * @param method
+     * @param interval
+     * @param time
+     * @throws IOException
+     */
     public void exportFromPatientsWithDownsampling(List<String> patients, String column, String method, String interval, String time)
             throws IOException {
         File dir = generateOutputDir("");
@@ -637,9 +631,9 @@ public class AnalysisService {
         return downsampleGroupDao.updateByPrimaryKeyWithBLOBs(group.getGroup());
     }
 
-    // TODO: Add some comments about this function?
-
     /**
+     * TODO: Add some comments about this function?
+     *
      * @param pids
      * @param downsample
      * @param downsampleGroups
@@ -713,14 +707,13 @@ public class AnalysisService {
     public int deleteGroupByPrimaryKey(Integer groupId) {
         return downsampleGroupDao.deleteByPrimaryKey(groupId);
     }
-    
+
     public List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ColumnJSON json = mapper.readValue(columnsJson, ColumnJSON.class);
         return columnService.selectColumnsByAggregationGroupColumns(json);
     }
-    
-    
+
 
     /**
      * Generate an object for output directory class
