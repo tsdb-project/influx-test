@@ -175,12 +175,12 @@ public interface FeatureMapper {
         "FROM feature f",
         "LEFT JOIN feature_mapping m ON f.type = m.type",
         "WHERE f.`type` = #{type} ",
-        "AND electrode IN (${elecString})",
+        "AND (CASE WHEN ${querySid} = TRUE THEN SID IN (${elecString}) ELSE electrode IN (${elecString}) END)",
         "AND (CASE WHEN m.comment IS NULL THEN range_low IN (${colString}) ELSE m.comment IN (${colString}) END)"
     })
     @ResultType(String.class)
     @Results({
         @Result(column="col", property="col", jdbcType=JdbcType.VARCHAR)
     })
-    List<String> selectColumnsByAggregationGroupColumns(String type, String elecString, String colString);
+    List<String> selectColumnsByAggregationGroupColumns(String type, String elecString, String colString, boolean querySid);
 }

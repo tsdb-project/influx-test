@@ -70,7 +70,7 @@ $(document).ready(function() {
             render: function(data) {
                 var cols = JSON.parse(data);
                 return "<th><b>" + cols.type + "</b></br>" 
-                    + "<i>" + cols.electrodes.join(', ') + "</i></br></br>" 
+                    + "<i>" + cols.electrodes.join(', ') + "</i></br>" 
                     + cols.columns.join(', ') + "</th>";
             }
         }, {
@@ -234,10 +234,10 @@ $(document).ready(function() {
     var cList = [];
     
     $("#addButton").click(function() {
-        var map = {};
-        var eList = [];
-        var cList = [];
-        map.type = $("#measure").val(); //
+        map = {};
+        eList = [];
+        cList = [];
+        map.type = $("#measure").val();
         
         var form = $("#column").val();
         var $columnsInGroup = $('#columnsInGroup');
@@ -248,14 +248,14 @@ $(document).ready(function() {
         
         $("#column :selected").each(function (i,sel) {
             cList.push($(sel).text());
-        }); //
+        });
         map.columns = cList;
         
         if ($("#predefined").val() != null) {
             eList.push($("#predefined").val());
             map.electrodes = eList;
             form.forEach(function(e) {
-                var electrode = $("#predefined").val(); //
+                var electrode = $("#predefined").val();
                 var start = electrode.split(' ')[2];
                 var end = electrode.split(' ')[4];
                 console.log(start + ' ' + end);
@@ -267,8 +267,8 @@ $(document).ready(function() {
         } else {
             $("#electrode :selected").each(function (i,sel) {
                 eList.push($(sel).text());
-            }); //
-            map.electrodes = eList; //
+            });
+            map.electrodes = eList;
             form.forEach(function(e) {
                 var electrode = $("#electrode").val();
                 electrode.forEach(function(element) {
@@ -277,7 +277,6 @@ $(document).ready(function() {
                 });
             });
         }
-        console.log(map); //
         
         $columnsInGroup.empty();
         $columnsInGroup.append('<option value="' + map.type + '">' + map.type + '</option>');
@@ -287,12 +286,9 @@ $(document).ready(function() {
         map.columns.forEach(function(e) {
             $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
         });
-//        set.forEach(function(e) {
-//            var html = '<option value="' + e + '">' + e + '</option>';
-//            $columnsInGroup.append(html);
-//        });
-        // $columnsInGroup.attr('size',
-        // $('#columnsInGroup').children('option').length);
+        
+        console.log("map = ");
+        console.log(map);
     });
 
     $("#clearButton").click(function() {
@@ -313,8 +309,6 @@ $(document).ready(function() {
             html += '<option value="' + e + '">' + e + '</option>';
         }
         $columnsInGroup.append(html);
-        // var length = $('#columnsInGroup').children('option').length;
-        // $columnsInGroup.attr('size', length > 0 ? length : 1);
     });
 
     $("#deleteGroupButton").click(function() {
@@ -398,6 +392,7 @@ $(document).ready(function() {
                 'error': function() {}
             });
         }
+        console.log(map);
         $('#measure').val('');
         $('#measure').trigger('change');
         $('#predefined').empty();
@@ -407,10 +402,11 @@ $(document).ready(function() {
 
     $("#addGroupButton").click(function() {
         if ($('#aggregation-form')[0].checkValidity()) {
-            if (map.keys().length != 3) {
+            if (map.type == null) {
                 notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut");
                 return false;
             }
+            console.log(map);
             var form = {
                 "group": {
                     "id": groupId,
@@ -441,7 +437,7 @@ $(document).ready(function() {
                 },
                 'error': function() {}
             });
-            return true;
+            return false;
         } else {
             console.log("invalid form");
             return true;
