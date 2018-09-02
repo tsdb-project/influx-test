@@ -3,6 +3,7 @@
  */
 package edu.pitt.medschool.model.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +47,22 @@ public class FeatureDao {
 
     public List<String> selectColumnsByAggregationGroupColumns(ColumnJSON json) {
         String colString = Util.wrapAndConcatStringList("'", ", ", json.getColumns());
-        String elecString = Util.wrapAndConcatStringList("'", ", ", json.getElectrodes());
-        return featureMapper.selectColumnsByAggregationGroupColumns(json.getType(), elecString, colString);
+        String elecString;
+        boolean querySid;
+        if (json.getElectrodes().size() == 1 && json.getElectrodes().get(0).startsWith("*")) {
+            String[] components = json.getElectrodes().get(0).split(" ");
+            List<String> sids = new ArrayList<>();
+            for (int i = Integer.valueOf(components[2].substring(1, components[2].length())); i <= Integer
+                    .valueOf(components[4].substring(1, components[4].length())); i++) {
+                sids.add("I" + i);
+            }
+            elecString = Util.wrapAndConcatStringList("'", ", ", sids);
+            querySid = true;
+        } else {
+            elecString = Util.wrapAndConcatStringList("'", ", ", json.getElectrodes());
+            querySid = false;
+        }
+        return featureMapper.selectColumnsByAggregationGroupColumns(json.getType(), elecString, colString, querySid);
     }
 
 }

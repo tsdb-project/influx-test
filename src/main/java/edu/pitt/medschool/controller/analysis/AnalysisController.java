@@ -82,7 +82,7 @@ public class AnalysisController {
         return analysisGenerateModel(model);
     }
 
-    @RequestMapping(value = {"analysis/edit/{id}", "analysis/edit"}, method = RequestMethod.GET)
+    @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "builder");
@@ -293,7 +293,7 @@ public class AnalysisController {
         // List<DownsampleGroupVO> downsampleGroups = analysisService.selectAllAggregationGroupByQueryId(qid);
         // analysisService.exportFromPatientsWithDownsamplingGroups(pids, downsample, downsampleGroups);
 
-        //TODO: Remove or change the TestRun parameter
+        // TODO: Remove or change the TestRun parameter
         analysisService.exportToFile(qid, false);
     }
 

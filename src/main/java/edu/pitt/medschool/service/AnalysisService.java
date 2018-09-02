@@ -218,7 +218,7 @@ public class AnalysisService {
                                 List<Object> vals = res.get(i);
                                 int resultSize = vals.size();
                                 for (int j = 1; j <= groups.size(); j++) {
-                                    if (Double.valueOf(vals.get(resultSize - 1).toString()).intValue() < 600
+                                    if (Double.valueOf(vals.get(resultSize - 1).toString()).intValue() < 20
                                             && Double.valueOf(vals.get(resultSize - 1).toString()).intValue() > 0) {
                                         row[1 + (j - 1) * intervals + i] = "Insuff. Data";
                                     } else if (vals.get(j) == null) {
