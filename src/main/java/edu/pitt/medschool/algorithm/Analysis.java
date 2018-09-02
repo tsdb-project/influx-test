@@ -3,13 +3,12 @@ package edu.pitt.medschool.algorithm;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.model.DataTimeSpan;
 import org.influxdb.InfluxDB;
-import org.influxdb.dto.Query;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import static edu.pitt.medschool.framework.influxdb.InfluxUtil.QueryResultToKV;
+import static edu.pitt.medschool.framework.influxdb.InfluxUtil.justQueryData;
 
 /**
  * Logic regarding exports
@@ -22,8 +21,7 @@ public class Analysis {
     public static List<DataTimeSpan> getPatientAllDataSpan(InfluxDB i, String pid) {
         pid = pid.toUpperCase().trim();
         String uuidSearchQuery = "show tag values from \"" + pid + "\" with key = fileUUID";
-        List<Object> uuids = QueryResultToKV(i.query(new Query(uuidSearchQuery, "data")))
-                .get(0).getDatalistByColumnName("value");
+        List<Object> uuids = justQueryData(i, uuidSearchQuery).get(0).getDatalistByColumnName("value");
 
         List<DataTimeSpan> res = new ArrayList<>(uuids.size());
         for (Object uuid : uuids) {
@@ -32,7 +30,7 @@ public class Analysis {
             template += "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1;";
 
             DataTimeSpan dts = new DataTimeSpan();
-            List<ResultTable> table = QueryResultToKV(i.query(new Query(String.format(template, uuid, "ASC", uuid, "DESC"), "data")));
+            List<ResultTable> table = justQueryData(i, String.format(template, uuid, "ASC", uuid, "DESC"));
 
             dts.setFileUuid((String) uuid);
             dts.setPid(pid);

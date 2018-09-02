@@ -2,6 +2,7 @@ package edu.pitt.medschool.framework.influxdb;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
+import org.influxdb.InfluxDB;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 
@@ -15,6 +16,13 @@ import java.util.List;
  * @author tonyz
  */
 public class InfluxUtil {
+
+    /**
+     * Method for lazy man, just query the 'data' database and get the result
+     */
+    public static List<ResultTable> justQueryData(InfluxDB i, String query) {
+        return QueryResultToKV(i.query(new Query(query, "data")));
+    }
 
     /**
      * Query results to a dictionary like struct, in most cases it should only have one series
