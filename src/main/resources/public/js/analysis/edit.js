@@ -66,7 +66,13 @@ $(document).ready(function() {
         }, {
             data: 'group.aggregation'
         }, {
-            data: 'columns'
+            data: 'columns',
+            render: function(data) {
+                var cols = JSON.parse(data);
+                return "<th>" + cols.type + "</br>" 
+                    + cols.electrodes.join(', ') + "</br>" 
+                    + cols.columns.join(', ') + "</th>";
+            }
         }, {
             "width": "15%",
             data: 'group.id',
