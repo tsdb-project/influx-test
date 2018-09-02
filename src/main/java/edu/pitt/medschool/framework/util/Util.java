@@ -52,7 +52,7 @@ public class Util {
         File folder = new File(dir);
         if (folder.isFile()) {
             if (dir.toLowerCase().endsWith("." + type))
-                return new String[]{dir};
+                return new String[] { dir };
             else
                 return new String[0];
         }
@@ -88,8 +88,7 @@ public class Util {
 
         if (listOfFiles != null) {
             for (File listOfFile : listOfFiles) {
-                if (listOfFile.isFile()
-                        && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals("csv")
+                if (listOfFile.isFile() && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals("csv")
                         && !listOfFile.getName().startsWith(".")) {
                     FileBean fileBean = new FileBean();
                     fileBean.setName(listOfFile.getName());
@@ -104,6 +103,13 @@ public class Util {
         return fileBeans;
     }
 
+    public static String wrapAndConcatStringList(String wrapper, String concat, List<String> list) {
+        for (int i = 0; i < list.size(); i++) {
+            list.set(i, wrapper + list.get(i) + wrapper);
+        }
+        return String.join(concat, list);
+    }
+
     /**
      * Generate info inside a exception
      *
@@ -114,7 +120,6 @@ public class Util {
         e.printStackTrace(new PrintWriter(sw));
         return sw.toString();
     }
-
 
     public static void SOP(Object s) {
         if (s == null) {
