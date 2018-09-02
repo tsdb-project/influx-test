@@ -69,8 +69,8 @@ $(document).ready(function() {
             data: 'columns',
             render: function(data) {
                 var cols = JSON.parse(data);
-                return "<th>" + cols.type + "</br>" 
-                    + cols.electrodes.join(', ') + "</br>" 
+                return "<th><b>" + cols.type + "</b></br>" 
+                    + "<i>" + cols.electrodes.join(', ') + "</i></br></br>" 
                     + cols.columns.join(', ') + "</th>";
             }
         }, {
@@ -234,7 +234,10 @@ $(document).ready(function() {
     var cList = [];
     
     $("#addButton").click(function() {
-        map.measure = $("#measure").val(); //
+        var map = {};
+        var eList = [];
+        var cList = [];
+        map.type = $("#measure").val(); //
         
         var form = $("#column").val();
         var $columnsInGroup = $('#columnsInGroup');
@@ -246,11 +249,11 @@ $(document).ready(function() {
         $("#column :selected").each(function (i,sel) {
             cList.push($(sel).text());
         }); //
-        map.column = cList;
+        map.columns = cList;
         
         if ($("#predefined").val() != null) {
             eList.push($("#predefined").val());
-            map.electrode = eList;
+            map.electrodes = eList;
             form.forEach(function(e) {
                 var electrode = $("#predefined").val(); //
                 var start = electrode.split(' ')[2];
@@ -265,7 +268,7 @@ $(document).ready(function() {
             $("#electrode :selected").each(function (i,sel) {
                 eList.push($(sel).text());
             }); //
-            map.electrode = eList; //
+            map.electrodes = eList; //
             form.forEach(function(e) {
                 var electrode = $("#electrode").val();
                 electrode.forEach(function(element) {
@@ -277,11 +280,11 @@ $(document).ready(function() {
         console.log(map); //
         
         $columnsInGroup.empty();
-        $columnsInGroup.append('<option value="' + map.measure + '">' + map.measure + '</option>');
-        map.electrode.forEach(function(e) {
+        $columnsInGroup.append('<option value="' + map.type + '">' + map.type + '</option>');
+        map.electrodes.forEach(function(e) {
             $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
         });
-        map.column.forEach(function(e) {
+        map.columns.forEach(function(e) {
             $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
         });
 //        set.forEach(function(e) {
@@ -349,7 +352,7 @@ $(document).ready(function() {
     var groupId;
 
     $('#edit-group-modal').on('show.bs.modal', function(event) {
-        $('#edit-group-modal').unbind('hidden');;
+        $('#edit-group-modal').unbind('hidden');
         var button = $(event.relatedTarget);
         var id = button.data('id');
         var modal = $(this);
@@ -377,16 +380,17 @@ $(document).ready(function() {
                     $('#aggregation').val(data.data.group.aggregation);
                     $('#aggregation').trigger('change');
 
-                    var columns = data.data.columns.split(', ');
+                    var columns = JSON.parse(data.data.columns);
+                    map = columns;
                     var $columnsInGroup = $('#columnsInGroup');
-                    var set = new Set();
-                    columns.forEach(function(e) {
-                        set.add(e);
-                    });
                     $columnsInGroup.empty();
-                    set.forEach(function(e) {
-                        var html = '<option value="' + e + '">' + e + '</option>';
-                        $columnsInGroup.append(html);
+                    $columnsInGroup.append('<option value="' + columns.type + '">' + columns.type + '</option>');
+                    
+                    columns.electrodes.forEach(function(e) {
+                        $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
+                    });
+                    columns.columns.forEach(function(e) {
+                        $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
                     });
                     requestMethod = 'put';
                     groupId = id;
@@ -402,13 +406,8 @@ $(document).ready(function() {
     });
 
     $("#addGroupButton").click(function() {
-        var columns = [];
-        $("#columnsInGroup option").each(function() {
-            columns.push($(this).val());
-        });
-        columns = columns.join(", ");
         if ($('#aggregation-form')[0].checkValidity()) {
-            if (columns.length == 0) {
+            if (map.keys().length != 3) {
                 notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut");
                 return false;
             }
@@ -419,9 +418,9 @@ $(document).ready(function() {
                     "queryId": $("#id").val(),
                     "downsample": $("#method").val(),
                     "aggregation": $("#aggregation").val(),
-                    "columns": columns
+                    "columns": JSON.stringify(map)
                 },
-                "columns": columns
+                "columns": JSON.stringify(map)
             };
             $.ajax({
                 'url': "/analysis/group",
@@ -442,7 +441,7 @@ $(document).ready(function() {
                 },
                 'error': function() {}
             });
-            return false;
+            return true;
         } else {
             console.log("invalid form");
             return true;
