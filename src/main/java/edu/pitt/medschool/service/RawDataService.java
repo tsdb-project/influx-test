@@ -2,7 +2,8 @@ package edu.pitt.medschool.service;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.util.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.model.TSData.RawData;
 import org.influxdb.InfluxDB;
@@ -14,7 +15,6 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Isolachine
@@ -72,11 +72,11 @@ public class RawDataService {
 
     private Instant availDataTimeQ(String qT, String pid, boolean hasAr) {
         Query q = new Query(String.format(qT, pid, hasAr ? "ar" : "noar"), dbDataName);
-        Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
+        List<ResultTable> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
 
         // Table does not exist
         if (res.size() == 0) return null;
-        return Instant.parse(res.get("time").get(0).toString());
+        return Instant.parse(res.get(0).getDatalistByColumnName("time").get(0).toString());
     }
 
     public static void main(String[] args) throws ParseException {

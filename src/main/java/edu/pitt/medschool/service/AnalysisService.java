@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,6 +14,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.opencsv.CSVWriter;
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.DownsampleGroupColumn;
+import okhttp3.OkHttpClient;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
@@ -27,14 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVWriter;
-
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
-import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
-import edu.pitt.medschool.framework.util.InfluxUtil;
-import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.DownsampleDao;
 import edu.pitt.medschool.model.dao.DownsampleGroupAggrDao;
 import edu.pitt.medschool.model.dao.DownsampleGroupColumnDao;
@@ -42,10 +45,6 @@ import edu.pitt.medschool.model.dao.DownsampleGroupDao;
 import edu.pitt.medschool.model.dao.DownsampleMetaDao;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.DownsampleGroupColumn;
-import okhttp3.OkHttpClient;
 
 /**
  * Export functions
@@ -218,7 +217,7 @@ public class AnalysisService {
 
                         Query query = new Query(queryString, dbName);
                         QueryResult result = influxDB.query(query);
-                        Map<String, List<Object>> resultKV = InfluxUtil.QueryResultToKV(result);
+                        List<ResultTable> resultKV = InfluxUtil.QueryResultToKV(result);
 
                         // logger.debug(patientId + " :\n" + result.toString());
 
