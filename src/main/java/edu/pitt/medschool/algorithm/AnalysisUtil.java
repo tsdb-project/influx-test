@@ -14,7 +14,7 @@ import static edu.pitt.medschool.framework.influxdb.InfluxUtil.justQueryData;
 /**
  * Logic regarding exports
  */
-public class Analysis {
+public class AnalysisUtil {
 
     /**
      * Get all the data periods for a patient
