@@ -131,7 +131,10 @@ $(document).ready(function() {
                 "alias": $("#alias").val(),
                 "period": $("#period").val() * $("#period_unit").val(),
                 "origin": $("#origin").val() * $("#origin_unit").val(),
-                "duration": $("#duration").val() * $("#duration_unit").val()
+                "duration": $("#duration").val() * $("#duration_unit").val(),
+                "minEveryBinThershold": $("#every_bin").val(),
+                "minTotalBinThreshold": $("#total_bin").val(),
+                "isDownsampleFirst": document.getElementById('isDsFirst').checked
             };
             $.ajax({
                 'url': "/analysis/query",
