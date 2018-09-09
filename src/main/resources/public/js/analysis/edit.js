@@ -88,7 +88,7 @@ $(document).ready(function() {
         fd.append("plist", document.getElementById('uploadPatientList').files[0]);
         $.ajax({
             type: "POST",
-            url: "/api/export/save_patients/" + query.downsample.id,
+            url: "/api/export/patient_list/" + query.downsample.id,
             data: fd,
             contentType: false,
             cache: false,
@@ -96,6 +96,24 @@ $(document).ready(function() {
             success: function (result) {
                 if (result.code === 1) {
                     alert(result.msg + ": Update patient list successful.");
+                } else {
+                    alert("Failed to update patient list. " + result.msg);
+                }
+            },
+            error: function (result) {
+                alert("Failed to update patient list. " + result.msg);
+            }
+        });
+    });
+
+    $("#clearPlist").click(function () {
+        $.ajax({
+            type: "DELETE",
+            url: "/api/export/patient_list/" + query.downsample.id,
+            cache: false,
+            success: function (result) {
+                if (result.code === 1) {
+                    alert(result.msg + ": Delete patient list successful.");
                 } else {
                     alert("Failed to update patient list. " + result.msg);
                 }

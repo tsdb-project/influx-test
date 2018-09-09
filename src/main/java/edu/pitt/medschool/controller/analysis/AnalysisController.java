@@ -303,7 +303,7 @@ public class AnalysisController {
         analysisService.exportToFile(qid, false);
     }
 
-    @PostMapping("api/export/save_patients/{qid}")
+    @PostMapping("api/export/patient_list/{qid}")
     @ResponseBody
     public RestfulResponse uploadPatientList(@RequestParam("plist") MultipartFile file, @PathVariable(required = true) Integer qid) {
         StringBuilder sb = new StringBuilder();
@@ -320,7 +320,29 @@ public class AnalysisController {
         }
         String lists = sb.deleteCharAt(sb.length() - 1).toString();
 
-        return new RestfulResponse(1, file.getOriginalFilename());
+        Downsample ds = analysisService.selectByPrimaryKey(qid);
+        ds.setPatientlist(lists);
+        ds.setUpdateTime(new java.util.Date());
+
+        if (analysisService.updateByPrimaryKey(ds) == 1) {
+            return new RestfulResponse(1, file.getOriginalFilename());
+        } else {
+            return new RestfulResponse(-2, "Database error");
+        }
+    }
+
+    @DeleteMapping("api/export/patient_list/{qid}")
+    @ResponseBody
+    public RestfulResponse removePatientList(@PathVariable(required = true) Integer qid) {
+        Downsample ds = analysisService.selectByPrimaryKey(qid);
+        ds.setPatientlist("");
+        ds.setUpdateTime(new java.util.Date());
+
+        if (analysisService.updateByPrimaryKey(ds) == 1) {
+            return new RestfulResponse(1, "ok");
+        } else {
+            return new RestfulResponse(-2, "Database error");
+        }
     }
 
 }
