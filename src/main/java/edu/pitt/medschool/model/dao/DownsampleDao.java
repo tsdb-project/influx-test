@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.pitt.medschool.model.dao;
 
 import java.util.List;
@@ -15,7 +12,6 @@ import edu.pitt.medschool.model.mapper.DownsampleMapper;
 
 /**
  * @author Isolachine
- *
  */
 @Repository
 public class DownsampleDao {
@@ -33,13 +29,14 @@ public class DownsampleDao {
     public int insert(Downsample downsample) throws Exception {
         return downsampleMapper.insertSelective(downsample);
     }
-    
-    public Downsample selectByPrimaryKey(int id) {
-        return downsampleMapper.selectByPrimaryKey(id);
-    }
 
+    @Transactional(rollbackFor = Exception.class)
     public int updateByPrimaryKey(Downsample downsample) {
         return downsampleMapper.updateByPrimaryKeySelective(downsample);
+    }
+
+    public Downsample selectByPrimaryKey(int id) {
+        return downsampleMapper.selectByPrimaryKey(id);
     }
 
     public int deleteByPrimaryKey(int id) {

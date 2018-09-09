@@ -53,13 +53,24 @@
                         <div class="row">
                             <div class="col-sm-12 col-md-12">
                                 <div class="row">
-                                    <div class="col-sm-12 col-md-12">
+                                    <div class="col-sm-8 col-md-8">
                                         <label>Alias</label>
                                         <div class="input-group mb-3">
                                             <input type="hidden" id="id" th:value="${query.downsample.id}" />
                                             <input type="text" class="form-control" id="alias" th:value="${query.downsample.alias}" placeholder="Input the name of the query" required>
                                             <i class="form-group__bar"></i>
                                         </div>
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <label>Patient lists (Will change once uploaded)</label>
+                                        <form class="md-form">
+                                            <div class="file-field">
+                                                <div class="btn btn-secondary btn-sm float-left">
+                                                    <span>Upload file</span>
+                                                    <input type="file" name="plist" id="uploadPatientList" accept=".txt">
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -123,6 +134,12 @@
                                 <div class="form-group">
                                     <label>&nbsp</label>
                                     <a role="button" class="btn btn-primary btn-lg btn-block" target="_blank" th:href="@{/api/export/export/{id}(id=${query.downsample.id})}">Export</a>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-md-2">
+                                <div class="form-group">
+                                    <label>&nbsp</label>
+                                    <input type="submit" class="btn btn-danger btn-lg btn-block" id="clearPlist" value="Clear Patient List"/>
                                 </div>
                             </div>
                             <div class="col-sm-4 col-md-2">
