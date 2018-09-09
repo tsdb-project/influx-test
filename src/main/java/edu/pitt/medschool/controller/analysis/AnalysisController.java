@@ -3,21 +3,25 @@
  */
 package edu.pitt.medschool.controller.analysis;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import edu.pitt.medschool.framework.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
@@ -51,6 +55,8 @@ public class AnalysisController {
     @Autowired
     AnalysisService analysisService;
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @RequestMapping("analysis/export")
     public Model exportPage(Model model) {
         model.addAttribute("nav", "analysis");
@@ -82,7 +88,7 @@ public class AnalysisController {
         return analysisGenerateModel(model);
     }
 
-    @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
+    @RequestMapping(value = {"analysis/edit/{id}", "analysis/edit"}, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "builder");
@@ -295,6 +301,26 @@ public class AnalysisController {
 
         // TODO: Remove or change the TestRun parameter
         analysisService.exportToFile(qid, false);
+    }
+
+    @PostMapping("api/export/save_patients/{qid}")
+    @ResponseBody
+    public RestfulResponse uploadPatientList(@RequestParam("plist") MultipartFile file, @PathVariable(required = true) Integer qid) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            Stream<String> stream = new BufferedReader(new InputStreamReader(file.getInputStream())).lines();
+            stream.forEach(s -> {
+                sb.append(s.trim());
+                sb.append(',');
+            });
+            stream.close();
+        } catch (Exception o) {
+            logger.error(Util.stackTraceErrorToString(o));
+            return new RestfulResponse(-1, o.getLocalizedMessage());
+        }
+        String lists = sb.deleteCharAt(sb.length() - 1).toString();
+
+        return new RestfulResponse(1, file.getOriginalFilename());
     }
 
 }
