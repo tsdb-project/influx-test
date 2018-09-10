@@ -8,8 +8,9 @@ import java.time.Instant;
  */
 public class DataTimeSpanBean implements java.io.Serializable {
 
-    private long delta;
+    private static final long serialVersionUID = -6688161009706456563L;
 
+    private long delta;
     private String pid;
     private String fileUuid;
     private Instant start;

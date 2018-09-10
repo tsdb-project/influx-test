@@ -345,4 +345,16 @@ public class AnalysisController {
         }
     }
 
+    //TODO: Remove in production
+    @PutMapping("api/debug/Export")
+    @ResponseBody
+    public void debugExprt() {
+        try {
+            //analysisService.exportToFile(35, false);
+            analysisService.exportToFile(37, false);
+        } catch (IOException e) {
+            logger.error(Util.stackTraceErrorToString(e));
+        }
+    }
+
 }
