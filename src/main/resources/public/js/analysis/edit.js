@@ -95,31 +95,41 @@ $(document).ready(function() {
             processData: false,
             success: function (result) {
                 if (result.code === 1) {
-                    alert(result.msg + ": Update patient list successful.");
+                    $("#upload-plist-modal-body").text(result.msg + ": Update patient list successful.");
+                    $("#upload-plist-modal-hdr").text("Success");
                 } else {
-                    alert("Failed to update patient list. " + result.msg);
+                    $("#upload-plist-modal-body").text("Failed to update patient list. " + result.msg);
+                    $("#upload-plist-modal-hdr").text("Error");
                 }
+                $("#upload-plist-modal").modal();
             },
             error: function (result) {
-                alert("Failed to update patient list. " + result.msg);
+                $("#upload-plist-modal-body").text("Failed to update patient list. " + result.msg);
+                $("#upload-plist-modal-hdr").text("Error");
+                $("#upload-plist-modal").modal();
             }
         });
     });
 
-    $("#clearPlist").click(function () {
+    $("#delPlistModalButton").click(function () {
         $.ajax({
             type: "DELETE",
             url: "/api/export/patient_list/" + query.downsample.id,
             cache: false,
             success: function (result) {
                 if (result.code === 1) {
-                    alert(result.msg + ": Delete patient list successful.");
+                    $("#upload-plist-modal-body").text("Delete patient list successful");
+                    $("#upload-plist-modal-hdr").text("Success");
                 } else {
-                    alert("Failed to update patient list. " + result.msg);
+                    $("#upload-plist-modal-body").text("Failed to delete patient list. " + result.msg);
+                    $("#upload-plist-modal-hdr").text("Error");
                 }
+                $("#upload-plist-modal").modal();
             },
             error: function (result) {
-                alert("Failed to update patient list. " + result.msg);
+                $("#upload-plist-modal-body").text("Failed to delete patient list. " + result.msg);
+                $("#upload-plist-modal-hdr").text("Error");
+                $("#upload-plist-modal").modal();
             }
         });
     });
