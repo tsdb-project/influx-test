@@ -8,15 +8,12 @@ import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
-import edu.pitt.medschool.framework.influxdb.DictionaryResultTable;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.DownsampleGroupColumn;
 import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.ArrayUtils;
 import org.influxdb.InfluxDB;
@@ -28,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -124,10 +120,18 @@ public class AnalysisService {
             columnLabelName.add(group.getGroup().getLabel());
         }
 
+        // Headers
+        String[] pHeader = new String[groups.size() + 3];
+        pHeader[0] = "Timestamp";
+        for (int i = 0; i < columnLabelName.size(); i++) {
+            pHeader[i + 1] = columnLabelName.get(i);
+        }
+        pHeader[pHeader.length - 2] = "Count";
+        pHeader[pHeader.length - 1] = "fileUUID";
+
         CSVWriter mainCsvWriter = new CSVWriter(new FileWriter(projectRootFolder + "/output.csv"));
         mainCsvWriter.writeNext(ArrayUtils.addAll(
-                new String[]{"PID", "Timestamp"},
-                columnLabelName.toArray(new String[0])));
+                new String[]{"PID", "Timestamp"}, columnLabelName.toArray(new String[0])));
         BufferedWriter bw = new BufferedWriter(new FileWriter(projectRootFolder + "/output_meta.txt"));
         bw.write(String.format("EXPORT '%s' (#%d) STARTED ON '%s'%n%n", exportQuery.getAlias(), exportQuery.getId(), Instant.now()));
         bw.write(String.format("Total patients in database: %d%n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
@@ -165,13 +169,6 @@ public class AnalysisService {
                     bw.write(String.format(" '%s': '%d' seconds and '%d' bins.%n", patientId, totalValidSeconds, totalBins));
 
                     CSVWriter pWriter = new CSVWriter(new FileWriter(String.format("%s/patients/%s.csv", projectRootFolder, patientId)));
-                    // Headers
-                    String[] pHeader = new String[res[0].getColCount() + 1];
-                    pHeader[0] = "Timestamp";
-                    for (int i = 1; i < pHeader.length; i++) {
-                        pHeader[i] = columnLabelName.get(i - 1);
-                    }
-                    pHeader[pHeader.length - 1] = "fileUUID";
                     pWriter.writeNext(pHeader);
                     for (int i = 0; i < res.length; i++) {
                         ResultTable r = res[i];
