@@ -50,6 +50,7 @@ public class ExportQuery {
 
     // Meta for downsamples
     private List<Integer> badTimeDataId;
+    private List<Integer> goodTimeDataId;
 
     /**
      * Initialize this class (Expection if dts null or no length)
@@ -74,6 +75,7 @@ public class ExportQuery {
         this.downsampleInterval = dsPeriod;
         this.needAr = needAr;
         this.badTimeDataId = new ArrayList<>(this.numDataSegments);
+        this.goodTimeDataId = new ArrayList<>(this.numDataSegments);
         findFirstData(duration);
 
         buildQuery();
@@ -118,6 +120,10 @@ public class ExportQuery {
         return this.badTimeDataId;
     }
 
+    public List<Integer> getGoodDataTimeId() {
+        return this.goodTimeDataId;
+    }
+
     private void buildQuery() {
         this.queriesString = new String[this.numDataSegments];
         // A query for each unique file uuid
@@ -127,6 +133,7 @@ public class ExportQuery {
                 this.badTimeDataId.add(i);
                 continue;
             }
+            this.goodTimeDataId.add(i);
             String whereClause = String.format(Template.locatorCondition,
                     d.getFileUuid(), needAr ? "ar" : "noar");
             // Start operations

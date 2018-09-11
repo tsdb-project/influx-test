@@ -18,6 +18,7 @@ import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.DownsampleGroupColumn;
 import okhttp3.OkHttpClient;
+import org.apache.commons.lang3.ArrayUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
@@ -37,6 +38,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -110,10 +112,26 @@ public class AnalysisService {
         }
         idQueue = new LinkedBlockingQueue<>(patientIDs);
         String projectRootFolder = outputDir.getAbsolutePath();
+        AtomicInteger validPatientCounter = new AtomicInteger(0);
 
+        // Get columns data
+        List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
+        List<List<String>> columns = new ArrayList<>(groups.size());
+        List<String> columnLabelName = new ArrayList<>(groups.size());
+        for (DownsampleGroupVO group : groups) {
+            //TODO: More testing as it's not stable
+            columns.add(parseAggregationGroupColumnsString(group.getColumns()));
+            columnLabelName.add(group.getGroup().getLabel());
+        }
+
+        CSVWriter mainCsvWriter = new CSVWriter(new FileWriter(projectRootFolder + "/output.csv"));
+        mainCsvWriter.writeNext(ArrayUtils.addAll(
+                new String[]{"PID", "Timestamp"},
+                columnLabelName.toArray(new String[0])));
         BufferedWriter bw = new BufferedWriter(new FileWriter(projectRootFolder + "/output_meta.txt"));
         bw.write(String.format("EXPORT '%s' (#%d) STARTED ON '%s'%n%n", exportQuery.getAlias(), exportQuery.getId(), Instant.now()));
         bw.write(String.format("Total patients in database: %d%n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
+        bw.write(String.format("Ar status is: %s%n", exportQuery.getNeedar() ? "AR" : "NoAR"));
         bw.write(String.format("Number of patients for initial export: %d%n%n", patientIDs.size()));
         bw.flush();
 
@@ -125,14 +143,8 @@ public class AnalysisService {
             while ((patientId = idQueue.poll()) != null) {
                 try {
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
-                    List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
-                    List<List<String>> columns = new ArrayList<>(groups.size());
                     int minEveryBinSeconds = exportQuery.getMinEveryBinThershold() * 60;
                     double dropoutPercent = 1.0 * exportQuery.getMinTotalBinThreshold() / 100;
-
-                    for (DownsampleGroupVO group : groups) {
-                        columns.add(parseAggregationGroupColumnsString(group.getColumns()));
-                    }
 
                     ExportQuery eq = new ExportQuery(
                             dtsb, groups, columns,
@@ -146,6 +158,7 @@ public class AnalysisService {
 
                     // Analyze bins first
                     List<Integer> emptyIDs = eq.getBadDataTimeId();
+                    List<Integer> goodIDs = eq.getGoodDataTimeId();
                     long totalValidSeconds = AnalysisUtil.dataValidTotalSpan(emptyIDs, dtsb) / 1000;
                     int totalBins = (int) Math.ceil(1.0 * totalValidSeconds / exportQuery.getPeriod());
 
@@ -153,15 +166,26 @@ public class AnalysisService {
 
                     CSVWriter pWriter = new CSVWriter(new FileWriter(String.format("%s/patients/%s.csv", projectRootFolder, patientId)));
                     // Headers
-                    pWriter.writeNext(res[0].getDataColumns().toArray(new String[0]));
-                    for (ResultTable r : res) {
+                    String[] pHeader = new String[res[0].getColCount() + 1];
+                    pHeader[0] = "Timestamp";
+                    for (int i = 1; i < pHeader.length; i++) {
+                        pHeader[i] = columnLabelName.get(i - 1);
+                    }
+                    pHeader[pHeader.length - 1] = "fileUUID";
+                    pWriter.writeNext(pHeader);
+                    for (int i = 0; i < res.length; i++) {
+                        ResultTable r = res[i];
                         //TODO: Write out what is really needed
                         for (int j = 0; j < r.getRowCount(); j++) {
                             List<Object> row = r.getDatalistByRow(j);
-                            pWriter.writeNext(row.stream().map(Object::toString).toArray(String[]::new));
+                            String[] data = row.stream().map(Object::toString).toArray(String[]::new);
+                            pWriter.writeNext(ArrayUtils.add(data, dtsb.get(goodIDs.get(i)).getFileUuid()));
+                            mainCsvWriter.writeNext(ArrayUtils.addAll(new String[]{patientId}, data));
                         }
                     }
                     pWriter.close();
+
+                    validPatientCounter.getAndIncrement();
 
                 } catch (Exception ee) {
                     logger.error(String.format("%s: %s", patientId, Util.stackTraceErrorToString(ee)));
@@ -192,8 +216,10 @@ public class AnalysisService {
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
         } finally {
-            bw.write(String.format("%n%nEND ON '%s'", Instant.now()));
+            bw.write(String.format("%n%n# of valid patients: %d%n", validPatientCounter.get()));
+            bw.write(String.format("END ON '%s'", Instant.now()));
             bw.close();
+            mainCsvWriter.close();
         }
     }
 
