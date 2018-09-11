@@ -80,14 +80,14 @@ public class AnalysisUtil {
     }
 
     /**
-     * Calc the total available time span for a patient, deduct invalid data
+     * Calc the total valid available time span for a patient
      *
      * @return Milliseconds
      */
-    public static long dataValidTotalSpan(List<Integer> inv, List<DataTimeSpanBean> dts) {
-        long totalTime = dataTotalSpan(dts);
-        for (Integer i : inv) {
-            totalTime -= dts.get(i).getDelta();
+    public static long dataValidTotalSpan(List<Integer> good, List<DataTimeSpanBean> dts) {
+        long totalTime = 0;
+        for (Integer i : good) {
+            totalTime += dts.get(i).getDelta();
         }
         return totalTime;
     }

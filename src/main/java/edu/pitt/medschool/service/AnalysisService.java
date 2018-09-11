@@ -15,7 +15,6 @@ import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.Downsample;
 import okhttp3.OkHttpClient;
-import org.apache.commons.lang3.ArrayUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
@@ -112,26 +111,23 @@ public class AnalysisService {
 
         // Get columns data
         List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
-        List<List<String>> columns = new ArrayList<>(groups.size());
-        List<String> columnLabelName = new ArrayList<>(groups.size());
+        int labelCount = groups.size();
+        List<List<String>> columns = new ArrayList<>(labelCount);
+        List<String> columnLabelName = new ArrayList<>(labelCount);
         for (DownsampleGroupVO group : groups) {
             //TODO: More testing as it's not stable
             columns.add(parseAggregationGroupColumnsString(group.getColumns()));
             columnLabelName.add(group.getGroup().getLabel());
         }
 
-        // Headers
-        String[] pHeader = new String[groups.size() + 3];
-        pHeader[0] = "Timestamp";
-        for (int i = 0; i < columnLabelName.size(); i++) {
-            pHeader[i + 1] = columnLabelName.get(i);
-        }
-        pHeader[pHeader.length - 2] = "Count";
-        pHeader[pHeader.length - 1] = "fileUUID";
-
+        // CSV output
+        String[] pHeader = new String[labelCount + 3],
+                mainHeader = new String[labelCount + 4];
+        populateHeaderNames(columnLabelName, pHeader, mainHeader);
         CSVWriter mainCsvWriter = new CSVWriter(new FileWriter(projectRootFolder + "/output.csv"));
-        mainCsvWriter.writeNext(ArrayUtils.addAll(
-                new String[]{"PID", "Timestamp"}, columnLabelName.toArray(new String[0])));
+        mainCsvWriter.writeNext(mainHeader);
+
+        // Export meta-data writer
         BufferedWriter bw = new BufferedWriter(new FileWriter(projectRootFolder + "/output_meta.txt"));
         bw.write(String.format("EXPORT '%s' (#%d) STARTED ON '%s'%n%n", exportQuery.getAlias(), exportQuery.getId(), Instant.now()));
         bw.write(String.format("Total patients in database: %d%n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
@@ -160,27 +156,17 @@ public class AnalysisService {
 
                     if (res.length == 0) return;
 
+                    int pHeadSize = pHeader.length, mainHeadSize = mainHeader.length;
+
                     // Analyze bins first
-                    List<Integer> emptyIDs = eq.getBadDataTimeId();
                     List<Integer> goodIDs = eq.getGoodDataTimeId();
-                    long totalValidSeconds = AnalysisUtil.dataValidTotalSpan(emptyIDs, dtsb) / 1000;
+                    long totalValidSeconds = AnalysisUtil.dataValidTotalSpan(goodIDs, dtsb) / 1000;
                     int totalBins = (int) Math.ceil(1.0 * totalValidSeconds / exportQuery.getPeriod());
 
                     bw.write(String.format(" '%s': '%d' seconds and '%d' bins.%n", patientId, totalValidSeconds, totalBins));
 
-                    CSVWriter pWriter = new CSVWriter(new FileWriter(String.format("%s/patients/%s.csv", projectRootFolder, patientId)));
-                    pWriter.writeNext(pHeader);
-                    for (int i = 0; i < res.length; i++) {
-                        ResultTable r = res[i];
-                        //TODO: Write out what is really needed
-                        for (int j = 0; j < r.getRowCount(); j++) {
-                            List<Object> row = r.getDatalistByRow(j);
-                            String[] data = row.stream().map(Object::toString).toArray(String[]::new);
-                            pWriter.writeNext(ArrayUtils.add(data, dtsb.get(goodIDs.get(i)).getFileUuid()));
-                            mainCsvWriter.writeNext(ArrayUtils.addAll(new String[]{patientId}, data));
-                        }
-                    }
-                    pWriter.close();
+                    writeOutCsvFiles(projectRootFolder, pHeader, mainCsvWriter,
+                            patientId, dtsb, res, pHeadSize, mainHeadSize, goodIDs);
 
                     validPatientCounter.getAndIncrement();
 
@@ -217,6 +203,52 @@ public class AnalysisService {
             bw.write(String.format("END ON '%s'", Instant.now()));
             bw.close();
             mainCsvWriter.close();
+        }
+    }
+
+    /**
+     * Write indiviual csv and main.csv
+     */
+    private void writeOutCsvFiles(String projectRootFolder, String[] pHeader, CSVWriter mainCsvWriter,
+                                  String patientId, List<DataTimeSpanBean> dtsb, ResultTable[] res,
+                                  int pHeadSize, int mainHeadSize, List<Integer> goodIDs) throws IOException {
+        CSVWriter pWriter = new CSVWriter(new FileWriter(String.format("%s/patients/%s.csv", projectRootFolder, patientId)));
+        pWriter.writeNext(pHeader);
+        for (int i = 0; i < res.length; i++) {
+            ResultTable r = res[i];
+            //TODO: Is this good?
+            for (int j = 0; j < r.getRowCount(); j++) {
+                List<Object> row = r.getDatalistByRow(j);
+                String[] resultDataRow = row.stream().map(Object::toString).toArray(String[]::new);
+                String[] pData = new String[pHeadSize], mainData = new String[mainHeadSize];
+                mainData[0] = patientId;
+                for (int k = 0; k < resultDataRow.length; k++) {
+                    mainData[k + 1] = pData[k] = resultDataRow[k];
+                }
+                mainData[pHeadSize] = pData[pHeadSize - 1] = dtsb.get(goodIDs.get(i)).getFileUuid();
+                pWriter.writeNext(pData);
+                mainCsvWriter.writeNext(mainData);
+            }
+        }
+        pWriter.close();
+    }
+
+    /**
+     * Populate header names for main csv and indiviual csv
+     * pHeader (Time,xxxx,Count,fileUUID)
+     * mainHeader (PID,Time,xxxx,Count,fileUUID)
+     */
+    private void populateHeaderNames(List<String> columnLabelName, String[] pHeader, String[] mainHeader) {
+        pHeader[0] = "Timestamp";
+        pHeader[pHeader.length - 2] = "Count";
+        pHeader[pHeader.length - 1] = "fileUUID";
+        mainHeader[0] = "PID";
+        mainHeader[1] = "Timestamp";
+        mainHeader[mainHeader.length - 1] = "fileUUID";
+        mainHeader[mainHeader.length - 2] = "Count";
+        for (int i = 0; i < columnLabelName.size(); i++) {
+            pHeader[i + 1] = columnLabelName.get(i);
+            mainHeader[i + 2] = columnLabelName.get(i);
         }
     }
 
