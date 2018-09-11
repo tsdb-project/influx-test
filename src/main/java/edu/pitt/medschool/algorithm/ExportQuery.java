@@ -18,10 +18,10 @@ public class ExportQuery {
         static final String defaultDownsampleColName = "ds_label_";
         static final String defaultAggregationColName = "ag_label_";
 
-        static final String basicSelectWhere = "SELECT %s FROM \"%s\" WHERE %s";
-        static final String basicSelect = "SELECT %s FROM \"%s\"";
-        static final String startDeltaCondition = "(time >= '%s' + %ds)";
-        static final String endTimeCondition = "(time <= '%s')";
+        static final String basicSelectInner = "SELECT %s FROM \"%s\" WHERE %s";
+        static final String basicSelectOuter = "SELECT %s FROM %s";
+        static final String timeAddDelta = "('%s' + %ds)";
+        static final String timeCondition = "(time >= %s AND time <= %s)";
         static final String locatorCondition = "(fileUUID='%s' AND arType='%s')";
         static final String downsampleGroupBy = "GROUP BY time(%ds) fill(none)";
     }
@@ -30,7 +30,7 @@ public class ExportQuery {
     private DownsampleGroup[] dsGroup;
     private boolean isDownSampleFirst;
     private boolean needAr;
-    private List<String> columnNames;
+    private List<List<String>> columnNames;
     private int startDelta; // In 's'
     private String globalEndTime; // In 's'
     private int downsampleInterval; // In 's'
@@ -57,7 +57,7 @@ public class ExportQuery {
      * @param duration        Duration (in s)
      */
     public static String[] generate(List<DataTimeSpanBean> d,
-                                    List<DownsampleGroupVO> v, List<String> columns,
+                                    List<DownsampleGroupVO> v, List<List<String>> columns,
                                     boolean downSampleFirst, boolean needAr,
                                     int dsPeriod, int startDelta, int duration) throws Exception {
         return new ExportQuery(d, v, columns, downSampleFirst, needAr, dsPeriod, startDelta, duration).toQureies();
@@ -66,7 +66,7 @@ public class ExportQuery {
     /**
      * Initialize this class (Expection if dts null or no length)
      */
-    private ExportQuery(List<DataTimeSpanBean> dts, List<DownsampleGroupVO> v, List<String> columns,
+    private ExportQuery(List<DataTimeSpanBean> dts, List<DownsampleGroupVO> v, List<List<String>> columns,
                         boolean downSampleFirst, boolean nar, int p, int sd, int d) throws IllegalArgumentException {
         initData(dts, v);
         this.isDownSampleFirst = downSampleFirst;
@@ -100,19 +100,20 @@ public class ExportQuery {
             String whereClause = String.format(Template.locatorCondition,
                     d.getFileUuid(), needAr ? "ar" : "noar");
             // Start operations
-            if (this.isDownSampleFirst) {
+            if (!this.isDownSampleFirst) {
                 // Downsample then Aggr
-                this.queriesString[i] = aggrFirst(whereClause, d.getEnd());
+                this.queriesString[i] = aggrFirst(whereClause);
             } else {
                 // Aggr then Downsample
-                dsFirst(whereClause);
+                throw new RuntimeException("Not implemented");
+                // dsFirst(whereClause);
             }
         }
     }
 
-    private String aggrFirst(String locator, Instant stopTime) {
+    private String aggrFirst(String locator) {
         String aggrQ = wrapByBracket(aggrDs_Aggr(locator));
-        return aggrDs_Ds(aggrQ, stopTime);
+        return aggrDs_Ds(aggrQ);
     }
 
     /**
@@ -125,34 +126,36 @@ public class ExportQuery {
             String colAlias = Template.defaultAggregationColName + String.valueOf(dg.getId());
             switch (dg.getAggregation().toLowerCase()) {
                 case "mean":
-                    cols[i] = aggregationColumnsMeanQuery(colAlias);
+                    cols[i] = aggregationColumnsMeanQuery(i, colAlias);
                     break;
                 case "sum":
-                    cols[i] = aggregationColumnsSumQuery(colAlias);
+                    cols[i] = aggregationColumnsSumQuery(i, colAlias);
                     break;
                 default:
                     throw new RuntimeException("Unsupported aggr type: " + dg.getAggregation());
             }
         }
 
-        String basic = String.format(Template.basicSelectWhere,
+        String basic = String.format(Template.basicSelectInner,
                 String.join(", ", cols), this.pid, locator);
-        String startDelta = String.format(Template.startDeltaCondition,
+        String startTimeFormat = String.format(Template.timeAddDelta,
                 this.firstAvailData.toString(), this.startDelta);
 
         if (this.globalEndTime == null) {
             // Time >= startDelta
-            return basic + " AND " + startDelta;
+            return basic + " AND time >=" + startTimeFormat;
         } else {
             // Time >= startDelta AND Time <= globalEndTime
-            return basic + " AND " + startDelta + " AND " + this.globalEndTime;
+            String endTime = String.format(Template.timeCondition,
+                    startTimeFormat, this.globalEndTime);
+            return basic + " AND " + endTime;
         }
     }
 
     /**
      * Aggr first, Ds part
      */
-    private String aggrDs_Ds(String aggrQuery, Instant stopInstant) {
+    private String aggrDs_Ds(String aggrQuery) {
         String[] cols = new String[this.dsGroup.length + 1];
         for (int i = 0; i < this.dsGroup.length; i++) {
             DownsampleGroup dg = this.dsGroup[i];
@@ -190,8 +193,7 @@ public class ExportQuery {
         cols[this.dsGroup.length] = String.format("COUNT(%s) AS COUNT",
                 Template.defaultAggregationColName + this.dsGroup[0].getId());
 
-        String endTime = String.format(Template.endTimeCondition, stopInstant.toString());
-        String basic = String.format(Template.basicSelect,
+        String basic = String.format(Template.basicSelectOuter,
                 String.join(", ", cols),
                 wrapByBracket(aggrQuery));
         return basic + " " +
@@ -239,7 +241,7 @@ public class ExportQuery {
         }
 
         if (duration > 1) {
-            this.globalEndTime = String.format("%s + %ds",
+            this.globalEndTime = String.format("'%s' + %ds",
                     this.firstAvailData.toString(), duration);
         } else {
             this.globalEndTime = null;
@@ -267,11 +269,11 @@ public class ExportQuery {
      *
      * @param alias Alias for this list, null for not using
      */
-    private String aggregationColumnsSumQuery(String alias) {
+    private String aggregationColumnsSumQuery(int i, String alias) {
         return selectQueryWithAlias(
-                wrapByBracket(this.columnNames.stream()
+                wrapByBracket(this.columnNames.get(i).stream()
                         .map(s -> "\"" + s + "\"")
-                        .collect(Collectors.joining("+"))
+                        .collect(Collectors.joining(" + "))
                 ), alias);
     }
 
@@ -281,11 +283,11 @@ public class ExportQuery {
      *
      * @param alias Alias for this list, null for not using
      */
-    private String aggregationColumnsMeanQuery(String alias) {
+    private String aggregationColumnsMeanQuery(int i, String alias) {
         return selectQueryWithAlias(
                 String.format("(%s/%d)",
-                        aggregationColumnsSumQuery(null),
-                        this.columnNames.size()),
+                        aggregationColumnsSumQuery(i, null),
+                        this.columnNames.get(i).size()),
                 alias);
     }
 

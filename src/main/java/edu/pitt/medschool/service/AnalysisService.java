@@ -3,6 +3,7 @@ package edu.pitt.medschool.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
 import edu.pitt.medschool.algorithm.AnalysisUtil;
+import edu.pitt.medschool.algorithm.ExportQuery;
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
@@ -10,6 +11,7 @@ import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.framework.influxdb.DictionaryResultTable;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
@@ -30,10 +32,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,7 @@ public class AnalysisService {
 
     private final static String dbName = DBConfiguration.Data.DBNAME;
     private final static String DIRECTORY = "/tsdb/output/";
+
     @Autowired
     DownsampleDao downsampleDao;
     @Autowired
@@ -80,6 +82,8 @@ public class AnalysisService {
 
     private BlockingQueue<String> idQueue = new LinkedBlockingQueue<>();
 
+    private Map<String, Integer> errorCount = new HashMap<>();
+
     /**
      * Export (downsample) a single query to files (Could be called mutiple times)
      */
@@ -107,156 +111,52 @@ public class AnalysisService {
         String projectRootFolder = outputDir.getAbsolutePath();
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(projectRootFolder + "/output_meta.txt"));
-        bw.write(String.format("Total patients in database: %d\n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
-        bw.write(String.format("Number of patients for initial export: %d\n", patientIDs.size()));
+        bw.write(String.format("EXPORT '%s' STARTED ON '%s'%n%n", exportQuery.getAlias(), Instant.now()));
+        bw.write(String.format("Total patients in database: %d%n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
+        bw.write(String.format("Number of patients for initial export: %d%n", patientIDs.size()));
         bw.flush();
 
-        // Construct & Write CSV Column Header
-        CSVWriter writer = new CSVWriter(new FileWriter(projectRootFolder + "/output.csv"));
-        List<String> colsList = new ArrayList<>();
-        colsList.add("ID");
-        List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
-        int intervals = Double.valueOf(Math.ceil(exportQuery.getDuration() * 1.0 / exportQuery.getPeriod())).intValue();
-        for (DownsampleGroupVO group : groups) {
-            String groupName = group.getGroup().getLabel();
-            for (int i = 1; i <= intervals; i++) {
-                if (i == 1) {
-                    colsList.add(groupName + ' ' + i);
-                } else {
-                    colsList.add("" + i);
-                }
-            }
-        }
-        String[] cols = colsList.toArray(new String[0]);
-        writer.writeNext(cols);
-        writer.flush();
-
-        // Query Task
         int paraCount = determineParaNumber();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
+        // Parallel query task
         Runnable queryTask = () -> {
             String patientId;
             while ((patientId = idQueue.poll()) != null) {
                 try {
-                    // TODO: Only doing ARs here
-                    String monitorTimeQuery = "select count(\"Time\") AS C from \"" + patientId + "\" where arType = 'ar'";
-                    QueryResult timeRes = influxDB.query(new Query(monitorTimeQuery, dbName));
-                    Double monitorTime = -1.0;
-                    if (timeRes.getResults().get(0).getSeries() != null) {
-                        monitorTime = Double.valueOf(timeRes.getResults().get(0).getSeries().get(0).getValues().get(0).get(1).toString());
+                    List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
+                    List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
+                    List<List<String>> columns = new ArrayList<>(groups.size());
+
+                    for (DownsampleGroupVO group : groups) {
+                        columns.add(parseAggregationGroupColumnsString(group.getColumns()));
                     }
 
-                    // What is this?
-                    if (monitorTime.intValue() >= 6 * 0) {
+                    String[] queries = ExportQuery.generate(
+                            dtsb, groups, columns,
+                            exportQuery.getIsDownsampleFirst(), exportQuery.getNeedar(), exportQuery.getPeriod(),
+                            exportQuery.getOrigin(), exportQuery.getDuration()
+                    );
 
-                        CSVWriter writerSeparate = new CSVWriter(new FileWriter(outputDir.getAbsolutePath() + "/" + patientId + ".csv"));
-                        writerSeparate.writeNext(cols);
-
-                        StringBuffer subQuery = new StringBuffer("SELECT ");
-
-                        // Iter through every downsample group to form the query
-                        for (DownsampleGroupVO group : groups) {
-                            List<String> columnAggregation = parseAggregationGroupColumnsString(group.getColumns());
-                            String columnAggregationComplete = columnAggregation.stream().map(s -> "\"" + s + "\"")
-                                    .collect(Collectors.joining(" + "));
-                            columnAggregationComplete = "(" + columnAggregationComplete + ")";
-                            switch (group.getGroup().getAggregation()) {
-                                case "mean":
-                                    columnAggregationComplete += " / " + columnAggregation.size();
-                                    break;
-                                default:
-                                    break;
-                            }
-                            String gpId = "label" + group.getGroup().getId();
-                            columnAggregationComplete += " AS " + gpId;
-                            subQuery.append(columnAggregationComplete).append(", ");
-                        }
-                        // Remove the last two char: ", "
-                        subQuery = new StringBuffer(subQuery.substring(0, subQuery.length() - 2));
-                        subQuery.append(" FROM \"" + patientId + "\"");
-                        // TODO: Only doing ARs here
-                        subQuery.append(" WHERE arType = 'ar'");
-                        subQuery.append(" LIMIT ").append(exportQuery.getDuration());
-
-                        // Number of aggregation groups dynamically added
-                        StringBuffer aggrQuery = new StringBuffer("SELECT ");
-                        int labelCount = 0;
-                        String countId = "";
-                        for (DownsampleGroupVO g : groups) {
-                            String gid = String.valueOf(g.getGroup().getId()).trim();
-                            String gpId = "label" + gid;
-                            String operation = g.getGroup().getDownsample().trim();
-                            aggrQuery.append(operation + "(" + gpId + ") as label" + labelCount + ", ");
-                            labelCount++;
-                            countId = gid;
-                        }
-
-                        // Adding COUNT label to track the existence of insufficient data
-                        aggrQuery.append("count(label" + countId + ") as COUNT");
-
-                        // Start of Subquery
-                        aggrQuery.append(" FROM (");
-                        aggrQuery.append(subQuery.toString());
-                        aggrQuery.append(") where time >= '%s' and time < '%s' + ");
-                        aggrQuery.append(exportQuery.getDuration());
-                        aggrQuery.append("s group by time(%ss, %ss)");
-
-                        // TODO: Only doing ARs here
-                        String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId + "\" where arType = 'ar' limit 1";
-                        QueryResult recordResult = influxDB.query(new Query(firstRecordTimeQuery, dbName));
-                        String firstRecordTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
-
-                        int offset = Integer.valueOf(firstRecordTime.substring(14, 16)) * 60 + Integer.valueOf(firstRecordTime.substring(17, 19));
-
-                        String queryString = String.format(aggrQuery.toString(), firstRecordTime, firstRecordTime, exportQuery.getPeriod(), offset);
-                        logger.debug(patientId + " :\n" + queryString);
-
-                        Query query = new Query(queryString, dbName);
-                        QueryResult result = influxDB.query(query);
-                        List<DictionaryResultTable> resultKV = InfluxUtil.queryResultToKV(result);
-
-                        // logger.debug(patientId + " :\n" + result.toString());
-
-                        // Construct the result to write to CSV files
-                        String[] row = new String[1 + intervals * groups.size()];
-                        row[0] = patientId;
-
-                        List<List<Object>> res = result.getResults().get(0).getSeries().get(0).getValues();
-                        logger.debug(patientId + " : " + String.valueOf(res.size()));
-
-                        for (int i = 0; i < intervals; i++) {
-                            if (res.size() > i) {
-                                List<Object> vals = res.get(i);
-                                int resultSize = vals.size();
-                                for (int j = 1; j <= groups.size(); j++) {
-                                    if (Double.valueOf(vals.get(resultSize - 1).toString()).intValue() < 20
-                                            && Double.valueOf(vals.get(resultSize - 1).toString()).intValue() > 0) {
-                                        row[1 + (j - 1) * intervals + i] = "Insuff. Data";
-                                    } else if (vals.get(j) == null) {
-                                        row[1 + (j - 1) * intervals + i] = "N/A";
-                                    } else {
-                                        row[1 + (j - 1) * intervals + i] = vals.get(j).toString();
-                                    }
-                                }
-                            } else {
-                                for (int j = 1; j <= groups.size(); j++) {
-                                    row[1 + (j - 1) * intervals + i] = "";
-                                }
-                            }
-                        }
-                        writer.writeNext(row);
-                        writerSeparate.writeNext(row);
-                        writerSeparate.close();
-                    } else {
-                        logger.debug(patientId + " : Not enough data, only " + monitorTime.intValue() + " seconds");
+                    for (String q : queries) {
+                        logger.debug(String.format("%s query: %s", patientId, q));
                     }
-                } catch (NullPointerException e) {
-                    // As for now, null pointer could be a glitch in the logic of the code
-                    logger.error(patientId + " : " + Util.stackTraceErrorToString(e));
+
                 } catch (Exception ee) {
-                    logger.error(patientId + " : " + Util.stackTraceErrorToString(ee));
-                    // Reinsert failed user into queue
-                    idQueue.offer(patientId);
+                    logger.error(String.format("%s: %s", patientId, Util.stackTraceErrorToString(ee)));
+                    int alreadyFailed = this.errorCount.getOrDefault(patientId, -1);
+                    if (alreadyFailed == -1) {
+                        this.errorCount.put(patientId, 0);
+                        alreadyFailed = 0;
+                    } else {
+                        this.errorCount.put(patientId, ++alreadyFailed);
+                    }
+                    // Reinsert failed user into queue, but no more than 3 times
+                    if (alreadyFailed < 3) {
+                        if (!idQueue.offer(patientId))
+                            logger.error(String.format("%s: Re-queue failed.", patientId));
+                    } else {
+                        logger.error(String.format("%s: Failed more than 3 times.", patientId));
+                    }
                 }
             }
         };
@@ -270,7 +170,8 @@ public class AnalysisService {
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
         } finally {
-            writer.close();
+            bw.write(String.format("%n%nEND ON '%s'", Instant.now()));
+            bw.close();
         }
     }
 
@@ -516,13 +417,6 @@ public class AnalysisService {
 
     /**
      * TODO: Add documents
-     *
-     * @param patients
-     * @param column
-     * @param method
-     * @param interval
-     * @param time
-     * @throws IOException
      */
     public void exportFromPatientsWithDownsampling(List<String> patients, String column, String method, String interval, String time)
             throws IOException {
@@ -570,85 +464,8 @@ public class AnalysisService {
         }
     }
 
-    public int insert(Downsample downsample) throws Exception {
-        return downsampleDao.insert(downsample);
-    }
-
-    public List<Downsample> selectAll() {
-        return downsampleDao.selectAll();
-    }
-
-    public Downsample selectByPrimaryKey(int id) {
-        return downsampleDao.selectByPrimaryKey(id);
-    }
-
-    public int insertAggregationGroup(Downsample query, DownsampleGroup group, List<DownsampleGroupColumn> columns) throws Exception {
-        // TODO: Implementation of method
-        for (DownsampleGroupColumn dgc : columns) {
-            dgc.getClass();
-        }
-        return 0;
-    }
-
-    public int insertMetaFilter(Downsample query, String key, String value) throws Exception {
-        // TODO: Implementation of method
-        return 0;
-    }
-
-    public int updateByPrimaryKey(Downsample downsample) {
-        return downsampleDao.updateByPrimaryKey(downsample);
-    }
-
-    public int deleteByPrimaryKey(int id) {
-        return downsampleDao.deleteByPrimaryKey(id);
-    }
-
-    /**
-     * @param queryId
-     * @return
-     */
-    public List<DownsampleGroupVO> selectAllAggregationGroupByQueryId(Integer queryId) {
-        List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
-        return groups;
-    }
-
-    /**
-     * @param group
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public boolean insertAggregationGroup(DownsampleGroupVO group) {
-        try {
-            group.getGroup().setColumns(group.getColumns());
-            downsampleGroupDao.insert(group.getGroup());
-            // int queryGroupId = group.getGroup().getId();
-            // for (String columnName : group.getColumns().split(", ")) {
-            // DownsampleGroupColumn column = new DownsampleGroupColumn();
-            // column.setQueryGroupId(queryGroupId);
-            // column.setColumnName(columnName);
-            // downsampleGroupColumnDao.insert(column);
-            // }
-        } catch (Exception e) {
-            System.out.println(e);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param group
-     * @return
-     */
-    public int updateAggregationGroup(DownsampleGroupVO group) {
-        return downsampleGroupDao.updateByPrimaryKeyWithBLOBs(group.getGroup());
-    }
-
     /**
      * TODO: Add some comments about this function?
-     *
-     * @param pids
-     * @param downsample
-     * @param downsampleGroups
-     * @throws IOException
      */
     public void exportFromPatientsWithDownsamplingGroups(List<String> pids, Downsample downsample, List<DownsampleGroupVO> downsampleGroups)
             throws IOException {
@@ -711,6 +528,46 @@ public class AnalysisService {
 
     }
 
+    public List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        ColumnJSON json = mapper.readValue(columnsJson, ColumnJSON.class);
+        return columnService.selectColumnsByAggregationGroupColumns(json);
+    }
+
+    // Below are interactions with DAOs
+
+    public int insertDownsample(Downsample downsample) throws Exception {
+        return downsampleDao.insert(downsample);
+    }
+
+    public List<Downsample> selectAll() {
+        return downsampleDao.selectAll();
+    }
+
+    public Downsample selectByPrimaryKey(int id) {
+        return downsampleDao.selectByPrimaryKey(id);
+    }
+
+    public int updateByPrimaryKey(Downsample downsample) {
+        return downsampleDao.updateByPrimaryKey(downsample);
+    }
+
+    public int deleteByPrimaryKey(int id) {
+        return downsampleDao.deleteByPrimaryKey(id);
+    }
+
+    public List<DownsampleGroupVO> selectAllAggregationGroupByQueryId(Integer queryId) {
+        return downsampleGroupDao.selectAllAggregationGroupByQueryId(queryId);
+    }
+
+    public boolean insertAggregationGroup(DownsampleGroupVO group) {
+        return downsampleGroupDao.insertAggregationGroup(group);
+    }
+
+    public int updateAggregationGroup(DownsampleGroupVO group) {
+        return downsampleGroupDao.updateByPrimaryKeyWithBLOBs(group.getGroup());
+    }
+
     public DownsampleGroupVO selectAggregationGroupByGroupId(Integer groupId) {
         return downsampleGroupDao.selectDownsampleGroupVO(groupId);
     }
@@ -718,13 +575,6 @@ public class AnalysisService {
     public int deleteGroupByPrimaryKey(Integer groupId) {
         return downsampleGroupDao.deleteByPrimaryKey(groupId);
     }
-
-    public List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        ColumnJSON json = mapper.readValue(columnsJson, ColumnJSON.class);
-        return columnService.selectColumnsByAggregationGroupColumns(json);
-    }
-
 
     /**
      * Generate an object for output directory class
@@ -766,9 +616,7 @@ public class AnalysisService {
     }
 
     /**
-     * Generate a new threadpool (when new request comes)
-     *
-     * @param i Number of threads
+     * Generate a new fixed threadpool (when new request comes)
      */
     private ExecutorService generateNewThreadPool(int i) {
         return Executors.newFixedThreadPool(i);

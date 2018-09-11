@@ -119,7 +119,7 @@ public class AnalysisController {
     @ResponseBody
     public RestfulResponse insert(@RequestBody(required = true) Downsample downsample) throws Exception {
         RestfulResponse response;
-        if (analysisService.insert(downsample) == 1) {
+        if (analysisService.insertDownsample(downsample) == 1) {
             response = new RestfulResponse(1, "success");
             response.setData(downsample);
         } else {
@@ -247,6 +247,7 @@ public class AnalysisController {
     @RequestMapping("api/export/export")
     @ResponseBody
     public void export(@RequestBody(required = true) ExportRequest request, Model model) throws IOException {
+        //TODO: Remove?
         PatientExample pe = new PatientExample();
         PatientExample.Criteria pec = pe.createCriteria();
         if (request.ageLower != null && !request.ageLower.isEmpty()) {
@@ -269,6 +270,7 @@ public class AnalysisController {
     @RequestMapping("api/export/export/uc1")
     @ResponseBody
     public void exportUC1(Model model) throws IOException {
+        //TODO: Remove?
         // List<String> patientIDs = patientDao.selectIdAll();
         // patientIDs.retainAll(importedFileDao.selectAllImportedPidPSC());
 
@@ -281,6 +283,7 @@ public class AnalysisController {
     @RequestMapping("api/export/export/uc2")
     @ResponseBody
     public void exportUC2(Model model) throws IOException {
+        //TODO: Remove?
         // List<String> patientIDs = patientDao.selectIdAll();
         // patientIDs.retainAll(importedFileDao.selectAllImportedPidPSC());
 
