@@ -17,6 +17,15 @@ public class DownsampleEditResponse {
     private int minTotalBinThreshold;
     private int minEveryBinThershold;
     private boolean isDownsampleFirst;
+    private boolean needar;
+
+    public boolean getNeedar() {
+        return needar;
+    }
+
+    public void setNeedar(boolean needAr) {
+        this.needar = needAr;
+    }
 
     public DownsampleEditResponse(Downsample downsample) {
         this.downsample = downsample;
@@ -35,6 +44,7 @@ public class DownsampleEditResponse {
         this.minEveryBinThershold = downsample.getMinEveryBinThershold();
         this.minTotalBinThreshold = downsample.getMinTotalBinThreshold();
         this.isDownsampleFirst = downsample.getIsDownsampleFirst();
+        this.needar = downsample.getNeedar();
     }
 
     public boolean getIsDownsampleFirst() {
@@ -42,7 +52,7 @@ public class DownsampleEditResponse {
     }
 
     public void setIsDownsampleFirst(boolean downsampleFirst) {
-        isDownsampleFirst = downsampleFirst;
+        this.isDownsampleFirst = downsampleFirst;
     }
 
     public int getMinTotalBinThreshold() {

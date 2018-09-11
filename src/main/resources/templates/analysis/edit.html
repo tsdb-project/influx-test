@@ -159,27 +159,34 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-3 col-md-3">
+                                    <div class="col-sm-2 col-md-2">
                                         <label>Minimal time threshold for every bin (Minute)</label>
-                                        <div class="input-group mb-3">
+                                        <div class="input-group mb-2">
                                             <input type="number" min="0" step="1" class="form-control"
                                                    id="every_bin" th:value="${query.minEveryBinThershold}"
                                                    placeholder="Unit is minute, integer only">
                                         </div>
                                     </div>
-                                    <div class="col-sm-3 col-md-3">
+                                    <div class="col-sm-2 col-md-2">
                                         <label>Minimal threshold for total number of bin (%)</label>
-                                        <div class="input-group mb-3">
+                                        <div class="input-group mb-2">
                                             <input type="number" min="0" max="100" step="1" class="form-control"
                                                    id="total_bin" th:value="${query.minTotalBinThreshold}"
                                                    placeholder="Percent (0-100), integer only">
                                         </div>
                                     </div>
-                                    <div class="col-sm-6 col-md-6">
+                                    <div class="col-sm-4 col-md-4">
                                         <label>Downsample first or aggregation first</label>
                                         <div class="checkbox">
                                             <input type="checkbox" id="isDsFirst" th:checked="${query.isDownsampleFirst}">
                                             <label class="checkbox__label" for="isDsFirst">Check for downsample first, uncheck for aggregation first</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <label>Ar or NoAr</label>
+                                        <div class="checkbox">
+                                            <input type="checkbox" id="needAr" th:checked="${query.needar}">
+                                            <label class="checkbox__label" for="needAr">Check to run on Ar data, uncheck to run on NoAr data</label>
                                         </div>
                                     </div>
                                 </div>

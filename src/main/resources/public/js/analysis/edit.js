@@ -144,6 +144,7 @@ $(document).ready(function() {
                 "duration": $("#duration").val() * $("#duration_unit").val(),
                 "minEveryBinThershold": $("#every_bin").val(),
                 "minTotalBinThreshold": $("#total_bin").val(),
+                "needar": document.getElementById('needAr').checked,
                 "isDownsampleFirst": document.getElementById('isDsFirst').checked
             };
             $.ajax({
