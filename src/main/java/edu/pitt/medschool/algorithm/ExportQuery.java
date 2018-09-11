@@ -238,6 +238,9 @@ public class ExportQuery {
             case "mean":
                 oper = String.format("MEAN(%s)", originalColAlias);
                 break;
+            case "median":
+                oper = String.format("MEDIAN(%s)", originalColAlias);
+                break;
             case "sum":
                 oper = String.format("SUM(%s)", originalColAlias);
                 break;

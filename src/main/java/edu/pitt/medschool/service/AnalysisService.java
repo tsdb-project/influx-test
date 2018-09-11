@@ -114,7 +114,7 @@ public class AnalysisService {
         BufferedWriter bw = new BufferedWriter(new FileWriter(projectRootFolder + "/output_meta.txt"));
         bw.write(String.format("EXPORT '%s' (#%d) STARTED ON '%s'%n%n", exportQuery.getAlias(), exportQuery.getId(), Instant.now()));
         bw.write(String.format("Total patients in database: %d%n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
-        bw.write(String.format("Number of patients for initial export: %d%n", patientIDs.size()));
+        bw.write(String.format("Number of patients for initial export: %d%n%n", patientIDs.size()));
         bw.flush();
 
         int paraCount = determineParaNumber();
