@@ -352,6 +352,7 @@ public class AnalysisController {
         try {
             analysisService.exportToFile(35, false);
             //analysisService.exportToFile(37, false);
+
         } catch (IOException e) {
             logger.error(Util.stackTraceErrorToString(e));
         }
