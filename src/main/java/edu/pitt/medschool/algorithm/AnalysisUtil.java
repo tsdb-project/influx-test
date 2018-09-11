@@ -17,6 +17,13 @@ import static edu.pitt.medschool.framework.influxdb.InfluxUtil.justQueryData;
 public class AnalysisUtil {
 
     /**
+     * Total number of patients in database
+     */
+    public static int numberOfPatientInDatabase(InfluxDB i, Logger logger) {
+        return justQueryData(i, true, "SHOW MEASUREMENTS;")[0].getRowCount();
+    }
+
+    /**
      * Get all the data periods for a patient
      */
     public static List<DataTimeSpanBean> getPatientAllDataSpan(InfluxDB i, Logger logger, String pid) {

@@ -593,6 +593,66 @@ public class DownsampleExample {
             return (Criteria) this;
         }
 
+        public Criteria andNeedarIsNull() {
+            addCriterion("needAr is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andNeedarIsNotNull() {
+            addCriterion("needAr is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andNeedarEqualTo(Boolean value) {
+            addCriterion("needAr =", value, "needar");
+            return (Criteria) this;
+        }
+
+        public Criteria andNeedarNotEqualTo(Boolean value) {
+            addCriterion("needAr <>", value, "needar");
+            return (Criteria) this;
+        }
+
+        public Criteria andNeedarGreaterThan(Boolean value) {
+            addCriterion("needAr >", value, "needar");
+            return (Criteria) this;
+        }
+
+        public Criteria andNeedarGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("needAr >=", value, "needar");
+            return (Criteria) this;
+        }
+
+        public Criteria andNeedarLessThan(Boolean value) {
+            addCriterion("needAr <", value, "needar");
+            return (Criteria) this;
+        }
+
+        public Criteria andNeedarLessThanOrEqualTo(Boolean value) {
+            addCriterion("needAr <=", value, "needar");
+            return (Criteria) this;
+        }
+
+        public Criteria andNeedarIn(List<Boolean> values) {
+            addCriterion("needAr in", values, "needar");
+            return (Criteria) this;
+        }
+
+        public Criteria andNeedarNotIn(List<Boolean> values) {
+            addCriterion("needAr not in", values, "needar");
+            return (Criteria) this;
+        }
+
+        public Criteria andNeedarBetween(Boolean value1, Boolean value2) {
+            addCriterion("needAr between", value1, value2, "needar");
+            return (Criteria) this;
+        }
+
+        public Criteria andNeedarNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("needAr not between", value1, value2, "needar");
+            return (Criteria) this;
+        }
+
         public Criteria andIsDownsampleFirstIsNull() {
             addCriterion("is_downsample_first is null");
             return (Criteria) this;

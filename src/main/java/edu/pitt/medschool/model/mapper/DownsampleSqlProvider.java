@@ -57,6 +57,9 @@ public class DownsampleSqlProvider {
         if (record.getMinEveryBinThershold() != null) {
             sql.VALUES("min_every_bin_thershold", "#{minEveryBinThershold,jdbcType=INTEGER}");
         }
+        if (record.getNeedar() != null) {
+            sql.VALUES("needAr", "#{needar,jdbcType=BIT}");
+        }
         if (record.getIsDownsampleFirst() != null) {
             sql.VALUES("is_downsample_first", "#{isDownsampleFirst,jdbcType=BIT}");
         }
@@ -89,6 +92,7 @@ public class DownsampleSqlProvider {
         sql.SELECT("origin");
         sql.SELECT("min_total_bin_threshold");
         sql.SELECT("min_every_bin_thershold");
+        sql.SELECT("needAr");
         sql.SELECT("is_downsample_first");
         sql.SELECT("update_time");
         sql.SELECT("create_time");
@@ -118,6 +122,7 @@ public class DownsampleSqlProvider {
         sql.SELECT("origin");
         sql.SELECT("min_total_bin_threshold");
         sql.SELECT("min_every_bin_thershold");
+        sql.SELECT("needAr");
         sql.SELECT("is_downsample_first");
         sql.SELECT("update_time");
         sql.SELECT("create_time");
@@ -159,6 +164,9 @@ public class DownsampleSqlProvider {
         if (record.getMinEveryBinThershold() != null) {
             sql.SET("min_every_bin_thershold = #{record.minEveryBinThershold,jdbcType=INTEGER}");
         }
+        if (record.getNeedar() != null) {
+            sql.SET("needAr = #{record.needar,jdbcType=BIT}");
+        }
         if (record.getIsDownsampleFirst() != null) {
             sql.SET("is_downsample_first = #{record.isDownsampleFirst,jdbcType=BIT}");
         }
@@ -189,6 +197,7 @@ public class DownsampleSqlProvider {
         sql.SET("origin = #{record.origin,jdbcType=INTEGER}");
         sql.SET("min_total_bin_threshold = #{record.minTotalBinThreshold,jdbcType=INTEGER}");
         sql.SET("min_every_bin_thershold = #{record.minEveryBinThershold,jdbcType=INTEGER}");
+        sql.SET("needAr = #{record.needar,jdbcType=BIT}");
         sql.SET("is_downsample_first = #{record.isDownsampleFirst,jdbcType=BIT}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
@@ -212,6 +221,7 @@ public class DownsampleSqlProvider {
         sql.SET("origin = #{record.origin,jdbcType=INTEGER}");
         sql.SET("min_total_bin_threshold = #{record.minTotalBinThreshold,jdbcType=INTEGER}");
         sql.SET("min_every_bin_thershold = #{record.minEveryBinThershold,jdbcType=INTEGER}");
+        sql.SET("needAr = #{record.needar,jdbcType=BIT}");
         sql.SET("is_downsample_first = #{record.isDownsampleFirst,jdbcType=BIT}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
@@ -244,6 +254,9 @@ public class DownsampleSqlProvider {
         }
         if (record.getMinEveryBinThershold() != null) {
             sql.SET("min_every_bin_thershold = #{minEveryBinThershold,jdbcType=INTEGER}");
+        }
+        if (record.getNeedar() != null) {
+            sql.SET("needAr = #{needar,jdbcType=BIT}");
         }
         if (record.getIsDownsampleFirst() != null) {
             sql.SET("is_downsample_first = #{isDownsampleFirst,jdbcType=BIT}");
