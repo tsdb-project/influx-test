@@ -141,8 +141,10 @@ public class ExportQuery {
                 this.firstAvailData.toString(), this.startDelta);
 
         if (this.globalEndTime == null) {
+            // Time >= startDelta
             return basic + " AND " + startDelta;
         } else {
+            // Time >= startDelta AND Time <= globalEndTime
             return basic + " AND " + startDelta + " AND " + this.globalEndTime;
         }
     }

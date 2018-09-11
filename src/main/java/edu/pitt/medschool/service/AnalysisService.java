@@ -2,6 +2,7 @@ package edu.pitt.medschool.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
+import edu.pitt.medschool.algorithm.AnalysisUtil;
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -88,20 +90,29 @@ public class AnalysisService {
         File outputDir = generateOutputDir(exportQuery.getAlias());
         if (outputDir == null)
             return;
+        // Create sub-folder for every patient's file
+        if (!new File(outputDir.getAbsolutePath() + "/patients/").mkdirs())
+            return;
 
-        // Get Patient List by 'test' or uuid
-        List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine(testRun ? "jetest" : uuid);
+        String pList = exportQuery.getPatientlist();
+        List<String> patientIDs;
+        if (pList == null || pList.isEmpty()) {
+            // No user-defined, get patient list by uuid
+            patientIDs = importedFileDao.selectAllImportedPidOnMachine(testRun ? "jetest" : uuid);
+        } else {
+            // Init list with user-defined
+            patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
+        }
         idQueue = new LinkedBlockingQueue<>(patientIDs);
+        String projectRootFolder = outputDir.getAbsolutePath();
 
-        // List<String> patientIDs = patientDao.selectIdAll();
-        // patientIDs.clear();
-        // patientIDs.add("PUH-2010-014");
-        // patientIDs.add("PUH-2010-064");
-        // patientIDs.add("PUH-2010-068");
-        // idQueue = new LinkedBlockingQueue<>(patientIDs);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(projectRootFolder + "/output_meta.txt"));
+        bw.write(String.format("Total patients in database: %d\n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
+        bw.write(String.format("Number of patients for initial export: %d\n", patientIDs.size()));
+        bw.flush();
 
         // Construct & Write CSV Column Header
-        CSVWriter writer = new CSVWriter(new FileWriter(outputDir.getAbsolutePath() + "/output.csv"));
+        CSVWriter writer = new CSVWriter(new FileWriter(projectRootFolder + "/output.csv"));
         List<String> colsList = new ArrayList<>();
         colsList.add("ID");
         List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
@@ -264,7 +275,7 @@ public class AnalysisService {
     }
 
     /**
-     * Traditional use case 1, don't improve unless JE stats
+     * Traditional use case 2, don't improve unless JE stats
      */
     public void useCaseTwo() throws IOException {
         File dir = generateOutputDir("UC2");
@@ -377,7 +388,7 @@ public class AnalysisService {
     }
 
     /**
-     * Traditional use case 2, don't improve unless JE stats
+     * Traditional use case 1, don't improve unless JE stats
      */
     public void useCaseOne() throws IOException {
         File dir = generateOutputDir("UC1");

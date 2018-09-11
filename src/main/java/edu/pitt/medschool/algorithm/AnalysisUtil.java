@@ -20,6 +20,7 @@ public class AnalysisUtil {
      * Total number of patients in database
      */
     public static int numberOfPatientInDatabase(InfluxDB i, Logger logger) {
+        logger.info("Getting number of patients...");
         return justQueryData(i, true, "SHOW MEASUREMENTS;")[0].getRowCount();
     }
 
