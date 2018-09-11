@@ -52,7 +52,7 @@ public class FeatureDao {
         if (json.getElectrodes().size() == 1 && json.getElectrodes().get(0).startsWith("*")) {
             String[] components = json.getElectrodes().get(0).split(" ");
             List<String> sids = new ArrayList<>();
-            for (int i = Integer.valueOf(components[2].substring(1, components[2].length())); i <= Integer
+            for (int i = Integer.parseInt(components[2].substring(1, components[2].length())); i <= Integer
                     .valueOf(components[4].substring(1, components[4].length())); i++) {
                 sids.add("I" + i);
             }

@@ -1,5 +1,6 @@
 package edu.pitt.medschool.algorithm;
 
+import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 
@@ -12,9 +13,12 @@ import java.util.stream.Collectors;
  */
 public class ExportQuery {
 
-    private static class Config {
+    private static class Template {
         static final String defaultDownsampleColName = "ds_label";
         static final String defaultAggregationColName = "ag_label";
+
+        static final String locatorWhere = "(fileUUID='%s' AND arType='%s')";
+        static final String downsampleGroupBy = "GROUP BY time(%ds) fill(none)";
     }
 
     // Downsample configs
@@ -61,9 +65,9 @@ public class ExportQuery {
      * @param downSampleFirst Is Downsample first or aggregation first
      */
     public static String generate(List<DataTimeSpanBean> d,
-                                  DownsampleGroup v, List<String> columns,
+                                  DownsampleGroupVO v, List<String> columns,
                                   boolean downSampleFirst) throws Exception {
-        return new ExportQuery(d, v, columns, downSampleFirst).toString();
+        return new ExportQuery(d, v.getGroup(), columns, downSampleFirst).toString();
     }
 
     /**
@@ -96,12 +100,27 @@ public class ExportQuery {
     }
 
     /**
+     * GROUP BY time(10s) fill(none)
+     */
+    private String downsampleGroupBy(int sec) {
+        return String.format(Template.downsampleGroupBy, sec);
+    }
+
+    /**
+     * (arType='ar' and fileUUID='xxxx')
+     */
+    private String whereFileUuidAndarType(String uuid, boolean isAr) {
+        return String.format(Template.locatorWhere,
+                uuid, isAr ? "ar" : "noar");
+    }
+
+    /**
      * Concat the column name list into an add string: ("f1"+"f2")
      * For aggregation
      *
      * @param alias Alias for this list, null for not using
      */
-    private String formColumnNamesToAddQuery(String alias) {
+    private String aggregationColumnsSumQuery(String alias) {
         return selectQueryWithAlias(String.format("(%s)",
                 this.columnNames.stream()
                         .map(s -> "\"" + s + "\"")
@@ -115,17 +134,17 @@ public class ExportQuery {
      *
      * @param alias Alias for this list, null for not using
      */
-    private String formColumnNamesToMeanQuery(String alias) {
+    private String aggregationColumnsMeanQuery(String alias) {
         return selectQueryWithAlias(
                 String.format("((%s)/%d)",
-                        formColumnNamesToAddQuery(null),
+                        aggregationColumnsSumQuery(null),
                         this.columnNames.size()),
                 alias);
     }
 
     /**
      * Give alias for select statements
-     * (COUNT(I10_1,I10_2) -> COUNT(I10_1,I10_2) AS A)
+     * (I10_1,I10_2) -> (I10_1,I10_2) AS A
      *
      * @param origin Original select obj
      * @param alias  Alias, null for not using
