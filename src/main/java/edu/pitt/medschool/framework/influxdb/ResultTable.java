@@ -64,6 +64,10 @@ public abstract class ResultTable {
         return this.colCount;
     }
 
+    public List<String> getDataColumns() {
+        return dataColumns;
+    }
+
     void extractResultColRowNumber(QueryResult.Series sr) {
         this.rowCount = sr.getValues().size();
         this.colCount = sr.getColumns().size();

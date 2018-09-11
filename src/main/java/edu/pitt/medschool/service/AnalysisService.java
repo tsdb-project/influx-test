@@ -10,6 +10,7 @@ import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.framework.influxdb.DictionaryResultTable;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dao.*;
@@ -111,7 +112,7 @@ public class AnalysisService {
         String projectRootFolder = outputDir.getAbsolutePath();
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(projectRootFolder + "/output_meta.txt"));
-        bw.write(String.format("EXPORT '%s' STARTED ON '%s'%n%n", exportQuery.getAlias(), Instant.now()));
+        bw.write(String.format("EXPORT '%s' (#%d) STARTED ON '%s'%n%n", exportQuery.getAlias(), exportQuery.getId(), Instant.now()));
         bw.write(String.format("Total patients in database: %d%n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
         bw.write(String.format("Number of patients for initial export: %d%n", patientIDs.size()));
         bw.flush();
@@ -126,20 +127,41 @@ public class AnalysisService {
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
                     List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
                     List<List<String>> columns = new ArrayList<>(groups.size());
+                    int minEveryBinSeconds = exportQuery.getMinEveryBinThershold() * 60;
+                    double dropoutPercent = 1.0 * exportQuery.getMinTotalBinThreshold() / 100;
 
                     for (DownsampleGroupVO group : groups) {
                         columns.add(parseAggregationGroupColumnsString(group.getColumns()));
                     }
 
-                    String[] queries = ExportQuery.generate(
+                    ExportQuery eq = new ExportQuery(
                             dtsb, groups, columns,
                             exportQuery.getIsDownsampleFirst(), exportQuery.getNeedar(), exportQuery.getPeriod(),
                             exportQuery.getOrigin(), exportQuery.getDuration()
                     );
+                    ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, eq.toQuery());
+                    logger.debug(String.format("%s query: %s", patientId, eq.toQuery()));
 
-                    for (String q : queries) {
-                        logger.debug(String.format("%s query: %s", patientId, q));
+                    if (res.length == 0) return;
+
+                    // Analyze bins first
+                    List<Integer> emptyIDs = eq.getBadDataTimeId();
+                    long totalValidSeconds = AnalysisUtil.dataValidTotalSpan(emptyIDs, dtsb) / 1000;
+                    int totalBins = (int) Math.ceil(1.0 * totalValidSeconds / exportQuery.getPeriod());
+
+                    bw.write(String.format(" '%s': '%d' seconds and '%d' bins.%n", patientId, totalValidSeconds, totalBins));
+
+                    CSVWriter pWriter = new CSVWriter(new FileWriter(String.format("%s/patients/%s.csv", projectRootFolder, patientId)));
+                    // Headers
+                    pWriter.writeNext(res[0].getDataColumns().toArray(new String[0]));
+                    for (ResultTable r : res) {
+                        //TODO: Write out what is really needed
+                        for (int j = 0; j < r.getRowCount(); j++) {
+                            List<Object> row = r.getDatalistByRow(j);
+                            pWriter.writeNext(row.stream().map(Object::toString).toArray(String[]::new));
+                        }
                     }
+                    pWriter.close();
 
                 } catch (Exception ee) {
                     logger.error(String.format("%s: %s", patientId, Util.stackTraceErrorToString(ee)));

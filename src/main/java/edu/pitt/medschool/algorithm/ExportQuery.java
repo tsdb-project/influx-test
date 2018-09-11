@@ -5,7 +5,10 @@ import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -43,9 +46,13 @@ public class ExportQuery {
 
     // Final query string
     private String[] queriesString;
+    private String queryString;
+
+    // Meta for downsamples
+    private List<Integer> badTimeDataId;
 
     /**
-     * Assemble the query string from given data.
+     * Initialize this class (Expection if dts null or no length)
      *
      * @param d               Data
      * @param v               List of DownsampleGroupVO
@@ -56,25 +63,18 @@ public class ExportQuery {
      * @param startDelta      Start time (in s)
      * @param duration        Duration (in s)
      */
-    public static String[] generate(List<DataTimeSpanBean> d,
-                                    List<DownsampleGroupVO> v, List<List<String>> columns,
-                                    boolean downSampleFirst, boolean needAr,
-                                    int dsPeriod, int startDelta, int duration) throws Exception {
-        return new ExportQuery(d, v, columns, downSampleFirst, needAr, dsPeriod, startDelta, duration).toQureies();
-    }
-
-    /**
-     * Initialize this class (Expection if dts null or no length)
-     */
-    private ExportQuery(List<DataTimeSpanBean> dts, List<DownsampleGroupVO> v, List<List<String>> columns,
-                        boolean downSampleFirst, boolean nar, int p, int sd, int d) throws IllegalArgumentException {
-        initData(dts, v);
+    public ExportQuery(List<DataTimeSpanBean> d,
+                       List<DownsampleGroupVO> v, List<List<String>> columns,
+                       boolean downSampleFirst, boolean needAr,
+                       int dsPeriod, int startDelta, int duration) throws IllegalArgumentException {
+        initData(d, v);
         this.isDownSampleFirst = downSampleFirst;
         this.columnNames = columns;
-        this.startDelta = sd;
-        this.downsampleInterval = p;
-        this.needAr = nar;
-        findFirstData(d);
+        this.startDelta = startDelta;
+        this.downsampleInterval = dsPeriod;
+        this.needAr = needAr;
+        this.badTimeDataId = new ArrayList<>(this.numDataSegments);
+        findFirstData(duration);
 
         buildQuery();
     }
@@ -83,7 +83,7 @@ public class ExportQuery {
      * Get the final assembled queries
      * Each unique file uuid would have one query
      */
-    public String[] toQureies() {
+    public String[] toQueries() {
         if (this.queriesString == null) {
             throw new RuntimeException("Failed to build query string");
         } else {
@@ -91,12 +91,42 @@ public class ExportQuery {
         }
     }
 
+    /**
+     * Get the final assembled queries in one query
+     */
+    public String toQuery() {
+        if (this.queriesString == null) {
+            throw new RuntimeException("Failed to build query string");
+        } else {
+            if (this.queryString == null) {
+                StringBuilder sb = new StringBuilder();
+                for (String q : this.queriesString) {
+                    if (q == null || q.isEmpty()) continue;
+                    sb.append(q);
+                    sb.append(';');
+                }
+                this.queryString = sb.toString();
+            }
+            return this.queryString;
+        }
+    }
+
+    /**
+     * Get list for bad IDs for `DataTimeSpanBean`
+     */
+    public List<Integer> getBadDataTimeId() {
+        return this.badTimeDataId;
+    }
+
     private void buildQuery() {
         this.queriesString = new String[this.numDataSegments];
         // A query for each unique file uuid
         for (int i = 0; i < this.numDataSegments; i++) {
             DataTimeSpanBean d = this.timeseriesMetadata.get(i);
-            if (!isDataArTypeGood(d)) continue;
+            if (!isDataArTypeGood(d)) {
+                this.badTimeDataId.add(i);
+                continue;
+            }
             String whereClause = String.format(Template.locatorCondition,
                     d.getFileUuid(), needAr ? "ar" : "noar");
             // Start operations
@@ -147,7 +177,7 @@ public class ExportQuery {
         } else {
             // Time >= startDelta AND Time <= globalEndTime
             String endTime = String.format(Template.timeCondition,
-                    startTimeFormat, this.globalEndTime);
+                    startTimeFormat, wrapByBracket(this.globalEndTime));
             return basic + " AND " + endTime;
         }
     }
@@ -159,35 +189,10 @@ public class ExportQuery {
         String[] cols = new String[this.dsGroup.length + 1];
         for (int i = 0; i < this.dsGroup.length; i++) {
             DownsampleGroup dg = this.dsGroup[i];
-            String newColAlias = Template.defaultDownsampleColName + String.valueOf(i);
-            String originalColAlias = Template.defaultAggregationColName + String.valueOf(dg.getId());
-            String oper;
-            switch (dg.getDownsample().toLowerCase()) {
-                case "mean":
-                    oper = String.format("MEAN(%s)", originalColAlias);
-                    break;
-                case "sum":
-                    oper = String.format("SUM(%s)", originalColAlias);
-                    break;
-                case "stddev":
-                    oper = String.format("STDDEV(%s)", originalColAlias);
-                    break;
-                case "min":
-                    oper = String.format("MIN(%s)", originalColAlias);
-                    break;
-                case "max":
-                    oper = String.format("MAX(%s)", originalColAlias);
-                    break;
-                case "25":
-                    oper = String.format("PERCENTILE(%s,25)", originalColAlias);
-                    break;
-                case "75":
-                    oper = String.format("PERCENTILE(%s,75)", originalColAlias);
-                    break;
-                default:
-                    throw new RuntimeException("Unsupported ds type: " + dg.getDownsample());
-            }
-            cols[i] = selectQueryWithAlias(oper, newColAlias);
+            String finalColAlias = "label_" + String.valueOf(i);
+            String oper = formAggrFunction(dg,
+                    Template.defaultAggregationColName + String.valueOf(dg.getId()));
+            cols[i] = selectQueryWithAlias(oper, finalColAlias);
         }
         // A count column
         cols[this.dsGroup.length] = String.format("COUNT(%s) AS COUNT",
@@ -205,17 +210,56 @@ public class ExportQuery {
     }
 
     /**
-     * Ds first, Aggr part
+     * Ds first, Ds part
      */
-    private String dsAggr_Aggr() {
+    private String dsAggr_Ds(String locator) {
+        String[] cols = new String[this.dsGroup.length];
+        for (int i = 0; i < cols.length; i++) {
+            DownsampleGroup dg = this.dsGroup[i];
+        }
         return "";
     }
 
     /**
-     * Ds first, Ds part
+     * Ds first, Aggr part
      */
-    private String dsAggr_Ds() {
+    private String dsAggr_Aggr() {
+
         return "";
+    }
+
+
+    /**
+     * MEAN(some_column)
+     */
+    private String formAggrFunction(DownsampleGroup dg, String originalColAlias) {
+        String oper;
+        switch (dg.getDownsample().toLowerCase()) {
+            case "mean":
+                oper = String.format("MEAN(%s)", originalColAlias);
+                break;
+            case "sum":
+                oper = String.format("SUM(%s)", originalColAlias);
+                break;
+            case "stddev":
+                oper = String.format("STDDEV(%s)", originalColAlias);
+                break;
+            case "min":
+                oper = String.format("MIN(%s)", originalColAlias);
+                break;
+            case "max":
+                oper = String.format("MAX(%s)", originalColAlias);
+                break;
+            case "25":
+                oper = String.format("PERCENTILE(%s,25)", originalColAlias);
+                break;
+            case "75":
+                oper = String.format("PERCENTILE(%s,75)", originalColAlias);
+                break;
+            default:
+                throw new RuntimeException("Unsupported ds type: " + dg.getDownsample());
+        }
+        return oper;
     }
 
     /**
