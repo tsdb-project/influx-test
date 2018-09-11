@@ -185,6 +185,19 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="modal fade" id="upload-plist-modal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title pull-left" id="upload-plist-modal-hdr">Err</h5>
+                                    </div>
+                                    <div class="modal-body" id="upload-plist-modal-body">Err</div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-link" data-dismiss="modal">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-sm-4 col-md-2">
                                 <div class="form-group">
@@ -201,14 +214,28 @@
                             <div class="col-sm-4 col-md-2">
                                 <div class="form-group">
                                     <label>&nbsp</label>
-                                    <input type="submit" class="btn btn-danger btn-lg btn-block" id="clearPlist" value="Clear Patient List"/>
+                                    <button type="button" class="btn btn-danger btn-lg btn-block" data-toggle="modal" data-target="#delete-plist-modal">Clear Patient List</button>
+                                    <div class="modal fade" id="delete-plist-modal" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title pull-left">Confirm Patient List Deletion</h5>
+                                                </div>
+                                                <div class="modal-body">Are you sure you want to delete uploaded patient list?</div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                                                    <button type="button" class="btn btn-danger" data-dismiss="modal" id="delPlistModalButton">Yes</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-sm-4 col-md-2">
                                 <div class="form-group">
                                     <label>&nbsp</label>
-                                    <button type="button" class="btn btn-danger btn-lg btn-block" data-toggle="modal" data-target="#modal-default">Delete</button>
-                                    <div class="modal fade" id="modal-default" tabindex="-1">
+                                    <button type="button" class="btn btn-danger btn-lg btn-block" data-toggle="modal" data-target="#delete-query-modal">Delete</button>
+                                    <div class="modal fade" id="delete-query-modal" tabindex="-1">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
