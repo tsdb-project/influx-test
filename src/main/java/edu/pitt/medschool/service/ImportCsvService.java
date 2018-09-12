@@ -230,7 +230,9 @@ public class ImportCsvService {
                 String errTemp = "%s hour on DST shift days";
                 String oper = "Add";
                 // Auto-fix the time according to month
-                if (testStartDate.getMonth() < Calendar.JUNE) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(testStartDate);
+                if (calendar.get(Calendar.MONTH) < Calendar.JUNE) {
                     testStartTimeEpoch = TimeUtil.addOneHourToTimestamp(testStartTimeEpoch); // Mar
                 } else {
                     testStartTimeEpoch = TimeUtil.subOneHourToTimestamp(testStartTimeEpoch); // Nov

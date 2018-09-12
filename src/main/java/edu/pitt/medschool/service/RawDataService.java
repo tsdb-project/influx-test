@@ -71,14 +71,15 @@ public class RawDataService {
     }
 
     private Instant availDataTimeQ(String qT, String pid, boolean hasAr) {
-        ResultTable[] res = InfluxUtil.justQueryData(this.influxDB, true,
-                String.format(qT, pid, hasAr ? "ar" : "noar"));
+        ResultTable[] res = InfluxUtil.justQueryData(this.influxDB, true, String.format(qT, pid, hasAr ? "ar" : "noar"));
 
         // Table does not exist
-        if (res.length == 0) return null;
+        if (res.length == 0)
+            return null;
         return Instant.parse(res[0].getDataByColAndRow(0, 0).toString());
     }
 
+    @SuppressWarnings("unused")
     public static void main(String[] args) throws ParseException {
         RawDataService rawDataService = new RawDataService();
 

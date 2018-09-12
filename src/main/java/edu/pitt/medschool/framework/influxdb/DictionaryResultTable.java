@@ -54,6 +54,7 @@ public class DictionaryResultTable extends ResultTable {
         return res;
     }
 
+    @SuppressWarnings("rawtypes")
     public Class getDataTypeByColumnName(String columnName) {
         return this.dataKV.get(columnName).get(0).getClass();
     }

@@ -201,7 +201,7 @@ public class TimeUtil {
         for (int i = 0; i < 365; i++) {
             if (isThisDayOnDstShift(nycTimeZone, c.getTime())) {
                 SOP("DST on: " + c.getTime());
-                SOP("Month: " + c.getTime().getMonth());
+                SOP("Month: " + c.get(Calendar.MONTH));
             }
             c.add(Calendar.DAY_OF_YEAR, 1);
         }

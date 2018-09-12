@@ -71,6 +71,7 @@ public class CsvFileService {
         return resultMapper.toPOJO(influxDB.query(q), CSVFile.class);
     }
 
+    @SuppressWarnings("unused")
     public static void main(String[] args) {
         CsvFileService cfs = new CsvFileService();
         List<CSVFile> f = cfs.FindFilesForPatient("puh-2010-080");

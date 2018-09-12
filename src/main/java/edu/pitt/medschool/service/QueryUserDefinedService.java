@@ -1,5 +1,14 @@
 package edu.pitt.medschool.service;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
@@ -7,14 +16,6 @@ import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.model.QueryResultBean;
 import edu.pitt.medschool.model.TimeSpan;
 import edu.pitt.medschool.model.dao.PatientDao;
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Query related services
@@ -29,6 +30,7 @@ public class QueryUserDefinedService {
 
     private final String dbName = DBConfiguration.Data.DBNAME;
 
+    @SuppressWarnings("unused")
     public static void main(String[] args) {
         QueryUserDefinedService qs = new QueryUserDefinedService();
         List<QueryResultBean> a = qs.TypeAQuery("I100_1", 5, 10, null, null);
@@ -86,9 +88,9 @@ public class QueryUserDefinedService {
     public List<QueryResultBean> TypeBQuery(String colA, String colB, double valDiff, int hEp, List<String> customPids, List<Integer> customAr) {
         String queryDesc = "Find all patients where the hourly mean values in column X and column Y differ by at least Z% for at least Q hourly epochs.";
         List<QueryResultBean> finalRes = new ArrayList<>();
-        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" +
-                "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM \"%s\" WHERE \"arType\"='%s' GROUP BY TIME(1h)) " +
-                "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
+        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM ("
+                + "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM \"%s\" WHERE \"arType\"='%s' GROUP BY TIME(1h)) "
+                + "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
 
         List<String> targetPid = generateTargetPid(customPids);
 

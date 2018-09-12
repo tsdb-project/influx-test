@@ -8,6 +8,7 @@ import org.influxdb.InfluxDB;
 import java.util.List;
 
 public class AlgoAnalysisTest {
+    @SuppressWarnings("unused")
     public static void main(String... args) {
         InfluxDB i = InfluxappConfig.INFLUX_DB;
         List<DataTimeSpanBean> tmp;

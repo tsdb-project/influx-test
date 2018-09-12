@@ -1,12 +1,13 @@
 package edu.pitt.medschool.model.mapper;
 
-import edu.pitt.medschool.model.dto.Patient;
-import edu.pitt.medschool.model.dto.PatientExample.Criteria;
-import edu.pitt.medschool.model.dto.PatientExample.Criterion;
-import edu.pitt.medschool.model.dto.PatientExample;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.ibatis.jdbc.SQL;
+
+import edu.pitt.medschool.model.dto.PatientExample;
+import edu.pitt.medschool.model.dto.PatientExample.Criteria;
+import edu.pitt.medschool.model.dto.PatientExample.Criterion;
 import edu.pitt.medschool.model.dto.PatientWithBLOBs;
 
 public class PatientSqlProvider {
