@@ -39,7 +39,6 @@ import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.PatientExample;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
 
@@ -95,7 +94,7 @@ public class AnalysisController {
         return analysisGenerateModel(model);
     }
 
-    @RequestMapping(value = {"analysis/edit/{id}", "analysis/edit"}, method = RequestMethod.GET)
+    @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "builder");
@@ -251,55 +250,6 @@ public class AnalysisController {
         public String ageUpper;
     }
 
-    @RequestMapping("api/export/export")
-    @ResponseBody
-    public void export(@RequestBody(required = true) ExportRequest request, Model model) throws IOException {
-        //TODO: Remove?
-        PatientExample pe = new PatientExample();
-        PatientExample.Criteria pec = pe.createCriteria();
-        if (request.ageLower != null && !request.ageLower.isEmpty()) {
-            pec.andAgeGreaterThan(Byte.valueOf(request.ageLower));
-        }
-        if (request.ageUpper != null && !request.ageUpper.isEmpty()) {
-            pec.andAgeLessThanOrEqualTo(Byte.valueOf(request.ageUpper));
-        }
-        if (request.gender != null && !request.gender.isEmpty()) {
-            pec.andFemaleEqualTo(request.gender.toUpperCase().equals("F"));
-        }
-        List<String> patientIDs = patientDao.selectIdByCustom(pe);
-        patientIDs.retainAll(importedFileDao.getAllImportedPid(uuid));
-
-        System.out.println(patientIDs);
-        System.out.println(request.interval + "====" + request.time + "======" + request.method);
-        analysisService.exportFromPatientsWithDownsampling(patientIDs, request.column, request.method, request.interval, request.time);
-    }
-
-    @RequestMapping("api/export/export/uc1")
-    @ResponseBody
-    public void exportUC1(Model model) throws IOException {
-        //TODO: Remove?
-        // List<String> patientIDs = patientDao.selectIdAll();
-        // patientIDs.retainAll(importedFileDao.selectAllImportedPidPSC());
-
-        List<String> patientIDs = importedFileDao.selectAllImportedPidPSC();
-
-        System.out.println(patientIDs);
-        analysisService.useCaseOne();
-    }
-
-    @RequestMapping("api/export/export/uc2")
-    @ResponseBody
-    public void exportUC2(Model model) throws IOException {
-        //TODO: Remove?
-        // List<String> patientIDs = patientDao.selectIdAll();
-        // patientIDs.retainAll(importedFileDao.selectAllImportedPidPSC());
-
-        List<String> patientIDs = importedFileDao.selectAllImportedPidPSC();
-
-        System.out.println(patientIDs);
-        analysisService.useCaseTwo();
-    }
-
     @RequestMapping("api/export/export/{qid}")
     @ResponseBody
     public void exportQuery(@PathVariable(required = true) Integer qid) throws IOException {
@@ -355,13 +305,13 @@ public class AnalysisController {
         }
     }
 
-    //TODO: Remove in production
+    // TODO: Remove in production
     @PutMapping("api/debug/Export")
     @ResponseBody
     public void debugExprt() {
         try {
             analysisService.exportToFile(35, false);
-            //analysisService.exportToFile(37, false);
+            // analysisService.exportToFile(37, false);
 
         } catch (IOException e) {
             logger.error(Util.stackTraceErrorToString(e));
