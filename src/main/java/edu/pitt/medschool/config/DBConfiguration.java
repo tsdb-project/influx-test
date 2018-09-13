@@ -5,7 +5,13 @@ package edu.pitt.medschool.config;
  */
 public class DBConfiguration {
 
+    private DBConfiguration() {
+    }
+
     public class RelationalData {
+        private RelationalData() {
+        }
+
         public static final String DBNAME = "upmc";
 
         /**
@@ -18,6 +24,9 @@ public class DBConfiguration {
      * Measurements in data table
      */
     public class Data {
+        private Data() {
+        }
+
         public static final String DBNAME = "data";
 
         /**
@@ -30,6 +39,9 @@ public class DBConfiguration {
      * Measurements in application table
      */
     public class Sys {
+        private Sys() {
+        }
+
         public static final String DBNAME = "sys";
 
         /**
