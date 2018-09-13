@@ -56,15 +56,15 @@ $(document).ready(function() {
         }],
         paging: false,
         columns: [{
-            data: 'group.id'
+            data: 'id'
         }, {
-            data: 'group.queryId'
+            data: 'queryId'
         }, {
-            data: 'group.label'
+            data: 'label'
         }, {
-            data: 'group.downsample'
+            data: 'downsample'
         }, {
-            data: 'group.aggregation'
+            data: 'aggregation'
         }, {
             data: 'columns',
             render: function(data) {
@@ -75,7 +75,7 @@ $(document).ready(function() {
             }
         }, {
             "width": "15%",
-            data: 'group.id',
+            data: 'id',
             render: function(data) {
                 return "<th><button class=\"btn btn-primary btn-sm\" data-toggle=\"modal\" data-target=\"#edit-group-modal\" data-id=\"" + data + "\"><i class=\"zmdi zmdi-edit\"></i> Edit</button> " +
                     "<button class=\"btn btn-danger btn-sm\" data-toggle=\"modal\" data-target=\"#delete-group-modal\" data-id=\"" + data + "\"><i class=\"zmdi zmdi-close\"></i> Delete</a></th>";
@@ -135,34 +135,34 @@ $(document).ready(function() {
     });
 
     $("#saveButton").click(function() {
-        if ($('#parameter-form')[0].checkValidity()) {
-            var form = {
-                "id": $("#id").val(),
-                "alias": $("#alias").val(),
-                "period": $("#period").val() * $("#period_unit").val(),
-                "origin": $("#origin").val() * $("#origin_unit").val(),
-                "duration": $("#duration").val() * $("#duration_unit").val(),
-                "minEveryBinThershold": $("#every_bin").val(),
-                "minTotalBinThreshold": $("#total_bin").val(),
-                "needar": document.getElementById('needAr').checked,
-                "isDownsampleFirst": document.getElementById('isDsFirst').checked
-            };
-            $.ajax({
-                'url': "/analysis/query",
-                'type': 'put',
-                'data': JSON.stringify(form),
-                'contentType': "application/json",
-                'dataType': 'json',
-                'success': function(data) {
-                    window.location.href = '/analysis/edit/' + $("#id").val();
-                },
-                'error': function() {}
-            });
-            return false;
-        } else {
-            console.log("invalid form");
-            return true;
-        }
+        //        if ($('#parameter-form')[0].checkValidity()) {
+        var form = {
+            "id": $("#id").val(),
+            "alias": $("#alias").val(),
+            "period": $("#period").val() * $("#period_unit").val(),
+            "origin": $("#origin").val() * $("#origin_unit").val(),
+            "duration": $("#duration").val() * $("#duration_unit").val(),
+            "minEveryBinThershold": $("#every_bin").val(),
+            "minTotalBinThreshold": $("#total_bin").val(),
+            "downsampleFirst": $('#downsample_first label.active input').val() == "true" ? true : false
+        };
+        console.log(form)
+        ////            $.ajax({
+        ////                'url': "/analysis/query",
+        ////                'type': 'put',
+        ////                'data': JSON.stringify(form),
+        ////                'contentType': "application/json",
+        ////                'dataType': 'json',
+        ////                'success': function(data) {
+        ////                    window.location.href = '/analysis/edit/' + $("#id").val();
+        ////                },
+        ////                'error': function() {}
+        ////            });
+        ////            return false;
+        //        } else {
+        //            console.log("invalid form");
+        //            return true;
+        //        }
     });
 
     $("#deleteButton").click(function() {
@@ -427,10 +427,10 @@ $(document).ready(function() {
                 'url': "/analysis/group/group/" + id,
                 'type': 'get',
                 'success': function(data) {
-                    $('#label').val(data.data.group.label);
-                    $('#method').val(data.data.group.downsample);
+                    $('#label').val(data.data.label);
+                    $('#method').val(data.data.downsample);
                     $('#method').trigger('change');
-                    $('#aggregation').val(data.data.group.aggregation);
+                    $('#aggregation').val(data.data.aggregation);
                     $('#aggregation').trigger('change');
 
                     var columns = JSON.parse(data.data.columns);
@@ -467,14 +467,11 @@ $(document).ready(function() {
             }
             console.log(map);
             var form = {
-                "group": {
-                    "id": groupId,
-                    "label": $("#label").val(),
-                    "queryId": $("#id").val(),
-                    "downsample": $("#method").val(),
-                    "aggregation": $("#aggregation").val(),
-                    "columns": JSON.stringify(map)
-                },
+                "id": groupId,
+                "label": $("#label").val(),
+                "queryId": $("#id").val(),
+                "downsample": $("#method").val(),
+                "aggregation": $("#aggregation").val(),
                 "columns": JSON.stringify(map)
             };
             $.ajax({

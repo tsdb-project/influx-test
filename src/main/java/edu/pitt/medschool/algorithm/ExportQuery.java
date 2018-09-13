@@ -5,13 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 
 /**
- * Queries for doing the downsample-aggregation query
- * Refactor from AnalysisService.exportToFile
+ * Queries for doing the downsample-aggregation query Refactor from AnalysisService.exportToFile
  */
 public class ExportQuery {
 
@@ -54,7 +52,7 @@ public class ExportQuery {
      * Initialize this class (Expection if dts null or no length)
      *
      * @param d               Data
-     * @param v               List of DownsampleGroupVO
+     * @param v               List of DownsampleGroup
      * @param columns         Columns (e.g. I10_4,I11_4)
      * @param downSampleFirst Is Downsample first or aggregation first
      * @param needAr          Export on Ar or Noar
@@ -62,10 +60,8 @@ public class ExportQuery {
      * @param startDelta      Start time (in s)
      * @param duration        Duration (in s)
      */
-    public ExportQuery(List<DataTimeSpanBean> d,
-                       List<DownsampleGroupVO> v, List<List<String>> columns,
-                       boolean downSampleFirst, boolean needAr,
-                       int dsPeriod, int startDelta, int duration) throws IllegalArgumentException {
+    public ExportQuery(List<DataTimeSpanBean> d, List<DownsampleGroup> v, List<List<String>> columns, boolean downSampleFirst, boolean needAr,
+            int dsPeriod, int startDelta, int duration) throws IllegalArgumentException {
         initData(d, v);
         this.isDownSampleFirst = downSampleFirst;
         this.columnNames = columns;
@@ -80,8 +76,7 @@ public class ExportQuery {
     }
 
     /**
-     * Get the final assembled queries
-     * Each unique file uuid would have one query
+     * Get the final assembled queries Each unique file uuid would have one query
      */
     public String[] toQueries() {
         if (this.queriesString == null) {
@@ -101,7 +96,8 @@ public class ExportQuery {
             if (this.queryString == null) {
                 StringBuilder sb = new StringBuilder();
                 for (String q : this.queriesString) {
-                    if (q == null || q.isEmpty()) continue;
+                    if (q == null || q.isEmpty())
+                        continue;
                     sb.append(q);
                     sb.append(';');
                 }
@@ -132,8 +128,7 @@ public class ExportQuery {
                 continue;
             }
             this.goodTimeDataId.add(i);
-            String whereClause = String.format(Template.locatorCondition,
-                    d.getFileUuid(), needAr ? "ar" : "noar");
+            String whereClause = String.format(Template.locatorCondition, d.getFileUuid(), needAr ? "ar" : "noar");
             // Start operations
             if (!this.isDownSampleFirst) {
                 // Downsample then Aggr
@@ -171,18 +166,15 @@ public class ExportQuery {
             }
         }
 
-        String basic = String.format(Template.basicSelectInner,
-                String.join(", ", cols), this.pid, locator);
-        String startTimeFormat = String.format(Template.timeAddDelta,
-                this.firstAvailData.toString(), this.startDelta);
+        String basic = String.format(Template.basicSelectInner, String.join(", ", cols), this.pid, locator);
+        String startTimeFormat = String.format(Template.timeAddDelta, this.firstAvailData.toString(), this.startDelta);
 
         if (this.globalEndTime == null) {
             // Time >= startDelta
             return basic + " AND time >=" + startTimeFormat;
         } else {
             // Time >= startDelta AND Time <= globalEndTime
-            String endTime = String.format(Template.timeCondition,
-                    startTimeFormat, wrapByBracket(this.globalEndTime));
+            String endTime = String.format(Template.timeCondition, startTimeFormat, wrapByBracket(this.globalEndTime));
             return basic + " AND " + endTime;
         }
     }
@@ -195,19 +187,14 @@ public class ExportQuery {
         for (int i = 0; i < this.dsGroup.length; i++) {
             DownsampleGroup dg = this.dsGroup[i];
             String finalColAlias = "label_" + String.valueOf(i);
-            String oper = formAggrFunction(dg,
-                    Template.defaultAggregationColName + String.valueOf(dg.getId()));
+            String oper = formAggrFunction(dg, Template.defaultAggregationColName + String.valueOf(dg.getId()));
             cols[i] = selectQueryWithAlias(oper, finalColAlias);
         }
         // A count column
-        cols[this.dsGroup.length] = String.format("COUNT(%s) AS COUNT",
-                Template.defaultAggregationColName + this.dsGroup[0].getId());
+        cols[this.dsGroup.length] = String.format("COUNT(%s) AS COUNT", Template.defaultAggregationColName + this.dsGroup[0].getId());
 
-        String basic = String.format(Template.basicSelectOuter,
-                String.join(", ", cols),
-                wrapByBracket(aggrQuery));
-        return basic + " " +
-                String.format(Template.downsampleGroupBy, this.downsampleInterval);
+        String basic = String.format(Template.basicSelectOuter, String.join(", ", cols), wrapByBracket(aggrQuery));
+        return basic + " " + String.format(Template.downsampleGroupBy, this.downsampleInterval);
     }
 
     private void dsFirst(String locator) {
@@ -232,7 +219,6 @@ public class ExportQuery {
 
         return "";
     }
-
 
     /**
      * MEAN(some_column)
@@ -273,12 +259,13 @@ public class ExportQuery {
     /**
      * Extract from `DataTimeSpanBean` to set some basic info for this class
      */
-    private void initData(List<DataTimeSpanBean> dts, List<DownsampleGroupVO> v) {
-        if (dts == null || dts.isEmpty()) throw new IllegalArgumentException("DataTimeSpanBean empty");
+    private void initData(List<DataTimeSpanBean> dts, List<DownsampleGroup> v) {
+        if (dts == null || dts.isEmpty())
+            throw new IllegalArgumentException("DataTimeSpanBean empty");
         this.pid = dts.get(0).getPid();
         this.numDataSegments = dts.size();
         this.timeseriesMetadata = dts;
-        this.dsGroup = v.stream().map(DownsampleGroupVO::getGroup).toArray(DownsampleGroup[]::new);
+        this.dsGroup = v.stream().toArray(DownsampleGroup[]::new);
     }
 
     // Find the first data, all internals are available
@@ -286,15 +273,15 @@ public class ExportQuery {
         // A 'large' data acts as maxi
         this.firstAvailData = Instant.now();
         for (DataTimeSpanBean d : this.timeseriesMetadata) {
-            if (!isDataArTypeGood(d)) continue;
+            if (!isDataArTypeGood(d))
+                continue;
             Instant tmpS = d.getStart();
             if (tmpS.compareTo(this.firstAvailData) < 0)
                 this.firstAvailData = tmpS;
         }
 
         if (duration > 1) {
-            this.globalEndTime = String.format("'%s' + %ds",
-                    this.firstAvailData.toString(), duration);
+            this.globalEndTime = String.format("'%s' + %ds", this.firstAvailData.toString(), duration);
         } else {
             this.globalEndTime = null;
         }
@@ -311,41 +298,30 @@ public class ExportQuery {
      * (arType='ar' and fileUUID='xxxx')
      */
     private String whereFileUuidAndarType(String uuid, boolean isAr) {
-        return String.format(Template.locatorCondition,
-                uuid, isAr ? "ar" : "noar");
+        return String.format(Template.locatorCondition, uuid, isAr ? "ar" : "noar");
     }
 
     /**
-     * Concat the column name list into an add string: ("f1"+"f2")
-     * For aggregation
+     * Concat the column name list into an add string: ("f1"+"f2") For aggregation
      *
      * @param alias Alias for this list, null for not using
      */
     private String aggregationColumnsSumQuery(int i, String alias) {
-        return selectQueryWithAlias(
-                wrapByBracket(this.columnNames.get(i).stream()
-                        .map(s -> "\"" + s + "\"")
-                        .collect(Collectors.joining(" + "))
-                ), alias);
-    }
-
-    /**
-     * Concat the column name list into an mean string": (("f1"+"f2")/2)
-     * For aggregation
-     *
-     * @param alias Alias for this list, null for not using
-     */
-    private String aggregationColumnsMeanQuery(int i, String alias) {
-        return selectQueryWithAlias(
-                String.format("(%s/%d)",
-                        aggregationColumnsSumQuery(i, null),
-                        this.columnNames.get(i).size()),
+        return selectQueryWithAlias(wrapByBracket(this.columnNames.get(i).stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(" + "))),
                 alias);
     }
 
     /**
-     * If already wrapped then do nothing
-     * "f1"+"f2" -> ("f1"+"f2")
+     * Concat the column name list into an mean string": (("f1"+"f2")/2) For aggregation
+     *
+     * @param alias Alias for this list, null for not using
+     */
+    private String aggregationColumnsMeanQuery(int i, String alias) {
+        return selectQueryWithAlias(String.format("(%s/%d)", aggregationColumnsSumQuery(i, null), this.columnNames.get(i).size()), alias);
+    }
+
+    /**
+     * If already wrapped then do nothing "f1"+"f2" -> ("f1"+"f2")
      */
     private String wrapByBracket(String toWrap) {
         if (toWrap.startsWith("(") && toWrap.endsWith(")"))
@@ -354,15 +330,16 @@ public class ExportQuery {
     }
 
     /**
-     * Give alias for select statements
-     * (I10_1,I10_2) -> (I10_1,I10_2) AS A
+     * Give alias for select statements (I10_1,I10_2) -> (I10_1,I10_2) AS A
      *
      * @param origin Original select obj
      * @param alias  Alias, null for not using
      */
     private String selectQueryWithAlias(String origin, String alias) {
-        if (alias == null) return origin;
-        else return String.format("%s AS %s", wrapByBracket(origin), alias);
+        if (alias == null)
+            return origin;
+        else
+            return String.format("%s AS %s", wrapByBracket(origin), alias);
     }
 
     /**

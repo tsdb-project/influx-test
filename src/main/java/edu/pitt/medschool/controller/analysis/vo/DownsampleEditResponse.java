@@ -14,8 +14,8 @@ public class DownsampleEditResponse {
     private String durationUnit;
     private String origin;
     private String originUnit;
-    private int minTotalBinThreshold;
-    private int minEveryBinThershold;
+    private int minBinRow;
+    private int minBin;
     private boolean isDownsampleFirst;
     private boolean needar;
 
@@ -41,10 +41,11 @@ public class DownsampleEditResponse {
         this.origin = originArr[0];
         this.originUnit = originArr[1];
 
-        this.minEveryBinThershold = downsample.getMinEveryBinThershold();
-        this.minTotalBinThreshold = downsample.getMinTotalBinThreshold();
-        this.isDownsampleFirst = downsample.getIsDownsampleFirst();
-        this.needar = downsample.getNeedar();
+        this.minBin = downsample.getMinBin();
+        this.minBinRow = downsample.getMinBinRow();
+        this.isDownsampleFirst = downsample.getDownsampleFirst();
+        // TODO : AR/noAR passed by exportVO
+        this.needar = true;
     }
 
     public boolean getIsDownsampleFirst() {
@@ -55,20 +56,20 @@ public class DownsampleEditResponse {
         this.isDownsampleFirst = downsampleFirst;
     }
 
-    public int getMinTotalBinThreshold() {
-        return minTotalBinThreshold;
+    public int getMinBinRow() {
+        return minBinRow;
     }
 
-    public void setMinTotalBinThreshold(int minTotalBinThreshold) {
-        this.minTotalBinThreshold = minTotalBinThreshold;
+    public void setMinBinRow(int minBinRow) {
+        this.minBinRow = minBinRow;
     }
 
-    public int getMinEveryBinThershold() {
-        return minEveryBinThershold;
+    public int getMinBin() {
+        return minBin;
     }
 
-    public void setMinEveryBinThershold(int minEveryBinThershold) {
-        this.minEveryBinThershold = minEveryBinThershold;
+    public void setMinBin(int minBin) {
+        this.minBin = minBin;
     }
 
     /**

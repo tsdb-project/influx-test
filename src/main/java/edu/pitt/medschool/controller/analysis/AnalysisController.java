@@ -32,13 +32,13 @@ import org.springframework.web.servlet.ModelAndView;
 
 import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
-import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
 
@@ -182,7 +182,7 @@ public class AnalysisController {
 
     @RequestMapping(value = "analysis/group", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> insertQueryGroup(@RequestBody(required = true) DownsampleGroupVO group) throws Exception {
+    public Map<String, Object> insertQueryGroup(@RequestBody(required = true) DownsampleGroup group) throws Exception {
         Map<String, Object> map = new HashMap<>();
         if (analysisService.insertAggregationGroup(group)) {
             map.put("res", new RestfulResponse(1, "success"));
@@ -194,14 +194,13 @@ public class AnalysisController {
 
     @RequestMapping(value = "analysis/group", method = RequestMethod.PUT)
     @ResponseBody
-    public Map<String, Object> updateQueryGroup(@RequestBody(required = true) DownsampleGroupVO group) throws Exception {
+    public Map<String, Object> updateQueryGroup(@RequestBody(required = true) DownsampleGroup group) throws Exception {
         Map<String, Object> map = new HashMap<>();
         if (analysisService.updateAggregationGroup(group) == 1) {
             map.put("res", new RestfulResponse(1, "success"));
         } else {
             map.put("res", new RestfulResponse(0, "update failed"));
         }
-        // map.put("data", analysisService.selectByPrimaryKey(group.getQueryId()));
         return map;
     }
 
@@ -281,7 +280,9 @@ public class AnalysisController {
         String lists = sb.deleteCharAt(sb.length() - 1).toString();
 
         Downsample ds = analysisService.selectByPrimaryKey(qid);
-        ds.setPatientlist(lists);
+
+        // AR/noAR passed by exportVO
+        // ds.setPatientlist(lists);
         ds.setUpdateTime(new java.util.Date());
 
         if (analysisService.updateByPrimaryKey(ds) == 1) {
@@ -295,7 +296,6 @@ public class AnalysisController {
     @ResponseBody
     public RestfulResponse removePatientList(@PathVariable(required = true) Integer qid) {
         Downsample ds = analysisService.selectByPrimaryKey(qid);
-        ds.setPatientlist("");
         ds.setUpdateTime(new java.util.Date());
 
         if (analysisService.updateByPrimaryKey(ds) == 1) {

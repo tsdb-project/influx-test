@@ -493,76 +493,6 @@ public class DownsampleGroupExample {
             return (Criteria) this;
         }
 
-        public Criteria andArtypeIsNull() {
-            addCriterion("arType is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeIsNotNull() {
-            addCriterion("arType is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeEqualTo(String value) {
-            addCriterion("arType =", value, "artype");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeNotEqualTo(String value) {
-            addCriterion("arType <>", value, "artype");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeGreaterThan(String value) {
-            addCriterion("arType >", value, "artype");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeGreaterThanOrEqualTo(String value) {
-            addCriterion("arType >=", value, "artype");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeLessThan(String value) {
-            addCriterion("arType <", value, "artype");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeLessThanOrEqualTo(String value) {
-            addCriterion("arType <=", value, "artype");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeLike(String value) {
-            addCriterion("arType like", value, "artype");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeNotLike(String value) {
-            addCriterion("arType not like", value, "artype");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeIn(List<String> values) {
-            addCriterion("arType in", values, "artype");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeNotIn(List<String> values) {
-            addCriterion("arType not in", values, "artype");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeBetween(String value1, String value2) {
-            addCriterion("arType between", value1, value2, "artype");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeNotBetween(String value1, String value2) {
-            addCriterion("arType not between", value1, value2, "artype");
-            return (Criteria) this;
-        }
-
         public Criteria andCreateTimeIsNull() {
             addCriterion("create_time is null");
             return (Criteria) this;
@@ -695,11 +625,6 @@ public class DownsampleGroupExample {
 
         public Criteria andAggregationLikeInsensitive(String value) {
             addCriterion("upper(aggregation) like", value.toUpperCase(), "aggregation");
-            return (Criteria) this;
-        }
-
-        public Criteria andArtypeLikeInsensitive(String value) {
-            addCriterion("upper(arType) like", value.toUpperCase(), "artype");
             return (Criteria) this;
         }
     }

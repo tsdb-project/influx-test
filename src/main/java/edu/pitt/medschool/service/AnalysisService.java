@@ -34,19 +34,16 @@ import edu.pitt.medschool.algorithm.AnalysisUtil;
 import edu.pitt.medschool.algorithm.ExportQuery;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
-import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dao.DownsampleDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupAggrDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupColumnDao;
 import edu.pitt.medschool.model.dao.DownsampleGroupDao;
-import edu.pitt.medschool.model.dao.DownsampleMetaDao;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
 import okhttp3.OkHttpClient;
 
 /**
@@ -67,12 +64,6 @@ public class AnalysisService {
     DownsampleDao downsampleDao;
     @Autowired
     DownsampleGroupDao downsampleGroupDao;
-    @Autowired
-    DownsampleGroupColumnDao downsampleGroupColumnDao;
-    @Autowired
-    DownsampleMetaDao downsampleMetaDao;
-    @Autowired
-    DownsampleGroupAggrDao downsampleGroupAggrDao;
     @Autowired
     ColumnService columnService;
 
@@ -108,7 +99,9 @@ public class AnalysisService {
         if (!new File(outputDir.getAbsolutePath() + "/patients/").mkdirs())
             return;
 
-        String pList = exportQuery.getPatientlist();
+        // TODO : AR/noAR passed by exportVO
+        // String pList = exportQuery.getPatientlist();
+        String pList = "";
         List<String> patientIDs;
         if (pList == null || pList.isEmpty()) {
             // No user-defined, get patient list by uuid
@@ -122,19 +115,18 @@ public class AnalysisService {
         AtomicInteger validPatientCounter = new AtomicInteger(0);
 
         // Get columns data
-        List<DownsampleGroupVO> groups = downsampleGroupDao.selectAllDownsampleGroupVO(queryId);
+        List<DownsampleGroup> groups = downsampleGroupDao.selectAllDownsampleGroup(queryId);
         int labelCount = groups.size();
         List<List<String>> columns = new ArrayList<>(labelCount);
         List<String> columnLabelName = new ArrayList<>(labelCount);
-        for (DownsampleGroupVO group : groups) {
-            //TODO: More testing as it's not stable
+        for (DownsampleGroup group : groups) {
+            // TODO: More testing as it's not stable
             columns.add(parseAggregationGroupColumnsString(group.getColumns()));
-            columnLabelName.add(group.getGroup().getLabel());
+            columnLabelName.add(group.getLabel());
         }
 
         // CSV output
-        String[] pHeader = new String[labelCount + 3],
-                mainHeader = new String[labelCount + 4];
+        String[] pHeader = new String[labelCount + 3], mainHeader = new String[labelCount + 4];
         populateHeaderNames(columnLabelName, pHeader, mainHeader);
         CSVWriter mainCsvWriter = new CSVWriter(new FileWriter(projectRootFolder + "/output.csv"));
         mainCsvWriter.writeNext(mainHeader);
@@ -143,7 +135,9 @@ public class AnalysisService {
         BufferedWriter bw = new BufferedWriter(new FileWriter(projectRootFolder + "/output_meta.txt"));
         bw.write(String.format("EXPORT '%s' (#%d) STARTED ON '%s'%n%n", exportQuery.getAlias(), exportQuery.getId(), Instant.now()));
         bw.write(String.format("Total patients in database: %d%n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
-        bw.write(String.format("Ar status is: %s%n", exportQuery.getNeedar() ? "AR" : "NoAR"));
+
+        // TODO : AR/noAR passed by exportVO
+        bw.write(String.format("Ar status is: %s%n", true ? "AR" : "NoAR"));
         bw.write(String.format("Number of patients for initial export: %d%n%n", patientIDs.size()));
         bw.flush();
 
@@ -155,18 +149,17 @@ public class AnalysisService {
             while ((patientId = idQueue.poll()) != null) {
                 try {
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
-                    int minEveryBinSeconds = exportQuery.getMinEveryBinThershold() * 60;
-                    double dropoutPercent = 1.0 * exportQuery.getMinTotalBinThreshold() / 100;
+                    int minEveryBinSeconds = exportQuery.getMinBinRow() * 60;
+                    double dropoutPercent = 1.0 * exportQuery.getMinBin() / 100;
 
-                    ExportQuery eq = new ExportQuery(
-                            dtsb, groups, columns,
-                            exportQuery.getIsDownsampleFirst(), exportQuery.getNeedar(), exportQuery.getPeriod(),
-                            exportQuery.getOrigin(), exportQuery.getDuration()
-                    );
+                    // TODO : AR/noAR passed by exportVO
+                    ExportQuery eq = new ExportQuery(dtsb, groups, columns, exportQuery.getDownsampleFirst(), true, exportQuery.getPeriod(),
+                            exportQuery.getOrigin(), exportQuery.getDuration());
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, eq.toQuery());
                     logger.debug(String.format("%s query: %s", patientId, eq.toQuery()));
 
-                    if (res.length == 0) return;
+                    if (res.length == 0)
+                        return;
 
                     int pHeadSize = pHeader.length, mainHeadSize = mainHeader.length;
 
@@ -177,8 +170,7 @@ public class AnalysisService {
 
                     bw.write(String.format(" '%s': '%d' seconds and '%d' bins.%n", patientId, totalValidSeconds, totalBins));
 
-                    writeOutCsvFiles(projectRootFolder, pHeader, mainCsvWriter,
-                            patientId, dtsb, res, pHeadSize, mainHeadSize, goodIDs);
+                    writeOutCsvFiles(projectRootFolder, pHeader, mainCsvWriter, patientId, dtsb, res, pHeadSize, mainHeadSize, goodIDs);
 
                     validPatientCounter.getAndIncrement();
 
@@ -221,14 +213,13 @@ public class AnalysisService {
     /**
      * Write indiviual csv and main.csv
      */
-    private void writeOutCsvFiles(String projectRootFolder, String[] pHeader, CSVWriter mainCsvWriter,
-                                  String patientId, List<DataTimeSpanBean> dtsb, ResultTable[] res,
-                                  int pHeadSize, int mainHeadSize, List<Integer> goodIDs) throws IOException {
+    private void writeOutCsvFiles(String projectRootFolder, String[] pHeader, CSVWriter mainCsvWriter, String patientId, List<DataTimeSpanBean> dtsb,
+            ResultTable[] res, int pHeadSize, int mainHeadSize, List<Integer> goodIDs) throws IOException {
         CSVWriter pWriter = new CSVWriter(new FileWriter(String.format("%s/patients/%s.csv", projectRootFolder, patientId)));
         pWriter.writeNext(pHeader);
         for (int i = 0; i < res.length; i++) {
             ResultTable r = res[i];
-            //TODO: Is this good?
+            // TODO: Is this good?
             for (int j = 0; j < r.getRowCount(); j++) {
                 List<Object> row = r.getDatalistByRow(j);
                 String[] resultDataRow = row.stream().map(Object::toString).toArray(String[]::new);
@@ -246,9 +237,7 @@ public class AnalysisService {
     }
 
     /**
-     * Populate header names for main csv and indiviual csv
-     * pHeader (Time,xxxx,Count,fileUUID)
-     * mainHeader (PID,Time,xxxx,Count,fileUUID)
+     * Populate header names for main csv and indiviual csv pHeader (Time,xxxx,Count,fileUUID) mainHeader (PID,Time,xxxx,Count,fileUUID)
      */
     private void populateHeaderNames(List<String> columnLabelName, String[] pHeader, String[] mainHeader) {
         pHeader[0] = "Timestamp";
@@ -292,20 +281,20 @@ public class AnalysisService {
         return downsampleDao.deleteByPrimaryKey(id);
     }
 
-    public List<DownsampleGroupVO> selectAllAggregationGroupByQueryId(Integer queryId) {
+    public List<DownsampleGroup> selectAllAggregationGroupByQueryId(Integer queryId) {
         return downsampleGroupDao.selectAllAggregationGroupByQueryId(queryId);
     }
 
-    public boolean insertAggregationGroup(DownsampleGroupVO group) {
-        return downsampleGroupDao.insertAggregationGroup(group);
+    public boolean insertAggregationGroup(DownsampleGroup group) {
+        return downsampleGroupDao.insertDownsampleGroup(group);
     }
 
-    public int updateAggregationGroup(DownsampleGroupVO group) {
-        return downsampleGroupDao.updateByPrimaryKeyWithBLOBs(group.getGroup());
+    public int updateAggregationGroup(DownsampleGroup group) {
+        return downsampleGroupDao.updateByPrimaryKeySelective(group);
     }
 
-    public DownsampleGroupVO selectAggregationGroupByGroupId(Integer groupId) {
-        return downsampleGroupDao.selectDownsampleGroupVO(groupId);
+    public DownsampleGroup selectAggregationGroupByGroupId(Integer groupId) {
+        return downsampleGroupDao.selectDownsampleGroup(groupId);
     }
 
     public int deleteGroupByPrimaryKey(Integer groupId) {

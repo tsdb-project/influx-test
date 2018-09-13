@@ -51,9 +51,6 @@ public class DownsampleGroupSqlProvider {
         if (record.getAggregation() != null) {
             sql.VALUES("aggregation", "#{aggregation,jdbcType=VARCHAR}");
         }
-        if (record.getArtype() != null) {
-            sql.VALUES("arType", "#{artype,jdbcType=VARCHAR}");
-        }
         if (record.getCreateTime() != null) {
             sql.VALUES("create_time", "#{createTime,jdbcType=TIMESTAMP}");
         }
@@ -81,7 +78,6 @@ public class DownsampleGroupSqlProvider {
         sql.SELECT("label");
         sql.SELECT("downsample");
         sql.SELECT("aggregation");
-        sql.SELECT("arType");
         sql.SELECT("create_time");
         sql.SELECT("update_time");
         sql.SELECT("columns");
@@ -108,7 +104,6 @@ public class DownsampleGroupSqlProvider {
         sql.SELECT("label");
         sql.SELECT("downsample");
         sql.SELECT("aggregation");
-        sql.SELECT("arType");
         sql.SELECT("create_time");
         sql.SELECT("update_time");
         sql.FROM("downsample_group");
@@ -143,9 +138,6 @@ public class DownsampleGroupSqlProvider {
         if (record.getAggregation() != null) {
             sql.SET("aggregation = #{record.aggregation,jdbcType=VARCHAR}");
         }
-        if (record.getArtype() != null) {
-            sql.SET("arType = #{record.artype,jdbcType=VARCHAR}");
-        }
         if (record.getCreateTime() != null) {
             sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         }
@@ -171,7 +163,6 @@ public class DownsampleGroupSqlProvider {
         sql.SET("label = #{record.label,jdbcType=VARCHAR}");
         sql.SET("downsample = #{record.downsample,jdbcType=VARCHAR}");
         sql.SET("aggregation = #{record.aggregation,jdbcType=VARCHAR}");
-        sql.SET("arType = #{record.artype,jdbcType=VARCHAR}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
         sql.SET("columns = #{record.columns,jdbcType=LONGVARCHAR}");
@@ -192,7 +183,6 @@ public class DownsampleGroupSqlProvider {
         sql.SET("label = #{record.label,jdbcType=VARCHAR}");
         sql.SET("downsample = #{record.downsample,jdbcType=VARCHAR}");
         sql.SET("aggregation = #{record.aggregation,jdbcType=VARCHAR}");
-        sql.SET("arType = #{record.artype,jdbcType=VARCHAR}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
         DownsampleGroupExample example = (DownsampleGroupExample) parameter.get("example");
@@ -218,9 +208,6 @@ public class DownsampleGroupSqlProvider {
         }
         if (record.getAggregation() != null) {
             sql.SET("aggregation = #{aggregation,jdbcType=VARCHAR}");
-        }
-        if (record.getArtype() != null) {
-            sql.SET("arType = #{artype,jdbcType=VARCHAR}");
         }
         if (record.getCreateTime() != null) {
             sql.SET("create_time = #{createTime,jdbcType=TIMESTAMP}");
@@ -297,7 +284,8 @@ public class DownsampleGroupSqlProvider {
                         if (criterion.getTypeHandler() == null) {
                             sb.append(String.format(parmPhrase2, criterion.getCondition(), i, j, i, j));
                         } else {
-                            sb.append(String.format(parmPhrase2_th, criterion.getCondition(), i, j, criterion.getTypeHandler(), i, j, criterion.getTypeHandler()));
+                            sb.append(String.format(parmPhrase2_th, criterion.getCondition(), i, j, criterion.getTypeHandler(), i, j,
+                                    criterion.getTypeHandler()));
                         }
                     } else if (criterion.isListValue()) {
                         sb.append(criterion.getCondition());
