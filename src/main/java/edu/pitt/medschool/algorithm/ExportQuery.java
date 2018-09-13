@@ -16,6 +16,17 @@ import java.util.stream.Collectors;
  */
 public class ExportQuery {
 
+    private static class Template {
+        static final String defaultDownsampleColName = "ds_label_";
+        static final String defaultAggregationColName = "ag_label_";
+
+        static final String basicAggregationInner = "SELECT %s FROM \"%s\" WHERE %s";
+        static final String basicDownsampleOuter = "SELECT %s FROM %s WHERE %s GROUP BY time(%ds)";
+
+        static final String aggregationCount = "COUNT(%s) AS C";
+        static final String timeCondition = "(time >= %s AND time <= %s)";
+    }
+
     // Downsample configs
     private int numOfDownsampleGroups;
     private DownsampleGroup[] downsampleGroups;
@@ -40,6 +51,7 @@ public class ExportQuery {
     private Instant lastAvailData = Instant.MIN;
     private Instant queryStartTime = null;
     private Instant queryEndTime = null;
+
     /**
      * Initialize this class (Generate nothing if dts is empty)
      *
@@ -126,8 +138,7 @@ public class ExportQuery {
             String aggrQ = aggregationWhenAggregationFirst(whereClause);
             this.queryString = downsampleWhenAggregationFirst(aggrQ);
         } else {
-            // Aggr then Downsample
-            throw new RuntimeException("Not implemented");
+            this.queryString = downsampleWhenDownsampleFirst(whereClause);
         }
     }
 
@@ -138,16 +149,7 @@ public class ExportQuery {
         String[] cols = new String[this.numOfDownsampleGroups];
         for (int i = 0; i < this.numOfDownsampleGroups; i++) {
             DownsampleGroup dg = this.downsampleGroups[i];
-            switch (dg.getAggregation().toLowerCase()) {
-                case "mean":
-                    cols[i] = columnsMeanQuery(this.columnNames.get(i), this.columnNameAliases.get(i));
-                    break;
-                case "sum":
-                    cols[i] = columnsSumQuery(this.columnNames.get(i), this.columnNameAliases.get(i));
-                    break;
-                default:
-                    throw new RuntimeException("Unsupported aggregation type: " + dg.getAggregation());
-            }
+            cols[i] = populateByAggregationType(this.columnNames.get(i), this.columnNameAliases.get(i), dg, "\"");
         }
         return String.format(Template.basicAggregationInner,
                 String.join(", ", cols), this.pid, locator);
@@ -159,7 +161,8 @@ public class ExportQuery {
     private String downsampleWhenAggregationFirst(String aggrQuery) {
         StringBuilder cols = new StringBuilder();
         for (int i = 0; i < this.numOfDownsampleGroups; i++) {
-            cols.append(formDownsampleFunction(this.downsampleGroups[i], this.columnNameAliases.get(i)));
+            String template = formDownsampleFunctionTemplate(this.downsampleGroups[i]);
+            cols.append(String.format(template, this.columnNameAliases.get(i)));
             cols.append(", ");
         }
         // A count column
@@ -173,51 +176,83 @@ public class ExportQuery {
      * Ds first, Ds part
      */
     private String downsampleWhenDownsampleFirst(String locator) {
-        return "";
+        String[] cols = new String[this.numOfDownsampleGroups + 1];
+        for (int i = 0; i < this.numOfDownsampleGroups; i++) {
+            DownsampleGroup dg = this.downsampleGroups[i];
+
+            // Generate downsample InfluxQLs
+            String downsampleTemplate = formDownsampleFunctionTemplate(dg);
+            List<String> downsampleOperators = this.columnNames.get(i).stream()
+                    .map(s -> String.format(downsampleTemplate, s))
+                    .collect(Collectors.toList());
+
+            // Concat downsample to form aggregation
+            String concated = populateByAggregationType(downsampleOperators, null, dg, "");
+            cols[i] = selectQueryWithAlias(concated, this.columnNameAliases.get(i));
+        }
+        cols[cols.length - 1] = String.format(Template.aggregationCount, "Time");
+
+        return String.format(Template.basicDownsampleOuter,
+                String.join(", ", cols), "\"" + pid + "\"", locator, this.downsampleInterval);
     }
 
     /**
-     * Ds first, Aggr part
+     * Create a new String to fulfill the aggregation InfluxQL
+     *
+     * @param aggregateName Name of column to aggregate
+     * @param columnAlias   Alias for aggregation function
+     * @param dg            Downsample group data
+     * @param delimter      Delimter for wrapping every column name
      */
-    private String aggregationWhenDownsampleFirst() {
-
-        return "";
+    private String populateByAggregationType(List<String> aggregateName, String columnAlias, DownsampleGroup dg, String delimter) {
+        switch (dg.getAggregation().toLowerCase()) {
+            case "mean":
+                return columnsMeanQuery(aggregateName, columnAlias, delimter);
+            case "sum":
+                return columnsSumQuery(aggregateName, columnAlias, delimter);
+            default:
+                throw new RuntimeException("Unsupported aggregation type: " + dg.getAggregation());
+        }
     }
 
     /**
-     * MEAN(some_column)
+     * MEAN(%s)
      */
-    private String formDownsampleFunction(DownsampleGroup dg, String colAlias) {
-        String oper;
+    private String formDownsampleFunctionTemplate(DownsampleGroup dg) {
         switch (dg.getDownsample().toLowerCase()) {
             case "mean":
-                oper = String.format("MEAN(%s)", colAlias);
-                break;
+                return "MEAN(%s)";
             case "median":
-                oper = String.format("MEDIAN(%s)", colAlias);
-                break;
+                return "MEDIAN(%s)";
             case "sum":
-                oper = String.format("SUM(%s)", colAlias);
-                break;
+                return "SUM(%s)";
             case "stddev":
-                oper = String.format("STDDEV(%s)", colAlias);
-                break;
+                return "STDDEV(%s)";
             case "min":
-                oper = String.format("MIN(%s)", colAlias);
-                break;
+                return "MIN(%s)";
             case "max":
-                oper = String.format("MAX(%s)", colAlias);
-                break;
+                return "MAX(%s)";
             case "25":
-                oper = String.format("PERCENTILE(%s,25)", colAlias);
-                break;
+                return "PERCENTILE(%s,25)";
             case "75":
-                oper = String.format("PERCENTILE(%s,75)", colAlias);
-                break;
+                return "PERCENTILE(%s,75)";
             default:
                 throw new RuntimeException("Unsupported downsample type: " + dg.getDownsample());
         }
-        return oper;
+    }
+
+    /**
+     * Concat the column name list into an add string: ("f1"+"f2")
+     * " Could be set as `delimters`
+     *
+     * @param alias Alias for this list, null for not using
+     */
+    private String columnsSumQuery(List<String> names, String alias, String delimter) {
+        return selectQueryWithAlias(
+                wrapByBracket(names.stream()
+                        .map(s -> delimter + s + delimter)
+                        .collect(Collectors.joining("+"))
+                ), alias);
     }
 
     /**
@@ -228,38 +263,14 @@ public class ExportQuery {
     }
 
     /**
-     * Concat the column name list into an add string: ("f1"+"f2")
-     * For aggregation
-     *
-     * @param alias Alias for this list, null for not using
-     */
-    private String columnsSumQuery(List<String> names, String alias) {
-        return selectQueryWithAlias(
-                wrapByBracket(names.stream()
-                        .map(s -> "\"" + s + "\"")
-                        .collect(Collectors.joining("+"))
-                ), alias);
-    }
-
-    /**
      * Concat the column name list into an mean string": (("f1"+"f2")/2)
-     * For aggregation
+     * " Could be set as `delimters`
      *
      * @param alias Alias for this list, null for not using
      */
-    private String columnsMeanQuery(List<String> names, String alias) {
-        String cols = String.format("(%s/%d)", columnsSumQuery(names, null), names.size());
+    private String columnsMeanQuery(List<String> names, String alias, String delimter) {
+        String cols = String.format("(%s/%d)", columnsSumQuery(names, null, delimter), names.size());
         return selectQueryWithAlias(cols, alias);
-    }
-
-    private static class Template {
-        static final String defaultDownsampleColName = "ds_label_";
-        static final String defaultAggregationColName = "ag_label_";
-
-        static final String aggregationCount = "COUNT(%s) AS C";
-        static final String basicAggregationInner = "SELECT %s FROM \"%s\" WHERE %s";
-        static final String basicDownsampleOuter = "SELECT %s FROM %s WHERE %s GROUP BY time(%ds)";
-        static final String timeCondition = "(time >= %s AND time <= %s)";
     }
 
     /**
