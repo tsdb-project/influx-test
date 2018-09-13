@@ -293,14 +293,7 @@ public class ImportCsvService {
 
                 // To avoid some problematic files where measurement date is not reliable
                 if (!TimeUtil.dateIsSameDay(measurementDate, testStartTime)) {
-                    // If difference is less than 1hr, then this measurement is on day shift (Still considered as continuous)
-                    if (Math.abs(measurementEpoch - testStartTimeEpoch) / 1000 < 3600) {
-                        logger.warn(String.format("Measurement accross day on line %d!", totalLines + 8));
-                    } else {
-                        String err_text = String.format("Measurement date differs from test start date on line %d!", totalLines + 8);
-                        logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
-                        continue;
-                    }
+                    logger.warn(String.format("Measurement accross day on line %d!", totalLines + 8));
                 }
 
                 // Overlap?
