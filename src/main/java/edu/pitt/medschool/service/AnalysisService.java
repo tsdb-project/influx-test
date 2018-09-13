@@ -8,10 +8,7 @@ import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dao.DownsampleDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupDao;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.PatientDao;
+import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import okhttp3.OkHttpClient;
@@ -141,8 +138,8 @@ public class AnalysisService {
                     int minEveryBinSeconds = exportQuery.getMinBinRow() * 60;
                     double dropoutPercent = 1.0 * exportQuery.getMinBin() / 100;
 
-
-                    ExportQueryBuilder eq = new ExportQueryBuilder(dtsb, groups, columns, exportQuery);
+                    // TODO : AR/noAR passed by exportVO
+                    ExportQueryBuilder eq = new ExportQueryBuilder(dtsb, groups, columns, exportQuery, true);
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, eq.toQuery());
                     logger.debug(String.format("%s query: %s", patientId, eq.toQuery()));
 
@@ -202,7 +199,7 @@ public class AnalysisService {
      * Write indiviual csv and main.csv
      */
     private void writeOutCsvFiles(String projectRootFolder, String[] pHeader, CSVWriter mainCsvWriter, String patientId, List<DataTimeSpanBean> dtsb,
-            ResultTable[] res, int pHeadSize, int mainHeadSize, List<Integer> goodIDs) throws IOException {
+                                  ResultTable[] res, int pHeadSize, int mainHeadSize, List<Integer> goodIDs) throws IOException {
         CSVWriter pWriter = new CSVWriter(new FileWriter(String.format("%s/patients/%s.csv", projectRootFolder, patientId)));
         pWriter.writeNext(pHeader);
         for (int i = 0; i < res.length; i++) {

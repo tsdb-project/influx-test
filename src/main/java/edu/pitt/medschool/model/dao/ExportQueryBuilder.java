@@ -1,6 +1,6 @@
 package edu.pitt.medschool.model.dao;
 
-import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
+import edu.pitt.medschool.controller.analysis.vo.DownsampleVO;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Queries for doing the downsample-aggregation query
- * Refactor from AnalysisService.exportToFile
+ * Queries for doing the downsample-aggregation query Refactor from AnalysisService.exportToFile
  */
 public class ExportQueryBuilder {
 
@@ -56,21 +55,23 @@ public class ExportQueryBuilder {
      * Initialize this class (Generate nothing if dts is empty)
      *
      * @param dts     Data
-     * @param vo      List of DownsampleGroupVO
+     * @param v       List of DownsampleGroup
      * @param columns Columns for every downsample group
      * @param ds      Downsample itself
+     * @param needAr  Export Ar or NoAr
      */
-    public ExportQueryBuilder(List<DataTimeSpanBean> dts, List<DownsampleGroupVO> vo, List<List<String>> columns, Downsample ds) {
+    public ExportQueryBuilder(List<DataTimeSpanBean> dts, List<DownsampleGroup> v, List<List<String>> columns, Downsample ds, boolean needAr) {
         if (dts == null || dts.isEmpty()) {
             return;
         }
+        this.needAr = needAr;
         this.pid = dts.get(0).getPid();
         this.numDataSegments = dts.size();
         this.timeseriesMetadata = dts;
         this.columnNames = columns;
         this.validTimeSpanIds = new ArrayList<>(this.numDataSegments);
 
-        populateDownsampleGroup(vo);
+        populateDownsampleGroup(v);
         populateDownsampleData(ds);
         findFirstLastMatchData();
 
@@ -79,23 +80,20 @@ public class ExportQueryBuilder {
         buildQuery();
     }
 
-    private void populateDownsampleGroup(List<DownsampleGroupVO> v) {
+    private void populateDownsampleGroup(List<DownsampleGroup> v) {
         this.numOfDownsampleGroups = v.size();
         this.columnNameAliases = new ArrayList<>(this.numOfDownsampleGroups);
         String prefix = isDownSampleFirst ? Template.defaultDownsampleColName : Template.defaultAggregationColName;
 
-        this.downsampleGroups = v.stream().map(dvo -> {
-            DownsampleGroup dg = dvo.getGroup();
-            this.columnNameAliases.add(prefix + String.valueOf(dg.getId()));
-            return dg;
-        }).toArray(DownsampleGroup[]::new);
+        this.downsampleGroups = v.stream().peek(dvo ->
+                this.columnNameAliases.add(prefix + String.valueOf(dvo.getId()))
+        ).toArray(DownsampleGroup[]::new);
     }
 
     private void populateDownsampleData(Downsample ds) {
         this.startDelta = ds.getOrigin();
         this.downsampleInterval = ds.getPeriod();
-        this.needAr = ds.getNeedar();
-        this.isDownSampleFirst = ds.getIsDownsampleFirst();
+        this.isDownSampleFirst = ds.getDownsampleFirst();
         this.totalDuration = ds.getDuration();
     }
 
