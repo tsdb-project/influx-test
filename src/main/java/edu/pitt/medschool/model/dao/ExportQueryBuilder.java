@@ -22,8 +22,9 @@ public class ExportQueryBuilder {
         static final String basicAggregationInner = "SELECT %s FROM \"%s\" WHERE %s";
         static final String basicDownsampleOuter = "SELECT %s FROM %s WHERE %s GROUP BY time(%ds)";
 
+        static final String downsampleTimeOutputLimit = "(time <= '%s')";
         static final String aggregationCount = "COUNT(%s) AS C";
-        static final String timeCondition = "(time >= %s AND time <= %s)";
+        static final String timeCondition = "(time >= '%s' AND time <= '%s')";
     }
 
     // Downsample configs
@@ -165,9 +166,10 @@ public class ExportQueryBuilder {
         }
         // A count column
         cols.append(String.format(Template.aggregationCount, this.columnNameAliases.get(0)));
+        String timeUpper = String.format(Template.downsampleTimeOutputLimit, this.queryEndTime.toString());
 
         return String.format(Template.basicDownsampleOuter, cols.toString(), wrapByBracket(aggrQuery),
-                "time <= " + this.queryEndTime.toString(), this.downsampleInterval);
+                timeUpper, this.downsampleInterval);
     }
 
     /**
