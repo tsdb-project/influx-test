@@ -1,6 +1,5 @@
 package edu.pitt.medschool.model.dao;
 
-import edu.pitt.medschool.controller.analysis.vo.DownsampleVO;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
@@ -30,21 +29,23 @@ public class ExportQueryBuilder {
     // Downsample configs
     private int numOfDownsampleGroups;
     private DownsampleGroup[] downsampleGroups;
-    private int totalDuration; // In 's'
     private boolean isDownSampleFirst;
     private boolean needAr;
     private List<List<String>> columnNames;
-    private int startDelta; // In 's'
+    private int exportTotalDuration; // In 's'
+    private int exportStartOffset; // In 's'
     private int downsampleInterval; // In 's'
+
     // Prebuilt final query string and related
     private String globalTimeLimitWhere = null;
+    private ArrayList<String> columnNameAliases;
+    private String queryString = "";
 
     // Metadata for patients
     private String pid;
     private int numDataSegments;
     private List<DataTimeSpanBean> timeseriesMetadata;
-    private ArrayList<String> columnNameAliases;
-    private String queryString = "";
+
     // Meta that this class generated (That others may use)
     private List<Integer> validTimeSpanIds;
     private Instant firstAvailData = Instant.MAX;
@@ -92,10 +93,10 @@ public class ExportQueryBuilder {
     }
 
     private void populateDownsampleData(Downsample ds) {
-        this.startDelta = ds.getOrigin();
+        this.exportStartOffset = ds.getOrigin();
         this.downsampleInterval = ds.getPeriod();
         this.isDownSampleFirst = ds.getDownsampleFirst();
-        this.totalDuration = ds.getDuration();
+        this.exportTotalDuration = ds.getDuration();
     }
 
     // Find first, last data and if ArType matches
@@ -113,11 +114,11 @@ public class ExportQueryBuilder {
                 this.queryEndTime = this.lastAvailData = tmpE;
         }
 
-        if (this.totalDuration > 0) {
-            this.queryEndTime = this.firstAvailData.plusSeconds(this.totalDuration);
+        if (this.exportTotalDuration > 0) {
+            this.queryEndTime = this.firstAvailData.plusSeconds(this.exportTotalDuration);
         }
-        if (this.startDelta > 0) {
-            this.queryStartTime = this.firstAvailData.plusSeconds(this.startDelta);
+        if (this.exportStartOffset > 0) {
+            this.queryStartTime = this.firstAvailData.plusSeconds(this.exportStartOffset);
         }
     }
 

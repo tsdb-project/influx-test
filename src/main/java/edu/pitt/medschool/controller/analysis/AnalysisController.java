@@ -1,34 +1,4 @@
-/**
- *
- */
 package edu.pitt.medschool.controller.analysis;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 
 import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
@@ -41,6 +11,24 @@ import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * @author Isolachine
@@ -94,7 +82,7 @@ public class AnalysisController {
         return analysisGenerateModel(model);
     }
 
-    @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
+    @RequestMapping(value = {"analysis/edit/{id}", "analysis/edit"}, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "builder");
@@ -310,8 +298,8 @@ public class AnalysisController {
     @ResponseBody
     public void debugExprt() {
         try {
+            //analysisService.exportToFile(34, false);
             analysisService.exportToFile(35, false);
-            // analysisService.exportToFile(37, false);
 
         } catch (IOException e) {
             logger.error(Util.stackTraceErrorToString(e));

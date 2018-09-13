@@ -84,7 +84,7 @@ public class AnalysisService {
         if (!new File(outputDir.getAbsolutePath() + "/patients/").mkdirs())
             return;
 
-        // TODO : AR/noAR passed by exportVO
+        // TODO : Patientlist passed by exportVO
         // String pList = exportQuery.getPatientlist();
         String pList = "";
         List<String> patientIDs;
@@ -140,7 +140,12 @@ public class AnalysisService {
 
                     // TODO : AR/noAR passed by exportVO
                     ExportQueryBuilder eq = new ExportQueryBuilder(dtsb, groups, columns, exportQuery, true);
-                    ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, eq.toQuery());
+                    String finalQueryString = eq.toQuery();
+                    if (finalQueryString.isEmpty()) {
+                        logger.error(String.format("PID '%s' no available data", patientId));
+                        return;
+                    }
+                    ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
                     logger.debug(String.format("%s query: %s", patientId, eq.toQuery()));
 
                     if (res.length == 0)
@@ -204,9 +209,10 @@ public class AnalysisService {
         pWriter.writeNext(pHeader);
         for (int i = 0; i < res.length; i++) {
             ResultTable r = res[i];
-            // TODO: Is this good?
             for (int j = 0; j < r.getRowCount(); j++) {
                 List<Object> row = r.getDatalistByRow(j);
+                //TODO: Some data is null to mark for N/A
+                //TODO: Some to mark as Insuff. Data
                 String[] resultDataRow = row.stream().map(Object::toString).toArray(String[]::new);
                 String[] pData = new String[pHeadSize], mainData = new String[mainHeadSize];
                 mainData[0] = patientId;
