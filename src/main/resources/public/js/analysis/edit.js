@@ -1,9 +1,9 @@
 $(document).ready(function() {
-    function notify(from, align, icon, type, animIn, animOut) {
+    function notify(from, align, icon, type, animIn, animOut, msg) {
         $.notify({
             icon: icon,
             title: '',
-            message: 'Please add at least one column to the final aggregation group list.',
+            message: msg,
             url: ''
         }, {
             element: 'body',
@@ -69,9 +69,9 @@ $(document).ready(function() {
             data: 'columns',
             render: function(data) {
                 var cols = JSON.parse(data);
-                return "<th><b>" + cols.type + "</b></br>" 
-                    + "<i>" + cols.electrodes.join(', ') + "</i></br>" 
-                    + cols.columns.join(', ') + "</th>";
+                return "<th><b>" + cols.type + "</b></br>" +
+                    "<i>" + cols.electrodes.join(', ') + "</i></br>" +
+                    cols.columns.join(', ') + "</th>";
             }
         }, {
             "width": "15%",
@@ -83,7 +83,7 @@ $(document).ready(function() {
         }]
     });
 
-    $("#uploadPatientList").change(function () {
+    $("#uploadPatientList").change(function() {
         var fd = new FormData();
         fd.append("plist", document.getElementById('uploadPatientList').files[0]);
         $.ajax({
@@ -93,7 +93,7 @@ $(document).ready(function() {
             contentType: false,
             cache: false,
             processData: false,
-            success: function (result) {
+            success: function(result) {
                 if (result.code === 1) {
                     $("#upload-plist-modal-body").text(result.msg + ": Update patient list successful.");
                     $("#upload-plist-modal-hdr").text("Success");
@@ -103,7 +103,7 @@ $(document).ready(function() {
                 }
                 $("#upload-plist-modal").modal();
             },
-            error: function (result) {
+            error: function(result) {
                 $("#upload-plist-modal-body").text("Failed to update patient list. " + result.msg);
                 $("#upload-plist-modal-hdr").text("Error");
                 $("#upload-plist-modal").modal();
@@ -111,12 +111,12 @@ $(document).ready(function() {
         });
     });
 
-    $("#delPlistModalButton").click(function () {
+    $("#delPlistModalButton").click(function() {
         $.ajax({
             type: "DELETE",
             url: "/api/export/patient_list/" + query.downsample.id,
             cache: false,
-            success: function (result) {
+            success: function(result) {
                 if (result.code === 1) {
                     $("#upload-plist-modal-body").text("Delete patient list successful");
                     $("#upload-plist-modal-hdr").text("Success");
@@ -126,7 +126,7 @@ $(document).ready(function() {
                 }
                 $("#upload-plist-modal").modal();
             },
-            error: function (result) {
+            error: function(result) {
                 $("#upload-plist-modal-body").text("Failed to delete patient list. " + result.msg);
                 $("#upload-plist-modal-hdr").text("Error");
                 $("#upload-plist-modal").modal();
@@ -198,7 +198,7 @@ $(document).ready(function() {
                 console.log(data);
                 var $electrode = $('#electrode');
                 var $predefined = $('#predefined');
-                
+
                 // $electrode.attr("size", data.length + 1);
                 // $electrode.removeAttr('multiple');
                 $electrode.empty();
@@ -207,7 +207,7 @@ $(document).ready(function() {
                 // $('#column').attr("size", 1);
                 $electrode.append('<option value="" disabled>Single Electrodes</option>');
                 $predefined.append('<option value="" disabled>Predefined Sets</option>');
-                
+
                 for (var i = 0; i < data.electrodes.length; i++) {
                     var html = '<option value="' + data.electrodes[i].sid + '">' + data.electrodes[i].electrode + '</option>';
                     $electrode.append(html);
@@ -247,7 +247,7 @@ $(document).ready(function() {
             'error': function() {}
         });
     });
-    
+
     $("#predefined").change(function() {
         console.log($("#predefined").val());
         var form = {
@@ -273,7 +273,7 @@ $(document).ready(function() {
             'error': function() {}
         });
     });
-    
+
     $("#method").select2({
         width: "100%",
         dropdownCssClass: "custom-dropdown"
@@ -287,25 +287,29 @@ $(document).ready(function() {
     var map = {};
     var eList = [];
     var cList = [];
-    
+
     $("#addButton").click(function() {
+        if ($("#column").val().length == 0) {
+            notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Please select at least one option from each\n category to form a valid column group.');
+            return;
+        }
         map = {};
         eList = [];
         cList = [];
         map.type = $("#measure").val();
-        
+
         var form = $("#column").val();
         var $columnsInGroup = $('#columnsInGroup');
         var set = new Set();
         $("#columnsInGroup option").each(function() {
             set.add($(this).val());
         });
-        
-        $("#column :selected").each(function (i,sel) {
+
+        $("#column :selected").each(function(i, sel) {
             cList.push($(sel).text());
         });
         map.columns = cList;
-        
+
         if ($("#predefined").val() != null) {
             eList.push($("#predefined").val());
             map.electrodes = eList;
@@ -320,7 +324,7 @@ $(document).ready(function() {
                 }
             });
         } else {
-            $("#electrode :selected").each(function (i,sel) {
+            $("#electrode :selected").each(function(i, sel) {
                 eList.push($(sel).text());
             });
             map.electrodes = eList;
@@ -332,7 +336,7 @@ $(document).ready(function() {
                 });
             });
         }
-        
+
         $columnsInGroup.empty();
         $columnsInGroup.append('<option value="' + map.type + '">' + map.type + '</option>');
         map.electrodes.forEach(function(e) {
@@ -341,7 +345,7 @@ $(document).ready(function() {
         map.columns.forEach(function(e) {
             $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
         });
-        
+
         console.log("map = ");
         console.log(map);
     });
@@ -434,7 +438,7 @@ $(document).ready(function() {
                     var $columnsInGroup = $('#columnsInGroup');
                     $columnsInGroup.empty();
                     $columnsInGroup.append('<option value="' + columns.type + '">' + columns.type + '</option>');
-                    
+
                     columns.electrodes.forEach(function(e) {
                         $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
                     });
@@ -458,7 +462,7 @@ $(document).ready(function() {
     $("#addGroupButton").click(function() {
         if ($('#aggregation-form')[0].checkValidity()) {
             if (map.type == null) {
-                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut");
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Please add at least one column to the final aggregation group list.');
                 return false;
             }
             console.log(map);

@@ -56,10 +56,8 @@
                                     <div class="col-sm-8 col-md-8">
                                         <label>Alias</label>
                                         <div class="input-group mb-3">
-                                            <input type="hidden" id="id" th:value="${query.downsample.id}"/>
-                                            <input type="text" class="form-control" id="alias"
-                                                   th:value="${query.downsample.alias}"
-                                                   placeholder="Input the name of the query" required>
+                                            <input type="hidden" id="id" th:value="${query.downsample.id}" />
+                                            <input type="text" class="form-control" id="alias" th:value="${query.downsample.alias}" placeholder="Input the name of the query" required>
                                             <i class="form-group__bar"></i>
                                         </div>
                                     </div>
@@ -69,8 +67,7 @@
                                             <div class="file-field">
                                                 <div class="btn btn-secondary btn-sm float-left">
                                                     <span>Upload file</span>
-                                                    <input type="file" name="plist" id="uploadPatientList"
-                                                           accept=".txt">
+                                                    <input type="file" name="plist" id="uploadPatientList" accept=".txt">
                                                 </div>
                                             </div>
                                         </form>
@@ -80,25 +77,14 @@
                                     <div class="col-sm-4 col-md-4">
                                         <label>Downsample Interval</label>
                                         <div class="input-group mb-3">
-                                            <input type="number" min="0" step="1" class="form-control" id="period"
-                                                   th:value="${query.period}"
-                                                   placeholder="Leave empty for no downsampling">
+                                            <input type="number" min="0" step="1" class="form-control" id="period" th:value="${query.period}" placeholder="Leave empty for no downsampling">
                                             <div class="input-group-append">
-                                                <select class="select2" data-placeholder="Time Unit" id="period_unit"
-                                                        data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled" th:selected="${query.periodUnit} == ''"
-                                                            value="">Select Time Unit
-                                                    </option>
-                                                    <option th:selected="${query.periodUnit} == 1" value="1">Seconds
-                                                    </option>
-                                                    <option th:selected="${query.periodUnit} == 60" value="60">Minutes
-                                                    </option>
-                                                    <option th:selected="${query.periodUnit} == 3600" value="3600">
-                                                        Hours
-                                                    </option>
-                                                    <option th:selected="${query.periodUnit} == 86400" value="86400">
-                                                        Days
-                                                    </option>
+                                                <select class="select2" data-placeholder="Time Unit" id="period_unit" data-minimum-results-for-search="Infinity">
+                                                    <option disabled="disabled" th:selected="${query.periodUnit} == ''" value="">Select Time Unit</option>
+                                                    <option th:selected="${query.periodUnit} == 1" value="1">Seconds</option>
+                                                    <option th:selected="${query.periodUnit} == 60" value="60">Minutes</option>
+                                                    <option th:selected="${query.periodUnit} == 3600" value="3600">Hours</option>
+                                                    <option th:selected="${query.periodUnit} == 86400" value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -106,25 +92,14 @@
                                     <div class="col-sm-4 col-md-4">
                                         <label>Starting Time</label>
                                         <div class="input-group mb-3">
-                                            <input type="number" min="0" step="1" class="form-control" id="origin"
-                                                   th:value="${query.origin}"
-                                                   placeholder="Leave empty to start at beginning">
+                                            <input type="number" min="0" step="1" class="form-control" id="origin" th:value="${query.origin}" placeholder="Leave empty to start at beginning">
                                             <div class="input-group-append">
-                                                <select class="select2" data-placeholder="Time Unit" id="origin_unit"
-                                                        data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled" th:selected="${query.originUnit} == ''"
-                                                            value="">Select Time Unit
-                                                    </option>
-                                                    <option th:selected="${query.originUnit} == 1" value="1">Seconds
-                                                    </option>
-                                                    <option th:selected="${query.originUnit} == 60" value="60">Minutes
-                                                    </option>
-                                                    <option th:selected="${query.originUnit} == 3600" value="3600">
-                                                        Hours
-                                                    </option>
-                                                    <option th:selected="${query.originUnit} == 86400" value="86400">
-                                                        Days
-                                                    </option>
+                                                <select class="select2" data-placeholder="Time Unit" id="origin_unit" data-minimum-results-for-search="Infinity">
+                                                    <option disabled="disabled" th:selected="${query.originUnit} == ''" value="">Select Time Unit</option>
+                                                    <option th:selected="${query.originUnit} == 1" value="1">Seconds</option>
+                                                    <option th:selected="${query.originUnit} == 60" value="60">Minutes</option>
+                                                    <option th:selected="${query.originUnit} == 3600" value="3600">Hours</option>
+                                                    <option th:selected="${query.originUnit} == 86400" value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -132,27 +107,15 @@
                                     <div class="col-sm-4 col-md-4">
                                         <label>Duration</label>
                                         <div class="input-group mb-3">
-                                            <input type="number" min="0" step="1" class="form-control" id="duration"
-                                                   th:value="${query.duration}"
-                                                   placeholder="Leave empty for the whole measure process">
+                                            <input type="number" min="0" step="1" class="form-control" id="duration" th:value="${query.duration}"
+                                                placeholder="Leave empty for the whole measure process">
                                             <div class="input-group-append">
-                                                <select class="select2" data-placeholder="Time Unit" id="duration_unit"
-                                                        data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled"
-                                                            th:selected="${query.durationUnit} == ''" value="">Select
-                                                        Time Unit
-                                                    </option>
-                                                    <option th:selected="${query.durationUnit} == 1" value="1">Seconds
-                                                    </option>
-                                                    <option th:selected="${query.durationUnit} == 60" value="60">
-                                                        Minutes
-                                                    </option>
-                                                    <option th:selected="${query.durationUnit} == 3600" value="3600">
-                                                        Hours
-                                                    </option>
-                                                    <option th:selected="${query.durationUnit} == 86400" value="86400">
-                                                        Days
-                                                    </option>
+                                                <select class="select2" data-placeholder="Time Unit" id="duration_unit" data-minimum-results-for-search="Infinity">
+                                                    <option disabled="disabled" th:selected="${query.durationUnit} == ''" value="">Select Time Unit</option>
+                                                    <option th:selected="${query.durationUnit} == 1" value="1">Seconds</option>
+                                                    <option th:selected="${query.durationUnit} == 60" value="60">Minutes</option>
+                                                    <option th:selected="${query.durationUnit} == 3600" value="3600">Hours</option>
+                                                    <option th:selected="${query.durationUnit} == 86400" value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -162,17 +125,15 @@
                                     <div class="col-sm-2 col-md-2">
                                         <label>Minimal time threshold for every bin (Minute)</label>
                                         <div class="input-group mb-2">
-                                            <input type="number" min="0" step="1" class="form-control"
-                                                   id="every_bin" th:value="${query.minEveryBinThershold}"
-                                                   placeholder="Unit is minute, integer only">
+                                            <input type="number" min="0" step="1" class="form-control" id="every_bin" th:value="${query.minEveryBinThershold}"
+                                                placeholder="Unit is minute, integer only">
                                         </div>
                                     </div>
                                     <div class="col-sm-2 col-md-2">
                                         <label>Minimal threshold for total number of bin (%)</label>
                                         <div class="input-group mb-2">
-                                            <input type="number" min="0" max="100" step="1" class="form-control"
-                                                   id="total_bin" th:value="${query.minTotalBinThreshold}"
-                                                   placeholder="Percent (0-100), integer only">
+                                            <input type="number" min="0" max="100" step="1" class="form-control" id="total_bin" th:value="${query.minTotalBinThreshold}"
+                                                placeholder="Percent (0-100), integer only">
                                         </div>
                                     </div>
                                     <div class="col-sm-4 col-md-4">
