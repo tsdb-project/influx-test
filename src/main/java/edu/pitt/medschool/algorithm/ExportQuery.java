@@ -1,13 +1,14 @@
 package edu.pitt.medschool.algorithm;
 
+import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
+import edu.pitt.medschool.model.DataTimeSpanBean;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
-import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
 
 /**
  * Queries for doing the downsample-aggregation query
@@ -15,304 +16,215 @@ import edu.pitt.medschool.model.dto.DownsampleGroup;
  */
 public class ExportQuery {
 
-    private static class Template {
-        static final String defaultDownsampleColName = "ds_label_";
-        static final String defaultAggregationColName = "ag_label_";
-
-        static final String basicSelectInner = "SELECT %s FROM \"%s\" WHERE %s";
-        static final String basicSelectOuter = "SELECT %s FROM %s";
-        static final String timeAddDelta = "('%s' + %ds)";
-        static final String timeCondition = "(time >= %s AND time <= %s)";
-        static final String locatorCondition = "(fileUUID='%s' AND arType='%s')";
-        static final String downsampleGroupBy = "GROUP BY time(%ds) fill(none)";
-    }
-
     // Downsample configs
-    private DownsampleGroup[] dsGroup;
+    private int numOfDownsampleGroups;
+    private DownsampleGroup[] downsampleGroups;
+    private int totalDuration; // In 's'
     private boolean isDownSampleFirst;
     private boolean needAr;
     private List<List<String>> columnNames;
     private int startDelta; // In 's'
-    private String globalEndTime; // In 's'
     private int downsampleInterval; // In 's'
+    // Prebuilt final query string and related
+    private String globalTimeLimitWhere = null;
 
     // Metadata for patients
     private String pid;
     private int numDataSegments;
     private List<DataTimeSpanBean> timeseriesMetadata;
-    private Instant firstAvailData;
-
-    // Final query string
-    private String[] queriesString;
-    private String queryString;
-
-    // Meta for downsamples
-    private List<Integer> badTimeDataId;
-    private List<Integer> goodTimeDataId;
-
+    private ArrayList<String> columnNameAliases;
+    private String queryString = "";
+    // Meta that this class generated (That others may use)
+    private List<Integer> validTimeSpanIds;
+    private Instant firstAvailData = Instant.MAX;
+    private Instant lastAvailData = Instant.MIN;
+    private Instant queryStartTime = null;
+    private Instant queryEndTime = null;
     /**
-     * Initialize this class (Expection if dts null or no length)
+     * Initialize this class (Generate nothing if dts is empty)
      *
-     * @param d               Data
-     * @param v               List of DownsampleGroupVO
-     * @param columns         Columns (e.g. I10_4,I11_4)
-     * @param downSampleFirst Is Downsample first or aggregation first
-     * @param needAr          Export on Ar or Noar
-     * @param dsPeriod        Downsample period
-     * @param startDelta      Start time (in s)
-     * @param duration        Duration (in s)
+     * @param dts     Data
+     * @param vo      List of DownsampleGroupVO
+     * @param columns Columns for every downsample group
+     * @param ds      Downsample itself
      */
-    public ExportQuery(List<DataTimeSpanBean> d,
-                       List<DownsampleGroupVO> v, List<List<String>> columns,
-                       boolean downSampleFirst, boolean needAr,
-                       int dsPeriod, int startDelta, int duration) throws IllegalArgumentException {
-        initData(d, v);
-        this.isDownSampleFirst = downSampleFirst;
+    public ExportQuery(List<DataTimeSpanBean> dts, List<DownsampleGroupVO> vo, List<List<String>> columns, Downsample ds) {
+        if (dts == null || dts.isEmpty()) {
+            return;
+        }
+        this.pid = dts.get(0).getPid();
+        this.numDataSegments = dts.size();
+        this.timeseriesMetadata = dts;
         this.columnNames = columns;
-        this.startDelta = startDelta;
-        this.downsampleInterval = dsPeriod;
-        this.needAr = needAr;
-        this.badTimeDataId = new ArrayList<>(this.numDataSegments);
-        this.goodTimeDataId = new ArrayList<>(this.numDataSegments);
-        findFirstData(duration);
+        this.validTimeSpanIds = new ArrayList<>(this.numDataSegments);
 
+        populateDownsampleGroup(vo);
+        populateDownsampleData(ds);
+        findFirstLastMatchData();
+
+        this.globalTimeLimitWhere = String.format(Template.timeCondition,
+                this.queryStartTime.toString(), this.queryEndTime.toString());
         buildQuery();
     }
 
-    /**
-     * Get the final assembled queries
-     * Each unique file uuid would have one query
-     */
-    public String[] toQueries() {
-        if (this.queriesString == null) {
-            throw new RuntimeException("Failed to build query string");
-        } else {
-            return this.queriesString;
-        }
+    private void populateDownsampleGroup(List<DownsampleGroupVO> v) {
+        this.numOfDownsampleGroups = v.size();
+        this.columnNameAliases = new ArrayList<>(this.numOfDownsampleGroups);
+        String prefix = isDownSampleFirst ? Template.defaultDownsampleColName : Template.defaultAggregationColName;
+
+        this.downsampleGroups = v.stream().map(dvo -> {
+            DownsampleGroup dg = dvo.getGroup();
+            this.columnNameAliases.add(prefix + String.valueOf(dg.getId()));
+            return dg;
+        }).toArray(DownsampleGroup[]::new);
     }
 
-    /**
-     * Get the final assembled queries in one query
-     */
-    public String toQuery() {
-        if (this.queriesString == null) {
-            throw new RuntimeException("Failed to build query string");
-        } else {
-            if (this.queryString == null) {
-                StringBuilder sb = new StringBuilder();
-                for (String q : this.queriesString) {
-                    if (q == null || q.isEmpty()) continue;
-                    sb.append(q);
-                    sb.append(';');
-                }
-                this.queryString = sb.toString();
-            }
-            return this.queryString;
-        }
+    private void populateDownsampleData(Downsample ds) {
+        this.startDelta = ds.getOrigin();
+        this.downsampleInterval = ds.getPeriod();
+        this.needAr = ds.getNeedar();
+        this.isDownSampleFirst = ds.getIsDownsampleFirst();
+        this.totalDuration = ds.getDuration();
     }
 
-    /**
-     * Get list for bad IDs for `DataTimeSpanBean`
-     */
-    public List<Integer> getBadDataTimeId() {
-        return this.badTimeDataId;
-    }
-
-    public List<Integer> getGoodDataTimeId() {
-        return this.goodTimeDataId;
-    }
-
-    private void buildQuery() {
-        this.queriesString = new String[this.numDataSegments];
-        // A query for each unique file uuid
+    // Find first, last data and if ArType matches
+    private void findFirstLastMatchData() {
         for (int i = 0; i < this.numDataSegments; i++) {
             DataTimeSpanBean d = this.timeseriesMetadata.get(i);
             if (!isDataArTypeGood(d)) {
-                this.badTimeDataId.add(i);
                 continue;
             }
-            this.goodTimeDataId.add(i);
-            String whereClause = String.format(Template.locatorCondition,
-                    d.getFileUuid(), needAr ? "ar" : "noar");
-            // Start operations
-            if (!this.isDownSampleFirst) {
-                // Downsample then Aggr
-                this.queriesString[i] = aggrFirst(whereClause);
-            } else {
-                // Aggr then Downsample
-                throw new RuntimeException("Not implemented");
-                // dsFirst(whereClause);
-            }
+            this.validTimeSpanIds.add(i);
+            Instant tmpS = d.getStart(), tmpE = d.getEnd();
+            if (tmpS.compareTo(this.firstAvailData) < 0)
+                this.queryStartTime = this.firstAvailData = tmpS;
+            if (tmpE.compareTo(this.lastAvailData) > 0)
+                this.queryEndTime = this.lastAvailData = tmpE;
+        }
+
+        if (this.totalDuration > 0) {
+            this.queryEndTime = this.firstAvailData.plusSeconds(this.totalDuration);
+        }
+        if (this.startDelta > 0) {
+            this.queryStartTime = this.firstAvailData.plusSeconds(this.startDelta);
         }
     }
 
-    private String aggrFirst(String locator) {
-        String aggrQ = wrapByBracket(aggrDs_Aggr(locator));
-        return aggrDs_Ds(aggrQ);
+    public String toQuery() {
+        return this.queryString;
+    }
+
+    public List<Integer> getGoodDataTimeId() {
+        return this.validTimeSpanIds;
+    }
+
+    // Lookup all in one query, DO NOT lookup by files
+    private void buildQuery() {
+        String whereClause = this.artypeWhereClause(this.needAr) + " AND " + this.globalTimeLimitWhere;
+
+        if (!this.isDownSampleFirst) {
+            String aggrQ = aggregationWhenAggregationFirst(whereClause);
+            this.queryString = downsampleWhenAggregationFirst(aggrQ);
+        } else {
+            // Aggr then Downsample
+            throw new RuntimeException("Not implemented");
+        }
     }
 
     /**
-     * Aggr first, Aggr part
+     * Aggr part for Aggr first
      */
-    private String aggrDs_Aggr(String locator) {
-        String[] cols = new String[this.dsGroup.length];
-        for (int i = 0; i < this.dsGroup.length; i++) {
-            DownsampleGroup dg = this.dsGroup[i];
-            String colAlias = Template.defaultAggregationColName + String.valueOf(dg.getId());
+    private String aggregationWhenAggregationFirst(String locator) {
+        String[] cols = new String[this.numOfDownsampleGroups];
+        for (int i = 0; i < this.numOfDownsampleGroups; i++) {
+            DownsampleGroup dg = this.downsampleGroups[i];
             switch (dg.getAggregation().toLowerCase()) {
                 case "mean":
-                    cols[i] = aggregationColumnsMeanQuery(i, colAlias);
+                    cols[i] = columnsMeanQuery(this.columnNames.get(i), this.columnNameAliases.get(i));
                     break;
                 case "sum":
-                    cols[i] = aggregationColumnsSumQuery(i, colAlias);
+                    cols[i] = columnsSumQuery(this.columnNames.get(i), this.columnNameAliases.get(i));
                     break;
                 default:
-                    throw new RuntimeException("Unsupported aggr type: " + dg.getAggregation());
+                    throw new RuntimeException("Unsupported aggregation type: " + dg.getAggregation());
             }
         }
-
-        String basic = String.format(Template.basicSelectInner,
+        return String.format(Template.basicAggregationInner,
                 String.join(", ", cols), this.pid, locator);
-        String startTimeFormat = String.format(Template.timeAddDelta,
-                this.firstAvailData.toString(), this.startDelta);
-
-        if (this.globalEndTime == null) {
-            // Time >= startDelta
-            return basic + " AND time >=" + startTimeFormat;
-        } else {
-            // Time >= startDelta AND Time <= globalEndTime
-            String endTime = String.format(Template.timeCondition,
-                    startTimeFormat, wrapByBracket(this.globalEndTime));
-            return basic + " AND " + endTime;
-        }
     }
 
     /**
      * Aggr first, Ds part
      */
-    private String aggrDs_Ds(String aggrQuery) {
-        String[] cols = new String[this.dsGroup.length + 1];
-        for (int i = 0; i < this.dsGroup.length; i++) {
-            DownsampleGroup dg = this.dsGroup[i];
-            String finalColAlias = "label_" + String.valueOf(i);
-            String oper = formAggrFunction(dg,
-                    Template.defaultAggregationColName + String.valueOf(dg.getId()));
-            cols[i] = selectQueryWithAlias(oper, finalColAlias);
+    private String downsampleWhenAggregationFirst(String aggrQuery) {
+        StringBuilder cols = new StringBuilder();
+        for (int i = 0; i < this.numOfDownsampleGroups; i++) {
+            cols.append(formDownsampleFunction(this.downsampleGroups[i], this.columnNameAliases.get(i)));
+            cols.append(", ");
         }
         // A count column
-        cols[this.dsGroup.length] = String.format("COUNT(%s) AS COUNT",
-                Template.defaultAggregationColName + this.dsGroup[0].getId());
+        cols.append(String.format(Template.aggregationCount, this.columnNameAliases.get(0)));
 
-        String basic = String.format(Template.basicSelectOuter,
-                String.join(", ", cols),
-                wrapByBracket(aggrQuery));
-        return basic + " " +
-                String.format(Template.downsampleGroupBy, this.downsampleInterval);
-    }
-
-    private void dsFirst(String locator) {
-
+        return String.format(Template.basicDownsampleOuter, cols.toString(), wrapByBracket(aggrQuery),
+                "time <= " + this.queryEndTime.toString(), this.downsampleInterval);
     }
 
     /**
      * Ds first, Ds part
      */
-    private String dsAggr_Ds(String locator) {
-        String[] cols = new String[this.dsGroup.length];
-        for (int i = 0; i < cols.length; i++) {
-            DownsampleGroup dg = this.dsGroup[i];
-        }
+    private String downsampleWhenDownsampleFirst(String locator) {
         return "";
     }
 
     /**
      * Ds first, Aggr part
      */
-    private String dsAggr_Aggr() {
+    private String aggregationWhenDownsampleFirst() {
 
         return "";
     }
 
-
     /**
      * MEAN(some_column)
      */
-    private String formAggrFunction(DownsampleGroup dg, String originalColAlias) {
+    private String formDownsampleFunction(DownsampleGroup dg, String colAlias) {
         String oper;
         switch (dg.getDownsample().toLowerCase()) {
             case "mean":
-                oper = String.format("MEAN(%s)", originalColAlias);
+                oper = String.format("MEAN(%s)", colAlias);
                 break;
             case "median":
-                oper = String.format("MEDIAN(%s)", originalColAlias);
+                oper = String.format("MEDIAN(%s)", colAlias);
                 break;
             case "sum":
-                oper = String.format("SUM(%s)", originalColAlias);
+                oper = String.format("SUM(%s)", colAlias);
                 break;
             case "stddev":
-                oper = String.format("STDDEV(%s)", originalColAlias);
+                oper = String.format("STDDEV(%s)", colAlias);
                 break;
             case "min":
-                oper = String.format("MIN(%s)", originalColAlias);
+                oper = String.format("MIN(%s)", colAlias);
                 break;
             case "max":
-                oper = String.format("MAX(%s)", originalColAlias);
+                oper = String.format("MAX(%s)", colAlias);
                 break;
             case "25":
-                oper = String.format("PERCENTILE(%s,25)", originalColAlias);
+                oper = String.format("PERCENTILE(%s,25)", colAlias);
                 break;
             case "75":
-                oper = String.format("PERCENTILE(%s,75)", originalColAlias);
+                oper = String.format("PERCENTILE(%s,75)", colAlias);
                 break;
             default:
-                throw new RuntimeException("Unsupported ds type: " + dg.getDownsample());
+                throw new RuntimeException("Unsupported downsample type: " + dg.getDownsample());
         }
         return oper;
     }
 
     /**
-     * Extract from `DataTimeSpanBean` to set some basic info for this class
+     * (arType='ar')
      */
-    private void initData(List<DataTimeSpanBean> dts, List<DownsampleGroupVO> v) {
-        if (dts == null || dts.isEmpty()) throw new IllegalArgumentException("DataTimeSpanBean empty");
-        this.pid = dts.get(0).getPid();
-        this.numDataSegments = dts.size();
-        this.timeseriesMetadata = dts;
-        this.dsGroup = v.stream().map(DownsampleGroupVO::getGroup).toArray(DownsampleGroup[]::new);
-    }
-
-    // Find the first data, all internals are available
-    private void findFirstData(int duration) {
-        // A 'large' data acts as maxi
-        this.firstAvailData = Instant.now();
-        for (DataTimeSpanBean d : this.timeseriesMetadata) {
-            if (!isDataArTypeGood(d)) continue;
-            Instant tmpS = d.getStart();
-            if (tmpS.compareTo(this.firstAvailData) < 0)
-                this.firstAvailData = tmpS;
-        }
-
-        if (duration > 1) {
-            this.globalEndTime = String.format("'%s' + %ds",
-                    this.firstAvailData.toString(), duration);
-        } else {
-            this.globalEndTime = null;
-        }
-    }
-
-    /**
-     * GROUP BY time(10s) fill(none)
-     */
-    private String downsampleGroupBy(int sec) {
-        return String.format(Template.downsampleGroupBy, sec);
-    }
-
-    /**
-     * (arType='ar' and fileUUID='xxxx')
-     */
-    private String whereFileUuidAndarType(String uuid, boolean isAr) {
-        return String.format(Template.locatorCondition,
-                uuid, isAr ? "ar" : "noar");
+    private String artypeWhereClause(boolean isAr) {
+        return String.format("(arType='%s')", isAr ? "ar" : "noar");
     }
 
     /**
@@ -321,11 +233,11 @@ public class ExportQuery {
      *
      * @param alias Alias for this list, null for not using
      */
-    private String aggregationColumnsSumQuery(int i, String alias) {
+    private String columnsSumQuery(List<String> names, String alias) {
         return selectQueryWithAlias(
-                wrapByBracket(this.columnNames.get(i).stream()
+                wrapByBracket(names.stream()
                         .map(s -> "\"" + s + "\"")
-                        .collect(Collectors.joining(" + "))
+                        .collect(Collectors.joining("+"))
                 ), alias);
     }
 
@@ -335,12 +247,19 @@ public class ExportQuery {
      *
      * @param alias Alias for this list, null for not using
      */
-    private String aggregationColumnsMeanQuery(int i, String alias) {
-        return selectQueryWithAlias(
-                String.format("(%s/%d)",
-                        aggregationColumnsSumQuery(i, null),
-                        this.columnNames.get(i).size()),
-                alias);
+    private String columnsMeanQuery(List<String> names, String alias) {
+        String cols = String.format("(%s/%d)", columnsSumQuery(names, null), names.size());
+        return selectQueryWithAlias(cols, alias);
+    }
+
+    private static class Template {
+        static final String defaultDownsampleColName = "ds_label_";
+        static final String defaultAggregationColName = "ag_label_";
+
+        static final String aggregationCount = "COUNT(%s) AS C";
+        static final String basicAggregationInner = "SELECT %s FROM \"%s\" WHERE %s";
+        static final String basicDownsampleOuter = "SELECT %s FROM %s WHERE %s GROUP BY time(%ds)";
+        static final String timeCondition = "(time >= %s AND time <= %s)";
     }
 
     /**

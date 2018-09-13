@@ -1,35 +1,7 @@
 package edu.pitt.medschool.service;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
-
 import edu.pitt.medschool.algorithm.AnalysisUtil;
 import edu.pitt.medschool.algorithm.ExportQuery;
 import edu.pitt.medschool.config.InfluxappConfig;
@@ -39,15 +11,27 @@ import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dao.DownsampleDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupAggrDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupColumnDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupDao;
-import edu.pitt.medschool.model.dao.DownsampleMetaDao;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.PatientDao;
+import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.Downsample;
 import okhttp3.OkHttpClient;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Export functions
@@ -158,11 +142,7 @@ public class AnalysisService {
                     int minEveryBinSeconds = exportQuery.getMinEveryBinThershold() * 60;
                     double dropoutPercent = 1.0 * exportQuery.getMinTotalBinThreshold() / 100;
 
-                    ExportQuery eq = new ExportQuery(
-                            dtsb, groups, columns,
-                            exportQuery.getIsDownsampleFirst(), exportQuery.getNeedar(), exportQuery.getPeriod(),
-                            exportQuery.getOrigin(), exportQuery.getDuration()
-                    );
+                    ExportQuery eq = new ExportQuery(dtsb, groups, columns, exportQuery);
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, eq.toQuery());
                     logger.debug(String.format("%s query: %s", patientId, eq.toQuery()));
 
