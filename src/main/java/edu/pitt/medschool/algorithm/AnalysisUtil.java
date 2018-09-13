@@ -30,8 +30,11 @@ public class AnalysisUtil {
     public static List<DataTimeSpanBean> getPatientAllDataSpan(InfluxDB i, Logger logger, String pid) {
         pid = pid.toUpperCase().trim();
         String uuidSearchQuery = "show tag values from \"" + pid + "\" with key = fileUUID";
-        List<Object> uuids = justQueryData(i, true, uuidSearchQuery)[0].getDatalistByColumnName("value");
+        ResultTable[] patientUuids = justQueryData(i, true, uuidSearchQuery);
+        // No data for this patient
+        if (patientUuids.length == 0) return new ArrayList<>(0);
 
+        List<Object> uuids = patientUuids[0].getDatalistByColumnName("value");
         List<DataTimeSpanBean> res = new ArrayList<>(uuids.size());
         for (Object uuid : uuids) {
             // Query 4 at the same time to save some requests
