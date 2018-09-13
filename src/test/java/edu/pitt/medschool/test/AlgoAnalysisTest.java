@@ -1,8 +1,8 @@
 package edu.pitt.medschool.test;
 
-import edu.pitt.medschool.algorithm.AnalysisUtil;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.model.DataTimeSpanBean;
+import edu.pitt.medschool.model.dao.AnalysisUtil;
 import org.influxdb.InfluxDB;
 
 import java.util.List;

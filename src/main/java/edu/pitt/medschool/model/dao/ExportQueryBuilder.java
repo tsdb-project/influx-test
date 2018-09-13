@@ -1,4 +1,4 @@
-package edu.pitt.medschool.algorithm;
+package edu.pitt.medschool.model.dao;
 
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.model.DataTimeSpanBean;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * Queries for doing the downsample-aggregation query
  * Refactor from AnalysisService.exportToFile
  */
-public class ExportQuery {
+public class ExportQueryBuilder {
 
     private static class Template {
         static final String defaultDownsampleColName = "ds_label_";
@@ -60,7 +60,7 @@ public class ExportQuery {
      * @param columns Columns for every downsample group
      * @param ds      Downsample itself
      */
-    public ExportQuery(List<DataTimeSpanBean> dts, List<DownsampleGroupVO> vo, List<List<String>> columns, Downsample ds) {
+    public ExportQueryBuilder(List<DataTimeSpanBean> dts, List<DownsampleGroupVO> vo, List<List<String>> columns, Downsample ds) {
         if (dts == null || dts.isEmpty()) {
             return;
         }

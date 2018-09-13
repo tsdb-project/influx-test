@@ -1,4 +1,4 @@
-package edu.pitt.medschool.algorithm;
+package edu.pitt.medschool.model.dao;
 
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.model.DataTimeSpanBean;

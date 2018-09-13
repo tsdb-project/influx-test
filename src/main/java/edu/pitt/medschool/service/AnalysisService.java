@@ -2,8 +2,6 @@ package edu.pitt.medschool.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
-import edu.pitt.medschool.algorithm.AnalysisUtil;
-import edu.pitt.medschool.algorithm.ExportQuery;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
@@ -142,7 +140,7 @@ public class AnalysisService {
                     int minEveryBinSeconds = exportQuery.getMinEveryBinThershold() * 60;
                     double dropoutPercent = 1.0 * exportQuery.getMinTotalBinThreshold() / 100;
 
-                    ExportQuery eq = new ExportQuery(dtsb, groups, columns, exportQuery);
+                    ExportQueryBuilder eq = new ExportQueryBuilder(dtsb, groups, columns, exportQuery);
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, eq.toQuery());
                     logger.debug(String.format("%s query: %s", patientId, eq.toQuery()));
 
