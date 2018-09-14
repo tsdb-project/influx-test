@@ -333,7 +333,7 @@ public class ImportCsvService {
                     long start = System.currentTimeMillis();
                     idb.write(records);
                     long end = System.currentTimeMillis();
-                    logger.info(String.format("Write to InfluxDB used %fs.", (end - start) / 1000.0));
+                    logger.info("Write to InfluxDB used {}s.", (end - start) / 1000.0);
 
                     // Reset batch point
                     records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type).tag("fileName", filename.substring(0, filename.length() - 4)).build();

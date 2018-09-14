@@ -20,30 +20,33 @@ public class ExportQueryBuilder {
         static final String defaultAggregationColName = "ag_label_";
 
         static final String basicAggregationInner = "SELECT %s FROM \"%s\" WHERE %s";
-        static final String basicDownsampleOuter = "SELECT %s FROM %s WHERE %s GROUP BY time(%ds)";
+        static final String basicDownsampleOuter = "SELECT %s FROM %s WHERE %s GROUP BY time(%ds) ORDER BY time ASC";
 
+        static final String downsampleTimeOutputLimit = "(time <= '%s')";
         static final String aggregationCount = "COUNT(%s) AS C";
-        static final String timeCondition = "(time >= %s AND time <= %s)";
+        static final String timeCondition = "(time >= '%s' AND time <= '%s')";
     }
 
     // Downsample configs
     private int numOfDownsampleGroups;
     private DownsampleGroup[] downsampleGroups;
-    private int totalDuration; // In 's'
     private boolean isDownSampleFirst;
     private Export job;
     private List<List<String>> columnNames;
-    private int startDelta; // In 's'
+    private int exportTotalDuration; // In 's'
+    private int exportStartOffset; // In 's'
     private int downsampleInterval; // In 's'
+
     // Prebuilt final query string and related
     private String globalTimeLimitWhere = null;
+    private ArrayList<String> columnNameAliases;
+    private String queryString = "";
 
     // Metadata for patients
     private String pid;
     private int numDataSegments;
     private List<DataTimeSpanBean> timeseriesMetadata;
-    private ArrayList<String> columnNameAliases;
-    private String queryString = "";
+
     // Meta that this class generated (That others may use)
     private List<Integer> validTimeSpanIds;
     private Instant firstAvailData = Instant.MAX;
@@ -53,15 +56,16 @@ public class ExportQueryBuilder {
 
     /**
      * Initialize this class (Generate nothing if dts is empty)
-     * 
+     *
      * @param job
      *
      * @param dts     Data
-     * @param vo      List of DownsampleGroupVO
+     * @param v       List of DownsampleGroup
      * @param columns Columns for every downsample group
      * @param ds      Downsample itself
+     * @param needAr  Export Ar or NoAr
      */
-    public ExportQueryBuilder(Export job, List<DataTimeSpanBean> dts, List<DownsampleGroup> vo, List<List<String>> columns, Downsample ds) {
+    public ExportQueryBuilder(Export job, List<DataTimeSpanBean> dts, List<DownsampleGroup> v, List<List<String>> columns, Downsample ds) {
         if (dts == null || dts.isEmpty()) {
             return;
         }
@@ -72,12 +76,11 @@ public class ExportQueryBuilder {
         this.validTimeSpanIds = new ArrayList<>(this.numDataSegments);
         this.job = job;
 
-        populateDownsampleGroup(vo);
+        populateDownsampleGroup(v);
         populateDownsampleData(ds);
         findFirstLastMatchData();
 
-        this.globalTimeLimitWhere = String.format(Template.timeCondition, "'" + this.queryStartTime.toString() + "'",
-                "'" + this.queryEndTime.toString() + "'");
+        this.globalTimeLimitWhere = String.format(Template.timeCondition, this.queryStartTime.toString(), this.queryEndTime.toString());
         buildQuery();
     }
 
@@ -86,18 +89,15 @@ public class ExportQueryBuilder {
         this.columnNameAliases = new ArrayList<>(this.numOfDownsampleGroups);
         String prefix = isDownSampleFirst ? Template.defaultDownsampleColName : Template.defaultAggregationColName;
 
-        this.downsampleGroups = v.stream().map(dvo -> {
-            DownsampleGroup dg = dvo;
-            this.columnNameAliases.add(prefix + String.valueOf(dg.getId()));
-            return dg;
-        }).toArray(DownsampleGroup[]::new);
+        this.downsampleGroups = v.stream().peek(dvo -> this.columnNameAliases.add(prefix + String.valueOf(dvo.getId())))
+                .toArray(DownsampleGroup[]::new);
     }
 
     private void populateDownsampleData(Downsample ds) {
-        this.startDelta = ds.getOrigin();
+        this.exportStartOffset = ds.getOrigin();
         this.downsampleInterval = ds.getPeriod();
         this.isDownSampleFirst = ds.getDownsampleFirst();
-        this.totalDuration = ds.getDuration();
+        this.exportTotalDuration = ds.getDuration();
     }
 
     // Find first, last data and if ArType matches
@@ -115,20 +115,36 @@ public class ExportQueryBuilder {
                 this.queryEndTime = this.lastAvailData = tmpE;
         }
 
-        if (this.totalDuration > 0) {
-            this.queryEndTime = this.firstAvailData.plusSeconds(this.totalDuration);
+        if (this.exportTotalDuration > 0) {
+            this.queryEndTime = this.firstAvailData.plusSeconds(this.exportTotalDuration);
         }
-        if (this.startDelta > 0) {
-            this.queryStartTime = this.firstAvailData.plusSeconds(this.startDelta);
+        if (this.exportStartOffset > 0) {
+            this.queryStartTime = this.firstAvailData.plusSeconds(this.exportStartOffset);
         }
     }
 
-    public String toQuery() {
+    public String getQueryString() {
         return this.queryString;
     }
 
     public List<Integer> getGoodDataTimeId() {
         return this.validTimeSpanIds;
+    }
+
+    public Instant getFirstAvailData() {
+        return firstAvailData;
+    }
+
+    public Instant getLastAvailData() {
+        return lastAvailData;
+    }
+
+    public Instant getQueryStartTime() {
+        return queryStartTime;
+    }
+
+    public Instant getQueryEndTime() {
+        return queryEndTime;
     }
 
     // Lookup all in one query, DO NOT lookup by files
@@ -139,7 +155,7 @@ public class ExportQueryBuilder {
             String aggrQ = aggregationWhenAggregationFirst(whereClause);
             this.queryString = downsampleWhenAggregationFirst(aggrQ);
         } else {
-            this.queryString = downsampleWhenDownsampleFirst(whereClause);
+            this.queryString = whenDownsampleFirst(whereClause);
         }
     }
 
@@ -167,15 +183,15 @@ public class ExportQueryBuilder {
         }
         // A count column
         cols.append(String.format(Template.aggregationCount, this.columnNameAliases.get(0)));
+        String timeUpper = String.format(Template.downsampleTimeOutputLimit, this.queryEndTime.toString());
 
-        return String.format(Template.basicDownsampleOuter, cols.toString(), wrapByBracket(aggrQuery),
-                "time <= '" + this.queryEndTime.toString() + "'", this.downsampleInterval);
+        return String.format(Template.basicDownsampleOuter, cols.toString(), wrapByBracket(aggrQuery), timeUpper, this.downsampleInterval);
     }
 
     /**
-     * Ds first, Ds part
+     * Ds first, ds and aggr part
      */
-    private String downsampleWhenDownsampleFirst(String locator) {
+    private String whenDownsampleFirst(String locator) {
         String[] cols = new String[this.numOfDownsampleGroups + 1];
         for (int i = 0; i < this.numOfDownsampleGroups; i++) {
             DownsampleGroup dg = this.downsampleGroups[i];
