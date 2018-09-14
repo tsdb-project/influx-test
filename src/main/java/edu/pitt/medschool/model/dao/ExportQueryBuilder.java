@@ -75,8 +75,17 @@ public class ExportQueryBuilder {
 
         populateDownsampleGroup(v);
         populateDownsampleData(ds);
-        findFirstLastMatchData();
+        findValidFirstLastData();
 
+        // If no available data then stop building
+        if (this.validTimeSpanIds.isEmpty()) return;
+
+        if (this.exportTotalDuration > 0) {
+            this.queryEndTime = this.firstAvailData.plusSeconds(this.exportTotalDuration);
+        }
+        if (this.exportStartOffset > 0) {
+            this.queryStartTime = this.firstAvailData.plusSeconds(this.exportStartOffset);
+        }
         this.globalTimeLimitWhere = String.format(Template.timeCondition, this.queryStartTime.toString(), this.queryEndTime.toString());
         buildQuery();
     }
@@ -98,7 +107,7 @@ public class ExportQueryBuilder {
     }
 
     // Find first, last data and if ArType matches
-    private void findFirstLastMatchData() {
+    private void findValidFirstLastData() {
         for (int i = 0; i < this.numDataSegments; i++) {
             DataTimeSpanBean d = this.timeseriesMetadata.get(i);
             if (!isDataArTypeGood(d)) {
@@ -110,13 +119,6 @@ public class ExportQueryBuilder {
                 this.queryStartTime = this.firstAvailData = tmpS;
             if (tmpE.compareTo(this.lastAvailData) > 0)
                 this.queryEndTime = this.lastAvailData = tmpE;
-        }
-
-        if (this.exportTotalDuration > 0) {
-            this.queryEndTime = this.firstAvailData.plusSeconds(this.exportTotalDuration);
-        }
-        if (this.exportStartOffset > 0) {
-            this.queryStartTime = this.firstAvailData.plusSeconds(this.exportStartOffset);
         }
     }
 

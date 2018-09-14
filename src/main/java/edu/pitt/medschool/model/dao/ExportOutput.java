@@ -3,6 +3,7 @@ package edu.pitt.medschool.model.dao;
 import com.opencsv.CSVWriter;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dto.Downsample;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,9 +75,8 @@ public class ExportOutput {
         }
         this.outputFileWriter.writeNext(mainHeader);
         this.mainHeaderSize = mainHeader.length;
-        // TODO: Discuss what do we need.
-        String[] timemetaHdr = { "PID", "Export start time", "Export end time", "Duration in seconds", "Number of data used",
-                "Occurance insufficient data", "Should considered as good" };
+        String[] timemetaHdr = {"PID", "Export start time", "Export end time", "Number of data segments",
+                "Duration in seconds", "Number of data used", "Occurance insufficient data", "Should considered as good"};
         this.timeMetaHeaderSize = timemetaHdr.length;
         this.outputTimeMetaWriter.writeNext(timemetaHdr);
     }
@@ -102,11 +102,15 @@ public class ExportOutput {
         }
     }
 
-    public void writeMain(String pid, ResultTable r, ExportQueryBuilder eq) {
-        this.writeMainData(pid, r, eq);
+    /**
+     * Call this when finished query on one patient
+     */
+    public void writeForOnePatient(String pid, ResultTable r, ExportQueryBuilder eq, List<DataTimeSpanBean> dtsb) {
+        List<Integer> validId = eq.getGoodDataTimeId();
+        this.writeMainData(pid, r, eq, validId.size(), AnalysisUtil.dataValidTotalSpan(validId, dtsb));
     }
 
-    private void writeMainData(String patientId, ResultTable r, ExportQueryBuilder eq) {
+    private void writeMainData(String patientId, ResultTable r, ExportQueryBuilder eq, int numSegments, long totalDataSeconds) {
         int dataRows = r.getRowCount();
         if (dataRows > this.maxNumOfBins) {
             this.maxNumOfBins = dataRows;
@@ -147,13 +151,14 @@ public class ExportOutput {
             tooFewData = true;
             this.writeMetaFile(String.format("  PID '%s' overall data insufficient.%n", patientId));
         }
-        this.writeTimeMeta(patientId, eq, thisPatientTotalCount, thisPatientTotalInsufficientCount, tooFewData);
+        this.writeTimeMeta(patientId, eq, thisPatientTotalCount, thisPatientTotalInsufficientCount, numSegments, totalDataSeconds, !tooFewData);
     }
 
-    private void writeTimeMeta(String patientId, ExportQueryBuilder eq, int dataCount, int insuffCount, boolean tooFewData) {
+    private void writeTimeMeta(String patientId, ExportQueryBuilder eq, int dataCount, int insuffCount,
+                               int numSegments, long totalDataSeconds, boolean enoughData) {
         Instant start = eq.getQueryStartTime(), end = eq.getQueryEndTime();
-        String[] data = { patientId, start.toString(), end.toString(), String.valueOf((end.toEpochMilli() - start.toEpochMilli()) / 1000),
-                String.valueOf(dataCount), String.valueOf(insuffCount), tooFewData ? "No" : "Yes" };
+        String[] data = {patientId, start.toString(), end.toString(), String.valueOf(numSegments), String.valueOf(totalDataSeconds),
+                String.valueOf(dataCount), String.valueOf(insuffCount), enoughData ? "Yes" : "No"};
         this.outputTimeMetaWriter.writeNext(data);
     }
 
@@ -185,13 +190,6 @@ public class ExportOutput {
         } catch (IOException e) {
             logger.error("Writers fail to close: {}", Util.stackTraceErrorToString(e));
         }
-    }
-
-    /**
-     * Transpose vert table to get a horz one
-     */
-    private void transposeVertCsv() {
-        // TODO: Finish this.
     }
 
 }
