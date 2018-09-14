@@ -1,20 +1,18 @@
 package edu.pitt.medschool.model.dao;
 
+import com.opencsv.CSVWriter;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dto.Downsample;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.opencsv.CSVWriter;
-
-import edu.pitt.medschool.framework.influxdb.ResultTable;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dto.Downsample;
 
 /**
  * Managing output for analysis service
@@ -35,7 +33,7 @@ public class ExportOutput {
     private CSVWriter outputTimeMetaWriter;
 
     // Runtime values
-    private int intervals = Integer.MIN_VALUE;
+    private int maxNumOfBins = Integer.MIN_VALUE;
     private int mainHeaderSize;
     private int timeMetaHeaderSize;
     private boolean initMetaWrote = false;
@@ -110,8 +108,8 @@ public class ExportOutput {
 
     private void writeMainData(String patientId, ResultTable r, ExportQueryBuilder eq) {
         int dataRows = r.getRowCount();
-        if (dataRows > this.intervals) {
-            this.intervals = dataRows;
+        if (dataRows > this.maxNumOfBins) {
+            this.maxNumOfBins = dataRows;
         }
         int thisPatientTotalCount = 0, thisPatientTotalInsufficientCount = 0;
         for (int i = 0; i < dataRows; i++) {

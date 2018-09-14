@@ -1,14 +1,13 @@
 package edu.pitt.medschool.model.dao;
 
+import edu.pitt.medschool.model.DataTimeSpanBean;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.Export;
 
 /**
  * Queries for doing the downsample-aggregation query Refactor from AnalysisService.exportToFile
@@ -31,7 +30,7 @@ public class ExportQueryBuilder {
     private int numOfDownsampleGroups;
     private DownsampleGroup[] downsampleGroups;
     private boolean isDownSampleFirst;
-    private Export job;
+    private boolean isAr;
     private List<List<String>> columnNames;
     private int exportTotalDuration; // In 's'
     private int exportStartOffset; // In 's'
@@ -57,15 +56,13 @@ public class ExportQueryBuilder {
     /**
      * Initialize this class (Generate nothing if dts is empty)
      *
-     * @param job
-     *
      * @param dts     Data
      * @param v       List of DownsampleGroup
      * @param columns Columns for every downsample group
      * @param ds      Downsample itself
-     * @param needAr  Export Ar or NoAr
+     * @param needAr  This job is Ar or NoAr
      */
-    public ExportQueryBuilder(Export job, List<DataTimeSpanBean> dts, List<DownsampleGroup> v, List<List<String>> columns, Downsample ds) {
+    public ExportQueryBuilder(List<DataTimeSpanBean> dts, List<DownsampleGroup> v, List<List<String>> columns, Downsample ds, boolean needAr) {
         if (dts == null || dts.isEmpty()) {
             return;
         }
@@ -74,7 +71,7 @@ public class ExportQueryBuilder {
         this.timeseriesMetadata = dts;
         this.columnNames = columns;
         this.validTimeSpanIds = new ArrayList<>(this.numDataSegments);
-        this.job = job;
+        this.isAr = needAr;
 
         populateDownsampleGroup(v);
         populateDownsampleData(ds);
@@ -149,7 +146,7 @@ public class ExportQueryBuilder {
 
     // Lookup all in one query, DO NOT lookup by files
     private void buildQuery() {
-        String whereClause = this.artypeWhereClause(this.job.getAr()) + " AND " + this.globalTimeLimitWhere;
+        String whereClause = this.artypeWhereClause(this.isAr) + " AND " + this.globalTimeLimitWhere;
 
         if (!this.isDownSampleFirst) {
             String aggrQ = aggregationWhenAggregationFirst(whereClause);
@@ -308,7 +305,7 @@ public class ExportQueryBuilder {
      */
     private boolean isDataArTypeGood(DataTimeSpanBean d) {
         DataTimeSpanBean.ArStatus as = d.getArStat();
-        if (job.getAr()) {
+        if (this.isAr) {
             // Need Ar but this UUID only has NoAr
             return !as.equals(DataTimeSpanBean.ArStatus.NoArOnly);
         } else {

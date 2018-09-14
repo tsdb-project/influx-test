@@ -1,21 +1,17 @@
 package edu.pitt.medschool.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.DataTimeSpanBean;
+import edu.pitt.medschool.model.dao.*;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.Export;
+import okhttp3.OkHttpClient;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.slf4j.Logger;
@@ -24,26 +20,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
-import edu.pitt.medschool.framework.influxdb.InfluxUtil;
-import edu.pitt.medschool.framework.influxdb.ResultTable;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dao.AnalysisUtil;
-import edu.pitt.medschool.model.dao.DownsampleDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupDao;
-import edu.pitt.medschool.model.dao.ExportDao;
-import edu.pitt.medschool.model.dao.ExportOutput;
-import edu.pitt.medschool.model.dao.ExportQueryBuilder;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.PatientDao;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.Export;
-import okhttp3.OkHttpClient;
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Export functions
@@ -132,7 +115,7 @@ public class AnalysisService {
                 try {
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
 
-                    ExportQueryBuilder eq = new ExportQueryBuilder(job, dtsb, groups, columns, exportQuery);
+                    ExportQueryBuilder eq = new ExportQueryBuilder(dtsb, groups, columns, exportQuery, job.getAr());
                     String finalQueryString = eq.getQueryString();
                     if (finalQueryString.isEmpty()) {
                         outputWriter.writeMetaFile(String.format("  PID '%s' no available data.%n", patientId));
@@ -142,7 +125,7 @@ public class AnalysisService {
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
 
                     if (res.length != 1) {
-                        outputWriter.writeMetaFile(String.format("  PID '%s' no results from database.%n", patientId));
+                        outputWriter.writeMetaFile(String.format("  PID '%s' incorrect result from database.%n", patientId));
                         return;
                     }
 
@@ -164,6 +147,7 @@ public class AnalysisService {
                             logger.error(String.format("%s: Re-queue failed.", patientId));
                     } else {
                         logger.error(String.format("%s: Failed more than 3 times.", patientId));
+                        outputWriter.writeMetaFile(String.format("  PID '%s' failed more than 3 times, possible program error.%n", patientId));
                     }
                 }
             }
