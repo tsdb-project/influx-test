@@ -167,12 +167,12 @@ $(document).ready(function() {
                 $("#min_bin_row").addClass('is-invalid');
                 return false;
             }
-            if (form.minBinUnit == '%' && (form.minBin < 0 || form.minBin > 100)) {
+            if ($("#minBinUnit").val() == '%' && (form.minBin < 0 || form.minBin > 100)) {
                 notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Invalid percentage entered.');
                 $("#min_bin").addClass('is-invalid');
                 return false;
             }
-            if (form.minBinUnit == '1' && form.minBin > (form.duration / form.period)) {
+            if ($("#minBinUnit").val() == '1' && form.duration != 0 && form.minBin > (form.duration / form.period)) {
                 notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Minimal bin number for a valid patient exceeded max bin count.');
                 $("#min_bin").addClass('is-invalid');
                 return false;

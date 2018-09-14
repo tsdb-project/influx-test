@@ -129,9 +129,9 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-4 col-md-4">
-                                        <label>Maximal invalid bins for a valid patient</label>
+                                        <label>Minimal valid bins for a patient</label>
                                         <div class="input-group mb-2">
-                                            <input type="number" min="0" max="100" step="1" class="form-control" id="min_bin" th:value="${query.minBin}"
+                                            <input type="number" min="0" step="1" class="form-control" id="min_bin" th:value="${query.minBin}"
                                                 placeholder="Input minimal intervals / percentage for a valid patient">
                                             <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Unit" id="minBinUnit" data-minimum-results-for-search="Infinity">
