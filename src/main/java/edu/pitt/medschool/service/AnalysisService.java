@@ -129,7 +129,7 @@ public class AnalysisService {
                         return;
                     }
 
-                    outputWriter.writeMain(patientId, res[0], eq);
+                    outputWriter.writeForOnePatient(patientId, res[0], eq, dtsb);
                     validPatientCounter.getAndIncrement();
 
                 } catch (Exception ee) {
