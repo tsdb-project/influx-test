@@ -91,7 +91,7 @@ public class AnalysisController {
         return analysisGenerateModel(model);
     }
 
-    @RequestMapping(value = {"analysis/edit/{id}", "analysis/edit"}, method = RequestMethod.GET)
+    @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "builder");
@@ -122,6 +122,9 @@ public class AnalysisController {
     @ResponseBody
     public RestfulResponse insert(@RequestBody(required = true) Downsample downsample) throws Exception {
         RestfulResponse response;
+        if (downsample.getPeriod() == 0) {
+            downsample.setPeriod(1);
+        }
         if (analysisService.insertDownsample(downsample) == 1) {
             response = new RestfulResponse(1, "success");
             response.setData(downsample);
@@ -135,6 +138,9 @@ public class AnalysisController {
     @ResponseBody
     public Map<String, Object> update(@RequestBody(required = true) Downsample downsample) throws Exception {
         Map<String, Object> map = new HashMap<>();
+        if (downsample.getPeriod() == 0) {
+            downsample.setPeriod(1);
+        }
         if (analysisService.updateByPrimaryKey(downsample) == 1) {
             map.put("res", new RestfulResponse(1, "success"));
         } else {
@@ -280,7 +286,7 @@ public class AnalysisController {
     @ResponseBody
     public void debugExprt() {
         try {
-            //analysisService.exportToFile(34, false);
+            // analysisService.exportToFile(34, false);
             analysisService.exportToFile(35, false);
 
         } catch (IOException e) {

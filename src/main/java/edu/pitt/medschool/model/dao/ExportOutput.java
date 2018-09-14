@@ -38,7 +38,7 @@ public class ExportOutput {
     private int mainHeaderSize;
     private int timeMetaHeaderSize;
     private boolean initMetaWrote = false;
-    private int numTotalInsuffBin = 0;
+    private int totalInvalidPatientCount = 0;
 
     /**
      * Init the output wrapper class for exporting
@@ -146,8 +146,8 @@ public class ExportOutput {
             this.outputFileWriter.writeNext(mainData);
         }
         boolean tooFewData = false;
-        if (thisPatientTotalInsufficientCount > this.minBin) {
-            this.numTotalInsuffBin += 1;
+        if (dataRows - thisPatientTotalInsufficientCount < this.minBin) {
+            this.totalInvalidPatientCount += 1;
             tooFewData = true;
             this.writeMetaFile(String.format("  PID '%s' overall data insufficient.%n", patientId));
         }
@@ -172,7 +172,7 @@ public class ExportOutput {
      */
     private void closeMetaText(int validNum) {
         try {
-            this.outputMetaWriter.write(String.format("%n%n# of insufficient data patients:%d%n", this.numTotalInsuffBin));
+            this.outputMetaWriter.write(String.format("%n%n# of insufficient data patients:%d%n", this.totalInvalidPatientCount));
             this.outputMetaWriter.write(String.format("# of valid patients: %d%nENDED ON '%s'", validNum, LocalDateTime.now().toString()));
             this.outputMetaWriter.close();
         } catch (IOException e) {
