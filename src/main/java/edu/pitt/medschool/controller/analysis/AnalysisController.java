@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -39,6 +38,7 @@ import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.Export;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
 
@@ -134,7 +134,7 @@ public class AnalysisController {
         return response;
     }
 
-    @RequestMapping(value = "analysis/query", method = RequestMethod.PUT)
+    @PutMapping(value = "analysis/query")
     @ResponseBody
     public Map<String, Object> update(@RequestBody(required = true) Downsample downsample) throws Exception {
         Map<String, Object> map = new HashMap<>();
@@ -251,20 +251,15 @@ public class AnalysisController {
 
     @RequestMapping("api/export/export/{qid}")
     @ResponseBody
-    public void exportQuery(@PathVariable(required = true) Integer qid) throws IOException {
-        // List<String> pids = importedFileDao.getAllImportedPid(uuid);
-        // System.out.println(pids);
-        // Downsample downsample = analysisService.selectByPrimaryKey(qid);
-        // List<DownsampleGroupVO> downsampleGroups = analysisService.selectAllAggregationGroupByQueryId(qid);
-        // analysisService.exportFromPatientsWithDownsamplingGroups(pids, downsample, downsampleGroups);
-
-        // TODO: Remove or change the TestRun parameter
-        analysisService.exportToFile(qid, false);
+    public void exportQuery(@PathVariable(required = true) Integer qid, @RequestBody(required = true) Export job) throws IOException {
+        if (analysisService.insertExportJob(job) == 1) {
+            analysisService.exportToFile(job.getId(), false);
+        }
     }
 
-    @PostMapping("api/export/patient_list/{qid}")
+    @PostMapping("api/export/patient_list/")
     @ResponseBody
-    public RestfulResponse uploadPatientList(@RequestParam("plist") MultipartFile file, @PathVariable(required = true) Integer qid) {
+    public RestfulResponse uploadPatientList(@RequestParam("plist") MultipartFile file) {
         StringBuilder sb = new StringBuilder();
         try {
             Stream<String> stream = new BufferedReader(new InputStreamReader(file.getInputStream())).lines();
@@ -278,31 +273,9 @@ public class AnalysisController {
             return new RestfulResponse(-1, o.getLocalizedMessage());
         }
         String lists = sb.deleteCharAt(sb.length() - 1).toString();
-
-        Downsample ds = analysisService.selectByPrimaryKey(qid);
-
-        // AR/noAR passed by exportVO
-        // ds.setPatientlist(lists);
-        ds.setUpdateTime(new java.util.Date());
-
-        if (analysisService.updateByPrimaryKey(ds) == 1) {
-            return new RestfulResponse(1, file.getOriginalFilename());
-        } else {
-            return new RestfulResponse(-2, "Database error");
-        }
-    }
-
-    @DeleteMapping("api/export/patient_list/{qid}")
-    @ResponseBody
-    public RestfulResponse removePatientList(@PathVariable(required = true) Integer qid) {
-        Downsample ds = analysisService.selectByPrimaryKey(qid);
-        ds.setUpdateTime(new java.util.Date());
-
-        if (analysisService.updateByPrimaryKey(ds) == 1) {
-            return new RestfulResponse(1, "ok");
-        } else {
-            return new RestfulResponse(-2, "Database error");
-        }
+        RestfulResponse response = new RestfulResponse(1, file.getOriginalFilename());
+        response.setData(lists);
+        return response;
     }
 
     // TODO: Remove in production

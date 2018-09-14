@@ -14,18 +14,10 @@ public class DownsampleEditResponse {
     private String durationUnit;
     private String origin;
     private String originUnit;
-    private int minBinRow;
+    private String minBinRow;
+    private String minBinRowUnit;
     private int minBin;
-    private boolean isDownsampleFirst;
-    private boolean needar;
-
-    public boolean getNeedar() {
-        return needar;
-    }
-
-    public void setNeedar(boolean needAr) {
-        this.needar = needAr;
-    }
+    private boolean downsampleFirst;
 
     public DownsampleEditResponse(Downsample downsample) {
         this.downsample = downsample;
@@ -42,26 +34,12 @@ public class DownsampleEditResponse {
         this.originUnit = originArr[1];
 
         this.minBin = downsample.getMinBin();
-        this.minBinRow = downsample.getMinBinRow();
-        this.isDownsampleFirst = downsample.getDownsampleFirst();
-        // TODO : AR/noAR passed by exportVO
-        this.needar = true;
-    }
 
-    public boolean getIsDownsampleFirst() {
-        return isDownsampleFirst;
-    }
+        String[] minBinRowArr = TimeUtil.secondToString(downsample.getMinBinRow());
+        this.setMinBinRow(minBinRowArr[0]);
+        this.setMinBinRowUnit(minBinRowArr[1]);
 
-    public void setIsDownsampleFirst(boolean downsampleFirst) {
-        this.isDownsampleFirst = downsampleFirst;
-    }
-
-    public int getMinBinRow() {
-        return minBinRow;
-    }
-
-    public void setMinBinRow(int minBinRow) {
-        this.minBinRow = minBinRow;
+        this.downsampleFirst = downsample.getDownsampleFirst();
     }
 
     public int getMinBin() {
@@ -168,5 +146,29 @@ public class DownsampleEditResponse {
      */
     public void setOriginUnit(String originUnit) {
         this.originUnit = originUnit;
+    }
+
+    public boolean isDownsampleFirst() {
+        return downsampleFirst;
+    }
+
+    public void setDownsampleFirst(boolean downsampleFirst) {
+        this.downsampleFirst = downsampleFirst;
+    }
+
+    public String getMinBinRow() {
+        return minBinRow;
+    }
+
+    public void setMinBinRow(String minBinRow) {
+        this.minBinRow = minBinRow;
+    }
+
+    public String getMinBinRowUnit() {
+        return minBinRowUnit;
+    }
+
+    public void setMinBinRowUnit(String minBinRowUnit) {
+        this.minBinRowUnit = minBinRowUnit;
     }
 }

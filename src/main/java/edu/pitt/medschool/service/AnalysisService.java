@@ -1,38 +1,53 @@
 package edu.pitt.medschool.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVWriter;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
-import edu.pitt.medschool.framework.influxdb.InfluxUtil;
-import edu.pitt.medschool.framework.influxdb.ResultTable;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dao.DownsampleDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupDao;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.PatientDao;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import okhttp3.OkHttpClient;
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.YamlProcessor.ResolutionMethod;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVWriter;
+
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.DataTimeSpanBean;
+import edu.pitt.medschool.model.dao.AnalysisUtil;
+import edu.pitt.medschool.model.dao.DownsampleDao;
+import edu.pitt.medschool.model.dao.DownsampleGroupDao;
+import edu.pitt.medschool.model.dao.ExportDao;
+import edu.pitt.medschool.model.dao.ExportQueryBuilder;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.PatientDao;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.Export;
+import okhttp3.OkHttpClient;
 
 /**
  * Export functions
@@ -52,6 +67,8 @@ public class AnalysisService {
     DownsampleDao downsampleDao;
     @Autowired
     DownsampleGroupDao downsampleGroupDao;
+    @Autowired
+    ExportDao exportDao;
     @Autowired
     ColumnService columnService;
 
@@ -76,7 +93,9 @@ public class AnalysisService {
     /**
      * Export (downsample) a single query to files (Could be called mutiple times)
      */
-    public void exportToFile(Integer queryId, Boolean testRun) throws IOException {
+    public void exportToFile(Integer exportId, Boolean testRun) throws IOException {
+        Export job = exportDao.selectByPrimaryKey(exportId);
+        int queryId = job.getQueryId();
         Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
 
         // Create Folder
@@ -87,9 +106,7 @@ public class AnalysisService {
         if (!new File(outputDir.getAbsolutePath() + "/patients/").mkdirs())
             return;
 
-        // TODO : AR/noAR passed by exportVO
-        // String pList = exportQuery.getPatientlist();
-        String pList = "";
+        String pList = job.getPatientList();
         List<String> patientIDs;
         if (pList == null || pList.isEmpty()) {
             // No user-defined, get patient list by uuid
@@ -124,8 +141,7 @@ public class AnalysisService {
         bw.write(String.format("EXPORT '%s' (#%d) STARTED ON '%s'%n%n", exportQuery.getAlias(), exportQuery.getId(), Instant.now()));
         bw.write(String.format("Total patients in database: %d%n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
 
-        // TODO : AR/noAR passed by exportVO
-        bw.write(String.format("Ar status is: %s%n", true ? "AR" : "NoAR"));
+        bw.write(String.format("Ar status is: %s%n", job.getAr() ? "AR" : "NoAR"));
         bw.write(String.format("Number of patients for initial export: %d%n%n", patientIDs.size()));
         bw.flush();
 
@@ -141,8 +157,7 @@ public class AnalysisService {
                     int minEveryBinSeconds = exportQuery.getMinBinRow() * 60;
                     double dropoutPercent = 1.0 * exportQuery.getMinBin() / 100;
 
-
-                    ExportQueryBuilder eq = new ExportQueryBuilder(dtsb, groups, columns, exportQuery);
+                    ExportQueryBuilder eq = new ExportQueryBuilder(job, dtsb, groups, columns, exportQuery);
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, eq.toQuery());
                     logger.debug(String.format("%s query: %s", patientId, eq.toQuery()));
 
@@ -333,6 +348,10 @@ public class AnalysisService {
      */
     private ExecutorService generateNewThreadPool(int i) {
         return Executors.newFixedThreadPool(i);
+    }
+
+    public int insertExportJob(Export job) {
+        return exportDao.insertExportJob(job);
     }
 
 }

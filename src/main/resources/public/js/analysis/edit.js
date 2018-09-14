@@ -38,11 +38,12 @@ $(document).ready(function() {
                 '<button type="button" aria-hidden="true" data-notify="dismiss" class="alert--notify__close">Close</button>' +
                 '</div>'
         });
-    }
+    };
 
     var groups = {
         "data": []
     };
+    var patientList = null;
 
     var groupTable = $('#groupTable').DataTable({
         ajax: {
@@ -84,85 +85,114 @@ $(document).ready(function() {
     });
 
     $("#uploadPatientList").change(function() {
-        var fd = new FormData();
-        fd.append("plist", document.getElementById('uploadPatientList').files[0]);
+        var formData = new FormData();
+        formData.append("plist", document.getElementById('uploadPatientList').files[0]);
         $.ajax({
             type: "POST",
-            url: "/api/export/patient_list/" + query.downsample.id,
-            data: fd,
+            url: "/api/export/patient_list/",
+            data: formData,
             contentType: false,
             cache: false,
             processData: false,
             success: function(result) {
-                if (result.code === 1) {
-                    $("#upload-plist-modal-body").text(result.msg + ": Update patient list successful.");
-                    $("#upload-plist-modal-hdr").text("Success");
+                if (result.code == 1) {
+                    notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'Successfully uploaded patient list.');
+                    patientList = result.data;
+                    console.log(patientList);
                 } else {
-                    $("#upload-plist-modal-body").text("Failed to update patient list. " + result.msg);
-                    $("#upload-plist-modal-hdr").text("Error");
+                    notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Failed to upload patient list.');
                 }
-                $("#upload-plist-modal").modal();
             },
             error: function(result) {
-                $("#upload-plist-modal-body").text("Failed to update patient list. " + result.msg);
-                $("#upload-plist-modal-hdr").text("Error");
-                $("#upload-plist-modal").modal();
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Failed to upload patient list.');
             }
         });
     });
 
-    $("#delPlistModalButton").click(function() {
+    $("#clear-patient-list").click(function() {
+        notify("top", "center", null, "info", "animated bounceIn", "animated fadeOut", 'Patient list cleared.');
+        $("#uploadPatientList").val('');
+        patientList = null;
+    });
+
+    $("#export-modal").on('hidden.bs.modal', function(e) {
+        $("#uploadPatientList").val('');
+        patientList = null;
+    })
+
+    $("#submitJobButton").click(function() {
+        var form = {
+            "queryId": $("#id").val(),
+            "patientList": patientList,
+            "layout": $('#ar label.active input').val() == "true" ? true : false,
+            "ar": $('#ar label.active input').val() == "true" ? true : false
+        };
         $.ajax({
-            type: "DELETE",
-            url: "/api/export/patient_list/" + query.downsample.id,
-            cache: false,
-            success: function(result) {
-                if (result.code === 1) {
-                    $("#upload-plist-modal-body").text("Delete patient list successful");
-                    $("#upload-plist-modal-hdr").text("Success");
-                } else {
-                    $("#upload-plist-modal-body").text("Failed to delete patient list. " + result.msg);
-                    $("#upload-plist-modal-hdr").text("Error");
-                }
-                $("#upload-plist-modal").modal();
+            'url': "/api/export/export/" + $("#id").val(),
+            'type': 'post',
+            'data': JSON.stringify(form),
+            'contentType': "application/json",
+            'dataType': 'json',
+            'success': function(data) {
+                window.location.href = '/analysis/job';
             },
-            error: function(result) {
-                $("#upload-plist-modal-body").text("Failed to delete patient list. " + result.msg);
-                $("#upload-plist-modal-hdr").text("Error");
-                $("#upload-plist-modal").modal();
-            }
+            'error': function() {}
         });
+        
     });
 
     $("#saveButton").click(function() {
-        //        if ($('#parameter-form')[0].checkValidity()) {
-        var form = {
-            "id": $("#id").val(),
-            "alias": $("#alias").val(),
-            "period": $("#period").val() * $("#period_unit").val(),
-            "origin": $("#origin").val() * $("#origin_unit").val(),
-            "duration": $("#duration").val() * $("#duration_unit").val(),
-            "minEveryBinThershold": $("#every_bin").val(),
-            "minTotalBinThreshold": $("#total_bin").val(),
-            "downsampleFirst": $('#downsample_first label.active input').val() == "true" ? true : false
-        };
-        console.log(form)
-        ////            $.ajax({
-        ////                'url': "/analysis/query",
-        ////                'type': 'put',
-        ////                'data': JSON.stringify(form),
-        ////                'contentType': "application/json",
-        ////                'dataType': 'json',
-        ////                'success': function(data) {
-        ////                    window.location.href = '/analysis/edit/' + $("#id").val();
-        ////                },
-        ////                'error': function() {}
-        ////            });
-        ////            return false;
-        //        } else {
-        //            console.log("invalid form");
-        //            return true;
-        //        }
+        if ($('#parameter-form')[0].checkValidity()) {
+            var form = {
+                "id": $("#id").val(),
+                "alias": $("#alias").val(),
+                "period": $("#period").val() * $("#period_unit").val(),
+                "origin": $("#origin").val() * $("#origin_unit").val(),
+                "duration": $("#duration").val() * $("#duration_unit").val(),
+                "downsampleFirst": $('#downsample_first label.active input').val() == "true" ? true : false
+            };
+            if ($("#minBinRowUnit").val() == '%') {
+                form.minBinRow = form.period * $("#min_bin_row").val() / 100;
+            } else {
+                form.minBinRow = $("#min_bin_row").val() * $("#minBinRowUnit").val();
+            }
+            if ($("#minBinUnit").val() == '%') {
+                form.minBin = form.duration / form.period * $("#min_bin").val() / 100;
+            } else {
+                form.minBin = $("#min_bin").val();
+            }
+            console.log(form);
+            if (form.minBinRow > form.period) {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Minimal row for a valid bin exceeded bin size.');
+                $("#min_bin_row").addClass('is-invalid');
+                return false;
+            }
+            if (form.minBinUnit == '%' && (form.minBin < 0 || form.minBin > 100)) {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Invalid percentage entered.');
+                $("#min_bin").addClass('is-invalid');
+                return false;
+            }
+            if (form.minBinUnit == '1' && form.minBin > (form.duration / form.period)) {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Minimal bin number for a valid patient exceeded max bin count.');
+                $("#min_bin").addClass('is-invalid');
+                return false;
+            }
+            $.ajax({
+                'url': "/analysis/query",
+                'type': 'put',
+                'data': JSON.stringify(form),
+                'contentType': "application/json",
+                'dataType': 'json',
+                'success': function(data) {
+                    window.location.href = '/analysis/edit/' + $("#id").val();
+                },
+                'error': function() {}
+            });
+            return false;
+        } else {
+            notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Invalid form.');
+            return false;
+        }
     });
 
     $("#deleteButton").click(function() {
