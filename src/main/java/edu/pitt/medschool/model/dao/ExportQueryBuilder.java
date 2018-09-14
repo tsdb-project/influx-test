@@ -19,7 +19,7 @@ public class ExportQueryBuilder {
         static final String defaultAggregationColName = "ag_label_";
 
         static final String basicAggregationInner = "SELECT %s FROM \"%s\" WHERE %s";
-        static final String basicDownsampleOuter = "SELECT %s FROM %s WHERE %s GROUP BY time(%ds)";
+        static final String basicDownsampleOuter = "SELECT %s FROM %s WHERE %s GROUP BY time(%ds) ORDER BY time ASC";
 
         static final String downsampleTimeOutputLimit = "(time <= '%s')";
         static final String aggregationCount = "COUNT(%s) AS C";
@@ -122,12 +122,28 @@ public class ExportQueryBuilder {
         }
     }
 
-    public String toQuery() {
+    public String getQueryString() {
         return this.queryString;
     }
 
     public List<Integer> getGoodDataTimeId() {
         return this.validTimeSpanIds;
+    }
+
+    public Instant getFirstAvailData() {
+        return firstAvailData;
+    }
+
+    public Instant getLastAvailData() {
+        return lastAvailData;
+    }
+
+    public Instant getQueryStartTime() {
+        return queryStartTime;
+    }
+
+    public Instant getQueryEndTime() {
+        return queryEndTime;
     }
 
     // Lookup all in one query, DO NOT lookup by files
@@ -138,7 +154,7 @@ public class ExportQueryBuilder {
             String aggrQ = aggregationWhenAggregationFirst(whereClause);
             this.queryString = downsampleWhenAggregationFirst(aggrQ);
         } else {
-            this.queryString = downsampleWhenDownsampleFirst(whereClause);
+            this.queryString = whenDownsampleFirst(whereClause);
         }
     }
 
@@ -174,9 +190,9 @@ public class ExportQueryBuilder {
     }
 
     /**
-     * Ds first, Ds part
+     * Ds first, ds and aggr part
      */
-    private String downsampleWhenDownsampleFirst(String locator) {
+    private String whenDownsampleFirst(String locator) {
         String[] cols = new String[this.numOfDownsampleGroups + 1];
         for (int i = 0; i < this.numOfDownsampleGroups; i++) {
             DownsampleGroup dg = this.downsampleGroups[i];

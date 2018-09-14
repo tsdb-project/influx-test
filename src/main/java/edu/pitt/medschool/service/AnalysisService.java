@@ -1,7 +1,6 @@
 package edu.pitt.medschool.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVWriter;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
@@ -20,11 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
@@ -66,8 +62,6 @@ public class AnalysisService {
             new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(300, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS));
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private BlockingQueue<String> idQueue = new LinkedBlockingQueue<>();
-
     private Map<String, Integer> errorCount = new HashMap<>();
 
     /**
@@ -77,15 +71,15 @@ public class AnalysisService {
         Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
 
         // Create Folder
-        File outputDir = generateOutputDir(exportQuery.getAlias());
+        File outputDir = generateOutputDir(exportQuery.getAlias(), null);
         if (outputDir == null)
             return;
-        // Create sub-folder for every patient's file
-        if (!new File(outputDir.getAbsolutePath() + "/patients/").mkdirs())
-            return;
 
-        // TODO : Patientlist passed by exportVO
+        // TODO : AR/noAR passed by exportVO
+        // TODO : Patientlist and h/v output passed by exportVO
         // String pList = exportQuery.getPatientlist();
+        boolean isOutputVertical = true;
+        boolean isAr = true;
         String pList = "";
         List<String> patientIDs;
         if (pList == null || pList.isEmpty()) {
@@ -95,7 +89,7 @@ public class AnalysisService {
             // Init list with user-defined
             patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
         }
-        idQueue = new LinkedBlockingQueue<>(patientIDs);
+        BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
         String projectRootFolder = outputDir.getAbsolutePath();
         AtomicInteger validPatientCounter = new AtomicInteger(0);
 
@@ -105,26 +99,18 @@ public class AnalysisService {
         List<List<String>> columns = new ArrayList<>(labelCount);
         List<String> columnLabelName = new ArrayList<>(labelCount);
         for (DownsampleGroup group : groups) {
-            // TODO: More testing as it's not stable
             columns.add(parseAggregationGroupColumnsString(group.getColumns()));
             columnLabelName.add(group.getLabel());
         }
+        ExportOutput outputWriter = new ExportOutput(projectRootFolder, columnLabelName, groups, isOutputVertical,
+                -1, exportQuery.getMinBinRow(), exportQuery.getMinBin());
 
-        // CSV output
-        String[] pHeader = new String[labelCount + 3], mainHeader = new String[labelCount + 4];
-        populateHeaderNames(columnLabelName, pHeader, mainHeader);
-        CSVWriter mainCsvWriter = new CSVWriter(new FileWriter(projectRootFolder + "/output.csv"));
-        mainCsvWriter.writeNext(mainHeader);
-
-        // Export meta-data writer
-        BufferedWriter bw = new BufferedWriter(new FileWriter(projectRootFolder + "/output_meta.txt"));
-        bw.write(String.format("EXPORT '%s' (#%d) STARTED ON '%s'%n%n", exportQuery.getAlias(), exportQuery.getId(), Instant.now()));
-        bw.write(String.format("Total patients in database: %d%n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
-
-        // TODO : AR/noAR passed by exportVO
-        bw.write(String.format("Ar status is: %s%n", true ? "AR" : "NoAR"));
-        bw.write(String.format("Number of patients for initial export: %d%n%n", patientIDs.size()));
-        bw.flush();
+        // Export meta-data file
+        outputWriter.writeMetaFile(String.format("EXPORT '%s' (#%d) STARTED ON '%s'%n%n",
+                exportQuery.getAlias(), exportQuery.getId(), LocalDateTime.now().toString()));
+        outputWriter.writeMetaFile(String.format("# of patients in database: %d%n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
+        outputWriter.writeMetaFile(String.format("# of patients initially: %d%n%n", patientIDs.size()));
+        outputWriter.writeMetaFile(String.format("Ar status is: %s%n", isAr ? "AR" : "NoAR"));
 
         int paraCount = determineParaNumber();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
@@ -135,32 +121,22 @@ public class AnalysisService {
                 try {
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
 
-                    int minEveryBinSeconds = exportQuery.getMinBinRow() * 60;
-                    double dropoutPercent = 1.0 * exportQuery.getMinBin() / 100;
-
-                    // TODO : AR/noAR passed by exportVO
-                    ExportQueryBuilder eq = new ExportQueryBuilder(dtsb, groups, columns, exportQuery, true);
-                    String finalQueryString = eq.toQuery();
+                    ExportQueryBuilder eq = new ExportQueryBuilder(dtsb, groups, columns, exportQuery, isAr);
+                    String finalQueryString = eq.getQueryString();
                     if (finalQueryString.isEmpty()) {
-                        logger.error(String.format("PID '%s' no available data", patientId));
+                        logger.error("PID '{}' no available data", patientId);
                         return;
                     }
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
-                    logger.debug(String.format("%s query: %s", patientId, eq.toQuery()));
+                    logger.debug("Query for {}: {}", patientId, eq.getQueryString());
 
-                    if (res.length == 0)
+                    if (res.length != 1) {
+                        logger.error("PID '{}' no results from InfluxDB.", patientId);
                         return;
+                    }
 
-                    int pHeadSize = pHeader.length, mainHeadSize = mainHeader.length;
-
-                    // Analyze bins first
-                    List<Integer> goodIDs = eq.getGoodDataTimeId();
-                    long totalValidSeconds = AnalysisUtil.dataValidTotalSpan(goodIDs, dtsb) / 1000;
-                    int totalBins = (int) Math.ceil(1.0 * totalValidSeconds / exportQuery.getPeriod());
-
-                    bw.write(String.format(" '%s': '%d' seconds and '%d' bins.%n", patientId, totalValidSeconds, totalBins));
-
-                    writeOutCsvFiles(projectRootFolder, pHeader, mainCsvWriter, patientId, dtsb, res, pHeadSize, mainHeadSize, goodIDs);
+                    outputWriter.writeTimeMeta(patientId, eq, res[0]);
+                    outputWriter.writeMainData(patientId, res[0]);
 
                     validPatientCounter.getAndIncrement();
 
@@ -193,58 +169,11 @@ public class AnalysisService {
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
         } finally {
-            bw.write(String.format("%n%n# of valid patients: %d%n", validPatientCounter.get()));
-            bw.write(String.format("END ON '%s'", Instant.now()));
-            bw.close();
-            mainCsvWriter.close();
+            outputWriter.close();
         }
     }
 
-    /**
-     * Write indiviual csv and main.csv
-     */
-    private void writeOutCsvFiles(String projectRootFolder, String[] pHeader, CSVWriter mainCsvWriter, String patientId, List<DataTimeSpanBean> dtsb,
-                                  ResultTable[] res, int pHeadSize, int mainHeadSize, List<Integer> goodIDs) throws IOException {
-        CSVWriter pWriter = new CSVWriter(new FileWriter(String.format("%s/patients/%s.csv", projectRootFolder, patientId)));
-        pWriter.writeNext(pHeader);
-        for (int i = 0; i < res.length; i++) {
-            ResultTable r = res[i];
-            for (int j = 0; j < r.getRowCount(); j++) {
-                List<Object> row = r.getDatalistByRow(j);
-                //TODO: Some data is null to mark for N/A
-                //TODO: Some to mark as Insuff. Data
-                String[] resultDataRow = row.stream().map(Object::toString).toArray(String[]::new);
-                String[] pData = new String[pHeadSize], mainData = new String[mainHeadSize];
-                mainData[0] = patientId;
-                for (int k = 0; k < resultDataRow.length; k++) {
-                    mainData[k + 1] = pData[k] = resultDataRow[k];
-                }
-                mainData[pHeadSize] = pData[pHeadSize - 1] = dtsb.get(goodIDs.get(i)).getFileUuid();
-                pWriter.writeNext(pData);
-                mainCsvWriter.writeNext(mainData);
-            }
-        }
-        pWriter.close();
-    }
-
-    /**
-     * Populate header names for main csv and indiviual csv pHeader (Time,xxxx,Count,fileUUID) mainHeader (PID,Time,xxxx,Count,fileUUID)
-     */
-    private void populateHeaderNames(List<String> columnLabelName, String[] pHeader, String[] mainHeader) {
-        pHeader[0] = "Timestamp";
-        pHeader[pHeader.length - 2] = "Count";
-        pHeader[pHeader.length - 1] = "fileUUID";
-        mainHeader[0] = "PID";
-        mainHeader[1] = "Timestamp";
-        mainHeader[mainHeader.length - 1] = "fileUUID";
-        mainHeader[mainHeader.length - 2] = "Count";
-        for (int i = 0; i < columnLabelName.size(); i++) {
-            pHeader[i + 1] = columnLabelName.get(i);
-            mainHeader[i + 2] = columnLabelName.get(i);
-        }
-    }
-
-    public List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
+    List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ColumnJSON json = mapper.readValue(columnsJson, ColumnJSON.class);
         return columnService.selectColumnsByAggregationGroupColumns(json);
@@ -294,11 +223,16 @@ public class AnalysisService {
 
     /**
      * Generate an object for output directory class
+     *
+     * @param purpose What's this dir for
+     * @param uuid    UUID for this dir (Current time in RFC3339 if is null)
      */
-    private File generateOutputDir(String purpose) {
-        String rfc3339 = "_(" + LocalDateTime.now().toString() + ")";
-        // Workaround for Windows name restriction
-        String path = DIRECTORY + purpose + rfc3339.replace(':', '.');
+    private File generateOutputDir(String purpose, String uuid) {
+        String identifier = uuid;
+        if (identifier == null)
+            identifier = "_(" + LocalDateTime.now().toString() + ")";
+        // Windows name restriction
+        String path = DIRECTORY + purpose + identifier.replace(':', '.');
         File outputDir = new File(path);
         boolean dirCreationSuccess = true;
 
