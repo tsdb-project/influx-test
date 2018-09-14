@@ -76,8 +76,8 @@ public class ExportQueryBuilder {
         populateDownsampleData(ds);
         findFirstLastMatchData();
 
-        this.globalTimeLimitWhere = String.format(Template.timeCondition,
-                this.queryStartTime.toString(), this.queryEndTime.toString());
+        this.globalTimeLimitWhere = String.format(Template.timeCondition, "'" + this.queryStartTime.toString() + "'",
+                "'" + this.queryEndTime.toString() + "'");
         buildQuery();
     }
 
@@ -169,7 +169,7 @@ public class ExportQueryBuilder {
         cols.append(String.format(Template.aggregationCount, this.columnNameAliases.get(0)));
 
         return String.format(Template.basicDownsampleOuter, cols.toString(), wrapByBracket(aggrQuery),
-                "time <= " + this.queryEndTime.toString(), this.downsampleInterval);
+                "time <= '" + this.queryEndTime.toString() + "'", this.downsampleInterval);
     }
 
     /**
