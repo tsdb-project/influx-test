@@ -77,8 +77,6 @@ public class AnalysisService {
 
         // TODO : AR/noAR passed by exportVO
         // TODO : Patientlist and h/v output passed by exportVO
-        // String pList = exportQuery.getPatientlist();
-        boolean isOutputVertical = true;
         boolean isAr = true;
         String pList = "";
         List<String> patientIDs;
@@ -102,17 +100,12 @@ public class AnalysisService {
             columns.add(parseAggregationGroupColumnsString(group.getColumns()));
             columnLabelName.add(group.getLabel());
         }
-        ExportOutput outputWriter = new ExportOutput(projectRootFolder, columnLabelName, groups, isOutputVertical,
-                -1, exportQuery.getMinBinRow(), exportQuery.getMinBin());
-
-        // Export meta-data file
-        outputWriter.writeMetaFile(String.format("EXPORT '%s' (#%d) STARTED ON '%s'%n%n",
-                exportQuery.getAlias(), exportQuery.getId(), LocalDateTime.now().toString()));
-        outputWriter.writeMetaFile(String.format("# of patients in database: %d%n", AnalysisUtil.numberOfPatientInDatabase(influxDB, logger)));
-        outputWriter.writeMetaFile(String.format("# of patients initially: %d%n%n", patientIDs.size()));
-        outputWriter.writeMetaFile(String.format("Ar status is: %s%n", isAr ? "AR" : "NoAR"));
 
         int paraCount = determineParaNumber();
+        ExportOutput outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery);
+        outputWriter.writeInitialMetaText(
+                AnalysisUtil.numberOfPatientInDatabase(influxDB, logger), patientIDs.size(), isAr, paraCount);
+
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         // Parallel query task
         Runnable queryTask = () -> {
@@ -124,20 +117,18 @@ public class AnalysisService {
                     ExportQueryBuilder eq = new ExportQueryBuilder(dtsb, groups, columns, exportQuery, isAr);
                     String finalQueryString = eq.getQueryString();
                     if (finalQueryString.isEmpty()) {
-                        logger.error("PID '{}' no available data", patientId);
+                        outputWriter.writeMetaFile(String.format("  PID '%s' no available data.%n", patientId));
                         return;
                     }
+                    logger.debug("Query for {}: {}", patientId, finalQueryString);
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
-                    logger.debug("Query for {}: {}", patientId, eq.getQueryString());
 
                     if (res.length != 1) {
-                        logger.error("PID '{}' no results from InfluxDB.", patientId);
+                        outputWriter.writeMetaFile(String.format("  PID '%s' no results from database.%n", patientId));
                         return;
                     }
 
-                    outputWriter.writeTimeMeta(patientId, eq, res[0]);
-                    outputWriter.writeMainData(patientId, res[0]);
-
+                    outputWriter.writeMain(patientId, res[0], eq);
                     validPatientCounter.getAndIncrement();
 
                 } catch (Exception ee) {
@@ -169,11 +160,11 @@ public class AnalysisService {
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
         } finally {
-            outputWriter.close();
+            outputWriter.close(validPatientCounter.get());
         }
     }
 
-    List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
+    private List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ColumnJSON json = mapper.readValue(columnsJson, ColumnJSON.class);
         return columnService.selectColumnsByAggregationGroupColumns(json);

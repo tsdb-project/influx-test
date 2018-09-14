@@ -3,13 +3,14 @@ package edu.pitt.medschool.model.dao;
 import com.opencsv.CSVWriter;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.Downsample;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,77 +21,76 @@ public class ExportOutput {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private LocalDateTime outputStartTime;
 
-    private boolean isOutputVertical;
-    private int numberOfIntervalBins;
+    // Downsample values
+    private Downsample ds;
+    private int dsInterval;
     private int numberOfLabels;
     private int minEveryBinSeconds;
     private int minTotalBinSeconds;
 
-    private int mainHeaderSize;
-    private int timeMetaHeaderSize;
-
     private CSVWriter outputFileWriter;
     private BufferedWriter outputMetaWriter;
     private CSVWriter outputTimeMetaWriter;
+
+    // Runtime values
+    private int intervals = Integer.MIN_VALUE;
+    private int mainHeaderSize;
+    private int timeMetaHeaderSize;
+    private boolean initMetaWrote = false;
+    private int numTotalInsuffBin = 0;
 
     /**
      * Init the output wrapper class for exporting
      *
      * @param rootDir         Root dir for exporting
      * @param columnLabelName Label names for this export
-     * @param dg              Downsample Groups
-     * @param isOutVertical   V/H output?
-     * @param intervals       Number of bins (intervals)
-     * @param everyBin        Every bin must have at least some size
-     * @param totalBin        Total bin must have at least some size
+     * @param ds              Downsample data
      */
-    public ExportOutput(String rootDir, List<String> columnLabelName, List<DownsampleGroup> dg,
-                        boolean isOutVertical, int intervals, int everyBin, int totalBin) throws IOException {
+    public ExportOutput(String rootDir, List<String> columnLabelName, Downsample ds) throws IOException {
         this.outputStartTime = LocalDateTime.now();
-        this.isOutputVertical = isOutVertical;
-        this.numberOfIntervalBins = intervals;
         this.numberOfLabels = columnLabelName.size();
-        this.minTotalBinSeconds = totalBin;
-        this.minEveryBinSeconds = everyBin;
+        this.minTotalBinSeconds = ds.getMinBin();
+        this.minEveryBinSeconds = ds.getMinBinRow();
+        this.ds = ds;
+        this.dsInterval = ds.getPeriod();
 
         initWriters(rootDir);
-        initCsvHeaders(columnLabelName, dg);
+        initCsvHeaders(columnLabelName);
     }
 
     private void initWriters(String root) throws IOException {
-        this.outputFileWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output.csv")));
+        this.outputFileWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_vert.csv")));
         this.outputTimeMetaWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_time_dict.csv")));
         this.outputMetaWriter = new BufferedWriter(new FileWriter(root + "/output_meta.txt"));
     }
 
-    private void initCsvHeaders(List<String> labelNames, List<DownsampleGroup> dg) {
+    private void initCsvHeaders(List<String> labelNames) {
         int numLabel = this.numberOfLabels;
-        String[] timemetaHdr = {"PID", "Data begin time", "Data end time",
-                "Export start time", "Export end time", "Number of data used", "Comments"};
-        String[] mainHeader;
-        if (this.isOutputVertical) {
-            mainHeader = new String[numLabel + 2];
-            mainHeader[0] = "PID";
-            mainHeader[1] = "Timestamp";
-            for (int i = 0; i < numLabel; i++) {
-                mainHeader[i + 2] = labelNames.get(i);
-            }
-        } else {
-            mainHeader = new String[numLabel * this.numberOfIntervalBins + 1];
-            mainHeader[0] = "PID";
-            for (int j = 0; j < dg.size(); j++) {
-                int pfxSize = j * this.numberOfIntervalBins;
-                DownsampleGroup g = dg.get(j);
-                mainHeader[pfxSize + 1] = g.getLabel() + "_1";
-                for (int i = 2; i <= this.numberOfIntervalBins; i++) {
-                    mainHeader[pfxSize + i] = String.valueOf(i);
-                }
-            }
+        String[] mainHeader = new String[numLabel + 2];
+        mainHeader[0] = "PID";
+        mainHeader[1] = "Timestamp";
+        for (int i = 0; i < numLabel; i++) {
+            mainHeader[i + 2] = labelNames.get(i);
         }
-        this.outputTimeMetaWriter.writeNext(timemetaHdr);
         this.outputFileWriter.writeNext(mainHeader);
         this.mainHeaderSize = mainHeader.length;
+        //TODO: Discuss what do we need.
+        String[] timemetaHdr = {"PID", "Export start time", "Export end time", "Duration in seconds",
+                "Number of data used", "Occurance insufficient data", "Should considered as good"};
         this.timeMetaHeaderSize = timemetaHdr.length;
+        this.outputTimeMetaWriter.writeNext(timemetaHdr);
+    }
+
+    public void writeInitialMetaText(int numPatientsInTsdb, int numQueueSize, boolean isAr, int threads) {
+        if (this.initMetaWrote) return;
+
+        this.writeMetaFile(String.format("EXPORT '%s' - #%d:%nStarted on: '%s'%n%n",
+                this.ds.getAlias(), this.ds.getId(), this.outputStartTime.toString()));
+        this.writeMetaFile(String.format("# of threads: %d%n", threads));
+        this.writeMetaFile(String.format("# of patients in database: %d%n", numPatientsInTsdb));
+        this.writeMetaFile(String.format("# of patients initially: %d%n", numQueueSize));
+        this.writeMetaFile(String.format("AR status is: %s%n%n%n", isAr ? "AR" : "NoAR"));
+        this.initMetaWrote = true;
     }
 
     public void writeMetaFile(String data) {
@@ -101,44 +101,74 @@ public class ExportOutput {
         }
     }
 
-    public void writeMainData(String patientId, ResultTable r) {
-        if (this.isOutputVertical) {
-            for (int i = 0; i < r.getRowCount(); i++) {
-                List<Object> row = r.getDatalistByRow(i);
-                //TODO: Some data is null to mark for N/A
-                //TODO: Some to mark as Insuff. Data
-                String[] resultDataRow = row.stream().map(Object::toString).toArray(String[]::new);
-                int count = (int) Double.parseDouble(resultDataRow[resultDataRow.length - 1]);
-                String[] mainData = new String[this.mainHeaderSize];
-                mainData[0] = patientId;
-                System.arraycopy(resultDataRow, 0, mainData, 1, resultDataRow.length - 1);
-                this.outputFileWriter.writeNext(mainData);
-            }
-        } else {
-            //TODO: Implement H write out not
-        }
+    public void writeMain(String pid, ResultTable r, ExportQueryBuilder eq) {
+        this.writeMainData(pid, r, eq);
     }
 
-    public void writeTimeMeta(String patientId, ExportQueryBuilder eq, ResultTable r) {
-        String[] data = {
-                patientId, eq.getFirstAvailData().toString(), eq.getLastAvailData().toString(),
-                eq.getQueryStartTime().toString(), eq.getQueryEndTime().toString(), "", ""
-        };
-        //TODO: Fill last 2 columns
+    private void writeMainData(String patientId, ResultTable r, ExportQueryBuilder eq) {
+        int dataRows = r.getRowCount();
+        if (dataRows > this.intervals) {
+            this.intervals = dataRows;
+        }
+        int thisPatientTotalCount = 0, thisPatientTotalInsufficientCount = 0;
+        for (int i = 0; i < dataRows; i++) {
+            List<Object> row = r.getDatalistByRow(i);
+            int rowSize = row.size();
+
+            String[] mainData = new String[this.mainHeaderSize];
+            mainData[0] = patientId;
+            mainData[1] = row.get(0).toString();
+            int count = (int) (double) row.get(rowSize - 1);
+
+            // One data per second, however should NOT rely on that
+            boolean thisRowInsuffData = count < this.minEveryBinSeconds;
+            if (thisRowInsuffData) {
+                thisPatientTotalInsufficientCount += 1;
+            }
+
+            for (int j = 0; j < this.numberOfLabels; j++) {
+                Object data = row.get(j + 1);
+                if (data == null) {
+                    mainData[j + 2] = "N/A";
+                } else if (thisRowInsuffData) {
+                    mainData[j + 2] = "Insuff. Data";
+                } else {
+                    mainData[j + 2] = data.toString();
+                }
+            }
+
+            thisPatientTotalCount += count;
+            this.outputFileWriter.writeNext(mainData);
+        }
+        boolean tooFewData = false;
+        if (thisPatientTotalInsufficientCount * this.dsInterval > this.minTotalBinSeconds) {
+            this.numTotalInsuffBin += 1;
+            tooFewData = true;
+            this.writeMetaFile(String.format("  PID '%s' overall data insufficient.%n", patientId));
+        }
+        this.writeTimeMeta(patientId, eq, thisPatientTotalCount, thisPatientTotalInsufficientCount, tooFewData);
+    }
+
+    private void writeTimeMeta(String patientId, ExportQueryBuilder eq, int dataCount, int insuffCount, boolean tooFewData) {
+        Instant start = eq.getQueryStartTime(), end = eq.getQueryEndTime();
+        String[] data = {patientId, start.toString(), end.toString(),
+                String.valueOf((end.toEpochMilli() - start.toEpochMilli()) / 1000),
+                String.valueOf(dataCount), String.valueOf(insuffCount), tooFewData ? "No" : "Yes"};
         this.outputTimeMetaWriter.writeNext(data);
     }
 
-    public void close() {
-        this.closeMetaText();
+    public void close(int validNum) {
+        this.closeMetaText(validNum);
         this.closeCsv();
     }
 
     /**
      * Call when this downsample finished
      */
-    private void closeMetaText() {
+    private void closeMetaText(int validNum) {
         try {
-            this.outputMetaWriter.write(String.format("%nEXPORT ENDED ON '%s'.", LocalDateTime.now().toString()));
+            this.outputMetaWriter.write(String.format("%n%n# of insufficient data patients:%d%n", this.numTotalInsuffBin));
+            this.outputMetaWriter.write(String.format("# of valid patients: %d%nENDED ON '%s'", validNum, LocalDateTime.now().toString()));
             this.outputMetaWriter.close();
         } catch (IOException e) {
             logger.error("Meta text fail to close: {}", Util.stackTraceErrorToString(e));
@@ -155,6 +185,13 @@ public class ExportOutput {
         } catch (IOException e) {
             logger.error("Writers fail to close: {}", Util.stackTraceErrorToString(e));
         }
+    }
+
+    /**
+     * Transpose vert table to get a horz one
+     */
+    private void transposeVertCsv() {
+        //TODO: Finish this.
     }
 
 }
