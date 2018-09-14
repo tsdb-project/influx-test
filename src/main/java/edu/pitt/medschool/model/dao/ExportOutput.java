@@ -70,8 +70,8 @@ public class ExportOutput {
         String[] mainHeader;
         if (this.isOutputVertical) {
             mainHeader = new String[numLabel + 2];
-            mainHeader[0] = "Timestamp";
-            mainHeader[1] = "PID";
+            mainHeader[0] = "PID";
+            mainHeader[1] = "Timestamp";
             for (int i = 0; i < numLabel; i++) {
                 mainHeader[i + 2] = labelNames.get(i);
             }
@@ -108,9 +108,10 @@ public class ExportOutput {
                 //TODO: Some data is null to mark for N/A
                 //TODO: Some to mark as Insuff. Data
                 String[] resultDataRow = row.stream().map(Object::toString).toArray(String[]::new);
+                int count = (int) Double.parseDouble(resultDataRow[resultDataRow.length - 1]);
                 String[] mainData = new String[this.mainHeaderSize];
                 mainData[0] = patientId;
-                System.arraycopy(resultDataRow, 0, mainData, 1, resultDataRow.length);
+                System.arraycopy(resultDataRow, 0, mainData, 1, resultDataRow.length - 1);
                 this.outputFileWriter.writeNext(mainData);
             }
         } else {
