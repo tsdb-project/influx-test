@@ -44,7 +44,6 @@ import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.Export;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import okhttp3.OkHttpClient;
 
