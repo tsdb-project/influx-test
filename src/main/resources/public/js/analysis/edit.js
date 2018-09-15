@@ -485,7 +485,7 @@ $(document).ready(function() {
         $('#electrode').empty();
         $('#column').empty();
     });
-
+    
     $("#addGroupButton").click(function() {
         if ($('#aggregation-form')[0].checkValidity()) {
             if (map.type == null) {

@@ -1,7 +1,10 @@
 package edu.pitt.medschool.controller.analysis;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
@@ -9,12 +12,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -25,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -301,6 +308,30 @@ public class AnalysisController {
         RestfulResponse response = new RestfulResponse(1, file.getOriginalFilename());
         response.setData(lists);
         return response;
+    }
+
+    @GetMapping("api/analysis/job")
+    @ResponseBody
+    public RestfulResponse uploadPatientList() {
+        RestfulResponse response = new RestfulResponse(1, "");
+        response.setData(analysisService.selectAllExportJobOnLocalMachine());
+        return response;
+    }
+
+    @GetMapping(value = "download", params = { "path", "id" })
+    public StreamingResponseBody getSteamingFile(HttpServletResponse response, @RequestParam("path") String path, @RequestParam("id") Integer id)
+            throws IOException {
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "output_" + id + ".zip"));
+        InputStream inputStream = new FileInputStream(new File(path));
+        return outputStream -> {
+            int nRead;
+            byte[] data = new byte[1024];
+            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                outputStream.write(data, 0, nRead);
+            }
+            inputStream.close();
+        };
     }
 
     // TODO: Remove in production

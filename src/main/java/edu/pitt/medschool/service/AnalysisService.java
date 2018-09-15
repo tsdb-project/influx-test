@@ -28,8 +28,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
+import edu.pitt.medschool.controller.analysis.vo.ExportVO;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
+import edu.pitt.medschool.framework.util.FileZip;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dao.AnalysisUtil;
@@ -42,6 +44,7 @@ import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.Export;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import okhttp3.OkHttpClient;
 
@@ -180,6 +183,12 @@ public class AnalysisService {
             logger.error(Util.stackTraceErrorToString(e));
         } finally {
             outputWriter.close(validPatientCounter.get());
+            FileZip.zip(outputDir.getAbsolutePath(), "output/output_" + job.getId() + ".zip", "");
+            job.setFinished(true);
+            ExportWithBLOBs updateJob = new ExportWithBLOBs();
+            updateJob.setId(job.getId());
+            updateJob.setFinished(true);
+            exportDao.updateByPrimaryKeySelective(updateJob);
         }
     }
 
@@ -284,6 +293,10 @@ public class AnalysisService {
 
     public int insertExportJob(ExportWithBLOBs job) {
         return exportDao.insertExportJob(job);
+    }
+
+    public List<ExportVO> selectAllExportJobOnLocalMachine() {
+        return exportDao.selectAllExportJobOnLocalMachine();
     }
 
 }

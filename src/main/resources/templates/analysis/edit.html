@@ -19,8 +19,14 @@
 <!-- App styles -->
 <link rel="stylesheet" href="/css/app.min.css">
 <style>
-.custom-dropdown {
-	z-index: 100000;
+.no-interaction {
+	pointer-events: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	background-color: #ffc;
+	padding: 15px;
 }
 </style>
 </head>
@@ -217,6 +223,7 @@
                                         </label>
                                     </div>
                                 </div>
+                                <div class="col-sm-12 col-md-12" style="height: 15px"></div>
                                 <div class="col-sm-12 col-md-12">
                                     <label>Upload Patient List</label>
                                     <div class="input-group mb-2 no-gutters">
@@ -228,6 +235,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-sm-12 col-md-12" style="height: 15px"></div>
                                 <div class="col-sm-12 col-md-12">
                                     <label>Output layout</label>
                                     <div class="btn-group btn-group-toggle input-group mb-2" data-toggle="buttons" id="layout">
@@ -238,6 +246,20 @@
                                         <label class="btn col-sm-6 col-md-6">
                                             <input type="radio" value="true" autocomplete="off" name="layout">
                                             Long Form (Vertical)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-12" style="height: 15px"></div>
+                                <div class="col-sm-12 col-md-12 no-interaction">
+                                    <label>Choose Data Source (under development)</label>
+                                    <div class="btn-group btn-group-toggle input-group mb-2" data-toggle="buttons" id="layout">
+                                        <label class="btn active col-sm-6 col-md-6">
+                                            <input type="radio" value="local" autocomplete="off" name="layout" disabled>
+                                            Local Database (for a test run)
+                                        </label>
+                                        <label class="btn col-sm-6 col-md-6">
+                                            <input type="radio" value="psc" autocomplete="off" name="layout" disabled>
+                                            PSC Database
                                         </label>
                                     </div>
                                 </div>
@@ -519,6 +541,8 @@
     <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.print.min.js"></script>
     <script src="/vendors/bower_components/jszip/dist/jszip.min.js"></script>
     <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net/js/moment.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net/js/datetime-moment.js"></script>
 
     <!-- App functions and actions -->
     <script src="/js/navigation.js"></script>
