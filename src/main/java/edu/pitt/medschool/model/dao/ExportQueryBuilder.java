@@ -48,6 +48,7 @@ public class ExportQueryBuilder {
     private List<DataTimeSpanBean> timeseriesMetadata;
 
     // Meta that this class generated (That others may use)
+    private int downsampleOffset = 0;
     private List<Integer> validTimeSpanIds;
     private Instant firstAvailData = Instant.MAX;
     private Instant lastAvailData = Instant.MIN;
@@ -57,13 +58,15 @@ public class ExportQueryBuilder {
     /**
      * Initialize this class (Generate nothing if dts is empty)
      *
-     * @param dts     Data
-     * @param v       List of DownsampleGroup
-     * @param columns Columns for every downsample group
-     * @param ds      Downsample itself
-     * @param needAr  This job is Ar or NoAr
+     * @param fakeStartTime Determine group by offset
+     * @param dts           Data
+     * @param v             List of DownsampleGroup
+     * @param columns       Columns for every downsample group
+     * @param ds            Downsample itself
+     * @param needAr        This job is Ar or NoAr
      */
-    public ExportQueryBuilder(List<DataTimeSpanBean> dts, List<DownsampleGroup> v, List<List<String>> columns, Downsample ds, boolean needAr) {
+    public ExportQueryBuilder(Instant fakeStartTime, List<DataTimeSpanBean> dts, List<DownsampleGroup> v, List<List<String>> columns,
+                              Downsample ds, boolean needAr) {
         if (dts == null || dts.isEmpty()) {
             return;
         }
@@ -87,8 +90,19 @@ public class ExportQueryBuilder {
         if (this.exportStartOffset > 0) {
             this.queryStartTime = this.firstAvailData.plusSeconds(this.exportStartOffset);
         }
+        calcOffsetInSeconds(fakeStartTime);
         this.globalTimeLimitWhere = String.format(Template.timeCondition, this.queryStartTime.toString(), this.queryEndTime.toString());
         buildQuery();
+    }
+
+    /**
+     * Find offset (in seconds) to match the start time
+     */
+    private void calcOffsetInSeconds(Instant fakeStartTime) {
+        LocalDateTime fakeStart = LocalDateTime.ofInstant(fakeStartTime, ZoneOffset.UTC);
+        LocalDateTime acutalStart = LocalDateTime.ofInstant(this.queryStartTime, ZoneOffset.UTC);
+        this.downsampleOffset = (acutalStart.getMinute() - fakeStart.getMinute()) * 60 +
+                (acutalStart.getSecond() - fakeStart.getSecond());
     }
 
     private void populateDownsampleGroup(List<DownsampleGroup> v) {
@@ -186,7 +200,7 @@ public class ExportQueryBuilder {
         String timeBoud = String.format(Template.timeCondition, this.queryStartTime.toString(), this.queryEndTime.toString());
 
         return String.format(Template.basicDownsampleOuter, cols.toString(), wrapByBracket(aggrQuery), timeBoud,
-                this.downsampleInterval, this.calcOffsetInSeconds());
+                this.downsampleInterval, this.downsampleOffset);
     }
 
     /**
@@ -209,7 +223,7 @@ public class ExportQueryBuilder {
         cols[cols.length - 1] = String.format(Template.aggregationCount, "Time");
 
         return String.format(Template.basicDownsampleOuter, String.join(", ", cols), "\"" + pid + "\"", locator,
-                this.downsampleInterval, this.calcOffsetInSeconds());
+                this.downsampleInterval, this.downsampleOffset);
     }
 
     /**
@@ -317,14 +331,6 @@ public class ExportQueryBuilder {
             // Need NoAr but this UUID only has Ar
             return !as.equals(DataTimeSpanBean.ArStatus.ArOnly);
         }
-    }
-
-    /**
-     * Find offset (in seconds) to match the start time
-     */
-    private int calcOffsetInSeconds() {
-        LocalDateTime d = LocalDateTime.ofInstant(this.queryStartTime, ZoneOffset.UTC);
-        return (d.getMinute() * 60 + d.getSecond());
     }
 
 }
