@@ -134,8 +134,11 @@ public class AnalysisService {
             while ((patientId = idQueue.poll()) != null) {
                 try {
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
+                    ResultTable r = InfluxUtil.justQueryData(influxDB, true, String.format(
+                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
+                            patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()))[0];
 
-                    ExportQueryBuilder eq = new ExportQueryBuilder(dtsb, groups, columns, exportQuery, job.getAr());
+                    ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse((String) r.getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery, job.getAr());
                     String finalQueryString = eq.getQueryString();
                     if (finalQueryString.isEmpty()) {
                         outputWriter.writeMetaFile(String.format("  PID '%s' no available data.%n", patientId));
