@@ -56,4 +56,8 @@ public class ImportProgressDao {
         return iProgessMapper.getActivityList(uuid);
     }
 
+    public String selectDatabaseVersion(String uuid) {
+        return iProgessMapper.selectDatabaseVersion(uuid);
+    }
+
 }

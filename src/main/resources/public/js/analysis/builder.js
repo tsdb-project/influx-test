@@ -3,6 +3,7 @@ $(document).ready(function () {
         "data": []
     };
 
+    $.fn.dataTable.moment('M/D/YYYY, h:mm:ss a');
     var table = $('#queryTable').DataTable({
         ajax: {
             "url": "/analysis/query"

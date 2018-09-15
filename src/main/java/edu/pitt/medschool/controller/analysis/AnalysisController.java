@@ -1,7 +1,10 @@
 package edu.pitt.medschool.controller.analysis;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
@@ -9,12 +12,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -25,6 +31,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
@@ -35,9 +44,10 @@ import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.Export;
+import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
+import edu.pitt.medschool.service.ExportService;
 
 /**
  * @author Isolachine
@@ -57,6 +67,8 @@ public class AnalysisController {
     ImportedFileDao importedFileDao;
     @Autowired
     AnalysisService analysisService;
+    @Autowired
+    ExportService exportService;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -84,6 +96,13 @@ public class AnalysisController {
     @RequestMapping("analysis/builder")
     public Model builderPage(Model model) {
         return analysisGenerateModel(model);
+    }
+
+    @RequestMapping("analysis/job")
+    public Model jobPage(Model model) {
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "job");
+        return model;
     }
 
     @RequestMapping("analysis/create")
@@ -252,12 +271,22 @@ public class AnalysisController {
         public String ageUpper;
     }
 
-    @RequestMapping("api/export/export/{qid}")
+    @PostMapping("api/export/export")
     @ResponseBody
-    public void exportQuery(@PathVariable(required = true) Integer qid, @RequestBody(required = true) Export job) throws IOException {
-        if (analysisService.insertExportJob(job) == 1) {
-            analysisService.exportToFile(job.getId(), false);
+    public RestfulResponse exportQuery(@RequestBody(required = true) ExportWithBLOBs job, RestfulResponse response) throws JsonProcessingException {
+        if (exportService.completeJobAndInsert(job) == 1) {
+            response.setCode(1);
+            try {
+                analysisService.exportToFile(job.getId(), false);
+                response.setMsg("Successfully added job.");
+            } catch (Exception e) {
+                response.setMsg("Failed to add job.");
+            }
+        } else {
+            response.setCode(0);
+            response.setMsg("Database error!");
         }
+        return response;
     }
 
     @PostMapping("api/export/patient_list/")
@@ -279,6 +308,30 @@ public class AnalysisController {
         RestfulResponse response = new RestfulResponse(1, file.getOriginalFilename());
         response.setData(lists);
         return response;
+    }
+
+    @GetMapping("api/analysis/job")
+    @ResponseBody
+    public RestfulResponse uploadPatientList() {
+        RestfulResponse response = new RestfulResponse(1, "");
+        response.setData(analysisService.selectAllExportJobOnLocalMachine());
+        return response;
+    }
+
+    @GetMapping(value = "download", params = { "path", "id" })
+    public StreamingResponseBody getSteamingFile(HttpServletResponse response, @RequestParam("path") String path, @RequestParam("id") Integer id)
+            throws IOException {
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "output_" + id + ".zip"));
+        InputStream inputStream = new FileInputStream(new File(path));
+        return outputStream -> {
+            int nRead;
+            byte[] data = new byte[1024];
+            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                outputStream.write(data, 0, nRead);
+            }
+            inputStream.close();
+        };
     }
 
     // TODO: Remove in production

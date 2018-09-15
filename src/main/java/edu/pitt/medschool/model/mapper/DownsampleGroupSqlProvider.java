@@ -57,6 +57,9 @@ public class DownsampleGroupSqlProvider {
         if (record.getUpdateTime() != null) {
             sql.VALUES("update_time", "#{updateTime,jdbcType=TIMESTAMP}");
         }
+        if (record.getDeleted() != null) {
+            sql.VALUES("deleted", "#{deleted,jdbcType=BIT}");
+        }
         if (record.getColumns() != null) {
             sql.VALUES("columns", "#{columns,jdbcType=LONGVARCHAR}");
         }
@@ -80,6 +83,7 @@ public class DownsampleGroupSqlProvider {
         sql.SELECT("aggregation");
         sql.SELECT("create_time");
         sql.SELECT("update_time");
+        sql.SELECT("deleted");
         sql.SELECT("columns");
         sql.FROM("downsample_group");
         applyWhere(sql, example, false);
@@ -106,6 +110,7 @@ public class DownsampleGroupSqlProvider {
         sql.SELECT("aggregation");
         sql.SELECT("create_time");
         sql.SELECT("update_time");
+        sql.SELECT("deleted");
         sql.FROM("downsample_group");
         applyWhere(sql, example, false);
         if (example != null && example.getOrderByClause() != null) {
@@ -144,6 +149,9 @@ public class DownsampleGroupSqlProvider {
         if (record.getUpdateTime() != null) {
             sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
         }
+        if (record.getDeleted() != null) {
+            sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
+        }
         if (record.getColumns() != null) {
             sql.SET("columns = #{record.columns,jdbcType=LONGVARCHAR}");
         }
@@ -165,6 +173,7 @@ public class DownsampleGroupSqlProvider {
         sql.SET("aggregation = #{record.aggregation,jdbcType=VARCHAR}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
+        sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
         sql.SET("columns = #{record.columns,jdbcType=LONGVARCHAR}");
         DownsampleGroupExample example = (DownsampleGroupExample) parameter.get("example");
         applyWhere(sql, example, true);
@@ -185,6 +194,7 @@ public class DownsampleGroupSqlProvider {
         sql.SET("aggregation = #{record.aggregation,jdbcType=VARCHAR}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
+        sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
         DownsampleGroupExample example = (DownsampleGroupExample) parameter.get("example");
         applyWhere(sql, example, true);
         return sql.toString();
@@ -214,6 +224,9 @@ public class DownsampleGroupSqlProvider {
         }
         if (record.getUpdateTime() != null) {
             sql.SET("update_time = #{updateTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getDeleted() != null) {
+            sql.SET("deleted = #{deleted,jdbcType=BIT}");
         }
         if (record.getColumns() != null) {
             sql.SET("columns = #{columns,jdbcType=LONGVARCHAR}");
