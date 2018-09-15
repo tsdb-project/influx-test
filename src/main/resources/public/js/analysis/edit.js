@@ -121,6 +121,7 @@ $(document).ready(function() {
     })
 
     $("#submitJobButton").click(function() {
+        $("#submitJobButton").attr('disabled','disabled');
         var form = {
             "queryId": $("#id").val(),
             "patientList": patientList,
@@ -128,17 +129,13 @@ $(document).ready(function() {
             "ar": $('#ar label.active input').val() == "true" ? true : false
         };
         $.ajax({
-            'url': "/api/export/export/" + $("#id").val(),
+            'url': "/api/export/export/",
             'type': 'post',
             'data': JSON.stringify(form),
             'contentType': "application/json",
             'dataType': 'json',
-            'success': function(data) {
-                window.location.href = '/analysis/job';
-            },
-            'error': function() {}
         });
-        
+        window.location.href = '/analysis/job';
     });
 
     $("#saveButton").click(function() {

@@ -26,8 +26,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
+import edu.pitt.medschool.controller.analysis.vo.DownsampleVO;
 import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.Util;
@@ -35,7 +39,7 @@ import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.Export;
+import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
 
@@ -84,6 +88,13 @@ public class AnalysisController {
     @RequestMapping("analysis/builder")
     public Model builderPage(Model model) {
         return analysisGenerateModel(model);
+    }
+
+    @RequestMapping("analysis/job")
+    public Model jobPage(Model model) {
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "job");
+        return model;
     }
 
     @RequestMapping("analysis/create")
@@ -252,12 +263,28 @@ public class AnalysisController {
         public String ageUpper;
     }
 
-    @RequestMapping("api/export/export/{qid}")
+    @PostMapping("api/export/export")
     @ResponseBody
-    public void exportQuery(@PathVariable(required = true) Integer qid, @RequestBody(required = true) Export job) throws IOException {
+    public RestfulResponse exportQuery(@RequestBody(required = true) ExportWithBLOBs job, RestfulResponse response) throws JsonProcessingException {
+        DownsampleVO downsampleVO = new DownsampleVO();
+        downsampleVO.setDownsample(analysisService.selectByPrimaryKey(job.getQueryId()));
+        downsampleVO.setGroups(analysisService.selectAllAggregationGroupByQueryId(job.getQueryId()));
+        ObjectMapper mapper = new ObjectMapper();
+        job.setQueryJson(mapper.writeValueAsString(downsampleVO));
+
         if (analysisService.insertExportJob(job) == 1) {
-            analysisService.exportToFile(job.getId(), false);
+            response.setCode(1);
+            try {
+                analysisService.exportToFile(job.getId(), false);
+                response.setMsg("Successfully added job.");
+            } catch (Exception e) {
+                response.setMsg("Failed to add job.");
+            }
+        } else {
+            response.setCode(0);
+            response.setMsg("Database error!");
         }
+        return response;
     }
 
     @PostMapping("api/export/patient_list/")

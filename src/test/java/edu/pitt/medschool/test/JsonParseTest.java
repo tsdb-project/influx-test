@@ -28,6 +28,7 @@ public class JsonParseTest {
         ColumnJSON j = objectMapper.readValue(json, ColumnJSON.class);
         System.out.println(j.getColumns().get(0));
         System.out.println(j.getColumns().get(1));
-
+        j.setType("heheeh");
+        System.out.println(objectMapper.writeValueAsString(j));
     }
 }
