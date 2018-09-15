@@ -522,6 +522,156 @@ public class ExportExample {
             addCriterion("update_time not between", value1, value2, "updateTime");
             return (Criteria) this;
         }
+
+        public Criteria andMachineIsNull() {
+            addCriterion("machine is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineIsNotNull() {
+            addCriterion("machine is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineEqualTo(String value) {
+            addCriterion("machine =", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineNotEqualTo(String value) {
+            addCriterion("machine <>", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineGreaterThan(String value) {
+            addCriterion("machine >", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineGreaterThanOrEqualTo(String value) {
+            addCriterion("machine >=", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineLessThan(String value) {
+            addCriterion("machine <", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineLessThanOrEqualTo(String value) {
+            addCriterion("machine <=", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineLike(String value) {
+            addCriterion("machine like", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineNotLike(String value) {
+            addCriterion("machine not like", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineIn(List<String> values) {
+            addCriterion("machine in", values, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineNotIn(List<String> values) {
+            addCriterion("machine not in", values, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineBetween(String value1, String value2) {
+            addCriterion("machine between", value1, value2, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineNotBetween(String value1, String value2) {
+            addCriterion("machine not between", value1, value2, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionIsNull() {
+            addCriterion("db_version is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionIsNotNull() {
+            addCriterion("db_version is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionEqualTo(String value) {
+            addCriterion("db_version =", value, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionNotEqualTo(String value) {
+            addCriterion("db_version <>", value, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionGreaterThan(String value) {
+            addCriterion("db_version >", value, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionGreaterThanOrEqualTo(String value) {
+            addCriterion("db_version >=", value, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionLessThan(String value) {
+            addCriterion("db_version <", value, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionLessThanOrEqualTo(String value) {
+            addCriterion("db_version <=", value, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionLike(String value) {
+            addCriterion("db_version like", value, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionNotLike(String value) {
+            addCriterion("db_version not like", value, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionIn(List<String> values) {
+            addCriterion("db_version in", values, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionNotIn(List<String> values) {
+            addCriterion("db_version not in", values, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionBetween(String value1, String value2) {
+            addCriterion("db_version between", value1, value2, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionNotBetween(String value1, String value2) {
+            addCriterion("db_version not between", value1, value2, "dbVersion");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineLikeInsensitive(String value) {
+            addCriterion("upper(machine) like", value.toUpperCase(), "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbVersionLikeInsensitive(String value) {
+            addCriterion("upper(db_version) like", value.toUpperCase(), "dbVersion");
+            return (Criteria) this;
+        }
     }
 
     /**

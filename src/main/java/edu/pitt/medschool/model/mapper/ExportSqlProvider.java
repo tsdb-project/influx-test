@@ -55,6 +55,12 @@ public class ExportSqlProvider {
         if (record.getUpdateTime() != null) {
             sql.VALUES("update_time", "#{updateTime,jdbcType=TIMESTAMP}");
         }
+        if (record.getMachine() != null) {
+            sql.VALUES("machine", "#{machine,jdbcType=VARCHAR}");
+        }
+        if (record.getDbVersion() != null) {
+            sql.VALUES("db_version", "#{dbVersion,jdbcType=VARCHAR}");
+        }
         if (record.getPatientList() != null) {
             sql.VALUES("patient_list", "#{patientList,jdbcType=LONGVARCHAR}");
         }
@@ -80,6 +86,8 @@ public class ExportSqlProvider {
         sql.SELECT("layout");
         sql.SELECT("create_time");
         sql.SELECT("update_time");
+        sql.SELECT("machine");
+        sql.SELECT("db_version");
         sql.SELECT("patient_list");
         sql.SELECT("query_json");
         sql.FROM("export");
@@ -106,6 +114,8 @@ public class ExportSqlProvider {
         sql.SELECT("layout");
         sql.SELECT("create_time");
         sql.SELECT("update_time");
+        sql.SELECT("machine");
+        sql.SELECT("db_version");
         sql.FROM("export");
         applyWhere(sql, example, false);
         if (example != null && example.getOrderByClause() != null) {
@@ -141,6 +151,12 @@ public class ExportSqlProvider {
         if (record.getUpdateTime() != null) {
             sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
         }
+        if (record.getMachine() != null) {
+            sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
+        }
+        if (record.getDbVersion() != null) {
+            sql.SET("db_version = #{record.dbVersion,jdbcType=VARCHAR}");
+        }
         if (record.getPatientList() != null) {
             sql.SET("patient_list = #{record.patientList,jdbcType=LONGVARCHAR}");
         }
@@ -164,6 +180,8 @@ public class ExportSqlProvider {
         sql.SET("layout = #{record.layout,jdbcType=BIT}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
+        sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
+        sql.SET("db_version = #{record.dbVersion,jdbcType=VARCHAR}");
         sql.SET("patient_list = #{record.patientList,jdbcType=LONGVARCHAR}");
         sql.SET("query_json = #{record.queryJson,jdbcType=LONGVARCHAR}");
         ExportExample example = (ExportExample) parameter.get("example");
@@ -184,6 +202,8 @@ public class ExportSqlProvider {
         sql.SET("layout = #{record.layout,jdbcType=BIT}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
+        sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
+        sql.SET("db_version = #{record.dbVersion,jdbcType=VARCHAR}");
         ExportExample example = (ExportExample) parameter.get("example");
         applyWhere(sql, example, true);
         return sql.toString();
@@ -210,6 +230,12 @@ public class ExportSqlProvider {
         }
         if (record.getUpdateTime() != null) {
             sql.SET("update_time = #{updateTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getMachine() != null) {
+            sql.SET("machine = #{machine,jdbcType=VARCHAR}");
+        }
+        if (record.getDbVersion() != null) {
+            sql.SET("db_version = #{dbVersion,jdbcType=VARCHAR}");
         }
         if (record.getPatientList() != null) {
             sql.SET("patient_list = #{patientList,jdbcType=LONGVARCHAR}");
