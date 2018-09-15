@@ -5,6 +5,8 @@ import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,9 +21,8 @@ public class ExportQueryBuilder {
         static final String defaultAggregationColName = "ag_label_";
 
         static final String basicAggregationInner = "SELECT %s FROM \"%s\" WHERE %s";
-        static final String basicDownsampleOuter = "SELECT %s FROM %s WHERE %s GROUP BY time(%ds) ORDER BY time ASC";
+        static final String basicDownsampleOuter = "SELECT %s FROM %s WHERE %s GROUP BY time(%ds,%ds) ORDER BY time ASC";
 
-        static final String downsampleTimeOutputLimit = "(time <= '%s')";
         static final String aggregationCount = "COUNT(%s) AS C";
         static final String timeCondition = "(time >= '%s' AND time <= '%s')";
     }
@@ -182,9 +183,10 @@ public class ExportQueryBuilder {
         }
         // A count column
         cols.append(String.format(Template.aggregationCount, this.columnNameAliases.get(0)));
-        String timeUpper = String.format(Template.downsampleTimeOutputLimit, this.queryEndTime.toString());
+        String timeBoud = String.format(Template.timeCondition, this.queryStartTime.toString(), this.queryEndTime.toString());
 
-        return String.format(Template.basicDownsampleOuter, cols.toString(), wrapByBracket(aggrQuery), timeUpper, this.downsampleInterval);
+        return String.format(Template.basicDownsampleOuter, cols.toString(), wrapByBracket(aggrQuery), timeBoud,
+                this.downsampleInterval, this.calcOffsetInSeconds());
     }
 
     /**
@@ -206,7 +208,8 @@ public class ExportQueryBuilder {
         }
         cols[cols.length - 1] = String.format(Template.aggregationCount, "Time");
 
-        return String.format(Template.basicDownsampleOuter, String.join(", ", cols), "\"" + pid + "\"", locator, this.downsampleInterval);
+        return String.format(Template.basicDownsampleOuter, String.join(", ", cols), "\"" + pid + "\"", locator,
+                this.downsampleInterval, this.calcOffsetInSeconds());
     }
 
     /**
@@ -314,6 +317,14 @@ public class ExportQueryBuilder {
             // Need NoAr but this UUID only has Ar
             return !as.equals(DataTimeSpanBean.ArStatus.ArOnly);
         }
+    }
+
+    /**
+     * Find offset (in seconds) to match the start time
+     */
+    private int calcOffsetInSeconds() {
+        LocalDateTime d = LocalDateTime.ofInstant(this.queryStartTime, ZoneOffset.UTC);
+        return (d.getMinute() * 60 + d.getSecond());
     }
 
 }
