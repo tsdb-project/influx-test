@@ -1,32 +1,6 @@
 package edu.pitt.medschool.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
 import edu.pitt.medschool.controller.analysis.vo.ExportVO;
@@ -35,18 +9,27 @@ import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.FileZip;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dao.AnalysisUtil;
-import edu.pitt.medschool.model.dao.DownsampleDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupDao;
-import edu.pitt.medschool.model.dao.ExportDao;
-import edu.pitt.medschool.model.dao.ExportOutput;
-import edu.pitt.medschool.model.dao.ExportQueryBuilder;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.PatientDao;
+import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import okhttp3.OkHttpClient;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Export functions
@@ -124,8 +107,8 @@ public class AnalysisService {
         }
 
         int paraCount = determineParaNumber();
-        ExportOutput outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery);
-        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(influxDB, logger), patientIDs.size(), job.getAr(), paraCount);
+        ExportOutput outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery, job);
+        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(influxDB, logger), patientIDs.size(), paraCount);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         // Parallel query task
@@ -134,23 +117,23 @@ public class AnalysisService {
             while ((patientId = idQueue.poll()) != null) {
                 try {
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
-                    ResultTable r = InfluxUtil.justQueryData(influxDB, true, String.format(
+                    String timeOffset = (String) InfluxUtil.justQueryData(influxDB, true, String.format(
                             "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
-                            patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()))[0];
+                            patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()))[0].getDataByColAndRow(0, 0);
 
-                    ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse((String) r.getDataByColAndRow(0, 0)), dtsb, groups, columns,
+                    ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(timeOffset), dtsb, groups, columns,
                             exportQuery, job.getAr());
                     String finalQueryString = eq.getQueryString();
                     if (finalQueryString.isEmpty()) {
-                        outputWriter.writeMetaFile(String.format("  PID '%s' no available data.%n", patientId));
-                        return;
+                        outputWriter.writeMetaFile(String.format("  PID <%s> no available data.%n", patientId));
+                        continue;
                     }
                     logger.debug("Query for {}: {}", patientId, finalQueryString);
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
 
                     if (res.length != 1) {
-                        outputWriter.writeMetaFile(String.format("  PID '%s' incorrect result from database.%n", patientId));
-                        return;
+                        outputWriter.writeMetaFile(String.format("  PID <%s> incorrect result from database.%n", patientId));
+                        continue;
                     }
 
                     outputWriter.writeForOnePatient(patientId, res[0], eq, dtsb);
@@ -171,7 +154,7 @@ public class AnalysisService {
                             logger.error(String.format("%s: Re-queue failed.", patientId));
                     } else {
                         logger.error(String.format("%s: Failed more than 3 times.", patientId));
-                        outputWriter.writeMetaFile(String.format("  PID '%s' failed more than 3 times, possible program error.%n", patientId));
+                        outputWriter.writeMetaFile(String.format("  PID <%s> failed more than 3 times, possible program error.%n", patientId));
                     }
                 }
             }

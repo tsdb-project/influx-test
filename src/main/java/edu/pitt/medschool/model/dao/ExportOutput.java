@@ -5,6 +5,7 @@ import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.Export;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,7 @@ public class ExportOutput {
     private LocalDateTime outputStartTime;
 
     // Downsample values
+    private Export job;
     private Downsample ds;
     private int dsInterval;
     private int numberOfLabels;
@@ -46,14 +48,16 @@ public class ExportOutput {
      * @param rootDir         Root dir for exporting
      * @param columnLabelName Label names for this export
      * @param ds              Downsample data
+     * @param job             An export job define by user
      */
-    public ExportOutput(String rootDir, List<String> columnLabelName, Downsample ds) throws IOException {
+    public ExportOutput(String rootDir, List<String> columnLabelName, Downsample ds, Export job) throws IOException {
         this.outputStartTime = LocalDateTime.now();
         this.numberOfLabels = columnLabelName.size();
         this.minBinRow = ds.getMinBinRow();
         this.minBin = ds.getMinBin();
         this.ds = ds;
         this.dsInterval = ds.getPeriod();
+        this.job = job;
 
         initWriters(rootDir);
         initCsvHeaders(columnLabelName);
@@ -81,7 +85,7 @@ public class ExportOutput {
         this.outputTimeMetaWriter.writeNext(timemetaHdr);
     }
 
-    public void writeInitialMetaText(int numPatientsInTsdb, int numQueueSize, boolean isAr, int threads) {
+    public void writeInitialMetaText(int numPatientsInTsdb, int numQueueSize, int threads) {
         if (this.initMetaWrote)
             return;
 
@@ -90,7 +94,7 @@ public class ExportOutput {
         this.writeMetaFile(String.format("# of threads: %d%n", threads));
         this.writeMetaFile(String.format("# of patients in database: %d%n", numPatientsInTsdb));
         this.writeMetaFile(String.format("# of patients initially: %d%n", numQueueSize));
-        this.writeMetaFile(String.format("AR status is: %s%n%n%n", isAr ? "AR" : "NoAR"));
+        this.writeMetaFile(String.format("AR status is: %s%n%n%n", this.job.getAr() ? "AR" : "NoAR"));
         this.initMetaWrote = true;
     }
 
@@ -163,8 +167,8 @@ public class ExportOutput {
     }
 
     public void close(int validNum) {
-        this.closeMetaText(validNum);
         this.closeCsv();
+        this.closeMetaText(validNum);
     }
 
     /**
@@ -174,6 +178,7 @@ public class ExportOutput {
         try {
             this.outputMetaWriter.write(String.format("%n%n# of insufficient data patients:%d%n", this.totalInvalidPatientCount));
             this.outputMetaWriter.write(String.format("# of valid patients: %d%nENDED ON '%s'", validNum, LocalDateTime.now().toString()));
+            this.outputMetaWriter.flush();
             this.outputMetaWriter.close();
         } catch (IOException e) {
             logger.error("Meta text fail to close: {}", Util.stackTraceErrorToString(e));

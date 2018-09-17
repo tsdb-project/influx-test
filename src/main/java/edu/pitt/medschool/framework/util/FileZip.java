@@ -1,12 +1,16 @@
 package edu.pitt.medschool.framework.util;
 
-import java.io.File;
-
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 public class FileZip {
+    private static final Logger logger = LoggerFactory.getLogger(FileZip.class);
+
     public static void zip(String targetPath, String destinationFilePath, String password) {
         try {
             ZipParameters parameters = new ZipParameters();
@@ -30,7 +34,7 @@ public class FileZip {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("File zip failed: {}", Util.stackTraceErrorToString(e));
         }
     }
 
@@ -43,7 +47,7 @@ public class FileZip {
             zipFile.extractAll(destinationFolderPath);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("File unzip failed: {}", Util.stackTraceErrorToString(e));
         }
     }
 
