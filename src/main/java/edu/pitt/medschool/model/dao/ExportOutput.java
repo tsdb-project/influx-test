@@ -111,7 +111,8 @@ public class ExportOutput {
         this.writeMetaFile(String.format("# of cores utilized: %d%n", threads));
         this.writeMetaFile(String.format("# of patients in database: %d%n", numPatientsInTsdb));
         this.writeMetaFile(String.format("# of patients in queue initially: %d%n", numQueueSize));
-        this.writeMetaFile(String.format("Dataset AR status is: %s%n%n%n", this.job.getAr() ? "AR" : "NoAR"));
+        this.writeMetaFile(String.format("Dataset AR status is: %s", this.job.getAr() ? "AR" : "NoAR"));
+        this.writeMetaFile(String.format("Spreadsheet output format is: %s%n%n%n", this.job.getLayout() ? "Long (Vertical)" : "Wide (Horizontal)"));
         this.initMetaWrote = true;
     }
 

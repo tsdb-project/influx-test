@@ -110,13 +110,20 @@ public class AnalysisService {
         ExportOutput outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery, job);
         outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(influxDB, logger), patientIDs.size(), paraCount);
 
+        // Wide output without duration is bad
+        if (!job.getLayout()) {
+            if (exportQuery.getDuration() == null || exportQuery.getDuration() == 0) {
+                outputWriter.writeMetaFile(String.format("%nWide output format must specify a duration.%n"));
+                jobClosingHandler(job, outputDir, outputWriter, 0);
+            }
+        }
+
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         // Parallel query task
         Runnable queryTask = () -> {
             String patientId;
             while ((patientId = idQueue.poll()) != null) {
                 try {
-                    List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
                     ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
                             "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
                             patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
@@ -124,6 +131,7 @@ public class AnalysisService {
                         outputWriter.writeMetaFile(String.format("  PID <%s> don't have enough data to export.%n", patientId));
                         continue;
                     }
+                    List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
                     ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns,
                             exportQuery, job.getAr());
                     String finalQueryString = eq.getQueryString();
@@ -173,14 +181,23 @@ public class AnalysisService {
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
         } finally {
-            outputWriter.close(validPatientCounter.get());
-            FileZip.zip(outputDir.getAbsolutePath(), "output/output_" + job.getId() + ".zip", "");
-            job.setFinished(true);
-            ExportWithBLOBs updateJob = new ExportWithBLOBs();
-            updateJob.setId(job.getId());
-            updateJob.setFinished(true);
-            exportDao.updateByPrimaryKeySelective(updateJob);
+            jobClosingHandler(job, outputDir, outputWriter, validPatientCounter.get());
         }
+    }
+
+    /**
+     * Handler when a job is finished (With error or not)
+     */
+    private void jobClosingHandler(ExportWithBLOBs job, File outputDir, ExportOutput eo, int validPatientNumber) {
+        if (eo != null) {
+            eo.close(validPatientNumber);
+        }
+        FileZip.zip(outputDir.getAbsolutePath(), "output/output_" + job.getId() + ".zip", "");
+        job.setFinished(true);
+        ExportWithBLOBs updateJob = new ExportWithBLOBs();
+        updateJob.setId(job.getId());
+        updateJob.setFinished(true);
+        exportDao.updateByPrimaryKeySelective(updateJob);
     }
 
     private List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
