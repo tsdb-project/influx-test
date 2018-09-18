@@ -1,21 +1,21 @@
 package edu.pitt.medschool.service;
 
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.util.InfluxUtil;
-import edu.pitt.medschool.model.QueryResultBean;
-import edu.pitt.medschool.model.TimeSpan;
-import edu.pitt.medschool.model.dao.PatientDao;
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.Query;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
+import edu.pitt.medschool.model.QueryResultBean;
+import edu.pitt.medschool.model.TimeSpan;
+import edu.pitt.medschool.model.dao.PatientDao;
 
 /**
  * Query related services
@@ -30,6 +30,7 @@ public class QueryUserDefinedService {
 
     private final String dbName = DBConfiguration.Data.DBNAME;
 
+    @SuppressWarnings("unused")
     public static void main(String[] args) {
         QueryUserDefinedService qs = new QueryUserDefinedService();
         List<QueryResultBean> a = qs.TypeAQuery("I100_1", 5, 10, null, null);
@@ -87,9 +88,9 @@ public class QueryUserDefinedService {
     public List<QueryResultBean> TypeBQuery(String colA, String colB, double valDiff, int hEp, List<String> customPids, List<Integer> customAr) {
         String queryDesc = "Find all patients where the hourly mean values in column X and column Y differ by at least Z% for at least Q hourly epochs.";
         List<QueryResultBean> finalRes = new ArrayList<>();
-        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM (" +
-                "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM \"%s\" WHERE \"arType\"='%s' GROUP BY TIME(1h)) " +
-                "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
+        String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM ("
+                + "SELECT * FROM (SELECT (MEAN(%s) - MEAN(%s)) / MEAN(%s) AS diff FROM \"%s\" WHERE \"arType\"='%s' GROUP BY TIME(1h)) "
+                + "WHERE diff > %f OR diff < - %f) GROUP BY TIME(%dh)) WHERE c = %d";
 
         List<String> targetPid = generateTargetPid(customPids);
 
@@ -128,11 +129,10 @@ public class QueryUserDefinedService {
      * @return Query execuation results
      */
     private QueryResultBean checkOnePatientA(String queryString, String pid, String queryN, int thrSec, boolean isAr) {
-        Query q = new Query(queryString, dbName);
-        Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
+        ResultTable[] res = InfluxUtil.justQueryData(this.influxDB, true, queryString);
 
         // This patient doesn't need to be included.
-        if (res.size() == 0)
+        if (res.length == 0)
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
@@ -140,7 +140,7 @@ public class QueryUserDefinedService {
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
-        List<Object> occTime = res.get("time");
+        List<Object> occTime = res[0].getDatalistByColumnName("time");
         qrb.setOccurTimes(occTime.size());
 
         // Do a type convert (Object -> Instant)
@@ -157,11 +157,10 @@ public class QueryUserDefinedService {
     }
 
     private QueryResultBean checkOnePatientB(String queryString, String pid, String queryN, int he, boolean isAr) {
-        Query q = new Query(queryString, dbName);
-        Map<String, List<Object>> res = InfluxUtil.QueryResultToKV(influxDB.query(q));
+        ResultTable[] res = InfluxUtil.justQueryData(this.influxDB, true, queryString);
 
         // This patient doesn't need to be included.
-        if (res.size() == 0)
+        if (res.length == 0)
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
@@ -169,7 +168,7 @@ public class QueryUserDefinedService {
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
-        List<Object> occTime = res.get("time");
+        List<Object> occTime = res[0].getDatalistByColumnName("time");
         qrb.setOccurTimes(occTime.size());
 
         List<TimeSpan> occTimes = new ArrayList<>(occTime.size());

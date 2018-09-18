@@ -61,8 +61,6 @@ public class ImportCsvService {
     private final BlockingQueue<Path> fileQueue = new LinkedBlockingQueue<>();
     private final Set<Path> processingSet = new HashSet<>();
 
-    // private static final int FAILURE_RETRY = 3;
-
     @Autowired
     private ImportedFileDao ifd;
 
@@ -89,10 +87,10 @@ public class ImportCsvService {
 
         AddArrayFiles(testFiles);
 
-        System.out.println("Sleep 3s...");
+        logger.debug("Sleep 3s...");
         Thread.sleep(3000);
 
-        System.out.println("Main exited, worker running...");
+        logger.debug("Main exited, worker running...");
     }
 
     /**
@@ -194,7 +192,8 @@ public class ImportCsvService {
      *
      * @return Obj[0]: Err msg; Obj[1]: Processed size.
      */
-    private Object[] fileImport(InfluxDB idb, String ar_type, String pid, Path file, long aFileSize) {
+    private Object[] fileImport(String ar_type, String pid, Path file, long aFileSize) {
+        InfluxDB idb = generateIdbClient();
         long currentProcessed = 0;
         String filename = file.getFileName().toString();
         long totalLines = 0;
@@ -209,28 +208,28 @@ public class ImportCsvService {
             totalProcessedSize.addAndGet(firstLine.length());
 
             // Next 6 lines no use expect time date
-            long tmp_size = 0;
-            String test_date = "";
+            long headerSize = 0;
+            StringBuilder testDate = new StringBuilder();
             for (int i = 0; i < 6; i++) {
                 String tmp = reader.readLine();
-                tmp_size += tmp.length();
-                switch (i) {
-                    case 3:
-                    case 4:
-                        test_date += tmp.split(",")[1].trim();
-                        break;
+                headerSize += tmp.length();
+                if (i == 3 || i == 4) {
+                    testDate.append(tmp.split(",")[1].trim());
                 }
             }
+
             // Test date in the headers is in PGH Time
-            Date testStartDate = TimeUtil.dateTimeFormatToDate(test_date, "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
-            long testStartTimeEpoch = testStartDate.getTime();
+            Date testStartTime = TimeUtil.dateTimeFormatToDate(testDate.toString(), "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
+            long testStartTimeEpoch = testStartTime.getTime();
 
             // Special operations when on DST shifting days
-            if (TimeUtil.isThisDayOnDstShift(TimeUtil.nycTimeZone, testStartDate)) {
+            if (TimeUtil.isThisDayOnDstShift(TimeUtil.nycTimeZone, testStartTime)) {
                 String errTemp = "%s hour on DST shift days";
                 String oper = "Add";
                 // Auto-fix the time according to month
-                if (testStartDate.getMonth() < Calendar.JUNE) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(testStartTime);
+                if (calendar.get(Calendar.MONTH) < Calendar.JUNE) {
                     testStartTimeEpoch = TimeUtil.addOneHourToTimestamp(testStartTimeEpoch); // Mar
                 } else {
                     testStartTimeEpoch = TimeUtil.subOneHourToTimestamp(testStartTimeEpoch); // Nov
@@ -239,67 +238,78 @@ public class ImportCsvService {
                 logFailureFiles(file.toString(), String.format(errTemp, oper), aFileSize, currentProcessed, true);
             }
 
-            currentProcessed += tmp_size;
-            totalProcessedSize.addAndGet(tmp_size);
+            currentProcessed += headerSize;
+            totalProcessedSize.addAndGet(headerSize);
 
             // 8th Line is column header line
             String eiL = reader.readLine();
             String[] columnNames = eiL.split(",");
-            int columnCount = columnNames.length, bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount, batchCount = 0;
+            int columnCount = columnNames.length,
+                    bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount, batchCount = 0;
 
             // More integrity checking
-            if (!columnNames[0].toLowerCase().equals("clockdatetime")) {
+            if (!columnNames[0].equalsIgnoreCase("clockdatetime")) {
                 throw new RuntimeException("Wrong first column!");
             }
 
             currentProcessed += eiL.length();
             totalProcessedSize.addAndGet(eiL.length());
 
-            BatchPoints records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type).tag("fileName", filename.substring(0, filename.length() - 4)).build();
+            BatchPoints records = BatchPoints.database(dbName)
+                    .tag("fileUUID", fileUUID)
+                    .tag("arType", ar_type)
+                    .tag("fileName", filename.substring(0, filename.length() - 4))
+                    .build();
 
+            long previousMeasurementEpoch = testStartTimeEpoch - 1000;
             String aLine;
             // Process every data lines
             while ((aLine = reader.readLine()) != null) {
                 String[] values = aLine.split(",");
-                int this_line_length = aLine.length();
+                int lengthOfThisLine = aLine.length();
 
                 totalLines++;
 
                 if (columnCount != values.length) {
                     String err_text = String.format("File content columns length inconsistent on line %d!", totalLines + 8);
                     logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
-                    currentProcessed += this_line_length;
-                    totalProcessedSize.addAndGet(this_line_length);
+                    currentProcessed += lengthOfThisLine;
+                    totalProcessedSize.addAndGet(lengthOfThisLine);
                     continue;
                 }
 
                 // Compare date on every measures (They are all UTCs)
-                double sTime = Double.valueOf(values[0]);
-                Date measurement_date = TimeUtil.serialTimeToDate(sTime, null);
-                long measurement_epoch_time = measurement_date.getTime();
-                // To avoid some problematic files, that measurement date is not reliable
-                if (!TimeUtil.dateIsSameDay(measurement_date, testStartDate)) {
-                    String err_text = String.format("Measurement date differs from test start date on line %d!", totalLines + 8);
-                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
-                    continue;
-                }
+                double sTime = Double.parseDouble(values[0]);
+                Date measurementDate = TimeUtil.serialTimeToDate(sTime, null);
+                long measurementEpoch = measurementDate.getTime();
+
 
                 // Measurement time should be later than test start time
-                if (measurement_epoch_time < testStartTimeEpoch) {
+                if (measurementEpoch < testStartTimeEpoch) {
                     String err_text = String.format("Measurement time earlier than test start time on line %d!", totalLines + 8);
                     logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
                     continue;
                 }
 
-                // Set initial capacity for slightly better performance
-                Map<String, Object> lineKVMap = new HashMap<>((int) (columnCount / 0.70));
+                // To avoid some problematic files where measurement date is not reliable
+                if (!TimeUtil.dateIsSameDay(measurementDate, testStartTime)) {
+                    logger.warn(String.format("Measurement accross day on line %d!", totalLines + 8));
+                }
+
+                // Overlap?
+                if (measurementEpoch < previousMeasurementEpoch) {
+                    logger.warn(String.format("Measurement time overlap on line %d!", totalLines + 8));
+                }
+
+                // Set initial capacity for better performance
+                Map<String, Object> lineKVMap = new HashMap<>((int) (columnCount + 1), 1.0f);
                 boolean gotParseProblem = false;
                 for (int i = 1; i < values.length; i++) {
                     try {
                         lineKVMap.put(columnNames[i], Double.valueOf(values[i]));
                     } catch (NumberFormatException nfe) {
-                        currentProcessed += this_line_length;
-                        totalProcessedSize.addAndGet(this_line_length);
+                        currentProcessed += lengthOfThisLine;
+                        totalProcessedSize.addAndGet(lengthOfThisLine);
                         gotParseProblem = true;
                         break;
                     }
@@ -311,18 +321,19 @@ public class ImportCsvService {
                 }
 
                 // Measurement is PID
-                Point record = Point.measurement(pid).time(measurement_epoch_time, TimeUnit.MILLISECONDS).fields(lineKVMap).build();
+                Point record = Point.measurement(pid).time(measurementEpoch, TimeUnit.MILLISECONDS).fields(lineKVMap).build();
                 records.point(record);
                 batchCount++;
-                currentProcessed += this_line_length;
-                totalProcessedSize.addAndGet(this_line_length);
+                currentProcessed += lengthOfThisLine;
+                totalProcessedSize.addAndGet(lengthOfThisLine);
+                previousMeasurementEpoch = measurementEpoch;
 
                 // Write batch into DB
                 if (batchCount >= bulkInsertMax) {
                     long start = System.currentTimeMillis();
                     idb.write(records);
                     long end = System.currentTimeMillis();
-                    logger.debug("used " + (end - start) / 1000.0 + "s");
+                    logger.info("Write to InfluxDB used {}s.", (end - start) / 1000.0);
 
                     // Reset batch point
                     records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type).tag("fileName", filename.substring(0, filename.length() - 4)).build();
@@ -330,25 +341,26 @@ public class ImportCsvService {
                     logImportingFile(file.toString(), aFileSize, currentProcessed, totalLines);
 
                     if (end - start > softTimeout) {
-                        logger.debug("Sleeping for " + timeoutSleep + " seconds");
+                        logger.warn(String.format("Sleeping for %ds", timeoutSleep));
                         TimeUnit.SECONDS.sleep(timeoutSleep);
                     }
                 }
             }
 
             // Write the last batch
-            reader.close();
             idb.write(records);
-            idb.close();
+            reader.close();
 
         } catch (Exception e) {
             try {
-                logger.debug("Sleeping for " + timeoutSleep + " seconds");
+                logger.debug(String.format("Sleeping for %ds", timeoutSleep));
                 TimeUnit.SECONDS.sleep(timeoutSleep);
             } catch (InterruptedException e1) {
                 logger.error(Util.stackTraceErrorToString(e1));
             }
             return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
+        } finally {
+            idb.close();
         }
 
         return new Object[]{"OK", currentProcessed, totalLines};
@@ -382,7 +394,9 @@ public class ImportCsvService {
         }
 
         // New file, all good, just import!
-        Object[] impStr = fileImport(generateIdbClient(), fileInfo[1], fileInfo[0], pFile, thisFileSize);
+        Object[] impStr = fileImport(fileInfo[1], fileInfo[0], pFile, thisFileSize);
+
+        // Main import function returned, doing cleanups
         if (impStr[0].equals("OK")) {
             // Import success
             try {
@@ -396,7 +410,7 @@ public class ImportCsvService {
                 iff.setUuid(taskUUID);
                 ifd.insert(iff);
             } catch (Exception e) {
-                logger.error("File name is: " + fileFullPath + "\n" + Util.stackTraceErrorToString(e));
+                logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileFullPath, Util.stackTraceErrorToString(e)));
             }
             // keep processed size consistent with the actual file size once a file is done with the import process
             totalProcessedSize.addAndGet(thisFileSize - (Long) impStr[1]);
@@ -412,19 +426,6 @@ public class ImportCsvService {
             processingSet.remove(pFile);
             logger.error((String) impStr[0]);
             transferFailedFiles(pFile);
-
-            // if (importFailCounter.containsKey(fileFullPath)) {
-            // int current_fails = importFailCounter.get(fileFullPath);
-            // // Only retry 3 times
-            // if (++current_fails <= FAILURE_RETRY) {
-            // internalAddOne(fileFullPath, false);
-            // importFailCounter.put(fileFullPath, current_fails);
-            // } else {
-            // transferFailedFiles(pFile);
-            // }
-            // } else {
-            // importFailCounter.put(fileFullPath, 1);
-            // }
         }
     }
 

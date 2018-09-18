@@ -1,40 +1,44 @@
-/**
- * 
- */
 package edu.pitt.medschool.framework.rest;
+
+import java.io.Serializable;
 
 /**
  * @author Isolachine
- *
  */
-public class RestfulResponse {
+public class RestfulResponse implements Serializable {
+
+    private static final long serialVersionUID = 8467939889876968376L;
+
     private Integer code;
     private String msg;
-    private Object data;
-    
+    private transient Object data;
+
     public RestfulResponse(Integer code, String msg) {
         this.code = code;
         this.msg = msg;
     }
-    
+
     /**
      * @return the code
      */
     public Integer getCode() {
         return code;
     }
+
     /**
      * @param code the code to set
      */
     public void setCode(Integer code) {
         this.code = code;
     }
+
     /**
      * @return the msg
      */
     public String getMsg() {
         return msg;
     }
+
     /**
      * @param msg the msg to set
      */
@@ -55,5 +59,5 @@ public class RestfulResponse {
     public void setData(Object data) {
         this.data = data;
     }
-    
+
 }

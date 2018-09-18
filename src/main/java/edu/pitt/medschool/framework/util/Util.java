@@ -1,6 +1,3 @@
-/**
- *
- */
 package edu.pitt.medschool.framework.util;
 
 import org.apache.commons.io.FileUtils;
@@ -16,9 +13,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * @author Isolachine
- */
 public class Util {
 
     public static String getIpFromHostname(String host) {
@@ -63,8 +57,7 @@ public class Util {
         };
         File[] files = folder.listFiles(extensionFileFilter);
 
-        assert files != null;
-        if (files.length == 0)
+        if (files == null || files.length == 0)
             return new String[0];
 
         LinkedList<String> file_list = new LinkedList<>();
@@ -88,8 +81,7 @@ public class Util {
 
         if (listOfFiles != null) {
             for (File listOfFile : listOfFiles) {
-                if (listOfFile.isFile()
-                        && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals("csv")
+                if (listOfFile.isFile() && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals("csv")
                         && !listOfFile.getName().startsWith(".")) {
                     FileBean fileBean = new FileBean();
                     fileBean.setName(listOfFile.getName());
@@ -104,6 +96,13 @@ public class Util {
         return fileBeans;
     }
 
+    public static String wrapAndConcatStringList(String wrapper, String concat, List<String> list) {
+        for (int i = 0; i < list.size(); i++) {
+            list.set(i, wrapper + list.get(i) + wrapper);
+        }
+        return String.join(concat, list);
+    }
+
     /**
      * Generate info inside a exception
      *
@@ -115,16 +114,4 @@ public class Util {
         return sw.toString();
     }
 
-
-    public static void SOP(Object s) {
-        if (s == null) {
-            System.out.println();
-            return;
-        }
-        System.out.println(s);
-    }
-
-    public static void main(String[] args) {
-
-    }
 }

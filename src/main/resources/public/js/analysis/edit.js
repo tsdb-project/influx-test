@@ -1,9 +1,9 @@
 $(document).ready(function() {
-    function notify(from, align, icon, type, animIn, animOut) {
+    function notify(from, align, icon, type, animIn, animOut, msg) {
         $.notify({
             icon: icon,
             title: '',
-            message: 'Please add at least one column to the final aggregation group list.',
+            message: msg,
             url: ''
         }, {
             element: 'body',
@@ -38,11 +38,12 @@ $(document).ready(function() {
                 '<button type="button" aria-hidden="true" data-notify="dismiss" class="alert--notify__close">Close</button>' +
                 '</div>'
         });
-    }
+    };
 
     var groups = {
         "data": []
     };
+    var patientList = null;
 
     var groupTable = $('#groupTable').DataTable({
         ajax: {
@@ -56,25 +57,85 @@ $(document).ready(function() {
         }],
         paging: false,
         columns: [{
-            data: 'group.id'
+            data: 'id'
         }, {
-            data: 'group.queryId'
+            data: 'queryId'
         }, {
-            data: 'group.label'
+            data: 'label'
         }, {
-            data: 'group.downsample'
+            data: 'downsample'
         }, {
-            data: 'group.aggregation'
+            data: 'aggregation'
         }, {
-            data: 'columns'
+            data: 'columns',
+            render: function(data) {
+                var cols = JSON.parse(data);
+                return "<th><b>" + cols.type + "</b></br>" +
+                    "<i>" + cols.electrodes.join(', ') + "</i></br>" +
+                    cols.columns.join(', ') + "</th>";
+            }
         }, {
             "width": "15%",
-            data: 'group.id',
+            data: 'id',
             render: function(data) {
                 return "<th><button class=\"btn btn-primary btn-sm\" data-toggle=\"modal\" data-target=\"#edit-group-modal\" data-id=\"" + data + "\"><i class=\"zmdi zmdi-edit\"></i> Edit</button> " +
                     "<button class=\"btn btn-danger btn-sm\" data-toggle=\"modal\" data-target=\"#delete-group-modal\" data-id=\"" + data + "\"><i class=\"zmdi zmdi-close\"></i> Delete</a></th>";
             }
         }]
+    });
+
+    $("#uploadPatientList").change(function() {
+        var formData = new FormData();
+        formData.append("plist", document.getElementById('uploadPatientList').files[0]);
+        $.ajax({
+            type: "POST",
+            url: "/api/export/patient_list/",
+            data: formData,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(result) {
+                if (result.code == 1) {
+                    notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'Successfully uploaded patient list.');
+                    patientList = result.data;
+                    console.log(patientList);
+                } else {
+                    notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Failed to upload patient list.');
+                }
+            },
+            error: function(result) {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Failed to upload patient list.');
+            }
+        });
+    });
+
+    $("#clear-patient-list").click(function() {
+        notify("top", "center", null, "info", "animated bounceIn", "animated fadeOut", 'Patient list cleared.');
+        $("#uploadPatientList").val('');
+        patientList = null;
+    });
+
+    $("#export-modal").on('hidden.bs.modal', function(e) {
+        $("#uploadPatientList").val('');
+        patientList = null;
+    })
+
+    $("#submitJobButton").click(function() {
+        $("#submitJobButton").attr('disabled','disabled');
+        var form = {
+            "queryId": $("#id").val(),
+            "patientList": patientList,
+            "layout": $('#ar label.active input').val() == "true" ? true : false,
+            "ar": $('#ar label.active input').val() == "true" ? true : false
+        };
+        $.ajax({
+            'url': "/api/export/export/",
+            'type': 'post',
+            'data': JSON.stringify(form),
+            'contentType': "application/json",
+            'dataType': 'json',
+        });
+        window.location.href = '/analysis/job';
     });
 
     $("#saveButton").click(function() {
@@ -84,8 +145,35 @@ $(document).ready(function() {
                 "alias": $("#alias").val(),
                 "period": $("#period").val() * $("#period_unit").val(),
                 "origin": $("#origin").val() * $("#origin_unit").val(),
-                "duration": $("#duration").val() * $("#duration_unit").val()
+                "duration": $("#duration").val() * $("#duration_unit").val(),
+                "downsampleFirst": $('#downsample_first label.active input').val() == "true" ? true : false
             };
+            if ($("#minBinRowUnit").val() == '%') {
+                form.minBinRow = form.period * $("#min_bin_row").val() / 100;
+            } else {
+                form.minBinRow = $("#min_bin_row").val() * $("#minBinRowUnit").val();
+            }
+            if ($("#minBinUnit").val() == '%') {
+                form.minBin = form.duration / form.period * $("#min_bin").val() / 100;
+            } else {
+                form.minBin = $("#min_bin").val();
+            }
+            console.log(form);
+            if (form.minBinRow > form.period) {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Minimal row for a valid bin exceeded bin size.');
+                $("#min_bin_row").addClass('is-invalid');
+                return false;
+            }
+            if ($("#minBinUnit").val() == '%' && (form.minBin < 0 || form.minBin > 100)) {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Invalid percentage entered.');
+                $("#min_bin").addClass('is-invalid');
+                return false;
+            }
+            if ($("#minBinUnit").val() == '1' && form.duration != 0 && form.minBin > (form.duration / form.period)) {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Minimal bin number for a valid patient exceeded max bin count.');
+                $("#min_bin").addClass('is-invalid');
+                return false;
+            }
             $.ajax({
                 'url': "/analysis/query",
                 'type': 'put',
@@ -99,8 +187,8 @@ $(document).ready(function() {
             });
             return false;
         } else {
-            console.log("invalid form");
-            return true;
+            notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Invalid form.');
+            return false;
         }
     });
 
@@ -137,7 +225,7 @@ $(document).ready(function() {
                 console.log(data);
                 var $electrode = $('#electrode');
                 var $predefined = $('#predefined');
-                
+
                 // $electrode.attr("size", data.length + 1);
                 // $electrode.removeAttr('multiple');
                 $electrode.empty();
@@ -146,7 +234,7 @@ $(document).ready(function() {
                 // $('#column').attr("size", 1);
                 $electrode.append('<option value="" disabled>Single Electrodes</option>');
                 $predefined.append('<option value="" disabled>Predefined Sets</option>');
-                
+
                 for (var i = 0; i < data.electrodes.length; i++) {
                     var html = '<option value="' + data.electrodes[i].sid + '">' + data.electrodes[i].electrode + '</option>';
                     $electrode.append(html);
@@ -186,7 +274,7 @@ $(document).ready(function() {
             'error': function() {}
         });
     });
-    
+
     $("#predefined").change(function() {
         console.log($("#predefined").val());
         var form = {
@@ -212,7 +300,7 @@ $(document).ready(function() {
             'error': function() {}
         });
     });
-    
+
     $("#method").select2({
         width: "100%",
         dropdownCssClass: "custom-dropdown"
@@ -226,27 +314,34 @@ $(document).ready(function() {
     var map = {};
     var eList = [];
     var cList = [];
-    
+
     $("#addButton").click(function() {
-        map.measure = $("#measure").val(); //
-        
+        if ($("#column").val().length == 0) {
+            notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Please select at least one option from each\n category to form a valid column group.');
+            return;
+        }
+        map = {};
+        eList = [];
+        cList = [];
+        map.type = $("#measure").val();
+
         var form = $("#column").val();
         var $columnsInGroup = $('#columnsInGroup');
         var set = new Set();
         $("#columnsInGroup option").each(function() {
             set.add($(this).val());
         });
-        
-        $("#column :selected").each(function (i,sel) {
+
+        $("#column :selected").each(function(i, sel) {
             cList.push($(sel).text());
-        }); //
-        map.column = cList;
-        
+        });
+        map.columns = cList;
+
         if ($("#predefined").val() != null) {
             eList.push($("#predefined").val());
-            map.electrode = eList;
+            map.electrodes = eList;
             form.forEach(function(e) {
-                var electrode = $("#predefined").val(); //
+                var electrode = $("#predefined").val();
                 var start = electrode.split(' ')[2];
                 var end = electrode.split(' ')[4];
                 console.log(start + ' ' + end);
@@ -256,10 +351,10 @@ $(document).ready(function() {
                 }
             });
         } else {
-            $("#electrode :selected").each(function (i,sel) {
+            $("#electrode :selected").each(function(i, sel) {
                 eList.push($(sel).text());
-            }); //
-            map.electrode = eList; //
+            });
+            map.electrodes = eList;
             form.forEach(function(e) {
                 var electrode = $("#electrode").val();
                 electrode.forEach(function(element) {
@@ -268,22 +363,18 @@ $(document).ready(function() {
                 });
             });
         }
-        console.log(map); //
-        
+
         $columnsInGroup.empty();
-        $columnsInGroup.append('<option value="' + map.measure + '">' + map.measure + '</option>');
-        map.electrode.forEach(function(e) {
+        $columnsInGroup.append('<option value="' + map.type + '">' + map.type + '</option>');
+        map.electrodes.forEach(function(e) {
             $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
         });
-        map.column.forEach(function(e) {
+        map.columns.forEach(function(e) {
             $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
         });
-//        set.forEach(function(e) {
-//            var html = '<option value="' + e + '">' + e + '</option>';
-//            $columnsInGroup.append(html);
-//        });
-        // $columnsInGroup.attr('size',
-        // $('#columnsInGroup').children('option').length);
+
+        console.log("map = ");
+        console.log(map);
     });
 
     $("#clearButton").click(function() {
@@ -304,8 +395,6 @@ $(document).ready(function() {
             html += '<option value="' + e + '">' + e + '</option>';
         }
         $columnsInGroup.append(html);
-        // var length = $('#columnsInGroup').children('option').length;
-        // $columnsInGroup.attr('size', length > 0 ? length : 1);
     });
 
     $("#deleteGroupButton").click(function() {
@@ -343,7 +432,7 @@ $(document).ready(function() {
     var groupId;
 
     $('#edit-group-modal').on('show.bs.modal', function(event) {
-        $('#edit-group-modal').unbind('hidden');;
+        $('#edit-group-modal').unbind('hidden');
         var button = $(event.relatedTarget);
         var id = button.data('id');
         var modal = $(this);
@@ -365,22 +454,23 @@ $(document).ready(function() {
                 'url': "/analysis/group/group/" + id,
                 'type': 'get',
                 'success': function(data) {
-                    $('#label').val(data.data.group.label);
-                    $('#method').val(data.data.group.downsample);
+                    $('#label').val(data.data.label);
+                    $('#method').val(data.data.downsample);
                     $('#method').trigger('change');
-                    $('#aggregation').val(data.data.group.aggregation);
+                    $('#aggregation').val(data.data.aggregation);
                     $('#aggregation').trigger('change');
 
-                    var columns = data.data.columns.split(', ');
+                    var columns = JSON.parse(data.data.columns);
+                    map = columns;
                     var $columnsInGroup = $('#columnsInGroup');
-                    var set = new Set();
-                    columns.forEach(function(e) {
-                        set.add(e);
-                    });
                     $columnsInGroup.empty();
-                    set.forEach(function(e) {
-                        var html = '<option value="' + e + '">' + e + '</option>';
-                        $columnsInGroup.append(html);
+                    $columnsInGroup.append('<option value="' + columns.type + '">' + columns.type + '</option>');
+
+                    columns.electrodes.forEach(function(e) {
+                        $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
+                    });
+                    columns.columns.forEach(function(e) {
+                        $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
                     });
                     requestMethod = 'put';
                     groupId = id;
@@ -388,34 +478,28 @@ $(document).ready(function() {
                 'error': function() {}
             });
         }
+        console.log(map);
         $('#measure').val('');
         $('#measure').trigger('change');
         $('#predefined').empty();
         $('#electrode').empty();
         $('#column').empty();
     });
-
+    
     $("#addGroupButton").click(function() {
-        var columns = [];
-        $("#columnsInGroup option").each(function() {
-            columns.push($(this).val());
-        });
-        columns = columns.join(", ");
         if ($('#aggregation-form')[0].checkValidity()) {
-            if (columns.length == 0) {
-                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut");
+            if (map.type == null) {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Please add at least one column to the final aggregation group list.');
                 return false;
             }
+            console.log(map);
             var form = {
-                "group": {
-                    "id": groupId,
-                    "label": $("#label").val(),
-                    "queryId": $("#id").val(),
-                    "downsample": $("#method").val(),
-                    "aggregation": $("#aggregation").val(),
-                    "columns": columns
-                },
-                "columns": columns
+                "id": groupId,
+                "label": $("#label").val(),
+                "queryId": $("#id").val(),
+                "downsample": $("#method").val(),
+                "aggregation": $("#aggregation").val(),
+                "columns": JSON.stringify(map)
             };
             $.ajax({
                 'url': "/analysis/group",

@@ -10,6 +10,11 @@ import org.springframework.boot.system.ApplicationTemp;
 public final class InfluxappConfig {
 
     /**
+     * A globally useable InfluxDB Client
+     */
+    public static final InfluxDB INFLUX_DB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+
+    /**
      * Available cores on this system
      */
     public static final int AvailableCores = Runtime.getRuntime().availableProcessors();
@@ -38,10 +43,11 @@ public final class InfluxappConfig {
      * Bulk insert size (DO NOT CHANGE)
      */
     public static final int PERFORMANCE_INDEX = 1000000;
+    public static final int FAILURE_RETRY = 3;
 
-    /**
-     * A globally useable InfluxDB Client
-     */
-    public static InfluxDB INFLUX_DB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+    public static final String OUTPUT_DIRECTORY = "/tsdb/output/";
+
+    private InfluxappConfig() {
+    }
 
 }

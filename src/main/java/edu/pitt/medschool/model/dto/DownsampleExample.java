@@ -473,6 +473,186 @@ public class DownsampleExample {
             return (Criteria) this;
         }
 
+        public Criteria andMinBinIsNull() {
+            addCriterion("min_bin is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinIsNotNull() {
+            addCriterion("min_bin is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinEqualTo(Integer value) {
+            addCriterion("min_bin =", value, "minBin");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinNotEqualTo(Integer value) {
+            addCriterion("min_bin <>", value, "minBin");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinGreaterThan(Integer value) {
+            addCriterion("min_bin >", value, "minBin");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinGreaterThanOrEqualTo(Integer value) {
+            addCriterion("min_bin >=", value, "minBin");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinLessThan(Integer value) {
+            addCriterion("min_bin <", value, "minBin");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinLessThanOrEqualTo(Integer value) {
+            addCriterion("min_bin <=", value, "minBin");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinIn(List<Integer> values) {
+            addCriterion("min_bin in", values, "minBin");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinNotIn(List<Integer> values) {
+            addCriterion("min_bin not in", values, "minBin");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinBetween(Integer value1, Integer value2) {
+            addCriterion("min_bin between", value1, value2, "minBin");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinNotBetween(Integer value1, Integer value2) {
+            addCriterion("min_bin not between", value1, value2, "minBin");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowIsNull() {
+            addCriterion("min_bin_row is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowIsNotNull() {
+            addCriterion("min_bin_row is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowEqualTo(Integer value) {
+            addCriterion("min_bin_row =", value, "minBinRow");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowNotEqualTo(Integer value) {
+            addCriterion("min_bin_row <>", value, "minBinRow");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowGreaterThan(Integer value) {
+            addCriterion("min_bin_row >", value, "minBinRow");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowGreaterThanOrEqualTo(Integer value) {
+            addCriterion("min_bin_row >=", value, "minBinRow");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowLessThan(Integer value) {
+            addCriterion("min_bin_row <", value, "minBinRow");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowLessThanOrEqualTo(Integer value) {
+            addCriterion("min_bin_row <=", value, "minBinRow");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowIn(List<Integer> values) {
+            addCriterion("min_bin_row in", values, "minBinRow");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowNotIn(List<Integer> values) {
+            addCriterion("min_bin_row not in", values, "minBinRow");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowBetween(Integer value1, Integer value2) {
+            addCriterion("min_bin_row between", value1, value2, "minBinRow");
+            return (Criteria) this;
+        }
+
+        public Criteria andMinBinRowNotBetween(Integer value1, Integer value2) {
+            addCriterion("min_bin_row not between", value1, value2, "minBinRow");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstIsNull() {
+            addCriterion("downsample_first is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstIsNotNull() {
+            addCriterion("downsample_first is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstEqualTo(Boolean value) {
+            addCriterion("downsample_first =", value, "downsampleFirst");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstNotEqualTo(Boolean value) {
+            addCriterion("downsample_first <>", value, "downsampleFirst");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstGreaterThan(Boolean value) {
+            addCriterion("downsample_first >", value, "downsampleFirst");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("downsample_first >=", value, "downsampleFirst");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstLessThan(Boolean value) {
+            addCriterion("downsample_first <", value, "downsampleFirst");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstLessThanOrEqualTo(Boolean value) {
+            addCriterion("downsample_first <=", value, "downsampleFirst");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstIn(List<Boolean> values) {
+            addCriterion("downsample_first in", values, "downsampleFirst");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstNotIn(List<Boolean> values) {
+            addCriterion("downsample_first not in", values, "downsampleFirst");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstBetween(Boolean value1, Boolean value2) {
+            addCriterion("downsample_first between", value1, value2, "downsampleFirst");
+            return (Criteria) this;
+        }
+
+        public Criteria andDownsampleFirstNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("downsample_first not between", value1, value2, "downsampleFirst");
+            return (Criteria) this;
+        }
+
         public Criteria andCreateTimeIsNull() {
             addCriterion("create_time is null");
             return (Criteria) this;
@@ -590,6 +770,66 @@ public class DownsampleExample {
 
         public Criteria andUpdateTimeNotBetween(Date value1, Date value2) {
             addCriterion("update_time not between", value1, value2, "updateTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedIsNull() {
+            addCriterion("deleted is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedIsNotNull() {
+            addCriterion("deleted is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedEqualTo(Boolean value) {
+            addCriterion("deleted =", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedNotEqualTo(Boolean value) {
+            addCriterion("deleted <>", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedGreaterThan(Boolean value) {
+            addCriterion("deleted >", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("deleted >=", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedLessThan(Boolean value) {
+            addCriterion("deleted <", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedLessThanOrEqualTo(Boolean value) {
+            addCriterion("deleted <=", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedIn(List<Boolean> values) {
+            addCriterion("deleted in", values, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedNotIn(List<Boolean> values) {
+            addCriterion("deleted not in", values, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedBetween(Boolean value1, Boolean value2) {
+            addCriterion("deleted between", value1, value2, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("deleted not between", value1, value2, "deleted");
             return (Criteria) this;
         }
 

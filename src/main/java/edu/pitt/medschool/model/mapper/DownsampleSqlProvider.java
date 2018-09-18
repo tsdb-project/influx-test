@@ -51,11 +51,23 @@ public class DownsampleSqlProvider {
         if (record.getOrigin() != null) {
             sql.VALUES("origin", "#{origin,jdbcType=INTEGER}");
         }
+        if (record.getMinBin() != null) {
+            sql.VALUES("min_bin", "#{minBin,jdbcType=INTEGER}");
+        }
+        if (record.getMinBinRow() != null) {
+            sql.VALUES("min_bin_row", "#{minBinRow,jdbcType=INTEGER}");
+        }
+        if (record.getDownsampleFirst() != null) {
+            sql.VALUES("downsample_first", "#{downsampleFirst,jdbcType=BIT}");
+        }
         if (record.getCreateTime() != null) {
             sql.VALUES("create_time", "#{createTime,jdbcType=TIMESTAMP}");
         }
         if (record.getUpdateTime() != null) {
             sql.VALUES("update_time", "#{updateTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getDeleted() != null) {
+            sql.VALUES("deleted", "#{deleted,jdbcType=BIT}");
         }
         return sql.toString();
     }
@@ -75,8 +87,12 @@ public class DownsampleSqlProvider {
         sql.SELECT("period");
         sql.SELECT("duration");
         sql.SELECT("origin");
+        sql.SELECT("min_bin");
+        sql.SELECT("min_bin_row");
+        sql.SELECT("downsample_first");
         sql.SELECT("create_time");
         sql.SELECT("update_time");
+        sql.SELECT("deleted");
         sql.FROM("downsample");
         applyWhere(sql, example, false);
         if (example != null && example.getOrderByClause() != null) {
@@ -109,11 +125,23 @@ public class DownsampleSqlProvider {
         if (record.getOrigin() != null) {
             sql.SET("origin = #{record.origin,jdbcType=INTEGER}");
         }
+        if (record.getMinBin() != null) {
+            sql.SET("min_bin = #{record.minBin,jdbcType=INTEGER}");
+        }
+        if (record.getMinBinRow() != null) {
+            sql.SET("min_bin_row = #{record.minBinRow,jdbcType=INTEGER}");
+        }
+        if (record.getDownsampleFirst() != null) {
+            sql.SET("downsample_first = #{record.downsampleFirst,jdbcType=BIT}");
+        }
         if (record.getCreateTime() != null) {
             sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         }
         if (record.getUpdateTime() != null) {
             sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getDeleted() != null) {
+            sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
         }
         applyWhere(sql, example, true);
         return sql.toString();
@@ -131,8 +159,12 @@ public class DownsampleSqlProvider {
         sql.SET("period = #{record.period,jdbcType=INTEGER}");
         sql.SET("duration = #{record.duration,jdbcType=INTEGER}");
         sql.SET("origin = #{record.origin,jdbcType=INTEGER}");
+        sql.SET("min_bin = #{record.minBin,jdbcType=INTEGER}");
+        sql.SET("min_bin_row = #{record.minBinRow,jdbcType=INTEGER}");
+        sql.SET("downsample_first = #{record.downsampleFirst,jdbcType=BIT}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
+        sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
         DownsampleExample example = (DownsampleExample) parameter.get("example");
         applyWhere(sql, example, true);
         return sql.toString();
@@ -157,11 +189,23 @@ public class DownsampleSqlProvider {
         if (record.getOrigin() != null) {
             sql.SET("origin = #{origin,jdbcType=INTEGER}");
         }
+        if (record.getMinBin() != null) {
+            sql.SET("min_bin = #{minBin,jdbcType=INTEGER}");
+        }
+        if (record.getMinBinRow() != null) {
+            sql.SET("min_bin_row = #{minBinRow,jdbcType=INTEGER}");
+        }
+        if (record.getDownsampleFirst() != null) {
+            sql.SET("downsample_first = #{downsampleFirst,jdbcType=BIT}");
+        }
         if (record.getCreateTime() != null) {
             sql.SET("create_time = #{createTime,jdbcType=TIMESTAMP}");
         }
         if (record.getUpdateTime() != null) {
             sql.SET("update_time = #{updateTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getDeleted() != null) {
+            sql.SET("deleted = #{deleted,jdbcType=BIT}");
         }
         sql.WHERE("id = #{id,jdbcType=INTEGER}");
         return sql.toString();

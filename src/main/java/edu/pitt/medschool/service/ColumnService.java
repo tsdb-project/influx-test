@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
 import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
 import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.model.dao.FeatureDao;
@@ -105,7 +106,8 @@ public class ColumnService {
 
         return columns;
     }
-
-    public static void main(String[] args) {
+    
+    public List<String> selectColumnsByAggregationGroupColumns(ColumnJSON json) {
+        return featureDao.selectColumnsByAggregationGroupColumns(json);
     }
 }

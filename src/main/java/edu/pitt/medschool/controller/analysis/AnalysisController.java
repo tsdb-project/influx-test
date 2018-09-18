@@ -1,36 +1,53 @@
-/**
- *
- */
 package edu.pitt.medschool.controller.analysis;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
-import edu.pitt.medschool.controller.analysis.vo.DownsampleGroupVO;
 import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
+import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.PatientExample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
+import edu.pitt.medschool.service.ExportService;
 
 /**
  * @author Isolachine
@@ -50,6 +67,10 @@ public class AnalysisController {
     ImportedFileDao importedFileDao;
     @Autowired
     AnalysisService analysisService;
+    @Autowired
+    ExportService exportService;
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @RequestMapping("analysis/export")
     public Model exportPage(Model model) {
@@ -77,12 +98,19 @@ public class AnalysisController {
         return analysisGenerateModel(model);
     }
 
+    @RequestMapping("analysis/job")
+    public Model jobPage(Model model) {
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "job");
+        return model;
+    }
+
     @RequestMapping("analysis/create")
     public Model createPage(Model model) {
         return analysisGenerateModel(model);
     }
 
-    @RequestMapping(value = {"analysis/edit/{id}", "analysis/edit"}, method = RequestMethod.GET)
+    @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "builder");
@@ -113,7 +141,10 @@ public class AnalysisController {
     @ResponseBody
     public RestfulResponse insert(@RequestBody(required = true) Downsample downsample) throws Exception {
         RestfulResponse response;
-        if (analysisService.insert(downsample) == 1) {
+        if (downsample.getPeriod() == 0) {
+            downsample.setPeriod(1);
+        }
+        if (analysisService.insertDownsample(downsample) == 1) {
             response = new RestfulResponse(1, "success");
             response.setData(downsample);
         } else {
@@ -122,10 +153,13 @@ public class AnalysisController {
         return response;
     }
 
-    @RequestMapping(value = "analysis/query", method = RequestMethod.PUT)
+    @PutMapping(value = "analysis/query")
     @ResponseBody
     public Map<String, Object> update(@RequestBody(required = true) Downsample downsample) throws Exception {
         Map<String, Object> map = new HashMap<>();
+        if (downsample.getPeriod() == 0) {
+            downsample.setPeriod(1);
+        }
         if (analysisService.updateByPrimaryKey(downsample) == 1) {
             map.put("res", new RestfulResponse(1, "success"));
         } else {
@@ -170,7 +204,7 @@ public class AnalysisController {
 
     @RequestMapping(value = "analysis/group", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> insertQueryGroup(@RequestBody(required = true) DownsampleGroupVO group) throws Exception {
+    public Map<String, Object> insertQueryGroup(@RequestBody(required = true) DownsampleGroup group) throws Exception {
         Map<String, Object> map = new HashMap<>();
         if (analysisService.insertAggregationGroup(group)) {
             map.put("res", new RestfulResponse(1, "success"));
@@ -182,14 +216,13 @@ public class AnalysisController {
 
     @RequestMapping(value = "analysis/group", method = RequestMethod.PUT)
     @ResponseBody
-    public Map<String, Object> updateQueryGroup(@RequestBody(required = true) DownsampleGroupVO group) throws Exception {
+    public Map<String, Object> updateQueryGroup(@RequestBody(required = true) DownsampleGroup group) throws Exception {
         Map<String, Object> map = new HashMap<>();
         if (analysisService.updateAggregationGroup(group) == 1) {
             map.put("res", new RestfulResponse(1, "success"));
         } else {
             map.put("res", new RestfulResponse(0, "update failed"));
         }
-        // map.put("data", analysisService.selectByPrimaryKey(group.getQueryId()));
         return map;
     }
 
@@ -238,63 +271,80 @@ public class AnalysisController {
         public String ageUpper;
     }
 
-    @RequestMapping("api/export/export")
+    @PostMapping("api/export/export")
     @ResponseBody
-    public void export(@RequestBody(required = true) ExportRequest request, Model model) throws IOException {
-        PatientExample pe = new PatientExample();
-        PatientExample.Criteria pec = pe.createCriteria();
-        if (request.ageLower != null && !request.ageLower.isEmpty()) {
-            pec.andAgeGreaterThan(Byte.valueOf(request.ageLower));
+    public RestfulResponse exportQuery(@RequestBody(required = true) ExportWithBLOBs job, RestfulResponse response) throws JsonProcessingException {
+        if (exportService.completeJobAndInsert(job) == 1) {
+            response.setCode(1);
+            try {
+                analysisService.exportToFile(job.getId(), false);
+                response.setMsg("Successfully added job.");
+            } catch (Exception e) {
+                response.setMsg("Failed to add job.");
+            }
+        } else {
+            response.setCode(0);
+            response.setMsg("Database error!");
         }
-        if (request.ageUpper != null && !request.ageUpper.isEmpty()) {
-            pec.andAgeLessThanOrEqualTo(Byte.valueOf(request.ageUpper));
-        }
-        if (request.gender != null && !request.gender.isEmpty()) {
-            pec.andFemaleEqualTo(request.gender.toUpperCase().equals("F"));
-        }
-        List<String> patientIDs = patientDao.selectIdByCustom(pe);
-        patientIDs.retainAll(importedFileDao.getAllImportedPid(uuid));
-
-        System.out.println(patientIDs);
-        System.out.println(request.interval + "====" + request.time + "======" + request.method);
-        analysisService.exportFromPatientsWithDownsampling(patientIDs, request.column, request.method, request.interval, request.time);
+        return response;
     }
 
-    @RequestMapping("api/export/export/uc1")
+    @PostMapping("api/export/patient_list/")
     @ResponseBody
-    public void exportUC1(Model model) throws IOException {
-        // List<String> patientIDs = patientDao.selectIdAll();
-        // patientIDs.retainAll(importedFileDao.selectAllImportedPidPSC());
-
-        List<String> patientIDs = importedFileDao.selectAllImportedPidPSC();
-
-        System.out.println(patientIDs);
-        analysisService.useCaseOne();
+    public RestfulResponse uploadPatientList(@RequestParam("plist") MultipartFile file) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            Stream<String> stream = new BufferedReader(new InputStreamReader(file.getInputStream())).lines();
+            stream.forEach(s -> {
+                sb.append(s.trim());
+                sb.append(',');
+            });
+            stream.close();
+        } catch (Exception o) {
+            logger.error(Util.stackTraceErrorToString(o));
+            return new RestfulResponse(-1, o.getLocalizedMessage());
+        }
+        String lists = sb.deleteCharAt(sb.length() - 1).toString();
+        RestfulResponse response = new RestfulResponse(1, file.getOriginalFilename());
+        response.setData(lists);
+        return response;
     }
 
-    @RequestMapping("api/export/export/uc2")
+    @GetMapping("api/analysis/job")
     @ResponseBody
-    public void exportUC2(Model model) throws IOException {
-        // List<String> patientIDs = patientDao.selectIdAll();
-        // patientIDs.retainAll(importedFileDao.selectAllImportedPidPSC());
-
-        List<String> patientIDs = importedFileDao.selectAllImportedPidPSC();
-
-        System.out.println(patientIDs);
-        analysisService.useCaseTwo();
+    public RestfulResponse uploadPatientList() {
+        RestfulResponse response = new RestfulResponse(1, "");
+        response.setData(analysisService.selectAllExportJobOnLocalMachine());
+        return response;
     }
 
-    @RequestMapping("api/export/export/{qid}")
-    @ResponseBody
-    public void exportQuery(@PathVariable(required = true) Integer qid) throws IOException {
-        // List<String> pids = importedFileDao.getAllImportedPid(uuid);
-        // System.out.println(pids);
-        // Downsample downsample = analysisService.selectByPrimaryKey(qid);
-        // List<DownsampleGroupVO> downsampleGroups = analysisService.selectAllAggregationGroupByQueryId(qid);
-        // analysisService.exportFromPatientsWithDownsamplingGroups(pids, downsample, downsampleGroups);
+    @GetMapping(value = "download", params = { "path", "id" })
+    public StreamingResponseBody getSteamingFile(HttpServletResponse response, @RequestParam("path") String path, @RequestParam("id") Integer id)
+            throws IOException {
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "output_" + id + ".zip"));
+        InputStream inputStream = new FileInputStream(new File(path));
+        return outputStream -> {
+            int nRead;
+            byte[] data = new byte[1024];
+            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                outputStream.write(data, 0, nRead);
+            }
+            inputStream.close();
+        };
+    }
 
-        //TODO: Remove or change the TestRun parameter
-        analysisService.exportToFile(qid, false);
+    // TODO: Remove in production
+    @PutMapping("api/debug/Export")
+    @ResponseBody
+    public void debugExprt() {
+        try {
+            // analysisService.exportToFile(34, false);
+            analysisService.exportToFile(35, false);
+
+        } catch (IOException e) {
+            logger.error(Util.stackTraceErrorToString(e));
+        }
     }
 
 }
