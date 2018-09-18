@@ -14,8 +14,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import static edu.pitt.medschool.framework.util.Util.SOP;
-
 /**
  * Utilities regarding time problems
  * Time is IMPORTANT in this project
@@ -175,36 +173,4 @@ public class TimeUtil {
         return DateUtils.isSameDay(a, b);
     }
 
-    public static void main(String[] args) throws ParseException {
-        SOP(Date.from(Instant.parse("2018-09-02T09:18:11.563847612Z")));
-
-        SOP(secondToString(30)[0] + ":" + secondToString(30)[1]);
-        SOP(secondToString(3600)[0] + ":" + secondToString(3600)[1]);
-        SOP(secondToString(18000)[0] + ":" + secondToString(18000)[1]);
-
-        SOP(dateToTimestamp("1/2/1934"));
-        SOP(timestampToUTCDate(dateToTimestamp("1/1/1934")));
-        SOP(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss", null));
-        SOP(timestampToUTCDateTimeFormat(dateTimeFormatToTimestamp("2017.10.28 15:00:17", "yyyy.MM.dd HH:mm:ss", null), "yyyy.MM.dd HH:mm:ss"));
-        SOP(timestampToUTCDateTimeFormat(
-                subOneHourToTimestamp(dateTimeFormatToTimestamp("2017.03.01 00:45:11", "yyyy.MM.dd HH:mm:ss", null)), "yyyy.MM.dd HH:mm:ss"));
-        SOP(timestampToUTCDateTimeFormat(
-                addOneHourToTimestamp(dateTimeFormatToTimestamp("2017.12.31 23:55:22", "yyyy.MM.dd HH:mm:ss", null)), "yyyy.MM.dd HH:mm:ss"));
-        SOP(timestampToUTCDateTimeFormat(serialTimeToLongDate(43036.6402314815, null), "yyyy-MM-dd HH:mm:ss"));
-
-        SOP(null);
-        Date testStartDate = TimeUtil.dateTimeFormatToDate("2011.03.1323:22:33", "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
-        SOP(TimeUtil.isThisDayOnDstShift(TimeUtil.nycTimeZone, testStartDate));
-
-        Calendar c = Calendar.getInstance(nycTimeZone);
-        c.set(2011, Calendar.JANUARY, 1, 15, 0); // 3.13 and 11.6
-        for (int i = 0; i < 365; i++) {
-            if (isThisDayOnDstShift(nycTimeZone, c.getTime())) {
-                SOP("DST on: " + c.getTime());
-                SOP("Month: " + c.get(Calendar.MONTH));
-            }
-            c.add(Calendar.DAY_OF_YEAR, 1);
-        }
-
-    }
 }

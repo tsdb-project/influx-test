@@ -28,12 +28,16 @@ public class FastResultTable extends ResultTable {
 
     @Override
     public List<Object> getDatalistByColumnName(String columnName) {
-        if (super.rowCount == 0 || super.colCount == 0) return new ArrayList<>(0);
         int colIdx = super.getColumnIndexByName(columnName);
+        return getDatalistByColumnId(colIdx);
+    }
+
+    public List<Object> getDatalistByColumnId(int columnId) {
+        if (super.rowCount == 0 || super.colCount == 0) return new ArrayList<>(0);
 
         List<Object> res = new ArrayList<>(super.rowCount);
         for (int i = 0; i < super.rowCount; i++) {
-            res.add(this.values.get(i).get(colIdx));
+            res.add(this.values.get(i).get(columnId));
         }
 
         return res;
