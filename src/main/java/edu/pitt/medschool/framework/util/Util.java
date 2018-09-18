@@ -1,6 +1,3 @@
-/**
- *
- */
 package edu.pitt.medschool.framework.util;
 
 import org.apache.commons.io.FileUtils;
@@ -16,9 +13,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * @author Isolachine
- */
 public class Util {
 
     public static String getIpFromHostname(String host) {
@@ -52,7 +46,7 @@ public class Util {
         File folder = new File(dir);
         if (folder.isFile()) {
             if (dir.toLowerCase().endsWith("." + type))
-                return new String[] { dir };
+                return new String[]{dir};
             else
                 return new String[0];
         }
@@ -63,8 +57,7 @@ public class Util {
         };
         File[] files = folder.listFiles(extensionFileFilter);
 
-        assert files != null;
-        if (files.length == 0)
+        if (files == null || files.length == 0)
             return new String[0];
 
         LinkedList<String> file_list = new LinkedList<>();
@@ -121,15 +114,4 @@ public class Util {
         return sw.toString();
     }
 
-    public static void SOP(Object s) {
-        if (s == null) {
-            System.out.println();
-            return;
-        }
-        System.out.println(s);
-    }
-
-    public static void main(String[] args) {
-
-    }
 }

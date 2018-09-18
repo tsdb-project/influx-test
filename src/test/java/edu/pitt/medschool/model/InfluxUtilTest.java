@@ -1,9 +1,10 @@
-package edu.pitt.medschool.test;
+package edu.pitt.medschool.model;
 
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
+import org.junit.Test;
 
 import static edu.pitt.medschool.framework.influxdb.InfluxUtil.queryResultToKV;
 import static edu.pitt.medschool.framework.influxdb.InfluxUtil.queryResultToTable;
@@ -13,7 +14,7 @@ import static edu.pitt.medschool.framework.influxdb.InfluxUtil.queryResultToTabl
  */
 public class InfluxUtilTest {
 
-    private static void doQuery(String d, String db) {
+    private void doQuery(String d, String db) {
         Query q = new Query(d, db);
         QueryResult qr = InfluxappConfig.INFLUX_DB.query(q);
         ResultTable[] data;
@@ -25,7 +26,8 @@ public class InfluxUtilTest {
     /**
      * Must MANUALLY CHECK THIS FIVE QUERY, ADJUST IF NECESSARY
      */
-    public static void main(String... args) {
+    @Test
+    public void main() {
         // No results
         doQuery("select Time from \"PUH-11\" LIMIT 1", "data");
         // Has 2 series
