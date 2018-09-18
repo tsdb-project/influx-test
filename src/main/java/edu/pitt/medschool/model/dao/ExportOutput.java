@@ -129,7 +129,7 @@ public class ExportOutput {
      */
     public void writeForOnePatient(String pid, ResultTable r, ExportQueryBuilder eq, List<DataTimeSpanBean> dtsb) {
         List<Integer> validId = eq.getGoodDataTimeId();
-        this.writeMainData(pid, r, eq, validId.size(), AnalysisUtil.dataValidTotalSpan(validId, dtsb));
+        this.writeMainData(pid, r, eq, validId.size(), AnalysisUtil.dataValidTotalSpan(validId, dtsb) / 1000);
     }
 
     private void writeMainData(String patientId, ResultTable r, ExportQueryBuilder eq, int numSegments, long totalDataSeconds) {
