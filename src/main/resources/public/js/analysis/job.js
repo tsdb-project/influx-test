@@ -87,7 +87,7 @@ $(document).ready(function() {
         var id = event.target.dataset.id;
         var status = event.target.dataset.type;
         if (status == 'download') {
-            window.location = '/download?path=output/output_' + id + '.zip&id=' + id;
+            window.location = '/download?path=archive/output_' + id + '.zip&id=' + id;
         } else if (status == 'progress') {
             alert("checking");
         }

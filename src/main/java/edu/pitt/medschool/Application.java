@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 
+import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +43,7 @@ public class Application implements ApplicationRunner {
         }
 
         // For storing zip files
-        String path = "archive";
-        File outputDir = new File(path);
+        File outputDir = new File(InfluxappConfig.ARCHIVE_DIRECTORY);
 
         if (!outputDir.exists()) {
             try {

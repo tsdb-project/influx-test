@@ -188,7 +188,7 @@ public class AnalysisService {
         if (eo != null) {
             eo.close(validPatientNumber);
         }
-        FileZip.zip(outputDir.getAbsolutePath(), "output/output_" + job.getId() + ".zip", "");
+        FileZip.zip(outputDir.getAbsolutePath(), InfluxappConfig.ARCHIVE_DIRECTORY + "/output_" + job.getId() + ".zip", "");
         job.setFinished(true);
         ExportWithBLOBs updateJob = new ExportWithBLOBs();
         updateJob.setId(job.getId());

@@ -46,6 +46,7 @@ public final class InfluxappConfig {
     public static final int FAILURE_RETRY = 3;
 
     public static final String OUTPUT_DIRECTORY = "/tsdb/output/";
+    public static final String ARCHIVE_DIRECTORY = "archive";
 
     private InfluxappConfig() {
     }
