@@ -6,10 +6,8 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -146,6 +144,21 @@ public class TimeUtil {
             return new String[]{String.valueOf((totalSeconds / 60)), "60"};
         }
         return new String[]{String.valueOf(totalSeconds), "1"};
+    }
+
+    /**
+     * Format the local date time (Tue, Sep 18 2018, 07:18:49 PM)
+     *
+     * @param ldt    Any LDT, null for now
+     * @param format Formatter, empty for "E, MMM dd uuuu, hh:mm:ss a"
+     */
+    public static String formatLocalDateTime(LocalDateTime ldt, String format) {
+        if (ldt == null)
+            ldt = LocalDateTime.now();
+        if (format.isEmpty())
+            format = "E, MMM dd uuuu, hh:mm:ss a";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        return ldt.format(formatter);
     }
 
     /**

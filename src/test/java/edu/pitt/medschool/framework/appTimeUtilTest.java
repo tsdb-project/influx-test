@@ -16,6 +16,11 @@ public class appTimeUtilTest {
     private String format = "yyyy.MM.dd HH:mm:ss";
 
     @Test
+    public void testFormat() {
+        System.err.println(formatLocalDateTime(null, "E, MMM dd uuuu, hh:mm:ss a"));
+    }
+
+    @Test
     public void testTimezone() {
         assertEquals(Date.from(Instant.parse("2018-09-02T09:18:11.563847612Z")).toString(),
                 "Sun Sep 02 05:18:11 EDT 2018");

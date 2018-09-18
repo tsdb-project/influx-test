@@ -2,6 +2,7 @@ package edu.pitt.medschool.model.dao;
 
 import com.opencsv.CSVWriter;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
+import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dto.Downsample;
@@ -12,9 +13,11 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Managing output for analysis service
@@ -39,7 +42,7 @@ public class ExportOutput {
     private int numOfIntervalBins;
     private int mainHeaderSize;
     private boolean initMetaWrote = false;
-    private int totalInvalidPatientCount = 0;
+    private AtomicInteger totalInvalidPatientCount = new AtomicInteger(0);
 
     /**
      * Init the output wrapper class for exporting
@@ -79,8 +82,7 @@ public class ExportOutput {
         if (this.job.getLayout()) {
             mainHeader = new String[numLabel + 2];
             mainHeader[0] = "PID";
-            //TODO: Remove timestamp?
-            mainHeader[1] = "Timestamp";
+            mainHeader[1] = "Timebins";
             for (int i = 0; i < numLabel; i++) {
                 mainHeader[i + 2] = labelNames.get(i);
             }
@@ -92,7 +94,8 @@ public class ExportOutput {
                 int prefixSize = j * this.numOfIntervalBins;
                 String labelJ = labelNames.get(j);
                 for (int k = 1; k <= this.numOfIntervalBins; k++) {
-                    mainHeader[prefixSize + k] = labelJ + "_" + k;
+                    String hdr = labelJ + "-" + k;
+                    mainHeader[prefixSize + k] = hdr.replace(' ', '_');
                 }
             }
         }
@@ -107,11 +110,11 @@ public class ExportOutput {
         if (this.initMetaWrote)
             return;
         this.writeMetaFile(String.format("EXPORT <%s> - #%d, built on: %s%nJob started on: %s%n%n",
-                this.ds.getAlias(), this.ds.getId(), this.job.getUpdateTime(), this.outputStartTime.toString()));
+                this.ds.getAlias(), this.ds.getId(), this.job.getUpdateTime(), TimeUtil.formatLocalDateTime(this.outputStartTime, "")));
         this.writeMetaFile(String.format("# of cores utilized: %d%n", threads));
         this.writeMetaFile(String.format("# of patients in database: %d%n", numPatientsInTsdb));
         this.writeMetaFile(String.format("# of patients in queue initially: %d%n", numQueueSize));
-        this.writeMetaFile(String.format("Dataset AR status is: %s", this.job.getAr() ? "AR" : "NoAR"));
+        this.writeMetaFile(String.format("Dataset AR status is: %s%n", this.job.getAr() ? "AR" : "NoAR"));
         this.writeMetaFile(String.format("Spreadsheet output format is: %s%n%n%n", this.job.getLayout() ? "Long (Vertical)" : "Wide (Horizontal)"));
         this.initMetaWrote = true;
     }
@@ -141,7 +144,7 @@ public class ExportOutput {
             for (int i = 0; i < dataRows; i++) {
                 List<Object> row = r.getDatalistByRow(i);
                 int resultSize = row.size(), count = (int) (double) row.get(resultSize - 1);
-                mainData[1] = row.get(0).toString(); // timestamp column
+                mainData[1] = String.valueOf(i + 1);
                 boolean thisRowInsuffData = count < this.minBinRow; // Based on the fact that single data per second
                 if (thisRowInsuffData) {
                     thisPatientTotalInsufficientCount += 1;
@@ -192,7 +195,7 @@ public class ExportOutput {
         }
         boolean tooFewData = false;
         if (dataRows - thisPatientTotalInsufficientCount < this.minBin) {
-            this.totalInvalidPatientCount += 1;
+            this.totalInvalidPatientCount.incrementAndGet();
             tooFewData = true;
             this.writeMetaFile(String.format("  PID '%s' overall data insufficient.%n", patientId));
         }
@@ -222,8 +225,11 @@ public class ExportOutput {
      */
     private void closeMetaText(int validNum) {
         try {
-            this.outputMetaWriter.write(String.format("%n%n# of patients with insufficient data: %d%n", this.totalInvalidPatientCount));
-            this.outputMetaWriter.write(String.format("# of valid patients: %d%nJob ended on %s%n", validNum, LocalDateTime.now().toString()));
+            LocalDateTime now = LocalDateTime.now();
+            this.writeMetaFile(String.format("%n# of patients with insufficient data: %d%n", this.totalInvalidPatientCount.get()));
+            this.writeMetaFile(String.format("# of valid patients: %d%n", validNum));
+            this.writeMetaFile(String.format("Job ended on: %s%nTotal running time for this job: %s%n",
+                    TimeUtil.formatLocalDateTime(now, ""), Duration.between(this.outputStartTime, now).toString().replace("PT", "")));
             this.outputMetaWriter.flush();
             this.outputMetaWriter.close();
         } catch (IOException e) {
