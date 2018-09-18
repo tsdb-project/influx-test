@@ -64,8 +64,8 @@ public class ExportOutput {
     }
 
     private void initWriters(String root) throws IOException {
-        this.outputFileWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_vert.csv")));
-        this.outputTimeMetaWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_time_dict.csv")));
+        this.outputFileWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_all.csv")));
+        this.outputTimeMetaWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_time_dictionary.csv")));
         this.outputMetaWriter = new BufferedWriter(new FileWriter(root + "/output_meta.txt"));
     }
 
@@ -90,10 +90,9 @@ public class ExportOutput {
             mainHeader[0] = "PID";
             for (int j = 0; j < numLabel; j++) {
                 int prefixSize = j * this.numOfIntervalBins;
-                // Set the first one
-                mainHeader[prefixSize + 1] = labelNames.get(j) + "_1";
-                for (int k = 2; k <= this.numOfIntervalBins; k++) {
-                    mainHeader[prefixSize + k] = String.valueOf(k);
+                String labelJ = labelNames.get(j);
+                for (int k = 1; k <= this.numOfIntervalBins; k++) {
+                    mainHeader[prefixSize + k] = labelJ + "_" + k;
                 }
             }
         }
@@ -223,7 +222,7 @@ public class ExportOutput {
     private void closeMetaText(int validNum) {
         try {
             this.outputMetaWriter.write(String.format("%n%n# of patients with insufficient data: %d%n", this.totalInvalidPatientCount));
-            this.outputMetaWriter.write(String.format("# of valid patients: %d%nJob ended on %s", validNum, LocalDateTime.now().toString()));
+            this.outputMetaWriter.write(String.format("# of valid patients: %d%nJob ended on %s%n", validNum, LocalDateTime.now().toString()));
             this.outputMetaWriter.flush();
             this.outputMetaWriter.close();
         } catch (IOException e) {
