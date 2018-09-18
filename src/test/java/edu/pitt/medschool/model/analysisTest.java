@@ -1,15 +1,18 @@
-package edu.pitt.medschool.test;
+package edu.pitt.medschool.model;
 
 import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dao.AnalysisUtil;
 import org.influxdb.InfluxDB;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.util.List;
 
-public class AlgoAnalysisTest {
-    @SuppressWarnings("unused")
-    public static void main(String... args) {
+public class analysisTest {
+
+    @Test
+    @Ignore
+    public void main() {
         InfluxDB i = InfluxappConfig.INFLUX_DB;
         List<DataTimeSpanBean> tmp;
 

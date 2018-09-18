@@ -154,7 +154,8 @@ public class AnalysisService {
                             logger.error(String.format("%s: Re-queue failed.", patientId));
                     } else {
                         logger.error(String.format("%s: Failed more than 3 times.", patientId));
-                        outputWriter.writeMetaFile(String.format("  PID <%s> failed more than 3 times, possible program error.%n", patientId));
+                        outputWriter.writeMetaFile(String.format("  PID <%s> failed multiple times, possible program error.%n", patientId));
+                        idQueue.remove(patientId);
                     }
                 }
             }
