@@ -36,14 +36,13 @@ import java.util.stream.Collectors;
  */
 @Service
 public class AnalysisService {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${machine}")
     private String uuid;
 
     @Value("${load}")
     private double loadFactor;
-
-    private final static String DIRECTORY = "/tsdb/output/";
 
     @Autowired
     DownsampleDao downsampleDao;
@@ -63,10 +62,6 @@ public class AnalysisService {
     PatientDao patientDao;
     @Autowired
     ImportedFileDao importedFileDao;
-
-    private InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-            new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(300, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS));
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private Map<String, Integer> errorCount = new HashMap<>();
 
@@ -108,7 +103,7 @@ public class AnalysisService {
 
         int paraCount = determineParaNumber();
         ExportOutput outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery, job);
-        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(influxDB, logger), patientIDs.size(), paraCount);
+        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(InfluxappConfig.INFLUX_DB, logger), patientIDs.size(), paraCount);
 
         // Wide output without duration is bad
         if (!job.getLayout()) {
@@ -121,6 +116,7 @@ public class AnalysisService {
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         // Parallel query task
         Runnable queryTask = () -> {
+            InfluxDB influxDB = generateIdbClient(false);
             String patientId;
             while ((patientId = idQueue.poll()) != null) {
                 try {
@@ -259,7 +255,7 @@ public class AnalysisService {
         if (identifier == null)
             identifier = "_(" + LocalDateTime.now().toString() + ")";
         // Windows name restriction
-        String path = DIRECTORY + purpose + identifier.replace(':', '.');
+        String path = InfluxappConfig.OUTPUT_DIRECTORY + purpose + identifier.replace(':', '.');
         File outputDir = new File(path);
         boolean dirCreationSuccess = true;
 
@@ -305,6 +301,22 @@ public class AnalysisService {
 
     public List<ExportVO> selectAllExportJobOnLocalMachine() {
         return exportDao.selectAllExportJobOnLocalMachine();
+    }
+
+    /**
+     * Generate one IdbClient for one thread when doing exports
+     *
+     * @param needGzip Unless Idb not running with Brainflux, you should disable GZip
+     */
+    private InfluxDB generateIdbClient(boolean needGzip) {
+        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(300, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS));
+        if (needGzip) {
+            idb.enableGzip();
+        } else {
+            idb.disableGzip();
+        }
+        return idb;
     }
 
 }

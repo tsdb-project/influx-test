@@ -1,5 +1,6 @@
 target/
 output/
+archive/
 .idea/
 *.iml
 logs/

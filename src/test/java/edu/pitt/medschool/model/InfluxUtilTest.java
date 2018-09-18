@@ -4,6 +4,7 @@ import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static edu.pitt.medschool.framework.influxdb.InfluxUtil.queryResultToKV;
@@ -27,6 +28,7 @@ public class InfluxUtilTest {
      * Must MANUALLY CHECK THIS FIVE QUERY, ADJUST IF NECESSARY
      */
     @Test
+    @Ignore
     public void main() {
         // No results
         doQuery("select Time from \"PUH-11\" LIMIT 1", "data");

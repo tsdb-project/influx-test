@@ -45,6 +45,8 @@ public final class InfluxappConfig {
     public static final int PERFORMANCE_INDEX = 1000000;
     public static final int FAILURE_RETRY = 3;
 
+    public static final String OUTPUT_DIRECTORY = "/tsdb/output/";
+
     private InfluxappConfig() {
     }
 

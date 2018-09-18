@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 
+import edu.pitt.medschool.framework.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -19,12 +20,12 @@ public class Application implements ApplicationRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
-    public static void main(String... args) throws Exception {
+    public static void main(String... args) {
         SpringApplication.run(Application.class, args);
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         TimeZone.setDefault(TimeUtil.nycTimeZone);
         logger.warn("BrainFlux start time: " + new Date());
 
@@ -40,24 +41,17 @@ public class Application implements ApplicationRunner {
             logger.error("Using default machine name: Anyone!!!");
         }
 
-        String path = "output";
+        // For storing zip files
+        String path = "archive";
         File outputDir = new File(path);
 
-        boolean dirCreationSuccess = true;
-
         if (!outputDir.exists()) {
-            String err = "Failed to create 'Results' dir. ";
             try {
                 if (!outputDir.mkdirs()) {
-                    dirCreationSuccess = false;
+                    throw new RuntimeException("Failed to create output folder.");
                 }
             } catch (SecurityException se) {
-                err += se.getLocalizedMessage();
-                dirCreationSuccess = false;
-            }
-            // Use a flag for flexible work flow
-            if (!dirCreationSuccess) {
-                logger.error(err);
+                logger.error(Util.stackTraceErrorToString(se));
             }
         }
 
