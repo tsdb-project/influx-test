@@ -78,8 +78,10 @@ $(document).ready(function() {
             "width": "15%",
             data: 'id',
             render: function(data) {
-                return "<th><button class=\"btn btn-primary btn-sm\" data-toggle=\"modal\" data-target=\"#edit-group-modal\" data-id=\"" + data + "\"><i class=\"zmdi zmdi-edit\"></i> Edit</button> " +
-                    "<button class=\"btn btn-danger btn-sm\" data-toggle=\"modal\" data-target=\"#delete-group-modal\" data-id=\"" + data + "\"><i class=\"zmdi zmdi-close\"></i> Delete</a></th>";
+                return "<th><button class=\"btn btn-primary btn-sm\" data-toggle=\"modal\" data-target=\"#edit-group-modal\" data-id=\"" +
+                    data + "\"><i class=\"zmdi zmdi-edit\"></i> Edit</button> " +
+                    "<button class=\"btn btn-danger btn-sm\" data-toggle=\"modal\" data-target=\"#delete-group-modal\" data-id=\"" +
+                    data + "\"><i class=\"zmdi zmdi-close\"></i> Delete</a></th>";
             }
         }]
     });
@@ -96,15 +98,18 @@ $(document).ready(function() {
             processData: false,
             success: function(result) {
                 if (result.code == 1) {
-                    notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'Successfully uploaded patient list.');
+                    notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
+                        'Successfully uploaded patient list.');
                     patientList = result.data;
                     console.log(patientList);
                 } else {
-                    notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Failed to upload patient list.');
+                    notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                        'Failed to upload patient list.');
                 }
             },
             error: function(result) {
-                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Failed to upload patient list.');
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Failed to upload patient list.');
             }
         });
     });
@@ -121,7 +126,7 @@ $(document).ready(function() {
     })
 
     $("#submitJobButton").click(function() {
-        $("#submitJobButton").attr('disabled','disabled');
+        $("#submitJobButton").attr('disabled', 'disabled');
         var form = {
             "queryId": $("#id").val(),
             "patientList": patientList,
@@ -160,7 +165,8 @@ $(document).ready(function() {
             }
             console.log(form);
             if (form.minBinRow > form.period) {
-                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Minimal row for a valid bin exceeded bin size.');
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Minimal row for a valid bin exceeded bin size.');
                 $("#min_bin_row").addClass('is-invalid');
                 return false;
             }
@@ -170,7 +176,8 @@ $(document).ready(function() {
                 return false;
             }
             if ($("#minBinUnit").val() == '1' && form.duration != 0 && form.minBin > (form.duration / form.period)) {
-                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Minimal bin number for a valid patient exceeded max bin count.');
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Minimal bin number for a valid patient exceeded max bin count.');
                 $("#min_bin").addClass('is-invalid');
                 return false;
             }
@@ -236,7 +243,8 @@ $(document).ready(function() {
                 $predefined.append('<option value="" disabled>Predefined Sets</option>');
 
                 for (var i = 0; i < data.electrodes.length; i++) {
-                    var html = '<option value="' + data.electrodes[i].sid + '">' + data.electrodes[i].electrode + '</option>';
+                    var html = '<option value="' + data.electrodes[i].sid + '">' + data.electrodes[i].electrode +
+                        '</option>';
                     $electrode.append(html);
                 }
 
@@ -317,7 +325,8 @@ $(document).ready(function() {
 
     $("#addButton").click(function() {
         if ($("#column").val().length == 0) {
-            notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Please select at least one option from each\n category to form a valid column group.');
+            notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                'Please select at least one option from each\n category to form a valid column group.');
             return;
         }
         map = {};
@@ -470,7 +479,8 @@ $(document).ready(function() {
                         $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
                     });
                     columns.columns.forEach(function(e) {
-                        $columnsInGroup.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
+                        $columnsInGroup.append('<option value="' + e +
+                            '">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
                     });
                     requestMethod = 'put';
                     groupId = id;
@@ -485,11 +495,12 @@ $(document).ready(function() {
         $('#electrode').empty();
         $('#column').empty();
     });
-    
+
     $("#addGroupButton").click(function() {
         if ($('#aggregation-form')[0].checkValidity()) {
             if (map.type == null) {
-                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Please add at least one column to the final aggregation group list.');
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Please add at least one column to the final aggregation group list.');
                 return false;
             }
             console.log(map);

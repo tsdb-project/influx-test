@@ -1,4 +1,4 @@
-package edu.pitt.medschool.service;
+package edu.pitt.medschool.deprecated;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,6 +19,7 @@ import edu.pitt.medschool.model.dto.PatientWithBLOBs;
 
 /**
  * Importing patient metadata into DB Based on mail at 02/21/2018
+ * 
  * @deprecated Unchecked Time zone problems and this file not necessary
  */
 @Service
@@ -29,7 +30,7 @@ public class ImportMetadataService {
      * Status code for this service
      */
     public enum StatusCode {
-        ALL_GOOD, FILE_IO_ERROR, FILE_NOT_FOUND, FILE_DATE_ERROR, FILE_FORMAT_ERROR
+    ALL_GOOD, FILE_IO_ERROR, FILE_NOT_FOUND, FILE_DATE_ERROR, FILE_FORMAT_ERROR
     }
 
     @Autowired
@@ -128,7 +129,7 @@ public class ImportMetadataService {
                     throw new RuntimeException(); // Line mismatch
 
                 PatientWithBLOBs p = new PatientWithBLOBs();
-                //TODO: Only support PID/Age/Gender now
+                // TODO: Only support PID/Age/Gender now
                 for (int i = 0; i < 3; i++) {
                     Object obj = genObjFromLine(i, values[i]);
                     switch (i) {
