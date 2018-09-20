@@ -223,7 +223,7 @@ public interface ImportProgressMapper {
         "       Max(import_progress.update_time) AS end, ",
         "      IF(( Count(0) = ( Count(IF((status = 'STATUS_FINISHED'), status, NULL)) + Count(IF((status = 'STATUS_FAIL'), status, NULL)) ) ), 1, 0) AS finish ",
         "FROM   import_progress ",
-        "WHERE  uuid = 'quz3' ",
+        "WHERE  uuid = #{uuid} ",
         "GROUP  BY import_progress.batch_id ",
         "ORDER  BY end DESC LIMIT 1) temp;"
     })

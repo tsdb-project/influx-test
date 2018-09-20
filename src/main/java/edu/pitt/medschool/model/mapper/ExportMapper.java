@@ -220,7 +220,7 @@ public interface ExportMapper {
     int updateByPrimaryKey(Export record);
 
     @Select({ "SELECT e.id, e.ar, e.machine, e.create_time, d.alias, e.finished FROM export e LEFT JOIN downsample d ON d.id = e.query_id",
-            "WHERE e.machine = #{queryId,jdbcType=INTEGER}" })
+            "WHERE e.machine = #{machineId,jdbcType=VARCHAR}" })
     @ResultType(ExportVO.class)
     @Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
             @Result(column = "ar", property = "ar", jdbcType = JdbcType.BIT),
