@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,7 +111,7 @@ public class AnalysisController {
         return analysisGenerateModel(model);
     }
 
-    @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
+    @RequestMapping(value = {"analysis/edit/{id}", "analysis/edit"}, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "builder");
@@ -318,12 +319,14 @@ public class AnalysisController {
         return response;
     }
 
-    @GetMapping(value = "download", params = { "path", "id" })
+    @GetMapping(value = "download", params = {"path", "id"})
     public StreamingResponseBody getSteamingFile(HttpServletResponse response, @RequestParam("path") String path, @RequestParam("id") Integer id)
             throws IOException {
         response.setContentType("application/zip");
+        Path p = Paths.get(".", path);
+        response.setContentLengthLong(Files.size(p));
         response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "output_" + id + ".zip"));
-        InputStream inputStream = new FileInputStream(new File(path));
+        InputStream inputStream = Files.newInputStream(p, StandardOpenOption.READ);
         return outputStream -> {
             int nRead;
             byte[] data = new byte[1024];
@@ -332,19 +335,6 @@ public class AnalysisController {
             }
             inputStream.close();
         };
-    }
-
-    // TODO: Remove in production
-    @PutMapping("api/debug/Export")
-    @ResponseBody
-    public void debugExprt() {
-        try {
-            // analysisService.exportToFile(34, false);
-            analysisService.exportToFile(35, false);
-
-        } catch (IOException e) {
-            logger.error(Util.stackTraceErrorToString(e));
-        }
     }
 
 }

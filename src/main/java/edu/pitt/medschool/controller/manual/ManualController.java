@@ -10,11 +10,11 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class ManualController {
-    @RequestMapping("/manual")
+    @RequestMapping("manual")
     public ModelAndView index(ModelAndView modelAndView) {
         modelAndView.addObject("nav", "manual");
         modelAndView.addObject("subnav", "");
-        modelAndView.setViewName("/manual/manual");
+        modelAndView.setViewName("manual/manual");
         return modelAndView;
     }
 }
