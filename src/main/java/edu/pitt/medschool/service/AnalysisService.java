@@ -128,8 +128,8 @@ public class AnalysisService {
                         continue;
                     }
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
-                    ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns,
-                            exportQuery, job.getAr());
+                    ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups,
+                            columns, exportQuery, job.getAr());
                     String finalQueryString = eq.getQueryString();
                     if (finalQueryString.isEmpty()) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> no available data.%n", patientId));
@@ -196,7 +196,7 @@ public class AnalysisService {
         exportDao.updateByPrimaryKeySelective(updateJob);
     }
 
-    private List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
+    public List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ColumnJSON json = mapper.readValue(columnsJson, ColumnJSON.class);
         return columnService.selectColumnsByAggregationGroupColumns(json);
@@ -310,7 +310,8 @@ public class AnalysisService {
      */
     private InfluxDB generateIdbClient(boolean needGzip) {
         InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(300, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS));
+                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(300, TimeUnit.SECONDS).writeTimeout(120,
+                        TimeUnit.SECONDS));
         if (needGzip) {
             idb.enableGzip();
         } else {

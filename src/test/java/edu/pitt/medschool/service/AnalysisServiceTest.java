@@ -11,6 +11,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import java.io.IOException;
+import java.util.List;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class AnalysisServiceTest {
@@ -25,6 +28,14 @@ public class AnalysisServiceTest {
         assertEquals((int) query.getPeriod(), 3600);
         assertEquals((int) query.getDuration(), 172800);
         assertFalse(query.getDownsampleFirst());
+    }
+    
+    @Test
+    public void testParseAggregationGroupColumnsString() throws IOException {
+        String columnsJson = "{\"type\":\"Asymmetry EASI/REASI\",\"columns\":[\"Relative Index (REASI), 1 - 5 Hz\",\"Relative Index (REASI), 6 - 14 Hz\"],\"electrodes\":[\"Posterior\"]}";
+        List<String> list = analysisService.parseAggregationGroupColumnsString(columnsJson);
+        assertEquals(list.get(0), "I163_1");
+        assertEquals(list.get(1), "I168_1");
     }
 
 }

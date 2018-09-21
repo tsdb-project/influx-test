@@ -26,13 +26,7 @@ public class FeatureDao {
     FeatureMapper featureMapper;
 
     public List<String> selectAllMeasures() {
-        List<String> list = featureMapper.selectAllMeasures();
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).equals("Time")) {
-                list.remove(i);
-            }
-        }
-        return list;
+        return featureMapper.selectAllMeasures();
     }
 
     public List<ColumnVO> selectColumnVOsBySet(String electrode) {
@@ -40,12 +34,24 @@ public class FeatureDao {
     }
 
     public List<Feature> selectByMeasure(String measure) {
+        if (measure.equals("Electrode Signal Quality")) {
+            return featureMapper.selectByMeasureElectrodeSignalQuality();
+        }
         FeatureExample example = new FeatureExample();
         example.createCriteria().andTypeEqualTo(measure);
         return featureMapper.selectByExample(example);
     }
 
     public List<String> selectColumnsByAggregationGroupColumns(ColumnJSON json) {
+        if (json.getType().equals("Electrode Signal Quality")) {
+            String electrodes = Util.wrapAndConcatStringList("'", ", ", json.getElectrodes());
+            return featureMapper.selectColumnVOsByElectrodeSignalQualityElectrodes(electrodes);
+        }
+        if (json.getType().equals("Asymmetry EASI/REASI")) {
+            String notes = Util.wrapAndConcatStringList("'", ", ", json.getColumns());
+            return featureMapper.selectColumnVOsByElectrodeAsymmetry(notes, json.getElectrodes().get(0));
+        }
+
         String colString = Util.wrapAndConcatStringList("'", ", ", json.getColumns());
         String elecString;
         boolean querySid;
@@ -65,4 +71,11 @@ public class FeatureDao {
         return featureMapper.selectColumnsByAggregationGroupColumns(json.getType(), elecString, colString, querySid);
     }
 
+    public List<String> selectPredefinedKVAsym() {
+        return featureMapper.selectPredefinedKVAsym();
+    }
+
+    public List<ColumnVO> selectColumnVOsAsymmetry(String electrode) {
+        return featureMapper.selectColumnVOsAsymmetry(electrode);
+    }
 }

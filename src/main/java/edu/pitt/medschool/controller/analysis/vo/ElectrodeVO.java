@@ -3,6 +3,7 @@ package edu.pitt.medschool.controller.analysis.vo;
 import java.util.List;
 
 import edu.pitt.medschool.model.dto.Feature;
+import edu.pitt.medschool.service.ColumnService.PredefinedKV;
 
 /**
  * @author Isolachine
@@ -10,14 +11,14 @@ import edu.pitt.medschool.model.dto.Feature;
  */
 public class ElectrodeVO {
 
-    private List<String> predefined;
+    private List<PredefinedKV> predefined;
     private List<Feature> electrodes;
 
-    public List<String> getPredefined() {
+    public List<PredefinedKV> getPredefined() {
         return predefined;
     }
 
-    public void setPredefined(List<String> predefined) {
+    public void setPredefined(List<PredefinedKV> predefined) {
         this.predefined = predefined;
     }
 

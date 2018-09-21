@@ -233,12 +233,9 @@ $(document).ready(function() {
                 var $electrode = $('#electrode');
                 var $predefined = $('#predefined');
 
-                // $electrode.attr("size", data.length + 1);
-                // $electrode.removeAttr('multiple');
                 $electrode.empty();
                 $predefined.empty();
                 $('#column').empty();
-                // $('#column').attr("size", 1);
                 $electrode.append('<option value="" disabled>Single Electrodes</option>');
                 $predefined.append('<option value="" disabled>Predefined Sets</option>');
 
@@ -249,9 +246,12 @@ $(document).ready(function() {
                 }
 
                 for (var i = 0; i < data.predefined.length; i++) {
-                    var html = '<option value="' + data.predefined[i] + '">' + data.predefined[i] + '</option>';
+                    var html = '<option value="' + data.predefined[i].value + '">' + data.predefined[i].key + '</option>';
                     $predefined.append(html);
                 }
+                var predefinedSize = data.predefined.length > 0 ? data.predefined.length + 1 : 2;
+                $predefined.attr('size', predefinedSize);
+                $electrode.attr('size', 13 - predefinedSize);
             },
             'error': function() {}
         });
@@ -272,7 +272,6 @@ $(document).ready(function() {
             'dataType': 'json',
             'success': function(data) {
                 var $column = $('#column');
-                // $column.attr("size", data.length);
                 $column.empty();
                 for (var i = 0; i < data.length; i++) {
                     $column.append('<option value="' + data[i].column + '">' + data[i].representation + '</option>');
@@ -298,7 +297,6 @@ $(document).ready(function() {
             'dataType': 'json',
             'success': function(data) {
                 var $column = $('#column');
-                // $column.attr("size", data.length);
                 $column.empty();
                 for (var i = 0; i < data.length; i++) {
                     $column.append('<option value="' + data[i].column + '">' + data[i].representation + '</option>');
@@ -347,18 +345,22 @@ $(document).ready(function() {
         map.columns = cList;
 
         if ($("#predefined").val() != null) {
-            eList.push($("#predefined").val());
+            eList.push($("#predefined :selected").text());
             map.electrodes = eList;
-            form.forEach(function(e) {
-                var electrode = $("#predefined").val();
-                var start = electrode.split(' ')[2];
-                var end = electrode.split(' ')[4];
-                console.log(start + ' ' + end);
-                for (i = parseInt(start.substring(1)); i <= parseInt(end.substring(1)); i++) {
-                    console.log(i);
-                    set.add('I' + i + e);
-                }
-            });
+            if ($("#predefined").val().startsWith('* ')) {
+                form.forEach(function(e) {
+                    var electrode = $("#predefined").val();
+                    var start = electrode.split(' ')[2];
+                    var end = electrode.split(' ')[4];
+                    console.log(start + ' ' + end);
+                    for (i = parseInt(start.substring(1)); i <= parseInt(end.substring(1)); i++) {
+                        console.log(i);
+                        set.add('I' + i + e);
+                    }
+                });
+            } else {
+                set.add($("#predefined").val());
+            } 
         } else {
             $("#electrode :selected").each(function(i, sel) {
                 eList.push($(sel).text());
