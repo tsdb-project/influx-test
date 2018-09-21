@@ -174,7 +174,7 @@ public class ExportOutput {
                 }
             }
             thisPatientTotalCount += count;
-            this.outputFileWideWriter.writeNext(mainDataLong);
+            this.outputFileLongWriter.writeNext(mainDataLong);
         }
 
         // Output wide form
