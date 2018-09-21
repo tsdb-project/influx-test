@@ -63,7 +63,9 @@ public class ExportOutput {
         this.job = job;
         // Wide output won't work if duration is not set
         this.shouldOutputWide = ds.getDuration() != null && ds.getDuration() > 0;
-
+        
+        this.shouldOutputWide = false; //no wide output
+        
         initWriters(rootDir);
         initCsvHeaders(columnLabelName);
     }

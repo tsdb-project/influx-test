@@ -360,7 +360,7 @@ $(document).ready(function() {
                 });
             } else {
                 set.add($("#predefined").val());
-            } 
+            }
         } else {
             $("#electrode :selected").each(function(i, sel) {
                 eList.push($(sel).text());
