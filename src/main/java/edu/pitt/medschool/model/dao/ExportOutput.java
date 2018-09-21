@@ -29,18 +29,20 @@ public class ExportOutput {
     // Downsample values
     private Export job;
     private Downsample ds;
-    private boolean isOutputVertical;
     private int numberOfLabels;
     private int minBinRow;
     private int minBin;
+    private boolean shouldOutputWide;
 
-    private CSVWriter outputFileWriter;
+    private CSVWriter outputFileLongWriter;
+    private CSVWriter outputFileWideWriter;
     private BufferedWriter outputMetaWriter;
-    private CSVWriter outputTimeMetaWriter;
+    private CSVWriter outputFileMetaWriter;
 
     // Runtime values
     private int numOfIntervalBins;
-    private int mainHeaderSize;
+    private int mainHeaderLongSize;
+    private int mainHeaderWideSize;
     private boolean initMetaWrote = false;
     private AtomicInteger totalInvalidPatientCount = new AtomicInteger(0);
 
@@ -58,17 +60,19 @@ public class ExportOutput {
         this.minBinRow = ds.getMinBinRow();
         this.minBin = ds.getMinBin();
         this.ds = ds;
-        // True for using long (vertical) form
-        this.isOutputVertical = job.getLayout();
         this.job = job;
+        // Wide output won't work if duration is not set
+        this.shouldOutputWide = ds.getDuration() != null && ds.getDuration() > 0;
 
         initWriters(rootDir);
         initCsvHeaders(columnLabelName);
     }
 
     private void initWriters(String root) throws IOException {
-        this.outputFileWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_all.csv")));
-        this.outputTimeMetaWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_time_dictionary.csv")));
+        this.outputFileLongWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_all_long.csv")));
+        if (this.shouldOutputWide)
+            this.outputFileWideWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_all_wide.csv")));
+        this.outputFileMetaWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_all_meta.csv")));
         this.outputMetaWriter = new BufferedWriter(new FileWriter(root + "/output_meta.txt"));
     }
 
@@ -78,32 +82,37 @@ public class ExportOutput {
      */
     private void initCsvHeaders(List<String> labelNames) {
         int numLabel = this.numberOfLabels;
-        String[] mainHeader;
-        if (this.job.getLayout()) {
-            mainHeader = new String[numLabel + 2];
-            mainHeader[0] = "PID";
-            mainHeader[1] = "Timebins";
-            for (int i = 0; i < numLabel; i++) {
-                mainHeader[i + 2] = labelNames.get(i);
-            }
-        } else {
+
+        // Long form header
+        String[] mainHeaderLong = new String[numLabel + 2];
+        mainHeaderLong[0] = "PID";
+        mainHeaderLong[1] = "Timebins";
+        for (int i = 0; i < numLabel; i++) {
+            mainHeaderLong[i + 2] = labelNames.get(i);
+        }
+        this.mainHeaderLongSize = mainHeaderLong.length;
+        this.outputFileLongWriter.writeNext(mainHeaderLong);
+
+        // Wide form header
+        if (this.shouldOutputWide) {
             this.numOfIntervalBins = (int) (Math.ceil(this.ds.getDuration() * 1.0 / this.ds.getPeriod()));
-            mainHeader = new String[numLabel * this.numOfIntervalBins + 1];
-            mainHeader[0] = "PID";
+            String[] mainHeaderWide = new String[numLabel * this.numOfIntervalBins + 1];
+            mainHeaderWide[0] = "PID";
             for (int j = 0; j < numLabel; j++) {
                 int prefixSize = j * this.numOfIntervalBins;
                 String labelJ = labelNames.get(j);
                 for (int k = 1; k <= this.numOfIntervalBins; k++) {
                     String hdr = labelJ + "-" + k;
-                    mainHeader[prefixSize + k] = hdr.replace(' ', '_');
+                    mainHeaderWide[prefixSize + k] = hdr.replace(' ', '_');
                 }
             }
+            this.mainHeaderWideSize = mainHeaderWide.length;
+            this.outputFileWideWriter.writeNext(mainHeaderWide);
         }
-        this.outputFileWriter.writeNext(mainHeader);
-        this.mainHeaderSize = mainHeader.length;
+
         String[] timemetaHdr = {"PID", "Export start time", "Export end time", "Number of data segments",
                 "Duration in seconds", "Number of data used", "Occurance insufficient data", "Should considered as good"};
-        this.outputTimeMetaWriter.writeNext(timemetaHdr);
+        this.outputFileMetaWriter.writeNext(timemetaHdr);
     }
 
     public void writeInitialMetaText(int numPatientsInTsdb, int numQueueSize, int threads) {
@@ -115,7 +124,8 @@ public class ExportOutput {
         this.writeMetaFile(String.format("# of patients in database: %d%n", numPatientsInTsdb));
         this.writeMetaFile(String.format("# of patients in queue initially: %d%n", numQueueSize));
         this.writeMetaFile(String.format("Dataset AR status is: %s%n", this.job.getAr() ? "AR" : "NoAR"));
-        this.writeMetaFile(String.format("Spreadsheet output format is: %s%n%n%n", this.job.getLayout() ? "Long (Vertical)" : "Wide (Horizontal)"));
+        if (!this.shouldOutputWide)
+            this.writeMetaFile("Note: Can't output wide form if duration is NOT set.");
         this.initMetaWrote = true;
     }
 
@@ -138,31 +148,35 @@ public class ExportOutput {
     private void writeMainData(String patientId, ResultTable r, ExportQueryBuilder eq, int numSegments, long totalDataSeconds) {
         int dataRows = r.getRowCount();
         long thisPatientTotalCount = 0, thisPatientTotalInsufficientCount = 0;
-        String[] mainData = new String[this.mainHeaderSize];
-        mainData[0] = patientId;
-        if (this.isOutputVertical) {
-            for (int i = 0; i < dataRows; i++) {
-                List<Object> row = r.getDatalistByRow(i);
-                int resultSize = row.size(), count = (int) (double) row.get(resultSize - 1);
-                mainData[1] = String.valueOf(i + 1);
-                boolean thisRowInsuffData = count < this.minBinRow; // Based on the fact that single data per second
-                if (thisRowInsuffData) {
-                    thisPatientTotalInsufficientCount += 1;
-                }
-                for (int j = 0; j < this.numberOfLabels; j++) {
-                    Object data = row.get(j + 1);
-                    if (data == null) {
-                        mainData[j + 2] = "N/A";
-                    } else if (thisRowInsuffData) {
-                        mainData[j + 2] = "Insuff. Data";
-                    } else {
-                        mainData[j + 2] = data.toString();
-                    }
-                }
-                thisPatientTotalCount += count;
-                this.outputFileWriter.writeNext(mainData);
+
+        // Output long form
+        String[] mainDataLong = new String[this.mainHeaderLongSize];
+        mainDataLong[0] = patientId;
+        for (int i = 0; i < dataRows; i++) {
+            List<Object> row = r.getDatalistByRow(i);
+            int resultSize = row.size(), count = (int) (double) row.get(resultSize - 1);
+            mainDataLong[1] = String.valueOf(i + 1);
+            boolean thisRowInsuffData = count < this.minBinRow; // Based on the fact that single data per second
+            if (thisRowInsuffData) {
+                thisPatientTotalInsufficientCount += 1;
             }
-        } else {
+            for (int j = 0; j < this.numberOfLabels; j++) {
+                Object data = row.get(j + 1);
+                if (data == null) {
+                    mainDataLong[j + 2] = "N/A";
+                } else if (thisRowInsuffData) {
+                    mainDataLong[j + 2] = "Insuff. Data";
+                } else {
+                    mainDataLong[j + 2] = data.toString();
+                }
+            }
+            thisPatientTotalCount += count;
+            this.outputFileWideWriter.writeNext(mainDataLong);
+        }
+
+        // Output wide form
+        if (this.shouldOutputWide) {
+            String[] mainDataWide = new String[this.mainHeaderWideSize];
             int intervals = this.numOfIntervalBins, nLabels = this.numberOfLabels;
             // Reference: c64e604145 from line 207-226
             for (int i = 0; i < intervals; i++) {
@@ -170,29 +184,27 @@ public class ExportOutput {
                     List<Object> row = r.getDatalistByRow(i);
                     int resultSize = row.size(), count = (int) (double) row.get(resultSize - 1);
                     boolean thisRowInsuffData = count < this.minBinRow; // Based on the fact that single data per second
-                    if (thisRowInsuffData) {
-                        thisPatientTotalInsufficientCount += 1;
-                    }
                     for (int j = 1; j <= nLabels; j++) {
                         Object data = row.get(j);
                         if (thisRowInsuffData) {
-                            mainData[1 + (j - 1) * intervals + i] = "Insuff. Data";
+                            mainDataWide[1 + (j - 1) * intervals + i] = "Insuff. Data";
                         } else if (data == null) {
-                            mainData[1 + (j - 1) * intervals + i] = "N/A";
+                            mainDataWide[1 + (j - 1) * intervals + i] = "N/A";
                         } else {
-                            mainData[1 + (j - 1) * intervals + i] = data.toString();
+                            mainDataWide[1 + (j - 1) * intervals + i] = data.toString();
                         }
                     }
-                    thisPatientTotalCount += count;
                 } else {
                     for (int j = 1; j <= nLabels; j++) {
-                        mainData[1 + (j - 1) * intervals + i] = "";
+                        mainDataWide[1 + (j - 1) * intervals + i] = "";
                     }
                 }
             }
             // Only one line for a patient in this mode
-            this.outputFileWriter.writeNext(mainData);
+            this.outputFileWideWriter.writeNext(mainDataWide);
         }
+
+        // Determine if data is enough or not
         boolean tooFewData = false;
         if (dataRows - thisPatientTotalInsufficientCount < this.minBin) {
             this.totalInvalidPatientCount.incrementAndGet();
@@ -207,7 +219,7 @@ public class ExportOutput {
         Instant start = eq.getQueryStartTime(), end = eq.getQueryEndTime();
         String[] data = {patientId, start.toString(), end.toString(), String.valueOf(numSegments), String.valueOf(totalDataSeconds),
                 String.valueOf(dataCount), String.valueOf(insuffCount), enoughData ? "Yes" : "No"};
-        this.outputTimeMetaWriter.writeNext(data);
+        this.outputFileMetaWriter.writeNext(data);
     }
 
     /**
@@ -242,8 +254,10 @@ public class ExportOutput {
      */
     private void closeCsv() {
         try {
-            this.outputFileWriter.close();
-            this.outputTimeMetaWriter.close();
+            this.outputFileLongWriter.close();
+            if (this.shouldOutputWide)
+                this.outputFileWideWriter.close();
+            this.outputFileMetaWriter.close();
         } catch (IOException e) {
             logger.error("Writers fail to close: {}", Util.stackTraceErrorToString(e));
         }

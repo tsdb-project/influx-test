@@ -24,7 +24,7 @@ public class ExportQueryBuilder {
         static final String basicDownsampleOuter = "SELECT %s FROM %s WHERE %s GROUP BY time(%ds,%ds) ORDER BY time ASC";
 
         static final String aggregationCount = "COUNT(%s) AS C";
-        static final String timeCondition = "(time >= '%s' AND time <= '%s')";
+        static final String timeCondition = "(time >= '%s' AND time < '%s')";
     }
 
     // Downsample configs

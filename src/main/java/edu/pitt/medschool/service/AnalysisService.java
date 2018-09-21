@@ -105,14 +105,6 @@ public class AnalysisService {
         ExportOutput outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery, job);
         outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(InfluxappConfig.INFLUX_DB, logger), patientIDs.size(), paraCount);
 
-        // Wide output without duration is bad
-        if (!job.getLayout()) {
-            if (exportQuery.getDuration() == null || exportQuery.getDuration() == 0) {
-                outputWriter.writeMetaFile(String.format("%nWide output format must specify a duration.%n"));
-                jobClosingHandler(job, outputDir, outputWriter, 0);
-            }
-        }
-
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         // Parallel query task
         Runnable queryTask = () -> {
@@ -135,7 +127,7 @@ public class AnalysisService {
                         outputWriter.writeMetaFile(String.format("  PID <%s> no available data.%n", patientId));
                         continue;
                     }
-                    logger.debug("Query for {}: {}", patientId, finalQueryString);
+                    logger.debug("Query for <{}>: {}", patientId, finalQueryString);
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
 
                     if (res.length != 1) {
