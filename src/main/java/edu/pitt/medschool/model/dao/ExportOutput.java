@@ -127,7 +127,7 @@ public class ExportOutput {
         this.writeMetaFile(String.format("# of patients in queue initially: %d%n", numQueueSize));
         this.writeMetaFile(String.format("Dataset AR status is: %s%n", this.job.getAr() ? "AR" : "NoAR"));
         if (!this.shouldOutputWide)
-            this.writeMetaFile("Note: Can't output wide form if duration is NOT set.");
+            this.writeMetaFile(String.format("Note: Can't output wide form if duration is NOT set.%n%n%n"));
         this.initMetaWrote = true;
     }
 
