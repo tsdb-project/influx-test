@@ -50,8 +50,8 @@ public class ExportQueryBuilder {
     // Meta that this class generated (That others may use)
     private int downsampleOffset = 0;
     private List<Integer> validTimeSpanIds;
-    private Instant firstAvailData = Instant.MAX;
-    private Instant lastAvailData = Instant.MIN;
+    private Instant firstAvailData = Instant.MAX; // Immutable once set
+    private Instant lastAvailData = Instant.MIN; // Immutable once set
     private Instant queryStartTime = null;
     private Instant queryEndTime = null;
 
@@ -89,6 +89,7 @@ public class ExportQueryBuilder {
         }
         if (this.exportStartOffset > 0) {
             this.queryStartTime = this.firstAvailData.plusSeconds(this.exportStartOffset);
+            this.queryEndTime = this.lastAvailData.plusSeconds(this.exportStartOffset);
         }
         calcOffsetInSeconds(fakeStartTime);
         this.globalTimeLimitWhere = String.format(Template.timeCondition, this.queryStartTime.toString(), this.queryEndTime.toString());

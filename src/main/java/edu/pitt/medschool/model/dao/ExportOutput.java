@@ -84,11 +84,12 @@ public class ExportOutput {
         int numLabel = this.numberOfLabels;
 
         // Long form header
-        String[] mainHeaderLong = new String[numLabel + 2];
+        String[] mainHeaderLong = new String[numLabel + 3];
         mainHeaderLong[0] = "PID";
-        mainHeaderLong[1] = "Timebins";
+        mainHeaderLong[2] = "Timebins";
+        mainHeaderLong[1] = "Timestamp";
         for (int i = 0; i < numLabel; i++) {
-            mainHeaderLong[i + 2] = labelNames.get(i);
+            mainHeaderLong[i + 3] = labelNames.get(i);
         }
         this.mainHeaderLongSize = mainHeaderLong.length;
         this.outputFileLongWriter.writeNext(mainHeaderLong);
@@ -96,14 +97,15 @@ public class ExportOutput {
         // Wide form header
         if (this.shouldOutputWide) {
             this.numOfIntervalBins = (int) (Math.ceil(this.ds.getDuration() * 1.0 / this.ds.getPeriod()));
-            String[] mainHeaderWide = new String[numLabel * this.numOfIntervalBins + 1];
+            String[] mainHeaderWide = new String[numLabel * this.numOfIntervalBins + 2];
             mainHeaderWide[0] = "PID";
+            mainHeaderWide[1] = "Start Timestamp";
             for (int j = 0; j < numLabel; j++) {
                 int prefixSize = j * this.numOfIntervalBins;
                 String labelJ = labelNames.get(j);
                 for (int k = 1; k <= this.numOfIntervalBins; k++) {
                     String hdr = labelJ + "-" + k;
-                    mainHeaderWide[prefixSize + k] = hdr.replace(' ', '_');
+                    mainHeaderWide[prefixSize + k + 1] = hdr.replace(' ', '_');
                 }
             }
             this.mainHeaderWideSize = mainHeaderWide.length;
@@ -155,7 +157,8 @@ public class ExportOutput {
         for (int i = 0; i < dataRows; i++) {
             List<Object> row = r.getDatalistByRow(i);
             int resultSize = row.size(), count = (int) (double) row.get(resultSize - 1);
-            mainDataLong[1] = String.valueOf(i + 1);
+            mainDataLong[2] = String.valueOf(i + 1);
+            mainDataLong[1] = String.valueOf(row.get(0));
             boolean thisRowInsuffData = count < this.minBinRow; // Based on the fact that single data per second
             if (thisRowInsuffData) {
                 thisPatientTotalInsufficientCount += 1;
@@ -163,11 +166,11 @@ public class ExportOutput {
             for (int j = 0; j < this.numberOfLabels; j++) {
                 Object data = row.get(j + 1);
                 if (data == null) {
-                    mainDataLong[j + 2] = "N/A";
+                    mainDataLong[j + 3] = "N/A";
                 } else if (thisRowInsuffData) {
-                    mainDataLong[j + 2] = "Insuff. Data";
+                    mainDataLong[j + 3] = "Insuff. Data";
                 } else {
-                    mainDataLong[j + 2] = data.toString();
+                    mainDataLong[j + 3] = data.toString();
                 }
             }
             thisPatientTotalCount += count;
@@ -177,6 +180,8 @@ public class ExportOutput {
         // Output wide form
         if (this.shouldOutputWide) {
             String[] mainDataWide = new String[this.mainHeaderWideSize];
+            mainDataWide[0] = patientId;
+            mainDataWide[1] = String.valueOf(eq.getQueryStartTime());
             int intervals = this.numOfIntervalBins, nLabels = this.numberOfLabels;
             // Reference: c64e604145 from line 207-226
             for (int i = 0; i < intervals; i++) {
@@ -187,16 +192,16 @@ public class ExportOutput {
                     for (int j = 1; j <= nLabels; j++) {
                         Object data = row.get(j);
                         if (thisRowInsuffData) {
-                            mainDataWide[1 + (j - 1) * intervals + i] = "Insuff. Data";
+                            mainDataWide[2 + (j - 1) * intervals + i] = "Insuff. Data";
                         } else if (data == null) {
-                            mainDataWide[1 + (j - 1) * intervals + i] = "N/A";
+                            mainDataWide[2 + (j - 1) * intervals + i] = "N/A";
                         } else {
-                            mainDataWide[1 + (j - 1) * intervals + i] = data.toString();
+                            mainDataWide[2 + (j - 1) * intervals + i] = data.toString();
                         }
                     }
                 } else {
                     for (int j = 1; j <= nLabels; j++) {
-                        mainDataWide[1 + (j - 1) * intervals + i] = "";
+                        mainDataWide[2 + (j - 1) * intervals + i] = "";
                     }
                 }
             }
