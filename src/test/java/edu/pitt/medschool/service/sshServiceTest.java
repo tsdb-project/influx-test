@@ -80,6 +80,9 @@ public class sshServiceTest {
         java.util.Properties config = new Properties();
         config.put("StrictHostKeyChecking", "no");
         config.put("PreferredAuthentications", "publickey");
+        config.put("compression.s2c", "zlib,none");
+        config.put("compression.c2s", "zlib,none");
+        config.put("compression_level", "6");
         s.setConfig(config);
         return s;
     }
