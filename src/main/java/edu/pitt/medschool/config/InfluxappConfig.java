@@ -48,6 +48,9 @@ public final class InfluxappConfig {
     public static final String OUTPUT_DIRECTORY = "/tsdb/output/";
     public static final String ARCHIVE_DIRECTORY = "archive";
 
+    public static final String REMOTE_SSH_HOST = "bridges.psc.edu";
+    public static final String SSH_PRIVATEKEY_PATH = "./mykey.key";
+
     private InfluxappConfig() {
     }
 
