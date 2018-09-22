@@ -39,6 +39,18 @@ public class sshServiceTest {
         System.out.println(s2);
     }
 
+    @Test
+    public void portforwardTest() throws JSchException, InterruptedException {
+        Session s3 = generateNewSshSession();
+        s3.connect();
+        s3.setPortForwardingL("localhost", 8086, "r014.pvt.bridges.psc.edu", 8086);
+        System.err.println("Port forward set.");
+        // Stop 20s for local connect test
+        Thread.sleep(20000);
+        s3.delPortForwardingL(8086);
+        s3.disconnect();
+    }
+
     private String testRunner(Session session, String command) throws JSchException, IOException {
         session.connect();
 
