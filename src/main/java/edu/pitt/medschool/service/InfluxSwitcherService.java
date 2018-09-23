@@ -38,6 +38,8 @@ public class InfluxSwitcherService {
 
     private String currentJobId = "";
     private String remoteInfluxHostname = "";
+    private boolean hasStartedPscInflux = false;
+    private boolean isStartingPscInflux = false;
 
     @Value("${ssh-username}")
     private String username;
@@ -54,6 +56,62 @@ public class InfluxSwitcherService {
         } catch (JSchException e) {
             logger.error("Init SSH client failed: {}", Util.stackTraceErrorToString(e));
         }
+    }
+
+    /**
+     * Setup a remote PSC InfluxDB server (in a different thread to avoid blocking)
+     */
+    public void setupRemotePSC() {
+        if (this.hasStartedPscInflux) return;
+        Runnable r = () -> {
+            if (this.isStartingPscInflux) return;
+            try {
+                this.isStartingPscInflux = true;
+                if (submitStartPscInflux()) {
+                    while (pscInfluxIsInQueue()) {
+                        // Check every 30s to ensure that we are no longer in queue
+                        Thread.sleep(30 * 1000);
+                    }
+                    // InfluxDB takes over 3 min to start
+                    Thread.sleep(200 * 1000);
+                    while (!hasPscInfluxStarted()) {
+                        // Check every 15s to ensure that Influx is available
+                        Thread.sleep(15 * 1000);
+                    }
+                    while (!startPortForward()) {
+                        // Check every 15s to start port forwaring
+                        Thread.sleep(15 * 1000);
+                    }
+                    this.hasStartedPscInflux = true;
+                } else {
+                    this.hasStartedPscInflux = false;
+                }
+            } catch (InterruptedException e) {
+                logger.error("PSC start thread failure!");
+                this.hasStartedPscInflux = false;
+            } finally {
+                this.isStartingPscInflux = false;
+            }
+        };
+        new Thread(r, "Remote PSC start thread").start();
+    }
+
+    /**
+     * Stop a remote PSC server
+     */
+    public void stopRemotePSC() {
+        if (!this.hasStartedPscInflux) return;
+        if (stopPortForward() && stopPscInflux())
+            stopPortForward();
+        stopPscInflux();
+        this.hasStartedPscInflux = false;
+    }
+
+    /**
+     * Check the status of a PSC InfluxDB
+     */
+    public boolean hasStartedPscInflux() {
+        return this.hasStartedPscInflux;
     }
 
     /**
@@ -94,7 +152,10 @@ public class InfluxSwitcherService {
         if (this.currentJobId.isEmpty()) return false;
         try {
             String res = runOneCommandViaSSH(String.format("srun --jobid=%s kill -15 $(cat %s);", this.currentJobId, Template.NOW_PID_PATH));
-            if (!res.trim().isEmpty()) return false;
+            if (!res.trim().isEmpty()) {
+                logger.error("Stop PSC influx said: {}", res.trim());
+                return false;
+            }
         } catch (Exception e) {
             logger.error("SSH batch job failed to stop: {}", Util.stackTraceErrorToString(e));
             return false;
@@ -124,17 +185,19 @@ public class InfluxSwitcherService {
         return true;
     }
 
-    public void stopPortForward() {
-        if (this.forwardSession == null) return;
+    public boolean stopPortForward() {
+        if (this.forwardSession == null) return false;
         try {
             forwardSession.delPortForwardingL(8086);
             logger.warn("Port forward to <{}> stopped on <{}>", remoteInfluxHostname, TimeUtil.formatLocalDateTime(null, ""));
         } catch (JSchException e) {
             logger.error("Stop port forward failed: {}", Util.stackTraceErrorToString(e));
+            return false;
         } finally {
             forwardSession.disconnect();
             forwardSession = null;
         }
+        return true;
     }
 
     /**
@@ -213,6 +276,7 @@ public class InfluxSwitcherService {
         while (true) {
             while (in.available() > 0) {
                 int i = in.read(buffer, 0, buf_size);
+                // When i==-1, EOF reached
                 if (i < 0) break;
                 sb.append(new String(buffer, 0, i, StandardCharsets.UTF_8));
             }

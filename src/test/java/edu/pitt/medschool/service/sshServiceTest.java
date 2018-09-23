@@ -87,9 +87,13 @@ public class sshServiceTest {
             }
             // InfluxDB takes over 3 min to start
             Thread.sleep(200 * 1000);
-            while (iss.hasPscInfluxStarted() && !iss.startPortForward()) {
-                // Check every 10s to ensure that Influx is available and port forward works
-                Thread.sleep(10 * 1000);
+            while (!iss.hasPscInfluxStarted()) {
+                // Check every 15s to ensure that Influx is available
+                Thread.sleep(15 * 1000);
+            }
+            while (!iss.startPortForward()) {
+                // Check every 5s to start port forwaring
+                Thread.sleep(5 * 1000);
             }
             // Stop 40 seconds for testing
             Thread.sleep(40 * 1000);
