@@ -82,17 +82,15 @@ public class sshServiceTest {
         InfluxSwitcherService iss = new InfluxSwitcherService();
         if (iss.submitStartPscInflux()) {
             while (iss.pscInfluxIsInQueue()) {
-                // Check every 5s to ensure that Influx is online
-                Thread.sleep(5000);
+                // Check every 10s to ensure that Influx is online
+                Thread.sleep(10 * 1000);
             }
-            iss.tryInitRemoteInfluxHostname();
-            // InfluxDB takes over 5min to start
-            Thread.sleep(310 * 1000);
-            while (!iss.hasPscInfluxStarted()) {
-                // Check every 5s to ensure that Influx is available
-                Thread.sleep(5000);
+            // InfluxDB takes over 3 min to start
+            Thread.sleep(200 * 1000);
+            while (iss.hasPscInfluxStarted() && !iss.startPortForward()) {
+                // Check every 10s to ensure that Influx is available and port forward works
+                Thread.sleep(10 * 1000);
             }
-            iss.startPortForward();
             // Stop 40 seconds for testing
             Thread.sleep(40 * 1000);
             iss.stopPortForward();
@@ -104,6 +102,8 @@ public class sshServiceTest {
         session.connect();
 
         ChannelExec channel = (ChannelExec) session.openChannel("exec");
+        channel.setEnv("LC_ALL", "en_US.UTF-8");
+        channel.setEnv("LANG", "en_US.UTF-8");
         channel.setCommand(command);
 
         channel.setInputStream(null);

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,7 +68,7 @@ public class InfluxSwitcherService {
         if (!this.remoteInfluxHostname.isEmpty()) return false;
         this.currentJobId = "";
         try {
-            Matcher m = jobIdPattern.matcher(runCommandViaSSH(String.format(Template.COMMAND_BASIC, "cd /pylon5/bi5fpep/quz3/ondemand;sbatch start-influx;")));
+            Matcher m = jobIdPattern.matcher(runOneCommandViaSSH(String.format(Template.COMMAND_BASIC, "cd /pylon5/bi5fpep/quz3/ondemand;sbatch start-influx;")));
             if (m.find()) {
                 this.currentJobId = m.group();
             } else {
@@ -92,7 +93,7 @@ public class InfluxSwitcherService {
         // Avoid stop a not started server (Optional)
         if (this.currentJobId.isEmpty()) return false;
         try {
-            String res = runCommandViaSSH(String.format("srun --jobid=%s kill -15 $(cat %s);", this.currentJobId, Template.NOW_PID_PATH));
+            String res = runOneCommandViaSSH(String.format("srun --jobid=%s kill -15 $(cat %s);", this.currentJobId, Template.NOW_PID_PATH));
             if (!res.trim().isEmpty()) return false;
         } catch (Exception e) {
             logger.error("SSH batch job failed to stop: {}", Util.stackTraceErrorToString(e));
@@ -106,10 +107,10 @@ public class InfluxSwitcherService {
 
     private Session forwardSession;
 
-    public void startPortForward() {
-        if (this.forwardSession != null) return;
+    public boolean startPortForward() {
+        if (this.forwardSession != null) return false;
         if (this.remoteInfluxHostname.isEmpty()) {
-            tryInitRemoteInfluxHostname();
+            return false;
         }
         try {
             forwardSession = generateNewSshSession(true);
@@ -118,7 +119,9 @@ public class InfluxSwitcherService {
             logger.warn("Port forward to <{}> started on <{}>", remoteInfluxHostname, TimeUtil.formatLocalDateTime(null, ""));
         } catch (JSchException e) {
             logger.error("Set port forward failed: {}", Util.stackTraceErrorToString(e));
+            return false;
         }
+        return true;
     }
 
     public void stopPortForward() {
@@ -140,25 +143,17 @@ public class InfluxSwitcherService {
     public boolean pscInfluxIsInQueue() {
         String status = "";
         try {
-            status = runCommandViaSSH(String.format(Template.COMMAND_BASIC, Template.READ_NOW_HOST)).trim();
+            status = runOneCommandViaSSH(String.format(Template.COMMAND_BASIC, Template.READ_NOW_HOST)).trim();
         } catch (Exception e) {
             logger.error("Failed to get status of currently running InfluxDB");
+            return false;
         }
-        return status.contains("No such file or directory");
-    }
-
-    /**
-     * Try initialize the remote InfluxDB hostname
-     */
-    public void tryInitRemoteInfluxHostname() {
-        try {
-            this.remoteInfluxHostname = runCommandViaSSH(String.format(Template.COMMAND_BASIC, Template.READ_NOW_HOST)).trim();
-            if (this.remoteInfluxHostname.contains("No such file or directory")) {
-                this.remoteInfluxHostname = "";
-            }
-        } catch (Exception e) {
-            logger.error("Failed to get remote Influx hostname");
+        boolean inQueue = status.contains("No such file or directory");
+        if (!inQueue) {
+            // If not in queue, then the remote hostname is here
+            this.remoteInfluxHostname = status.trim();
         }
+        return inQueue;
     }
 
     /**
@@ -166,13 +161,13 @@ public class InfluxSwitcherService {
      */
     public boolean hasPscInfluxStarted() {
         if (this.remoteInfluxHostname.isEmpty()) {
-            tryInitRemoteInfluxHostname();
+            return false;
         }
-        String res;
+        String res = "";
         try {
-            res = runCommandViaSSH(String.format(Template.COMMAND_BASIC, "tail -n50 /pylon5/bi5fpep/quz3/ondemand_log/*.log"));
+            res = runOneCommandViaSSH(String.format(Template.COMMAND_BASIC, "tail -n50 /pylon5/bi5fpep/quz3/ondemand_log/*.log"));
         } catch (Exception e) {
-            logger.error("Failed to determine InfluxDB status: {}", Util.stackTraceErrorToString(e));
+            logger.error("Failed to determine InfluxDB status: {}, returns: {}", e.getLocalizedMessage(), res);
             return false;
         }
         return res.contains("Compacting file") || res.contains("Listening on HTTP");
@@ -181,11 +176,13 @@ public class InfluxSwitcherService {
     /**
      * Generate a new SSH session and run the command
      */
-    private String runCommandViaSSH(String command) throws JSchException, IOException {
+    private String runOneCommandViaSSH(String command) throws JSchException, IOException {
         Session session = generateNewSshSession(true);
         session.connect();
 
         ChannelExec channel = (ChannelExec) session.openChannel("exec");
+        channel.setEnv("LC_ALL", "en_US.UTF-8");
+        channel.setEnv("LANG", "en_US.UTF-8");
         channel.setCommand(command);
         channel.setInputStream(null);
         channel.setOutputStream(null);
@@ -193,26 +190,37 @@ public class InfluxSwitcherService {
         InputStream in = channel.getInputStream();
         channel.connect();
 
-        StringBuilder sb = new StringBuilder(1024);
-        byte[] buffer = new byte[1024];
+        String res = readOutputFromChannelStream(channel, in);
+
+        if (channel.getExitStatus() != 0) {
+            logger.warn("SSH command <{}> message: '{}'", command, res);
+        } else {
+            logger.info("SSH command <{}> success.", command);
+        }
+        in.close();
+        channel.disconnect();
+        session.disconnect();
+        return res;
+    }
+
+    /**
+     * Read output from JSch and convert it to string
+     */
+    private String readOutputFromChannelStream(ChannelExec channel, InputStream in) throws IOException {
+        int buf_size = 1024;
+        StringBuilder sb = new StringBuilder(buf_size);
+        byte[] buffer = new byte[buf_size];
         while (true) {
             while (in.available() > 0) {
-                int i = in.read(buffer, 0, 1024);
+                int i = in.read(buffer, 0, buf_size);
                 if (i < 0) break;
-                sb.append(new String(buffer, 0, i));
+                sb.append(new String(buffer, 0, i, StandardCharsets.UTF_8));
             }
             if (channel.isClosed()) {
                 if (in.available() > 0) continue;
                 break;
             }
         }
-        logger.info("SSH command <{}>, status: {}.", command, channel.getExitStatus());
-        if (channel.getExitStatus() != 0) {
-            logger.warn("SSH command <{}> message: '{}'", command, sb.toString());
-        }
-        in.close();
-        channel.disconnect();
-        session.disconnect();
         return sb.toString();
     }
 

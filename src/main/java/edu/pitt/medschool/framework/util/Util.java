@@ -23,7 +23,6 @@ public class Util {
         while ((length = in.read(buffer)) != -1) {
             result.write(buffer, 0, length);
         }
-        in.close();
         return result.toString(StandardCharsets.UTF_8.name());
     }
 
