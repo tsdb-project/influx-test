@@ -52,6 +52,8 @@ public class AnalysisService {
     ExportDao exportDao;
     @Autowired
     ColumnService columnService;
+    @Autowired
+    InfluxSwitcherService iss;
 
     /*
      * Be able to restrict the epochs for which data are exported (e.g. specify to export up to the first 36 hours of available data, but truncate
@@ -232,6 +234,14 @@ public class AnalysisService {
         return downsampleGroupDao.selectDownsampleGroup(groupId);
     }
 
+    public int insertExportJob(ExportWithBLOBs job) {
+        return exportDao.insertExportJob(job);
+    }
+
+    public List<ExportVO> selectAllExportJobOnLocalMachine() {
+        return exportDao.selectAllExportJobOnLocalMachine();
+    }
+
     public int deleteGroupByPrimaryKey(Integer groupId) {
         return downsampleGroupDao.deleteByPrimaryKey(groupId);
     }
@@ -285,14 +295,6 @@ public class AnalysisService {
      */
     private ExecutorService generateNewThreadPool(int i) {
         return Executors.newFixedThreadPool(i);
-    }
-
-    public int insertExportJob(ExportWithBLOBs job) {
-        return exportDao.insertExportJob(job);
-    }
-
-    public List<ExportVO> selectAllExportJobOnLocalMachine() {
-        return exportDao.selectAllExportJobOnLocalMachine();
     }
 
     /**

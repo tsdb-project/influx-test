@@ -36,11 +36,12 @@ public class InfluxSwitcherService {
     private boolean isSshReady = false;
     private JSch jsch = new JSch();
     private Pattern jobIdPattern = Pattern.compile("[0-9]+");
+    private Session forwardSession;
 
     private String currentJobId = "";
     private String remoteInfluxHostname = "";
     private AtomicBoolean hasStartedPscInflux = new AtomicBoolean(false);
-    // Default there is a running InfluxDB on local
+    // Default there should have a running InfluxDB on local
     private AtomicBoolean hasStartedLocalInflux = new AtomicBoolean(true);
 
     private String systemOs = System.getProperty("os.name");
@@ -63,39 +64,36 @@ public class InfluxSwitcherService {
     }
 
     /**
-     * Setup a remote PSC InfluxDB server (in a different thread to avoid blocking)
+     * Setup a remote PSC InfluxDB server (blocking)
      */
     public void setupRemoteInflux() {
         if (this.hasStartedPscInflux.get()) return;
         if (this.hasStartedLocalInflux.get()) return;
-        Runnable r = () -> {
-            try {
-                if (submitStartPscInflux()) {
-                    while (pscInfluxIsInQueue()) {
-                        // Check every 30s to ensure that we are no longer in queue
-                        Thread.sleep(30 * 1000);
-                    }
-                    // InfluxDB takes over 3 min to start
-                    Thread.sleep(200 * 1000);
-                    while (!hasPscInfluxStarted()) {
-                        // Check every 15s to ensure that Influx is available
-                        Thread.sleep(15 * 1000);
-                    }
-                    while (!startPortForward()) {
-                        // Check every 15s to start port forwaring
-                        Thread.sleep(15 * 1000);
-                    }
-                    this.hasStartedPscInflux.set(true);
-                } else {
-                    this.hasStartedPscInflux.set(false);
+        try {
+            if (submitStartPscInflux()) {
+                while (pscInfluxIsInQueue()) {
+                    // Check every 30s to ensure that we are no longer in queue
+                    Thread.sleep(30 * 1000);
                 }
-            } catch (InterruptedException e) {
-                logger.error("PSC start thread failure!");
+                // InfluxDB takes over 3 min to start
+                Thread.sleep(200 * 1000);
+                while (!hasPscInfluxStarted()) {
+                    // Check every 15s to ensure that Influx is available
+                    Thread.sleep(15 * 1000);
+                }
+                while (!startPortForward()) {
+                    // Check every 15s to start port forwaring
+                    Thread.sleep(15 * 1000);
+                }
+                this.hasStartedPscInflux.set(true);
+            } else {
                 this.hasStartedPscInflux.set(false);
             }
-        };
-        synchronized (InfluxSwitcherService.class) {
-            new Thread(r, "Remote-PSC-starting").start();
+        } catch (InterruptedException e) {
+            logger.error("PSC start thread failure!");
+            stopPscInflux();
+            stopPortForward();
+            this.hasStartedPscInflux.set(false);
         }
     }
 
@@ -229,8 +227,6 @@ public class InfluxSwitcherService {
         this.remoteInfluxHostname = "";
         return true;
     }
-
-    private Session forwardSession;
 
     public boolean startPortForward() {
         if (this.forwardSession != null) return false;
