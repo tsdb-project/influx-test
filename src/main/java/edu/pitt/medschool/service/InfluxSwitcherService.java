@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,8 +39,12 @@ public class InfluxSwitcherService {
 
     private String currentJobId = "";
     private String remoteInfluxHostname = "";
-    private boolean hasStartedPscInflux = false;
-    private boolean isStartingPscInflux = false;
+    private AtomicBoolean hasStartedPscInflux = new AtomicBoolean(false);
+    private AtomicBoolean isStartingPscInflux = new AtomicBoolean(false);
+    // Default there is a running InfluxDB on local
+    private AtomicBoolean hasStartedLocalInflux = new AtomicBoolean(true);
+
+    private String systemOs = System.getProperty("os.name");
 
     @Value("${ssh-username}")
     private String username;
@@ -61,12 +66,13 @@ public class InfluxSwitcherService {
     /**
      * Setup a remote PSC InfluxDB server (in a different thread to avoid blocking)
      */
-    public void setupRemotePSC() {
-        if (this.hasStartedPscInflux) return;
+    public void setupRemoteInflux() {
+        if (this.hasStartedPscInflux.get()) return;
+        if (this.hasStartedLocalInflux.get()) return;
         Runnable r = () -> {
-            if (this.isStartingPscInflux) return;
+            if (this.isStartingPscInflux.get()) return;
             try {
-                this.isStartingPscInflux = true;
+                this.isStartingPscInflux.set(true);
                 if (submitStartPscInflux()) {
                     while (pscInfluxIsInQueue()) {
                         // Check every 30s to ensure that we are no longer in queue
@@ -82,36 +88,97 @@ public class InfluxSwitcherService {
                         // Check every 15s to start port forwaring
                         Thread.sleep(15 * 1000);
                     }
-                    this.hasStartedPscInflux = true;
+                    this.hasStartedPscInflux.set(true);
                 } else {
-                    this.hasStartedPscInflux = false;
+                    this.hasStartedPscInflux.set(false);
                 }
             } catch (InterruptedException e) {
                 logger.error("PSC start thread failure!");
-                this.hasStartedPscInflux = false;
+                this.hasStartedPscInflux.set(false);
             } finally {
-                this.isStartingPscInflux = false;
+                this.isStartingPscInflux.set(false);
             }
         };
-        new Thread(r, "Remote PSC start thread").start();
+        new Thread(r, "Remote-PSC-starting").start();
     }
 
     /**
      * Stop a remote PSC server
      */
-    public void stopRemotePSC() {
-        if (!this.hasStartedPscInflux) return;
-        if (stopPortForward() && stopPscInflux())
-            stopPortForward();
-        stopPscInflux();
-        this.hasStartedPscInflux = false;
+    public void stopRemoteInflux() {
+        if (!this.hasStartedPscInflux.get()) return;
+        if (stopPscInflux()) {
+            if (stopPortForward()) {
+                // Stopped successfully
+                this.hasStartedPscInflux.set(false);
+            } else {
+                logger.error("Failed to stop PSC InfluxDB tunnel.");
+            }
+        } else {
+            logger.error("Failed to stop PSC InfluxDB job.");
+        }
+    }
+
+    /**
+     * Start a local useable influxdb
+     * Should only run this on the Mac Pro!
+     */
+    public void setupLocalInflux() {
+        if (this.systemOs.toLowerCase().contains("windows")) {
+            logger.error("Start local InfluxDB does NOT support Windows");
+            return;
+        }
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"/bin/bash", "-c", "bash \"$HOME/Desktop/influxdb/start_influxdb.sh\""});
+            this.hasStartedLocalInflux.set(true);
+        } catch (IOException e) {
+            logger.error("Start local failed: {}", Util.stackTraceErrorToString(e));
+        }
+    }
+
+    /**
+     * Stop a local InfluxDB
+     */
+    public void stopLocalInflux() {
+        if (this.systemOs.toLowerCase().contains("windows")) {
+            logger.error("Stop local InfluxDB does NOT support Windows");
+            return;
+        }
+        try {
+            Process p = Runtime.getRuntime().exec("pkill -15 influxd");
+            p.waitFor();
+            // From man document (pkill):
+            // 0: One or more processes matched the criteria. 1: No processes matched.
+            // 2: Syntax error in the command line. 3: Fatal error: out of memory etc.
+            switch (p.exitValue()) {
+                case 0:
+                    logger.warn("Local InfluxDB SIGTERM success");
+                    this.hasStartedLocalInflux.set(false);
+                    break;
+                case 1:
+                    logger.warn("No running Local InfluxDB");
+                    this.hasStartedLocalInflux.set(false);
+                    break;
+                default:
+                    throw new RuntimeException(String.format("pkill return status <%d>", p.exitValue()));
+            }
+        } catch (Exception e) {
+            logger.error("Stop local failed: {}", Util.stackTraceErrorToString(e));
+        }
     }
 
     /**
      * Check the status of a PSC InfluxDB
      */
     public boolean hasStartedPscInflux() {
-        return this.hasStartedPscInflux;
+        return this.hasStartedPscInflux.get();
+    }
+
+    /**
+     * Check the status of a Local InfluxDB
+     */
+    public boolean hasStartedLocalInflux() {
+        return this.hasStartedLocalInflux.get();
     }
 
     /**
