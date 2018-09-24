@@ -100,17 +100,20 @@ public class InfluxSwitcherService {
     /**
      * Stop a remote PSC server
      */
-    public void stopRemoteInflux() {
-        if (!this.hasStartedPscInflux.get()) return;
+    public boolean stopRemoteInflux() {
+        if (!this.hasStartedPscInflux.get()) return false;
         if (stopPscInflux()) {
             if (stopPortForward()) {
                 // Stopped successfully
                 this.hasStartedPscInflux.set(false);
+                return true;
             } else {
                 logger.error("Failed to stop PSC InfluxDB tunnel.");
+                return false;
             }
         } else {
             logger.error("Failed to stop PSC InfluxDB job.");
+            return false;
         }
     }
 
@@ -125,7 +128,7 @@ public class InfluxSwitcherService {
             return;
         }
         try {
-            Runtime.getRuntime().exec(new String[]{"/bin/bash", "-c", "bash \"$HOME/Desktop/influxdb/start_influxdb.sh\""});
+            Runtime.getRuntime().exec(new String[]{"/bin/bash", "/usr/local/influxdb/start_influxdb.sh"});
             // Local InfluxDB takes up to 20s for starting
             Thread.sleep(20 * 1000);
             this.hasStartedLocalInflux.set(true);

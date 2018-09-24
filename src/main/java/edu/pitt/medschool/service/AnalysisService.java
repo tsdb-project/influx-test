@@ -40,6 +40,7 @@ public class AnalysisService {
 
     @Value("${machine}")
     private String uuid;
+    private String oldUuid;
 
     @Value("${load}")
     private double loadFactor;
@@ -81,6 +82,30 @@ public class AnalysisService {
         if (outputDir == null)
             return;
 
+        if (isPscRequired) {
+            // Start a PSC instance
+            iss.stopLocalInflux();
+            iss.setupRemoteInflux();
+            if (!iss.getHasStartedPscInflux()) {
+                // Psc not working, should exit
+                logger.error("Selected PSC InfluxDB but failed to start!");
+                jobClosingHandler(true, job, outputDir, null, 0);
+                return;
+            }
+            this.oldUuid = this.uuid;
+            this.uuid = "realpsc";
+        } else {
+            // Start a local one
+            iss.stopPscInflux();
+            iss.setupLocalInflux();
+            if (!iss.getHasStartedLocalInflux()) {
+                // Local not working, should exit
+                logger.error("Selected local InfluxDB but failed to start!");
+                jobClosingHandler(true, job, outputDir, null, 0);
+                return;
+            }
+        }
+
         String pList = job.getPatientList();
         List<String> patientIDs;
         if (pList == null || pList.isEmpty()) {
@@ -102,28 +127,6 @@ public class AnalysisService {
         for (DownsampleGroup group : groups) {
             columns.add(parseAggregationGroupColumnsString(group.getColumns()));
             columnLabelName.add(group.getLabel());
-        }
-
-        if (isPscRequired) {
-            // Start a PSC instance
-            iss.stopLocalInflux();
-            iss.setupRemoteInflux();
-            if (!iss.getHasStartedPscInflux()) {
-                // Psc not working, should exit
-                logger.error("Selected PSC InfluxDB but failed to start!");
-                jobClosingHandler(true, job, outputDir, null, 0);
-                return;
-            }
-        } else {
-            // Start a local one
-            iss.stopPscInflux();
-            iss.setupLocalInflux();
-            if (!iss.getHasStartedLocalInflux()) {
-                // Local not working, should exit
-                logger.error("Selected local InfluxDB but failed to start!");
-                jobClosingHandler(true, job, outputDir, null, 0);
-                return;
-            }
         }
 
         int paraCount = determineParaNumber();
@@ -195,13 +198,17 @@ public class AnalysisService {
             logger.error(Util.stackTraceErrorToString(e));
         } finally {
             if (isPscRequired) {
-                // Stop PSC instance after a job
-                if (!iss.stopPscInflux()) {
-                    jobClosingHandler(true, job, outputDir, outputWriter, 0);
-                    return;
+                if (!iss.stopRemoteInflux()) {
+                    // Stop PSC instance failed
+                    jobClosingHandler(true, job, outputDir, outputWriter, validPatientCounter.get());
+                } else {
+                    // Stop PSC instance success
+                    this.uuid = this.oldUuid;
+                    jobClosingHandler(false, job, outputDir, outputWriter, validPatientCounter.get());
                 }
+            } else {
+                jobClosingHandler(false, job, outputDir, outputWriter, validPatientCounter.get());
             }
-            jobClosingHandler(false, job, outputDir, outputWriter, validPatientCounter.get());
         }
     }
 
@@ -211,7 +218,7 @@ public class AnalysisService {
     private void jobClosingHandler(boolean idbError, ExportWithBLOBs job, File outputDir, ExportOutput eo, int validPatientNumber) {
         if (eo != null) {
             if (idbError) {
-                eo.writeMetaFile(String.format("InfluxDB failed to start on <%s>.%n", job.getDbType()));
+                eo.writeMetaFile(String.format("InfluxDB failed on <%s>.%n", job.getDbType()));
             }
             eo.close(validPatientNumber);
         }
