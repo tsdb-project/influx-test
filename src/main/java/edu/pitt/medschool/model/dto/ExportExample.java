@@ -533,6 +533,76 @@ public class ExportExample {
             return (Criteria) this;
         }
 
+        public Criteria andDbTypeIsNull() {
+            addCriterion("db_type is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeIsNotNull() {
+            addCriterion("db_type is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeEqualTo(String value) {
+            addCriterion("db_type =", value, "dbType");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeNotEqualTo(String value) {
+            addCriterion("db_type <>", value, "dbType");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeGreaterThan(String value) {
+            addCriterion("db_type >", value, "dbType");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeGreaterThanOrEqualTo(String value) {
+            addCriterion("db_type >=", value, "dbType");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeLessThan(String value) {
+            addCriterion("db_type <", value, "dbType");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeLessThanOrEqualTo(String value) {
+            addCriterion("db_type <=", value, "dbType");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeLike(String value) {
+            addCriterion("db_type like", value, "dbType");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeNotLike(String value) {
+            addCriterion("db_type not like", value, "dbType");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeIn(List<String> values) {
+            addCriterion("db_type in", values, "dbType");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeNotIn(List<String> values) {
+            addCriterion("db_type not in", values, "dbType");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeBetween(String value1, String value2) {
+            addCriterion("db_type between", value1, value2, "dbType");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeNotBetween(String value1, String value2) {
+            addCriterion("db_type not between", value1, value2, "dbType");
+            return (Criteria) this;
+        }
+
         public Criteria andDbVersionIsNull() {
             addCriterion("db_version is null");
             return (Criteria) this;
@@ -725,6 +795,11 @@ public class ExportExample {
 
         public Criteria andMachineLikeInsensitive(String value) {
             addCriterion("upper(machine) like", value.toUpperCase(), "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andDbTypeLikeInsensitive(String value) {
+            addCriterion("upper(db_type) like", value.toUpperCase(), "dbType");
             return (Criteria) this;
         }
 

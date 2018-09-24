@@ -120,27 +120,34 @@ $(document).ready(function() {
         patientList = null;
     });
 
-    $("#export-modal").on('hidden.bs.modal', function(e) {
+    $("#export-modal").on('hidden.bs.modal', function (e) {
         $("#uploadPatientList").val('');
         patientList = null;
-    })
+    });
 
-    $("#submitJobButton").click(function() {
+    $("#submitJobButton").click(function () {
         $("#submitJobButton").attr('disabled', 'disabled');
         var form = {
             "queryId": $("#id").val(),
             "patientList": patientList,
-            "layout": $('#ar label.active input').val() == "true" ? true : false,
-            "ar": $('#ar label.active input').val() == "true" ? true : false
+            "layout": $('#layout label.active input').val() == "true",
+            "ar": $('#ar label.active input').val() == "true",
+            "dbType": $('#selectdb label.active input').val()
         };
         $.ajax({
-            'url': "/api/export/export/",
-            'type': 'post',
-            'data': JSON.stringify(form),
-            'contentType': "application/json",
-            'dataType': 'json',
+            url: "/api/export/export/",
+            type: 'post',
+            data: JSON.stringify(form),
+            contentType: "application/json",
+            dataType: 'json',
+            success: function () {
+                window.location.href = '/analysis/job';
+            },
+            error: function () {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Failed to submit this job, please try again.');
+            }
         });
-        window.location.href = '/analysis/job';
     });
 
     $("#saveButton").click(function() {

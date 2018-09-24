@@ -41,8 +41,7 @@ public class InfluxSwitcherService {
     private String currentJobId = "";
     private String remoteInfluxHostname = "";
     private AtomicBoolean hasStartedPscInflux = new AtomicBoolean(false);
-    // Default there should have a running InfluxDB on local
-    private AtomicBoolean hasStartedLocalInflux = new AtomicBoolean(true);
+    private AtomicBoolean hasStartedLocalInflux = new AtomicBoolean(false);
 
     private String systemOs = System.getProperty("os.name");
 
@@ -68,6 +67,7 @@ public class InfluxSwitcherService {
      */
     public void setupRemoteInflux() {
         if (this.hasStartedPscInflux.get()) return;
+        // Can't setup remote if local is running
         if (this.hasStartedLocalInflux.get()) return;
         try {
             if (submitStartPscInflux()) {
@@ -119,15 +119,21 @@ public class InfluxSwitcherService {
      * Should only run this on the Mac Pro!
      */
     public void setupLocalInflux() {
+        if (this.hasStartedLocalInflux.get()) return;
         if (this.systemOs.toLowerCase().contains("windows")) {
             logger.error("Start local InfluxDB does NOT support Windows");
             return;
         }
         try {
             Runtime.getRuntime().exec(new String[]{"/bin/bash", "-c", "bash \"$HOME/Desktop/influxdb/start_influxdb.sh\""});
+            // Local InfluxDB takes up to 20s for starting
+            Thread.sleep(20 * 1000);
             this.hasStartedLocalInflux.set(true);
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Start local failed: {}", Util.stackTraceErrorToString(e));
+            // Local may still started in this case
+            this.stopLocalInflux();
+            this.hasStartedLocalInflux.set(false);
         }
     }
 
@@ -165,14 +171,14 @@ public class InfluxSwitcherService {
     /**
      * Check the status of a PSC InfluxDB
      */
-    public boolean hasStartedPscInflux() {
+    public boolean getHasStartedPscInflux() {
         return this.hasStartedPscInflux.get();
     }
 
     /**
      * Check the status of a Local InfluxDB
      */
-    public boolean hasStartedLocalInflux() {
+    public boolean getHasStartedLocalInflux() {
         return this.hasStartedLocalInflux.get();
     }
 
@@ -204,7 +210,7 @@ public class InfluxSwitcherService {
     }
 
     /**
-     * Stop the InfluxDB job (Better wait 30s when to let InfluxDB stop
+     * Stop the InfluxDB job (InfluxDB stop process may take 30s)
      *
      * @return True if idb stop signal successfully stopped, False if error happend
      */
