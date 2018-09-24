@@ -40,7 +40,6 @@ public class InfluxSwitcherService {
     private String currentJobId = "";
     private String remoteInfluxHostname = "";
     private AtomicBoolean hasStartedPscInflux = new AtomicBoolean(false);
-    private AtomicBoolean isStartingPscInflux = new AtomicBoolean(false);
     // Default there is a running InfluxDB on local
     private AtomicBoolean hasStartedLocalInflux = new AtomicBoolean(true);
 
@@ -70,9 +69,7 @@ public class InfluxSwitcherService {
         if (this.hasStartedPscInflux.get()) return;
         if (this.hasStartedLocalInflux.get()) return;
         Runnable r = () -> {
-            if (this.isStartingPscInflux.get()) return;
             try {
-                this.isStartingPscInflux.set(true);
                 if (submitStartPscInflux()) {
                     while (pscInfluxIsInQueue()) {
                         // Check every 30s to ensure that we are no longer in queue
@@ -95,11 +92,11 @@ public class InfluxSwitcherService {
             } catch (InterruptedException e) {
                 logger.error("PSC start thread failure!");
                 this.hasStartedPscInflux.set(false);
-            } finally {
-                this.isStartingPscInflux.set(false);
             }
         };
-        new Thread(r, "Remote-PSC-starting").start();
+        synchronized (InfluxSwitcherService.class) {
+            new Thread(r, "Remote-PSC-starting").start();
+        }
     }
 
     /**
@@ -129,7 +126,7 @@ public class InfluxSwitcherService {
             return;
         }
         try {
-            Process p = Runtime.getRuntime().exec(new String[]{"/bin/bash", "-c", "bash \"$HOME/Desktop/influxdb/start_influxdb.sh\""});
+            Runtime.getRuntime().exec(new String[]{"/bin/bash", "-c", "bash \"$HOME/Desktop/influxdb/start_influxdb.sh\""});
             this.hasStartedLocalInflux.set(true);
         } catch (IOException e) {
             logger.error("Start local failed: {}", Util.stackTraceErrorToString(e));
@@ -218,9 +215,9 @@ public class InfluxSwitcherService {
         // Avoid stop a not started server (Optional)
         if (this.currentJobId.isEmpty()) return false;
         try {
-            String res = runOneCommandViaSSH(String.format("srun --jobid=%s kill -15 $(cat %s);", this.currentJobId, Template.NOW_PID_PATH));
-            if (!res.trim().isEmpty()) {
-                logger.error("Stop PSC influx said: {}", res.trim());
+            String res = runOneCommandViaSSH(String.format("srun --jobid=%s kill -15 $(cat %s);", this.currentJobId, Template.NOW_PID_PATH)).trim();
+            if (!res.isEmpty()) {
+                logger.error("Stop PSC influx said: {}", res);
                 return false;
             }
         } catch (Exception e) {
