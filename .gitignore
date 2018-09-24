@@ -6,6 +6,8 @@ archive/
 logs/
 .settings/
 
+mykey.key
+
 .springBeans
 .classpath
 .project

@@ -54,6 +54,9 @@ public class ExportSqlProvider {
         if (record.getMachine() != null) {
             sql.VALUES("machine", "#{machine,jdbcType=VARCHAR}");
         }
+        if (record.getDbType() != null) {
+            sql.VALUES("db_type", "#{dbType,jdbcType=VARCHAR}");
+        }
         if (record.getDbVersion() != null) {
             sql.VALUES("db_version", "#{dbVersion,jdbcType=VARCHAR}");
         }
@@ -88,6 +91,7 @@ public class ExportSqlProvider {
         sql.SELECT("layout");
         sql.SELECT("finished");
         sql.SELECT("machine");
+        sql.SELECT("db_type");
         sql.SELECT("db_version");
         sql.SELECT("create_time");
         sql.SELECT("update_time");
@@ -117,6 +121,7 @@ public class ExportSqlProvider {
         sql.SELECT("layout");
         sql.SELECT("finished");
         sql.SELECT("machine");
+        sql.SELECT("db_type");
         sql.SELECT("db_version");
         sql.SELECT("create_time");
         sql.SELECT("update_time");
@@ -155,6 +160,9 @@ public class ExportSqlProvider {
         if (record.getMachine() != null) {
             sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
         }
+        if (record.getDbType() != null) {
+            sql.SET("db_type = #{record.dbType,jdbcType=VARCHAR}");
+        }
         if (record.getDbVersion() != null) {
             sql.SET("db_version = #{record.dbVersion,jdbcType=VARCHAR}");
         }
@@ -187,6 +195,7 @@ public class ExportSqlProvider {
         sql.SET("layout = #{record.layout,jdbcType=BIT}");
         sql.SET("finished = #{record.finished,jdbcType=BIT}");
         sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
+        sql.SET("db_type = #{record.dbType,jdbcType=VARCHAR}");
         sql.SET("db_version = #{record.dbVersion,jdbcType=VARCHAR}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
@@ -210,6 +219,7 @@ public class ExportSqlProvider {
         sql.SET("layout = #{record.layout,jdbcType=BIT}");
         sql.SET("finished = #{record.finished,jdbcType=BIT}");
         sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
+        sql.SET("db_type = #{record.dbType,jdbcType=VARCHAR}");
         sql.SET("db_version = #{record.dbVersion,jdbcType=VARCHAR}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
@@ -239,6 +249,9 @@ public class ExportSqlProvider {
         }
         if (record.getMachine() != null) {
             sql.SET("machine = #{machine,jdbcType=VARCHAR}");
+        }
+        if (record.getDbType() != null) {
+            sql.SET("db_type = #{dbType,jdbcType=VARCHAR}");
         }
         if (record.getDbVersion() != null) {
             sql.SET("db_version = #{dbVersion,jdbcType=VARCHAR}");
@@ -321,8 +334,7 @@ public class ExportSqlProvider {
                         if (criterion.getTypeHandler() == null) {
                             sb.append(String.format(parmPhrase2, criterion.getCondition(), i, j, i, j));
                         } else {
-                            sb.append(String.format(parmPhrase2_th, criterion.getCondition(), i, j, criterion.getTypeHandler(), i, j,
-                                    criterion.getTypeHandler()));
+                            sb.append(String.format(parmPhrase2_th, criterion.getCondition(), i, j, criterion.getTypeHandler(), i, j, criterion.getTypeHandler()));
                         }
                     } else if (criterion.isListValue()) {
                         sb.append(criterion.getCondition());

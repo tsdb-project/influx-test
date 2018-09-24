@@ -71,6 +71,7 @@ public class ExportWithBLOBs extends Export {
                 && (this.getLayout() == null ? other.getLayout() == null : this.getLayout().equals(other.getLayout()))
                 && (this.getFinished() == null ? other.getFinished() == null : this.getFinished().equals(other.getFinished()))
                 && (this.getMachine() == null ? other.getMachine() == null : this.getMachine().equals(other.getMachine()))
+                && (this.getDbType() == null ? other.getDbType() == null : this.getDbType().equals(other.getDbType()))
                 && (this.getDbVersion() == null ? other.getDbVersion() == null : this.getDbVersion().equals(other.getDbVersion()))
                 && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
                 && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()))
@@ -92,6 +93,7 @@ public class ExportWithBLOBs extends Export {
         result = prime * result + ((getLayout() == null) ? 0 : getLayout().hashCode());
         result = prime * result + ((getFinished() == null) ? 0 : getFinished().hashCode());
         result = prime * result + ((getMachine() == null) ? 0 : getMachine().hashCode());
+        result = prime * result + ((getDbType() == null) ? 0 : getDbType().hashCode());
         result = prime * result + ((getDbVersion() == null) ? 0 : getDbVersion().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
         result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());

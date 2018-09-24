@@ -279,7 +279,7 @@ public class AnalysisController {
         if (exportService.completeJobAndInsert(job) == 1) {
             response.setCode(1);
             try {
-                analysisService.exportToFile(job.getId(), false);
+                analysisService.exportToFile(job.getId());
                 response.setMsg("Successfully added job.");
             } catch (Exception e) {
                 response.setMsg("Failed to add job.");
