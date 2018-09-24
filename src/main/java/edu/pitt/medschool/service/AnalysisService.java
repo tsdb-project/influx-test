@@ -104,10 +104,6 @@ public class AnalysisService {
             columnLabelName.add(group.getLabel());
         }
 
-        int paraCount = determineParaNumber();
-        ExportOutput outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery, job);
-        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(InfluxappConfig.INFLUX_DB, logger), patientIDs.size(), paraCount);
-
         if (isPscRequired) {
             // Start a PSC instance
             iss.stopLocalInflux();
@@ -129,6 +125,10 @@ public class AnalysisService {
                 return;
             }
         }
+
+        int paraCount = determineParaNumber();
+        ExportOutput outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery, job);
+        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(InfluxappConfig.INFLUX_DB, logger), patientIDs.size(), paraCount);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         // Parallel query task
