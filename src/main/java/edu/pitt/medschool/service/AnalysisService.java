@@ -111,7 +111,7 @@ public class AnalysisService {
             if (!iss.getHasStartedPscInflux()) {
                 // Psc not working, should exit
                 logger.error("Selected PSC InfluxDB but failed to start!");
-                jobClosingHandler(true, job, outputDir, outputWriter, 0);
+                jobClosingHandler(true, job, outputDir, null, 0);
                 return;
             }
         } else {
@@ -121,7 +121,7 @@ public class AnalysisService {
             if (!iss.getHasStartedLocalInflux()) {
                 // Local not working, should exit
                 logger.error("Selected local InfluxDB but failed to start!");
-                jobClosingHandler(true, job, outputDir, outputWriter, 0);
+                jobClosingHandler(true, job, outputDir, null, 0);
                 return;
             }
         }
