@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,7 +43,6 @@ public class InfluxSwitcherService {
     private String currentJobId = "";
     private String remoteInfluxHostname = "";
     private AtomicBoolean hasStartedPscInflux = new AtomicBoolean(false);
-    private AtomicBoolean hasStartedLocalInflux = new AtomicBoolean(false);
 
     private String systemOs = System.getProperty("os.name");
 
@@ -66,9 +67,14 @@ public class InfluxSwitcherService {
      * Setup a remote PSC InfluxDB server (blocking)
      */
     public void setupRemoteInflux() {
-        if (this.hasStartedPscInflux.get()) return;
-        // Can't setup remote if local is running
-        if (this.hasStartedLocalInflux.get()) return;
+        if (this.hasStartedPscInflux.get()) {
+            logger.error("Can't setup remote InfluxDB if there is another InfluxDB running on remote.");
+            return;
+        }
+        if (this.getHasStartedLocalInflux()) {
+            logger.error("Can't setup remote InfluxDB if local one is running.");
+            return;
+        }
         try {
             if (submitStartPscInflux()) {
                 while (pscInfluxIsInQueue()) {
@@ -91,8 +97,7 @@ public class InfluxSwitcherService {
             }
         } catch (InterruptedException e) {
             logger.error("PSC start thread failure!");
-            stopPscInflux();
-            stopPortForward();
+            this.stopRemoteInflux();
             this.hasStartedPscInflux.set(false);
         }
     }
@@ -101,7 +106,8 @@ public class InfluxSwitcherService {
      * Stop a remote PSC server
      */
     public boolean stopRemoteInflux() {
-        if (!this.hasStartedPscInflux.get()) return false;
+        // Stop a never started server, consider stop successfully
+        if (!this.hasStartedPscInflux.get()) return true;
         if (stopPscInflux()) {
             if (stopPortForward()) {
                 // Stopped successfully
@@ -122,8 +128,8 @@ public class InfluxSwitcherService {
      * Should only run this on the Mac Pro!
      */
     public void setupLocalInflux() {
-        if (this.hasStartedLocalInflux.get()) return;
-        if (this.systemOs.toLowerCase().contains("windows")) {
+        if (this.getHasStartedLocalInflux()) return;
+        if (this.isSystemWindows()) {
             logger.error("Start local InfluxDB does NOT support Windows");
             return;
         }
@@ -131,12 +137,10 @@ public class InfluxSwitcherService {
             Runtime.getRuntime().exec(new String[]{"/bin/bash", "/usr/local/influxdb/start_influxdb.sh"});
             // Local InfluxDB takes up to 20s for starting
             Thread.sleep(20 * 1000);
-            this.hasStartedLocalInflux.set(true);
         } catch (Exception e) {
             logger.error("Start local failed: {}", Util.stackTraceErrorToString(e));
             // Local may still started in this case
             this.stopLocalInflux();
-            this.hasStartedLocalInflux.set(false);
         }
     }
 
@@ -157,11 +161,9 @@ public class InfluxSwitcherService {
             switch (p.exitValue()) {
                 case 0:
                     logger.warn("Local InfluxDB SIGTERM success");
-                    this.hasStartedLocalInflux.set(false);
                     break;
                 case 1:
                     logger.warn("No running Local InfluxDB");
-                    this.hasStartedLocalInflux.set(false);
                     break;
                 default:
                     throw new RuntimeException(String.format("pkill return status <%d>", p.exitValue()));
@@ -175,6 +177,7 @@ public class InfluxSwitcherService {
      * Check the status of a PSC InfluxDB
      */
     public boolean getHasStartedPscInflux() {
+        // We can trust `hasStartedPscInflux`
         return this.hasStartedPscInflux.get();
     }
 
@@ -182,7 +185,44 @@ public class InfluxSwitcherService {
      * Check the status of a Local InfluxDB
      */
     public boolean getHasStartedLocalInflux() {
-        return this.hasStartedLocalInflux.get();
+        String[] command = new String[]{"/bin/bash", "-c", "ps ux|grep influxd"};
+        if (this.isSystemWindows()) {
+            // Special command for Windows, tested Win 10 only
+            command = new String[]{"tasklist.exe", "/FI", "IMAGENAME eq influxd.exe"};
+        }
+        boolean started = false;
+        String line;
+        try {
+            Process p = Runtime.getRuntime().exec(command);
+            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            while ((line = input.readLine()) != null) {
+                String lineLc = line.toLowerCase();
+                // First for *NIX, second for Windows
+                // We always have the '-config' set for our InfluxDB instance
+                if (lineLc.contains("-config") || lineLc.contains("influxd.exe")) {
+                    started = true;
+                    break;
+                }
+            }
+            if (!started) {
+                while ((line = err.readLine()) != null) {
+                    String lineLc = line.toLowerCase();
+                    // First for *NIX, second for Windows
+                    // We always have the '-config' set for our InfluxDB instance
+                    if (lineLc.contains("-config") || lineLc.contains("influxd.exe")) {
+                        started = true;
+                        break;
+                    }
+                }
+            }
+            err.close();
+            input.close();
+            p.destroyForcibly();
+        } catch (IOException e) {
+            logger.error("Get local InfluxDB status failed: {}", e.getLocalizedMessage());
+        }
+        return started;
     }
 
     /**
@@ -190,7 +230,7 @@ public class InfluxSwitcherService {
      *
      * @return True if command successfully inited, False if error happend
      */
-    public boolean submitStartPscInflux() {
+    private boolean submitStartPscInflux() {
         if (!this.isSshReady) return false;
         // Avoid start one again
         if (!this.currentJobId.isEmpty()) return false;
@@ -217,7 +257,7 @@ public class InfluxSwitcherService {
      *
      * @return True if idb stop signal successfully stopped, False if error happend
      */
-    public boolean stopPscInflux() {
+    private boolean stopPscInflux() {
         if (!this.isSshReady) return false;
         // Avoid stop a not started server (Optional)
         if (this.currentJobId.isEmpty()) return false;
@@ -237,7 +277,7 @@ public class InfluxSwitcherService {
         return true;
     }
 
-    public boolean startPortForward() {
+    private boolean startPortForward() {
         if (this.forwardSession != null) return false;
         if (this.remoteInfluxHostname.isEmpty()) {
             return false;
@@ -254,7 +294,7 @@ public class InfluxSwitcherService {
         return true;
     }
 
-    public boolean stopPortForward() {
+    private boolean stopPortForward() {
         if (this.forwardSession == null) return false;
         try {
             forwardSession.delPortForwardingL(8086);
@@ -290,8 +330,9 @@ public class InfluxSwitcherService {
 
     /**
      * Usually Idb takes 5 minutes to start, we have to check it make sure it actually started
+     * In is intented for use with early starting stage
      */
-    public boolean hasPscInfluxStarted() {
+    private boolean hasPscInfluxStarted() {
         if (this.remoteInfluxHostname.isEmpty()) {
             return false;
         }
@@ -372,6 +413,13 @@ public class InfluxSwitcherService {
         }
         session.setConfig(config);
         return session;
+    }
+
+    /**
+     * Is this OS Micro$oft Win?
+     */
+    public boolean isSystemWindows() {
+        return this.systemOs.toLowerCase().contains("windows");
     }
 
 }

@@ -29,7 +29,7 @@ public class AnalysisServiceTest {
         assertEquals((int) query.getDuration(), 172800);
         assertFalse(query.getDownsampleFirst());
     }
-    
+
     @Test
     public void testParseAggregationGroupColumnsString() throws IOException {
         String columnsJson = "{\"type\":\"Asymmetry EASI/REASI\",\"columns\":[\"Relative Index (REASI), 1 - 5 Hz\",\"Relative Index (REASI), 6 - 14 Hz\"],\"electrodes\":[\"Posterior\"]}";

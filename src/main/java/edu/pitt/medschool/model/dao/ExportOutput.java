@@ -125,10 +125,10 @@ public class ExportOutput {
         this.writeMetaFile(String.format("# of cores utilized: %d%n", threads));
         this.writeMetaFile(String.format("# of patients in database: %d%n", numPatientsInTsdb));
         this.writeMetaFile(String.format("# of patients in queue initially: %d%n", numQueueSize));
-        this.writeMetaFile(String.format("Which database: %s%n", this.job.getDbType()));
-        this.writeMetaFile(String.format("Dataset AR status is: %s%n", this.job.getAr() ? "AR" : "NoAR"));
         if (!this.shouldOutputWide)
-            this.writeMetaFile(String.format("Note: Can't output wide form if duration is NOT set.%n%n%n"));
+            this.writeMetaFile(String.format("Note: Can't output wide form if duration is NOT set.%n"));
+        this.writeMetaFile(String.format("Which database: %s%n", this.job.getDbType()));
+        this.writeMetaFile(String.format("Job AR status is: %s%n%n%n", this.job.getAr() ? "AR" : "NoAR"));
         this.initMetaWrote = true;
     }
 
