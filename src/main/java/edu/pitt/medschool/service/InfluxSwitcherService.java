@@ -185,10 +185,10 @@ public class InfluxSwitcherService {
      * Check the status of a Local InfluxDB
      */
     public boolean getHasStartedLocalInflux() {
-        String command = "/bin/bash -c \"ps ux|grep influxd\"";
+        String[] command = new String[]{"/bin/bash", "-c", "ps ux|grep influxd"};
         if (this.isSystemWindows()) {
             // Special command for Windows, tested Win 10 only
-            command = "tasklist /FI \"IMAGENAME eq influxd.exe\"";
+            command = new String[]{"tasklist.exe", "/FI", "IMAGENAME eq influxd.exe"};
         }
         boolean started = false;
         String line;
