@@ -1,5 +1,29 @@
 package edu.pitt.medschool.controller.analysis;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
+import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
+import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
+import edu.pitt.medschool.framework.rest.RestfulResponse;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.ExportWithBLOBs;
+import edu.pitt.medschool.service.AnalysisService;
+import edu.pitt.medschool.service.ColumnService;
+import edu.pitt.medschool.service.ExportService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,43 +38,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
-import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
-import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
-import edu.pitt.medschool.framework.rest.RestfulResponse;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.PatientDao;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.ExportWithBLOBs;
-import edu.pitt.medschool.service.AnalysisService;
-import edu.pitt.medschool.service.ColumnService;
-import edu.pitt.medschool.service.ExportService;
-
 /**
  * @author Isolachine
  */
@@ -63,10 +50,6 @@ public class AnalysisController {
 
     @Autowired
     ColumnService columnService;
-    @Autowired
-    PatientDao patientDao;
-    @Autowired
-    ImportedFileDao importedFileDao;
     @Autowired
     AnalysisService analysisService;
     @Autowired
@@ -257,33 +240,14 @@ public class AnalysisController {
         return columnService.selectColumnsByMeasuresAndElectrodes(params.measure, params.electrode);
     }
 
-    public static class ExportRequest {
-        // column
-        public String measure;
-        public String electrode;
-        public String column;
-        // downsample
-        public String method;
-        public String interval;
-        public String time;
-        // meta filter
-        public String ar;
-        public String gender;
-        public String ageLower;
-        public String ageUpper;
-    }
-
     @PostMapping("api/export/export")
     @ResponseBody
     public RestfulResponse exportQuery(@RequestBody(required = true) ExportWithBLOBs job, RestfulResponse response) throws JsonProcessingException {
         if (exportService.completeJobAndInsert(job) == 1) {
+            // Run export in a separate thread to unblock the controller
+            new Thread(() -> analysisService.exportToFile(job.getId())).start();
             response.setCode(1);
-            try {
-                analysisService.exportToFile(job.getId());
-                response.setMsg("Successfully added job.");
-            } catch (Exception e) {
-                response.setMsg("Failed to add job.");
-            }
+            response.setMsg("Successfully added job.");
         } else {
             response.setCode(0);
             response.setMsg("Database error!");

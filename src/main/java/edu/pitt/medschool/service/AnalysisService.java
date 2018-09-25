@@ -71,7 +71,7 @@ public class AnalysisService {
     /**
      * Export (downsample) a single query to files (Could be called mutiple times)
      */
-    public void exportToFile(Integer exportId) throws IOException {
+    public void exportToFile(Integer exportId) {
         ExportWithBLOBs job = exportDao.selectByPrimaryKey(exportId);
         int queryId = job.getQueryId();
         Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
@@ -124,14 +124,25 @@ public class AnalysisService {
         int labelCount = groups.size();
         List<List<String>> columns = new ArrayList<>(labelCount);
         List<String> columnLabelName = new ArrayList<>(labelCount);
-        for (DownsampleGroup group : groups) {
-            columns.add(parseAggregationGroupColumnsString(group.getColumns()));
-            columnLabelName.add(group.getLabel());
+        try {
+            for (DownsampleGroup group : groups) {
+                columns.add(parseAggregationGroupColumnsString(group.getColumns()));
+                columnLabelName.add(group.getLabel());
+            }
+        } catch (IOException e) {
+            logger.error("Parse aggregation group failed: {}", Util.stackTraceErrorToString(e));
+            return;
         }
 
         int paraCount = determineParaNumber();
-        ExportOutput outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery, job);
-        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(InfluxappConfig.INFLUX_DB, logger), patientIDs.size(), paraCount);
+        ExportOutput outputWriter;
+        try {
+            outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery, job);
+            outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(InfluxappConfig.INFLUX_DB, logger), patientIDs.size(), paraCount);
+        } catch (IOException e) {
+            logger.error("Export writer failed to create: {}", Util.stackTraceErrorToString(e));
+            return;
+        }
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         // Parallel query task
