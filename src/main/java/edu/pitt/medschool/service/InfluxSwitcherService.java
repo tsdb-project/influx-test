@@ -195,20 +195,32 @@ public class InfluxSwitcherService {
         try {
             Process p = Runtime.getRuntime().exec(command);
             BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
             while ((line = input.readLine()) != null) {
                 String lineLc = line.toLowerCase();
                 // First for *NIX, second for Windows
                 // We always have the '-config' set for our InfluxDB instance
-                if (lineLc.contains(" -config ") || lineLc.contains("influxd.exe")) {
+                if (lineLc.contains("-config") || lineLc.contains("influxd.exe")) {
                     started = true;
                     break;
                 }
             }
+            if (!started) {
+                while ((line = err.readLine()) != null) {
+                    String lineLc = line.toLowerCase();
+                    // First for *NIX, second for Windows
+                    // We always have the '-config' set for our InfluxDB instance
+                    if (lineLc.contains("-config") || lineLc.contains("influxd.exe")) {
+                        started = true;
+                        break;
+                    }
+                }
+            }
+            err.close();
             input.close();
             p.destroyForcibly();
         } catch (IOException e) {
             logger.error("Get local InfluxDB status failed: {}", e.getLocalizedMessage());
-            started = false;
         }
         return started;
     }
