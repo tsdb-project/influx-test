@@ -10,19 +10,19 @@ import org.springframework.boot.system.ApplicationTemp;
 public final class InfluxappConfig {
 
     /**
-     * A globally useable InfluxDB Client
-     */
-    public static final InfluxDB INFLUX_DB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-
-    /**
      * Available cores on this system
      */
     public static final int AvailableCores = Runtime.getRuntime().availableProcessors();
 
     /**
-     * Server Address
+     * Server Address for local client
      */
-    public static final String IFX_ADDR = "http://127.0.0.1:8086";
+    public static final String IFX_ADDR_LOCAL = "http://127.0.0.1:8086";
+
+    /**
+     * Server Address for remote client
+     */
+    public static final String IFX_ADDR_REMOTE = "http://127.0.0.1:9086";
 
     /**
      * Server writable user's name (better to be an admin)

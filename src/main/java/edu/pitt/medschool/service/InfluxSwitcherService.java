@@ -285,7 +285,7 @@ public class InfluxSwitcherService {
         try {
             forwardSession = generateNewSshSession(true);
             forwardSession.connect();
-            forwardSession.setPortForwardingL("localhost", 8086, remoteInfluxHostname, 8086);
+            forwardSession.setPortForwardingL("localhost", 9086, remoteInfluxHostname, 8086);
             logger.warn("Port forward to <{}> started on <{}>", remoteInfluxHostname, TimeUtil.formatLocalDateTime(null, ""));
         } catch (JSchException e) {
             logger.error("Set port forward failed: {}", Util.stackTraceErrorToString(e));
@@ -297,7 +297,7 @@ public class InfluxSwitcherService {
     private boolean stopPortForward() {
         if (this.forwardSession == null) return false;
         try {
-            forwardSession.delPortForwardingL(8086);
+            forwardSession.delPortForwardingL(9086);
             logger.warn("Port forward to <{}> stopped on <{}>", remoteInfluxHostname, TimeUtil.formatLocalDateTime(null, ""));
         } catch (JSchException e) {
             logger.error("Stop port forward failed: {}", Util.stackTraceErrorToString(e));
