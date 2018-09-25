@@ -120,6 +120,13 @@ public class AnalysisService {
             } else {
                 patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
             }
+            // Local DB may take up to 10s to stop
+            try {
+                Thread.sleep(10 * 1000);
+            } catch (InterruptedException e) {
+                logger.error("Stop local Influx failed, {}", Util.stackTraceErrorToString(e));
+                return;
+            }
             iss.setupRemoteInflux();
             if (!iss.getHasStartedPscInflux()) {
                 // Psc not working, should exit
@@ -128,8 +135,14 @@ public class AnalysisService {
                 return;
             }
         } else {
-            // Start a local one
             iss.stopRemoteInflux();
+            // Remote DB may take up to 3s to stop
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                logger.error("Stop remote Influx failed, {}", Util.stackTraceErrorToString(e));
+                return;
+            }
             iss.setupLocalInflux();
             if (!iss.getHasStartedLocalInflux()) {
                 // Local not working, should exit
