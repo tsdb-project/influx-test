@@ -40,7 +40,6 @@ public class AnalysisService {
 
     @Value("${machine}")
     private String uuid;
-    private String oldUuid;
 
     @Value("${load}")
     private double loadFactor;
@@ -82,42 +81,10 @@ public class AnalysisService {
         if (outputDir == null)
             return;
 
-        if (isPscRequired) {
-            // Start a PSC instance
-            iss.stopLocalInflux();
-            iss.setupRemoteInflux();
-            if (!iss.getHasStartedPscInflux()) {
-                // Psc not working, should exit
-                logger.error("Selected PSC InfluxDB but failed to start!");
-                jobClosingHandler(true, job, outputDir, null, 0);
-                return;
-            }
-            this.oldUuid = this.uuid;
-            this.uuid = "realpsc";
-        } else {
-            // Start a local one
-            iss.stopPscInflux();
-            iss.setupLocalInflux();
-            if (!iss.getHasStartedLocalInflux()) {
-                // Local not working, should exit
-                logger.error("Selected local InfluxDB but failed to start!");
-                jobClosingHandler(true, job, outputDir, null, 0);
-                return;
-            }
-        }
-
-        String pList = job.getPatientList();
-        List<String> patientIDs;
-        if (pList == null || pList.isEmpty()) {
-            // No user-defined, get patient list by uuid
-            patientIDs = importedFileDao.selectAllImportedPidOnMachine(uuid);
-        } else {
-            // Init list with user-defined
-            patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
-        }
-        BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
         String projectRootFolder = outputDir.getAbsolutePath();
         AtomicInteger validPatientCounter = new AtomicInteger(0);
+        String pList = job.getPatientList();
+        List<String> patientIDs;
 
         // Get columns data
         List<DownsampleGroup> groups = downsampleGroupDao.selectAllDownsampleGroup(queryId);
@@ -134,15 +101,52 @@ public class AnalysisService {
             return;
         }
 
-        int paraCount = determineParaNumber();
+        // Init the `outputWriter` ASAP
         ExportOutput outputWriter;
         try {
             outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery, job);
-            outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(InfluxappConfig.INFLUX_DB, logger), patientIDs.size(), paraCount);
         } catch (IOException e) {
             logger.error("Export writer failed to create: {}", Util.stackTraceErrorToString(e));
+            jobClosingHandler(false, isPscRequired, job, outputDir, null, 0);
             return;
         }
+
+        if (isPscRequired) {
+            // Prep PSC instance
+            iss.stopLocalInflux();
+            if (pList == null || pList.isEmpty()) {
+                // Override UUID setting to match PSC database
+                patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
+            } else {
+                patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
+            }
+            iss.setupRemoteInflux();
+            if (!iss.getHasStartedPscInflux()) {
+                // Psc not working, should exit
+                logger.error("Selected PSC InfluxDB but failed to start!");
+                jobClosingHandler(true, isPscRequired, job, outputDir, null, 0);
+                return;
+            }
+        } else {
+            // Start a local one
+            iss.stopRemoteInflux();
+            iss.setupLocalInflux();
+            if (!iss.getHasStartedLocalInflux()) {
+                // Local not working, should exit
+                logger.error("Selected local InfluxDB but failed to start!");
+                jobClosingHandler(true, isPscRequired, job, outputDir, null, 0);
+                return;
+            }
+            if (pList == null || pList.isEmpty()) {
+                patientIDs = importedFileDao.selectAllImportedPidOnMachine(uuid);
+            } else {
+                patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
+            }
+        }
+
+        int paraCount = determineParaNumber();
+        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(InfluxappConfig.INFLUX_DB, logger), patientIDs.size(), paraCount);
+        BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         // Parallel query task
@@ -208,28 +212,21 @@ public class AnalysisService {
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
         } finally {
-            if (isPscRequired) {
-                if (!iss.stopRemoteInflux()) {
-                    // Stop PSC instance failed
-                    jobClosingHandler(true, job, outputDir, outputWriter, validPatientCounter.get());
-                } else {
-                    // Stop PSC instance success
-                    this.uuid = this.oldUuid;
-                    jobClosingHandler(false, job, outputDir, outputWriter, validPatientCounter.get());
-                }
-            } else {
-                jobClosingHandler(false, job, outputDir, outputWriter, validPatientCounter.get());
-            }
+            jobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, validPatientCounter.get());
         }
     }
 
     /**
      * Handler when a job is finished (With error or not)
      */
-    private void jobClosingHandler(boolean idbError, ExportWithBLOBs job, File outputDir, ExportOutput eo, int validPatientNumber) {
+    private void jobClosingHandler(boolean idbError, boolean isPscNeeded, ExportWithBLOBs job, File outputDir, ExportOutput eo, int validPatientNumber) {
+        // We will leave the local Idb running after the job
+        if (isPscNeeded) {
+            if (!this.iss.stopRemoteInflux()) idbError = true;
+        }
         if (eo != null) {
             if (idbError) {
-                eo.writeMetaFile(String.format("InfluxDB failed on <%s>.%n", job.getDbType()));
+                eo.writeMetaFile(String.format("InfluxDB probably failed on <%s>.%n", job.getDbType()));
             }
             eo.close(validPatientNumber);
         }
@@ -241,7 +238,7 @@ public class AnalysisService {
         exportDao.updateByPrimaryKeySelective(updateJob);
     }
 
-    public List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
+    List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ColumnJSON json = mapper.readValue(columnsJson, ColumnJSON.class);
         return columnService.selectColumnsByAggregationGroupColumns(json);
