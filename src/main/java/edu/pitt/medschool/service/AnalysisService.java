@@ -127,6 +127,7 @@ public class AnalysisService {
                 jobClosingHandler(true, isPscRequired, job, outputDir, null, 0);
                 return;
             }
+            this.columnService.setLocalInflux(false);
         } else {
             // Start a local one
             iss.stopRemoteInflux();
@@ -137,6 +138,7 @@ public class AnalysisService {
                 jobClosingHandler(true, isPscRequired, job, outputDir, null, 0);
                 return;
             }
+            this.columnService.setLocalInflux(true);
             if (pList == null || pList.isEmpty()) {
                 patientIDs = importedFileDao.selectAllImportedPidOnMachine(uuid);
             } else {

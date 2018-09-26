@@ -33,6 +33,7 @@ public class ColumnService {
     @Autowired
     FeatureDao featureDao;
 
+    private boolean isLocalInflux = true;
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     Set<String> electrodeMeasures = new HashSet<>(Arrays.asList(new String[]{"FFT Spectrogram", "aEEG", "PeakEnvelope", "Rhythmicity Spectrogram",
@@ -46,6 +47,10 @@ public class ColumnService {
     public class PredefinedKV extends Object {
         public String key;
         public String value;
+    }
+
+    public void setLocalInflux(boolean localInflux) {
+        isLocalInflux = localInflux;
     }
 
     public ElectrodeVO selectElectrodesByMeasures(List<String> measures) {
@@ -144,8 +149,7 @@ public class ColumnService {
     private final static String dbName = DBConfiguration.Data.DBNAME;
 
     public List<String> selectAllColumn() {
-        //TODO: Proper handle
-        InfluxDB influxDB = InfluxUtil.generateIdbClient(true, true);
+        InfluxDB influxDB = InfluxUtil.generateIdbClient(this.isLocalInflux, true);
         List<String> columns = new ArrayList<>();
         Query measurements = new Query("show measurements", dbName);
         QueryResult measurementsRes = influxDB.query(measurements);
