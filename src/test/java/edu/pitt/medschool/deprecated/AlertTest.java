@@ -1,13 +1,12 @@
 package edu.pitt.medschool.deprecated;
 
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
-
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +59,7 @@ public class AlertTest {
     }
 
     public static void main(String[] args) {
-        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR_LOCAL, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
         rndInsert(influxDB);
     }
 

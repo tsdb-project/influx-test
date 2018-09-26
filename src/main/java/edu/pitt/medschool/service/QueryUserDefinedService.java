@@ -1,30 +1,24 @@
 package edu.pitt.medschool.service;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.model.QueryResultBean;
 import edu.pitt.medschool.model.TimeSpan;
 import edu.pitt.medschool.model.dao.PatientDao;
+import org.influxdb.InfluxDB;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Query related services
  */
 @Service
 public class QueryUserDefinedService {
-
-    private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-
     @Autowired
     private PatientDao patientDao;
 
@@ -129,7 +123,10 @@ public class QueryUserDefinedService {
      * @return Query execuation results
      */
     private QueryResultBean checkOnePatientA(String queryString, String pid, String queryN, int thrSec, boolean isAr) {
-        ResultTable[] res = InfluxUtil.justQueryData(this.influxDB, true, queryString);
+        //TODO: Proper handle
+        InfluxDB influxDB = InfluxUtil.generateIdbClient(true, true);
+        ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, queryString);
+        influxDB.close();
 
         // This patient doesn't need to be included.
         if (res.length == 0)
@@ -157,7 +154,10 @@ public class QueryUserDefinedService {
     }
 
     private QueryResultBean checkOnePatientB(String queryString, String pid, String queryN, int he, boolean isAr) {
-        ResultTable[] res = InfluxUtil.justQueryData(this.influxDB, true, queryString);
+        //TODO: Proper handle
+        InfluxDB influxDB = InfluxUtil.generateIdbClient(true, true);
+        ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, queryString);
+        influxDB.close();
 
         // This patient doesn't need to be included.
         if (res.length == 0)
@@ -194,7 +194,11 @@ public class QueryUserDefinedService {
     }
 
     private List<String> getCurrentPatientList() {
+        //TODO: Proper handle
         // Focus on tables that have been imported
-        return InfluxUtil.getAllTables(dbName);
+        InfluxDB influxDB = InfluxUtil.generateIdbClient(true, true);
+        List<String> res = InfluxUtil.getAllTables(influxDB, dbName);
+        influxDB.close();
+        return res;
     }
 }

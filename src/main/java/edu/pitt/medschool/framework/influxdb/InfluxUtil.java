@@ -2,13 +2,16 @@ package edu.pitt.medschool.framework.influxdb;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
+import okhttp3.OkHttpClient;
 import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utilities for InfluxDB Java Client
@@ -73,9 +76,9 @@ public class InfluxUtil {
      * @param dbname DB Name
      * @return List of names
      */
-    public static List<String> getAllTables(String dbname) {
+    public static List<String> getAllTables(InfluxDB i, String dbname) {
         Query q = new Query("SHOW MEASUREMENTS", dbname);
-        QueryResult qr = InfluxappConfig.INFLUX_DB.query(q);
+        QueryResult qr = i.query(q);
         List<QueryResult.Series> s = qr.getResults().get(0).getSeries();
         if (s == null) return new ArrayList<>(0);
 
@@ -93,9 +96,9 @@ public class InfluxUtil {
      * @param keyName      Key name
      * @param toCheckValue Checked value
      */
-    public static boolean hasDuplicateTagKeyValues(String keyName, String toCheckValue, String dbName) {
+    public static boolean hasDuplicateTagKeyValues(InfluxDB i, String keyName, String toCheckValue, String dbName) {
         Query q = new Query("SHOW TAG VALUES ON \"" + dbName + "\" WITH KEY = \"" + keyName + "\"", dbName);
-        List<DictionaryResultTable> qr = queryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
+        List<DictionaryResultTable> qr = queryResultToKV(i.query(q));
         return qr.get(0).getRowCount() != 0 && qr.get(0).getDatalistByColumnName("value").contains(toCheckValue);
     }
 
@@ -105,16 +108,30 @@ public class InfluxUtil {
      * @param tn Table name
      * @return Number of lines
      */
-    public static long getDataTableRows(String tn) {
+    public static long getDataTableRows(InfluxDB i, String tn) {
         Query q = new Query("SELECT COUNT(\"Time\") FROM \"" + tn + "\"", DBConfiguration.Data.DBNAME);
-        QueryResult qr = InfluxappConfig.INFLUX_DB.query(q);
+        QueryResult qr = i.query(q);
         if (qr.getResults().get(0).getSeries() == null) return -1;
         return (long) qr.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
     }
 
-    public static void main(String[] args) {
-        List<String> s = getAllTables(DBConfiguration.Data.DBNAME);
-        System.out.println(s);
+    /**
+     * Generate one IdbClient
+     *
+     * @param isLocal  Is this client for local or remote
+     * @param needGzip Unless Idb not running with Brainflux, you should disable GZip
+     */
+    public static InfluxDB generateIdbClient(boolean isLocal, boolean needGzip) {
+        String addr = isLocal ? InfluxappConfig.IFX_ADDR_LOCAL : InfluxappConfig.IFX_ADDR_REMOTE;
+        InfluxDB idb = InfluxDBFactory.connect(addr, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(600, TimeUnit.SECONDS).writeTimeout(600,
+                        TimeUnit.SECONDS));
+        if (needGzip) {
+            idb.enableGzip();
+        } else {
+            idb.disableGzip();
+        }
+        return idb;
     }
 
 }

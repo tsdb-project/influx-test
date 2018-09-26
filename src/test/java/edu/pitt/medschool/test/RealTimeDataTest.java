@@ -1,31 +1,28 @@
 /**
- * 
+ *
  */
 package edu.pitt.medschool.test;
 
-import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
+import edu.pitt.medschool.config.InfluxappConfig;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Point.Builder;
-
-import edu.pitt.medschool.config.InfluxappConfig;
-
 import org.influxdb.dto.Query;
+
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Isolachine
- *
  */
 public class RealTimeDataTest {
     final static Random random = new Random();
-    final static InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+    final static InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR_LOCAL, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
     final static String dbName = "alert";
     final static Query query = new Query("CREATE DATABASE alert", "");
 

@@ -488,7 +488,8 @@ public class ImportCsvService {
      * Generate IdbClient for Importing CSVs
      */
     private InfluxDB generateIdbClient() {
-        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+        //TODO: Should always using local for importing?
+        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR_LOCAL, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
                 new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS));
         // Disable GZip to save CPU
         idb.disableGzip();

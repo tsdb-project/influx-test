@@ -1,7 +1,6 @@
 package edu.pitt.medschool.service;
 
 import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.TimeUtil;
@@ -21,8 +20,6 @@ import java.util.List;
  */
 @Service
 public class RawDataService {
-
-    private final InfluxDB influxDB = InfluxappConfig.INFLUX_DB;
     private final String dbDataName = DBConfiguration.Data.DBNAME;
 
     /**
@@ -46,11 +43,13 @@ public class RawDataService {
     }
 
     public List<RawData> selectAllRawDataInColumns(String patientTable, List<String> columnNames) throws ParseException {
+        //TODO: Proper handle
+        InfluxDB influxDB = InfluxUtil.generateIdbClient(true, false);
         String columns = String.join(", ", columnNames);
         String queryString = "Select " + columns + " from \"" + patientTable + "\"";
         Query q = new Query(queryString, dbDataName);
         QueryResult result = influxDB.query(q);
-
+        influxDB.close();
         List<RawData> data = new ArrayList<>();
         if (!result.hasError() && !result.getResults().get(0).hasError()) {
             for (List<Object> res : result.getResults().get(0).getSeries().get(0).getValues()) {
@@ -71,8 +70,10 @@ public class RawDataService {
     }
 
     private Instant availDataTimeQ(String qT, String pid, boolean hasAr) {
-        ResultTable[] res = InfluxUtil.justQueryData(this.influxDB, true, String.format(qT, pid, hasAr ? "ar" : "noar"));
-
+        //TODO: Proper handle
+        InfluxDB influxDB = InfluxUtil.generateIdbClient(true, false);
+        ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, String.format(qT, pid, hasAr ? "ar" : "noar"));
+        influxDB.close();
         // Table does not exist
         if (res.length == 0)
             return null;

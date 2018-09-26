@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edu.pitt.medschool.test;
 
@@ -21,13 +21,12 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author Isolachine
- *
  */
 public class IntegrityTest {
 
     static void lineCount() {
-
-        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+        //TODO: Proper handle
+        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR_LOCAL, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
                 new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS));
         Query query = new Query("show measurements", "data");
         QueryResult result = idb.query(query);
@@ -43,7 +42,8 @@ public class IntegrityTest {
     }
 
     static void startAndEnd() {
-        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+        //TODO: Proper handle
+        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR_LOCAL, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
                 new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS));
         for (int i = 0; i < 9; i++) {
             Query start = new Query("select \"I3_1\" from /PUH-201" + i + "/ limit 1 tz('America/New_York')", "data");
@@ -81,11 +81,10 @@ public class IntegrityTest {
         try {
             fw = new FileWriter("/tsdb/gap.csv");
             fw.write("PID,time,record count\n");
-
-            InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+            //TODO: Proper handle
+            InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR_LOCAL, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
                     new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).writeTimeout(120, TimeUnit.SECONDS));
-
-            List<String> patientIds = InfluxUtil.getAllTables("data");
+            List<String> patientIds = InfluxUtil.getAllTables(influxDB, "data");
             for (String patientId : patientIds) {
                 Query start = new Query("select \"I3_1\" from \"" + patientId + "\" limit 1", "data");
                 Query end = new Query("select \"I3_1\" from \"" + patientId + "\" order by time desc limit 1", "data");

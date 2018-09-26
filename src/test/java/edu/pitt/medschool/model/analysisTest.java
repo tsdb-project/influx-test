@@ -1,6 +1,6 @@
 package edu.pitt.medschool.model;
 
-import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.model.dao.AnalysisUtil;
 import org.influxdb.InfluxDB;
 import org.junit.Ignore;
@@ -13,7 +13,7 @@ public class analysisTest {
     @Test
     @Ignore
     public void main() {
-        InfluxDB i = InfluxappConfig.INFLUX_DB;
+        InfluxDB i = InfluxUtil.generateIdbClient(true, false);
         List<DataTimeSpanBean> tmp;
 
         tmp = AnalysisUtil.getPatientAllDataSpan(i, null, "PUH-2010-141");

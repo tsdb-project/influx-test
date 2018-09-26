@@ -170,7 +170,7 @@ public class QueryService {
                 "Asymmetry, Relative Index (REASI)01, 1 - 18 Hz, Asym Hemi", "aEEG, Left Hemisphere", "aEEG, Right Hemisphere",
                 "Suppression Ratio, Left Hemisphere", "Suppression Ratio, Right Hemisphere", "Time_Column" };
         int[] columnsNumbers = { 4, 1, 97, 97, 40, 40, 34, 1, 1, 5, 5, 1, 1, 1 };
-        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR_LOCAL, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
         BatchPoints records = BatchPoints.database(DBConfiguration.Data.DBNAME).consistency(ConsistencyLevel.ALL).build();
 
         for (int i = 1; i <= names.length; i++) {
@@ -186,7 +186,7 @@ public class QueryService {
 
     public static void main(String[] args) {
 
-        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+        InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR_LOCAL, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
         queryRunner(influxDB, "select \"I1_1\" from \"data_PUH-2010-014_ar\"");
 
         // List<String> colNames = getColNames(influxDB, tableName);

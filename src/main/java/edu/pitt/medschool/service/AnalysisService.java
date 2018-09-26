@@ -144,14 +144,16 @@ public class AnalysisService {
             }
         }
 
+        InfluxDB idb = InfluxUtil.generateIdbClient(!isPscRequired, false);
         int paraCount = determineParaNumber();
-        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(InfluxappConfig.INFLUX_DB, logger), patientIDs.size(), paraCount);
+        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(idb, logger), patientIDs.size(), paraCount);
+        idb.close();
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         // Parallel query task
         Runnable queryTask = () -> {
-            InfluxDB influxDB = generateIdbClient(false);
+            InfluxDB influxDB = InfluxUtil.generateIdbClient(!isPscRequired, true);
             String patientId;
             while ((patientId = idQueue.poll()) != null) {
                 try {
@@ -201,6 +203,7 @@ public class AnalysisService {
                     }
                 }
             }
+            influxDB.close();
         };
 
         for (int i = 0; i < paraCount; ++i) {
@@ -343,23 +346,6 @@ public class AnalysisService {
      */
     private ExecutorService generateNewThreadPool(int i) {
         return Executors.newFixedThreadPool(i);
-    }
-
-    /**
-     * Generate one IdbClient for one thread when doing exports
-     *
-     * @param needGzip Unless Idb not running with Brainflux, you should disable GZip
-     */
-    private InfluxDB generateIdbClient(boolean needGzip) {
-        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(300, TimeUnit.SECONDS).writeTimeout(120,
-                        TimeUnit.SECONDS));
-        if (needGzip) {
-            idb.enableGzip();
-        } else {
-            idb.disableGzip();
-        }
-        return idb;
     }
 
 }

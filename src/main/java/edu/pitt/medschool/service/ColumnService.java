@@ -3,15 +3,14 @@
  */
 package edu.pitt.medschool.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
+import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
+import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.model.dao.FeatureDao;
+import edu.pitt.medschool.model.dto.Feature;
 import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.slf4j.Logger;
@@ -20,17 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
-import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
-import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
-import edu.pitt.medschool.model.dao.FeatureDao;
-import edu.pitt.medschool.model.dto.Feature;
+import java.util.*;
 
 /**
  * service for returning column information of data
- * 
+ *
  * @author Isolachine
  */
 @Service
@@ -42,9 +35,9 @@ public class ColumnService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    Set<String> electrodeMeasures = new HashSet<>(Arrays.asList(new String[] { "FFT Spectrogram", "aEEG", "PeakEnvelope", "Rhythmicity Spectrogram",
-            "Suppression Ratio", "aEEG+ (0.16 - 25Hz) (LFF 1 sec, HFF 25 Hz, custom (off))" }));
-    Set<String> miscMeasures = new HashSet<>(Arrays.asList(new String[] { "Artifact Intensity", "Seizure Probability" }));
+    Set<String> electrodeMeasures = new HashSet<>(Arrays.asList(new String[]{"FFT Spectrogram", "aEEG", "PeakEnvelope", "Rhythmicity Spectrogram",
+            "Suppression Ratio", "aEEG+ (0.16 - 25Hz) (LFF 1 sec, HFF 25 Hz, custom (off))"}));
+    Set<String> miscMeasures = new HashSet<>(Arrays.asList(new String[]{"Artifact Intensity", "Seizure Probability"}));
 
     public List<String> selectAllMeasures() {
         return featureDao.selectAllMeasures();
@@ -148,11 +141,11 @@ public class ColumnService {
         return result;
     }
 
-    private InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-
     private final static String dbName = DBConfiguration.Data.DBNAME;
 
     public List<String> selectAllColumn() {
+        //TODO: Proper handle
+        InfluxDB influxDB = InfluxUtil.generateIdbClient(true, true);
         List<String> columns = new ArrayList<>();
         Query measurements = new Query("show measurements", dbName);
         QueryResult measurementsRes = influxDB.query(measurements);
@@ -166,7 +159,7 @@ public class ColumnService {
                 }
             }
         }
-
+        influxDB.close();
         return columns;
     }
 

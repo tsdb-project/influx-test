@@ -1,14 +1,13 @@
 package edu.pitt.medschool.deprecated;
 
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.model.TSData.CSVFile;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.impl.InfluxDBResultMapper;
 import org.springframework.stereotype.Service;
-
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.model.TSData.CSVFile;
 
 import java.util.List;
 
@@ -20,7 +19,7 @@ import java.util.List;
 @Deprecated
 public class CsvFileService {
 
-    private static final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+    private static final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR_LOCAL, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
     private static final InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
 
     private static final String fileQueryStr = "SELECT * FROM " + DBConfiguration.Sys.FILE;
