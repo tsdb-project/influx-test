@@ -8,12 +8,13 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class analysisTest {
+public class AnalysisTest {
 
     @Test
     @Ignore
     public void main() {
         InfluxDB i = InfluxappConfig.INFLUX_DB;
+        @SuppressWarnings("unused")
         List<DataTimeSpanBean> tmp;
 
         tmp = AnalysisUtil.getPatientAllDataSpan(i, null, "PUH-2010-141");

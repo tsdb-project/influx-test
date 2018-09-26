@@ -20,7 +20,6 @@ public class JsonParseTest {
 
         List<Object> aList = parser.parseList(json);
         assertEquals(aList.size(), 3);
-        assertEquals(((List<Object>) (aList.get(2))).size(), 2);
 
         json = "{\"type\":\"aEEG\",\"electrodes\":[\"Cz-Av17\", \"Pz-Av17\"],\"columns\":[\"Max\", \"Min\"]}";
 
