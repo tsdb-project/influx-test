@@ -11,7 +11,7 @@ import static edu.pitt.medschool.framework.util.TimeUtil.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class appTimeUtilTest {
+public class AppTimeUtilTest {
 
     private String format = "yyyy.MM.dd HH:mm:ss";
 

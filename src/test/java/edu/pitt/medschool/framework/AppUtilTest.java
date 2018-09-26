@@ -9,7 +9,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class appUtilTest {
+public class AppUtilTest {
 
     @Test
     public void testFiles() {

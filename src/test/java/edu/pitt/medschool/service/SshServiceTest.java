@@ -1,11 +1,7 @@
 package edu.pitt.medschool.service;
 
-import com.jcraft.jsch.*;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.util.Util;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,10 +9,19 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 
-public class sshServiceTest {
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.HostKey;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.util.Util;
+
+public class SshServiceTest {
 
     private JSch jsch = new JSch();
     private Session session1, session2;
