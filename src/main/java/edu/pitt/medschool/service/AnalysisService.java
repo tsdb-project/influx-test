@@ -365,7 +365,7 @@ public class AnalysisService {
      */
     private InfluxDB generateIdbClient(boolean needGzip) {
         InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(300, TimeUnit.SECONDS).writeTimeout(120,
+                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(120, TimeUnit.MINUTES).writeTimeout(120,
                         TimeUnit.SECONDS));
         if (needGzip) {
             idb.enableGzip();
