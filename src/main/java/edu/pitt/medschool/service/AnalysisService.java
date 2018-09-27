@@ -158,7 +158,12 @@ public class AnalysisService {
         }
 
         int paraCount = determineParaNumber();
-        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(InfluxappConfig.INFLUX_DB, logger), patientIDs.size(), paraCount);
+        // Dirty hack to migrate timeout problems, should remove this some time later
+        if (exportQuery.getPeriod() < 20 || labelCount > 8)
+            paraCount /= 5;
+        InfluxDB idb = generateIdbClient(false);
+        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(idb, logger), patientIDs.size(), paraCount);
+        idb.close();
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
@@ -214,6 +219,7 @@ public class AnalysisService {
                     }
                 }
             }
+            influxDB.close();
         };
 
         for (int i = 0; i < paraCount; ++i) {
@@ -365,8 +371,7 @@ public class AnalysisService {
      */
     private InfluxDB generateIdbClient(boolean needGzip) {
         InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(120, TimeUnit.MINUTES).writeTimeout(120,
-                        TimeUnit.SECONDS));
+                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(90, TimeUnit.MINUTES).writeTimeout(120, TimeUnit.SECONDS));
         if (needGzip) {
             idb.enableGzip();
         } else {
