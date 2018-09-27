@@ -30,8 +30,8 @@ public class ExportOutput {
     private Export job;
     private Downsample ds;
     private int numberOfLabels;
-    private int minBinRow;
-    private int minBin;
+    private int minSecondsForBinPerRow;
+    private int minTotalBinForOne;
     private boolean shouldOutputWide;
 
     private CSVWriter outputFileLongWriter;
@@ -48,6 +48,7 @@ public class ExportOutput {
 
     /**
      * Init the output wrapper class for exporting
+     * To be noticed, long form is always available, while wide form is only available when duration is set
      *
      * @param rootDir         Root dir for exporting
      * @param columnLabelName Label names for this export
@@ -57,11 +58,11 @@ public class ExportOutput {
     public ExportOutput(String rootDir, List<String> columnLabelName, Downsample ds, Export job) throws IOException {
         this.outputStartTime = LocalDateTime.now();
         this.numberOfLabels = columnLabelName.size();
-        this.minBinRow = ds.getMinBinRow();
-        this.minBin = ds.getMinBin();
+        this.minSecondsForBinPerRow = ds.getMinBinRow();
+        this.minTotalBinForOne = ds.getMinBin();
         this.ds = ds;
         this.job = job;
-        // Wide output won't work if duration is not set
+        // Wide output won't work (and will be slow) if duration is not set
         this.shouldOutputWide = ds.getDuration() != null && ds.getDuration() > 0;
 
         initWriters(rootDir);
@@ -69,11 +70,12 @@ public class ExportOutput {
     }
 
     private void initWriters(String root) throws IOException {
-        this.outputFileLongWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_all_long.csv")));
+        int jid = this.job.getId();
+        this.outputFileLongWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_long_%d.csv", root, jid))));
         if (this.shouldOutputWide)
-            this.outputFileWideWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_all_wide.csv")));
-        this.outputFileMetaWriter = new CSVWriter(new BufferedWriter(new FileWriter(root + "/output_all_meta.csv")));
-        this.outputMetaWriter = new BufferedWriter(new FileWriter(root + "/output_meta.txt"));
+            this.outputFileWideWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_wide_%d.csv", root, jid))));
+        this.outputFileMetaWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_meta_%d.csv.csv", root, jid))));
+        this.outputMetaWriter = new BufferedWriter(new FileWriter(String.format("%s/output_meta_%d.txt", root, jid)));
     }
 
     /**
@@ -148,9 +150,25 @@ public class ExportOutput {
         this.writeMainData(pid, r, eq, validId.size(), AnalysisUtil.dataValidTotalSpan(validId, dtsb) / 1000);
     }
 
+    /**
+     * Write the `main` csv data file (Hoz and Vert in one function)
+     * TO ANYONE WHO TOOK MY PLACE IN THE FUTURE THAT NEED TO MAINTAIN THIS PART:
+     * I know this function seems to be complicated, but it's okay if you understand the structure
+     *
+     * @param patientId        PID
+     * @param r                Result table queried
+     * @param eq               ExportQueryBuilder
+     * @param numSegments      How many files used for this patient
+     * @param totalDataSeconds Total data used for this patient in seconds
+     */
     private void writeMainData(String patientId, ResultTable r, ExportQueryBuilder eq, int numSegments, long totalDataSeconds) {
         int dataRows = r.getRowCount();
         long thisPatientTotalCount = 0, thisPatientTotalInsufficientCount = 0;
+
+        // A test on algorithm
+        if (dataRows != this.numOfIntervalBins) {
+            logger.error("Test: dataRows!=numOfIntervalBins");
+        }
 
         // Output long form
         String[] mainDataLong = new String[this.mainHeaderLongSize];
@@ -160,7 +178,7 @@ public class ExportOutput {
             int resultSize = row.size(), count = (int) (double) row.get(resultSize - 1);
             mainDataLong[2] = String.valueOf(i + 1);
             mainDataLong[1] = String.valueOf(row.get(0));
-            boolean thisRowInsuffData = count < this.minBinRow; // Based on the fact that single data per second
+            boolean thisRowInsuffData = count < this.minSecondsForBinPerRow; // Based on the fact that single data per second
             if (thisRowInsuffData) {
                 thisPatientTotalInsufficientCount += 1;
             }
@@ -178,50 +196,65 @@ public class ExportOutput {
             this.outputFileLongWriter.writeNext(mainDataLong);
         }
 
-        // Output wide form
-        if (this.shouldOutputWide) {
-            String[] mainDataWide = new String[this.mainHeaderWideSize];
-            mainDataWide[0] = patientId;
-            mainDataWide[1] = String.valueOf(eq.getQueryStartTime());
-            int intervals = this.numOfIntervalBins, nLabels = this.numberOfLabels;
-            // Reference: c64e604145 from line 207-226
-            for (int i = 0; i < intervals; i++) {
-                if (dataRows > i) {
-                    List<Object> row = r.getDatalistByRow(i);
-                    int resultSize = row.size(), count = (int) (double) row.get(resultSize - 1);
-                    boolean thisRowInsuffData = count < this.minBinRow; // Based on the fact that single data per second
-                    for (int j = 1; j <= nLabels; j++) {
-                        Object data = row.get(j);
-                        if (thisRowInsuffData) {
-                            mainDataWide[2 + (j - 1) * intervals + i] = "Insuff. Data";
-                        } else if (data == null) {
-                            mainDataWide[2 + (j - 1) * intervals + i] = "N/A";
-                        } else {
-                            mainDataWide[2 + (j - 1) * intervals + i] = data.toString();
-                        }
-                    }
-                } else {
-                    for (int j = 1; j <= nLabels; j++) {
-                        mainDataWide[2 + (j - 1) * intervals + i] = "";
-                    }
-                }
-            }
-            // Only one line for a patient in this mode
-            this.outputFileWideWriter.writeNext(mainDataWide);
-        }
-
         // Determine if data is enough or not
-        boolean tooFewData = false;
-        if (dataRows - thisPatientTotalInsufficientCount < this.minBin) {
+        boolean enoughData = true;
+        //TODO: Check the following logic really works as intended?
+        if (dataRows - thisPatientTotalInsufficientCount < this.minTotalBinForOne) {
             this.totalInvalidPatientCount.incrementAndGet();
-            tooFewData = true;
+            enoughData = false;
             this.writeMetaFile(String.format("  PID '%s' overall data insufficient.%n", patientId));
         }
-        this.writeTimeMeta(patientId, eq, thisPatientTotalCount, thisPatientTotalInsufficientCount, numSegments, totalDataSeconds, !tooFewData);
+
+        if (enoughData) {
+            // Output wide form if data is enough
+            if (this.shouldOutputWide) {
+                String[] mainDataWide = new String[this.mainHeaderWideSize];
+                mainDataWide[0] = patientId;
+                mainDataWide[1] = String.valueOf(eq.getQueryStartTime());
+                int intervals = this.numOfIntervalBins, nLabels = this.numberOfLabels;
+                // Reference: c64e604145 from line 207-226
+                for (int i = 0; i < intervals; i++) {
+                    if (dataRows > i) {
+                        List<Object> row = r.getDatalistByRow(i);
+                        int resultSize = row.size(), count = (int) (double) row.get(resultSize - 1);
+                        boolean thisRowInsuffData = count < this.minSecondsForBinPerRow; // Based on the fact that single data per second
+                        for (int j = 1; j <= nLabels; j++) {
+                            Object data = row.get(j);
+                            if (data == null) {
+                                mainDataWide[2 + (j - 1) * intervals + i] = "N/A";
+                            } else if (thisRowInsuffData) {
+                                mainDataWide[2 + (j - 1) * intervals + i] = "Insuff. Data";
+                            } else {
+                                mainDataWide[2 + (j - 1) * intervals + i] = data.toString();
+                            }
+                        }
+                    } else {
+                        // This should probably not happen
+                        for (int j = 1; j <= nLabels; j++) {
+                            mainDataWide[2 + (j - 1) * intervals + i] = "";
+                        }
+                    }
+                }
+                // Only one line for a patient in this mode
+                this.outputFileWideWriter.writeNext(mainDataWide);
+            }
+        }
+
+        this.writeTimeMeta(patientId, eq, thisPatientTotalCount, thisPatientTotalInsufficientCount, numSegments, totalDataSeconds, enoughData);
     }
 
-    private void writeTimeMeta(String patientId, ExportQueryBuilder eq, long dataCount, long insuffCount,
-                               int numSegments, long totalDataSeconds, boolean enoughData) {
+    /**
+     * Write meta file according to data file
+     *
+     * @param patientId        PID
+     * @param eq               Meta data that needed from ExportQueryBuilder
+     * @param dataCount        Total data for this patient
+     * @param insuffCount      Total "bad" data for this patient
+     * @param numSegments      How many files used for this patient
+     * @param totalDataSeconds Total data used for this patient in seconds
+     * @param enoughData       Does this patient have enough data
+     */
+    private void writeTimeMeta(String patientId, ExportQueryBuilder eq, long dataCount, long insuffCount, int numSegments, long totalDataSeconds, boolean enoughData) {
         Instant start = eq.getQueryStartTime(), end = eq.getQueryEndTime();
         String[] data = {patientId, start.toString(), end.toString(), String.valueOf(numSegments), String.valueOf(totalDataSeconds),
                 String.valueOf(dataCount), String.valueOf(insuffCount), enoughData ? "Yes" : "No"};
