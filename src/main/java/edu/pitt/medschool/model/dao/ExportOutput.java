@@ -74,8 +74,8 @@ public class ExportOutput {
         this.outputFileLongWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_long_%d.csv", root, jid))));
         if (this.shouldOutputWide)
             this.outputFileWideWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_wide_%d.csv", root, jid))));
-        this.outputFileMetaWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_meta_%d.csv.csv", root, jid))));
-        this.outputMetaWriter = new BufferedWriter(new FileWriter(String.format("%s/output_meta_%d.txt", root, jid)));
+        this.outputFileMetaWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_meta_%d.csv", root, jid))));
+        this.outputMetaWriter = new BufferedWriter(new FileWriter(String.format("%s/job_meta_%d.txt", root, jid)));
     }
 
     /**
