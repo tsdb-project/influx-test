@@ -294,8 +294,8 @@ public class AnalysisService {
      */
     private void jobClosingHandler(boolean idbError, boolean isPscNeeded, ExportWithBLOBs job, File outputDir, ExportOutput eo, int validPatientNumber) {
         // We will leave the local Idb running after the job
-        if (isPscNeeded) {
-            if (!this.iss.stopRemoteInflux()) idbError = true;
+        if (isPscNeeded && !this.iss.stopRemoteInflux()) {
+            idbError = true;
         }
         if (eo != null) {
             if (idbError) {
