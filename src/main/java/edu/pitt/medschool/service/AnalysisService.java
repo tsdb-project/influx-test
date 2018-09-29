@@ -129,15 +129,20 @@ public class AnalysisService {
         Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
         boolean isPscRequired = job.getDbType().equals("psc");
 
-        // Create Folder
+        // Create output folder, if failed, finish this process
         File outputDir = generateOutputDir(exportQuery.getAlias(), null);
         if (outputDir == null)
             return;
 
-        String projectRootFolder = outputDir.getAbsolutePath();
-        AtomicInteger validPatientCounter = new AtomicInteger(0);
         String pList = job.getPatientList();
         List<String> patientIDs;
+
+        if (pList == null || pList.isEmpty()) {
+            // Override UUID setting to match PSC database if necessary
+            patientIDs = importedFileDao.selectAllImportedPidOnMachine(isPscRequired ? "realpsc" : this.uuid);
+        } else {
+            patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
+        }
 
         // Get columns data
         List<DownsampleGroup> groups = downsampleGroupDao.selectAllDownsampleGroup(queryId);
@@ -154,10 +159,10 @@ public class AnalysisService {
             return;
         }
 
-        // Init the `outputWriter` ASAP
+        // Init the `outputWriter`
         ExportOutput outputWriter;
         try {
-            outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery, job);
+            outputWriter = new ExportOutput(outputDir.getAbsolutePath(), columnLabelName, exportQuery, job);
         } catch (IOException e) {
             logger.error("Export writer failed to create: {}", Util.stackTraceErrorToString(e));
             jobClosingHandler(false, isPscRequired, job, outputDir, null, 0);
@@ -167,12 +172,6 @@ public class AnalysisService {
         if (isPscRequired) {
             // Prep PSC instance
             iss.stopLocalInflux();
-            if (pList == null || pList.isEmpty()) {
-                // Override UUID setting to match PSC database
-                patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
-            } else {
-                patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
-            }
             // Local DB may take up to 10s to stop
             try {
                 Thread.sleep(10 * 1000);
@@ -203,25 +202,24 @@ public class AnalysisService {
                 jobClosingHandler(true, isPscRequired, job, outputDir, null, 0);
                 return;
             }
-            if (pList == null || pList.isEmpty()) {
-                patientIDs = importedFileDao.selectAllImportedPidOnMachine(uuid);
-            } else {
-                patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
-            }
         }
 
         int paraCount = determineParaNumber();
         // Dirty hack to migrate timeout problems, should remove this some time later
         if (exportQuery.getPeriod() < 20 || labelCount > 8)
             paraCount *= 0.8;
+
+        // Get some basic info for exporting
         InfluxDB idb = generateIdbClient(false);
         outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(idb, logger), patientIDs.size(), paraCount);
         idb.close();
+
+        // Final prep for running query task
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
         Map<String, Integer> errorCount = new HashMap<>();
+        AtomicInteger validPatientCounter = new AtomicInteger(0);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
-        // Parallel query task
         Runnable queryTask = () -> {
             InfluxDB influxDB = generateIdbClient(false);
             String patientId;
@@ -301,7 +299,7 @@ public class AnalysisService {
         }
         if (eo != null) {
             if (idbError) {
-                eo.writeMetaFile(String.format("InfluxDB probably failed on <%s>.%n", job.getDbType()));
+                eo.writeMetaFile(String.format("%nInfluxDB probably failed on <%s>.%n", job.getDbType()));
             }
             eo.close(validPatientNumber);
         }
