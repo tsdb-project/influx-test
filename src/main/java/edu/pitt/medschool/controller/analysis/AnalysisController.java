@@ -244,8 +244,7 @@ public class AnalysisController {
     @ResponseBody
     public RestfulResponse exportQuery(@RequestBody(required = true) ExportWithBLOBs job, RestfulResponse response) throws JsonProcessingException {
         if (exportService.completeJobAndInsert(job) == 1) {
-            // Run export in a separate thread to unblock the controller
-            new Thread(() -> analysisService.exportToFile(job.getId())).start();
+            analysisService.addOneExportJob(job.getId());
             response.setCode(1);
             response.setMsg("Successfully added job.");
         } else {

@@ -44,34 +44,87 @@ public class AnalysisService {
     @Value("${load}")
     private double loadFactor;
 
-    @Autowired
-    DownsampleDao downsampleDao;
-    @Autowired
-    DownsampleGroupDao downsampleGroupDao;
-    @Autowired
-    ExportDao exportDao;
-    @Autowired
-    ColumnService columnService;
-    @Autowired
-    InfluxSwitcherService iss;
-
-    /*
-     * Be able to restrict the epochs for which data are exported (e.g. specify to export up to the first 36 hours of available data, but truncate
-     * data thereafter). Be able to specify which columns are exported (e.g. I10_*, I10_2 only, all data, etc) Be able to export down sampled data
-     * (e.g. hourly mean, median, variance, etc)
-     */
-    @Autowired
-    PatientDao patientDao;
-    @Autowired
-    ImportedFileDao importedFileDao;
-
-    private Map<String, Integer> errorCount = new HashMap<>();
+    private final DownsampleDao downsampleDao;
+    private final DownsampleGroupDao downsampleGroupDao;
+    private final ExportDao exportDao;
+    private final ColumnService columnService;
+    private final InfluxSwitcherService iss;
+    private final PatientDao patientDao;
+    private final ImportedFileDao importedFileDao;
 
     /**
-     * Export (downsample) a single query to files (Could be called mutiple times)
+     * Queue for managing jobs
      */
-    public void exportToFile(Integer exportId) {
-        ExportWithBLOBs job = exportDao.selectByPrimaryKey(exportId);
+    private BlockingQueue<ExportWithBLOBs> jobQueue = new LinkedBlockingQueue<>();
+
+    /**
+     * Thread for running managed jobs
+     */
+    private ScheduledFuture jobCheckerThread;
+
+    @Autowired
+    public AnalysisService(DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, ExportDao exportDao, ColumnService columnService, InfluxSwitcherService iss, PatientDao patientDao, ImportedFileDao importedFileDao) {
+        this.downsampleDao = downsampleDao;
+        this.downsampleGroupDao = downsampleGroupDao;
+        this.exportDao = exportDao;
+        this.columnService = columnService;
+        this.iss = iss;
+        this.patientDao = patientDao;
+        this.importedFileDao = importedFileDao;
+        // Check the job queue every 20 seconds and have a initial delay of 60s
+        this.jobCheckerThread = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            ExportWithBLOBs target = null;
+            while ((target = this.jobQueue.poll()) != null) {
+                mainExportProcess(target);
+                try {
+                    // Sleep 10s for user to check something
+                    Thread.sleep(10 * 1000);
+                } catch (InterruptedException e) {
+                    logger.error("Job checker thread interrupted!");
+                    return;
+                }
+            }
+        }, 60, 20, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Add an export job to the job queue
+     *
+     * @param jobId ID of the job
+     */
+    public void addOneExportJob(Integer jobId) {
+        ExportWithBLOBs job = exportDao.selectByPrimaryKey(jobId);
+        this.jobQueue.add(job); // Using add because there is a jobCheckerThread (We can wait)
+    }
+
+    /**
+     * Stop periodically checking for jobs (DO NOT INVOKE UNLESS TESTING)
+     *
+     * @param shouldForce Should interrupt the running job
+     */
+    public void stopScheduler(boolean shouldForce) {
+        this.jobCheckerThread.cancel(shouldForce);
+    }
+
+    /**
+     * Try to remove a job from queue
+     *
+     * @return True if removed successfully (not started); False if no such entry in queue or failed to remove
+     */
+    public boolean removeOneExportJob(Integer jobId) {
+        for (ExportWithBLOBs j : this.jobQueue) {
+            if (j.getId().equals(jobId)) {
+                return this.jobQueue.remove(j);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Internal use only, export (downsample) a single query to files
+     */
+    private void mainExportProcess(ExportWithBLOBs job) {
+        int jobId = job.getId();
         int queryId = job.getQueryId();
         Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
         boolean isPscRequired = job.getDbType().equals("psc");
@@ -160,11 +213,12 @@ public class AnalysisService {
         int paraCount = determineParaNumber();
         // Dirty hack to migrate timeout problems, should remove this some time later
         if (exportQuery.getPeriod() < 20 || labelCount > 8)
-            paraCount /= 2;
+            paraCount *= 0.8;
         InfluxDB idb = generateIdbClient(false);
         outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(idb, logger), patientIDs.size(), paraCount);
         idb.close();
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
+        Map<String, Integer> errorCount = new HashMap<>();
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         // Parallel query task
@@ -200,13 +254,14 @@ public class AnalysisService {
                     validPatientCounter.getAndIncrement();
 
                 } catch (Exception ee) {
+                    // All exception will be logged (disregarded) and corresponding PID will be tried again
                     logger.error(String.format("%s: %s", patientId, Util.stackTraceErrorToString(ee)));
-                    int alreadyFailed = this.errorCount.getOrDefault(patientId, -1);
+                    int alreadyFailed = errorCount.getOrDefault(patientId, -1);
                     if (alreadyFailed == -1) {
-                        this.errorCount.put(patientId, 0);
+                        errorCount.put(patientId, 0);
                         alreadyFailed = 0;
                     } else {
-                        this.errorCount.put(patientId, ++alreadyFailed);
+                        errorCount.put(patientId, ++alreadyFailed);
                     }
                     // Reinsert failed user into queue, but no more than 3 times
                     if (alreadyFailed < 3) {
@@ -227,6 +282,7 @@ public class AnalysisService {
         }
         scheduler.shutdown();
         try {
+            //TODO: PSC 2 day limit!
             scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
