@@ -55,7 +55,12 @@ public class AnalysisService {
     /**
      * Queue for managing jobs
      */
-    private BlockingQueue<ExportWithBLOBs> jobQueue = new LinkedBlockingQueue<>();
+    private LinkedBlockingQueue<ExportWithBLOBs> jobQueue = new LinkedBlockingQueue<>();
+
+    /**
+     * Indicate if a job should stop
+     */
+    private ConcurrentHashMap<Integer, Boolean> jobStopIndicator = new ConcurrentHashMap<>();
 
     /**
      * Thread for running managed jobs
@@ -73,11 +78,24 @@ public class AnalysisService {
         this.importedFileDao = importedFileDao;
         // Check the job queue every 20 seconds and have a initial delay of 60s
         this.jobCheckerThread = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            ExportWithBLOBs target = null;
+            ExportWithBLOBs target = null, previous = null;
             while ((target = this.jobQueue.poll()) != null) {
+                // If previous is on PSC, then this one should also on PSC, unless there are no PSC jobs in the queue
+                if (previous != null && previous.getDbType().equals("psc") && !target.getDbType().equals("psc")) {
+                    for (ExportWithBLOBs job : this.jobQueue) {
+                        // Found a PSC job in queue, exec this one first
+                        if (job.getDbType().equals("psc")) {
+                            this.jobQueue.add(target);
+                            target = job;
+                            this.jobQueue.remove(job);
+                            break;
+                        }
+                    }
+                }
                 mainExportProcess(target);
+                previous = target;
+                // Sleep 10s for buffering program (and user)
                 try {
-                    // Sleep 10s for user to check something
                     Thread.sleep(10 * 1000);
                 } catch (InterruptedException e) {
                     logger.error("Job checker thread interrupted!");
@@ -98,26 +116,11 @@ public class AnalysisService {
     }
 
     /**
-     * Stop periodically checking for jobs (DO NOT INVOKE UNLESS TESTING)
-     *
-     * @param shouldForce Should interrupt the running job
+     * Stop a running job
      */
-    public void stopScheduler(boolean shouldForce) {
-        this.jobCheckerThread.cancel(shouldForce);
-    }
-
-    /**
-     * Try to remove a job from queue
-     *
-     * @return True if removed successfully (not started); False if no such entry in queue or failed to remove
-     */
-    public boolean removeOneExportJob(Integer jobId) {
-        for (ExportWithBLOBs j : this.jobQueue) {
-            if (j.getId().equals(jobId)) {
-                return this.jobQueue.remove(j);
-            }
-        }
-        return false;
+    public void removeOneExportJob(Integer jobId) {
+        // Should also mark the DB as finished (or deleted)
+        this.jobStopIndicator.putIfAbsent(jobId, false);
     }
 
     /**
@@ -166,6 +169,15 @@ public class AnalysisService {
         } catch (IOException e) {
             logger.error("Export writer failed to create: {}", Util.stackTraceErrorToString(e));
             jobClosingHandler(false, isPscRequired, job, outputDir, null, 0);
+            return;
+        }
+
+        // This job marked as removed
+        if (this.jobStopIndicator.containsKey(jobId)) {
+            this.jobStopIndicator.remove(jobId);
+            logger.warn("Job <{}> cancelled by user.", jobId);
+            outputWriter.writeMetaFile(String.format("%nJob cancelled by user.%n"));
+            jobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, 0);
             return;
         }
 
@@ -251,6 +263,11 @@ public class AnalysisService {
                     outputWriter.writeForOnePatient(patientId, res[0], eq, dtsb);
                     validPatientCounter.getAndIncrement();
 
+                    // This job marked as removed, so this thread should exit
+                    if (this.jobStopIndicator.containsKey(jobId)) {
+                        this.jobStopIndicator.put(jobId, true);
+                        return;
+                    }
                 } catch (Exception ee) {
                     // All exception will be logged (disregarded) and corresponding PID will be tried again
                     logger.error(String.format("%s: %s", patientId, Util.stackTraceErrorToString(ee)));
@@ -285,6 +302,13 @@ public class AnalysisService {
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
         } finally {
+            if (this.jobStopIndicator.getOrDefault(jobId, false).equals(true)) {
+                // Job removed special procedure
+                this.jobStopIndicator.remove(jobId);
+                outputWriter.writeMetaFile(String.format("%nJob cancelled by user during execution.%n"));
+                logger.warn("Job <{}> cancelled by user during execution.", jobId);
+            }
+            // Normal exit procedure
             jobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, validPatientCounter.get());
         }
     }
@@ -432,6 +456,15 @@ public class AnalysisService {
             idb.disableGzip();
         }
         return idb;
+    }
+
+    /**
+     * Stop periodically checking for jobs (DO NOT INVOKE UNLESS TESTING)
+     *
+     * @param shouldForce Should interrupt the running job
+     */
+    protected void stopScheduler(boolean shouldForce) {
+        this.jobCheckerThread.cancel(shouldForce);
     }
 
 }
