@@ -80,18 +80,6 @@ public class AnalysisService {
         this.jobCheckerThread = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             ExportWithBLOBs target = null, previous = null;
             while ((target = this.jobQueue.poll()) != null) {
-                // If previous is on PSC, then this one should also on PSC, unless there are no PSC jobs in the queue
-                if (previous != null && previous.getDbType().equals("psc") && !target.getDbType().equals("psc")) {
-                    for (ExportWithBLOBs job : this.jobQueue) {
-                        // Found a PSC job in queue, exec this one first
-                        if (job.getDbType().equals("psc")) {
-                            this.jobQueue.add(target);
-                            target = job;
-                            this.jobQueue.remove(job);
-                            break;
-                        }
-                    }
-                }
                 mainExportProcess(target);
                 previous = target;
                 // Sleep 10s for buffering program (and user)
@@ -280,8 +268,7 @@ public class AnalysisService {
                     }
                     // Reinsert failed user into queue, but no more than 3 times
                     if (alreadyFailed < 3) {
-                        if (!idQueue.offer(patientId))
-                            logger.error(String.format("%s: Re-queue failed.", patientId));
+                        idQueue.add(patientId);
                     } else {
                         logger.error(String.format("%s: Failed more than 3 times.", patientId));
                         outputWriter.writeMetaFile(String.format("  PID <%s> failed multiple times, possible program error.%n", patientId));
