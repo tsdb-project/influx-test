@@ -225,6 +225,13 @@ public class AnalysisService {
             String patientId;
             while ((patientId = idQueue.poll()) != null) {
                 try {
+                    // This job marked as removed, so this thread should exit
+                    if (this.jobStopIndicator.containsKey(jobId)) {
+                        this.jobStopIndicator.put(jobId, true);
+                        return;
+                    }
+
+                    // First get the group by time offset
                     ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
                             "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
                             patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
@@ -232,6 +239,7 @@ public class AnalysisService {
                         outputWriter.writeMetaFile(String.format("  PID <%s> don't have enough data to export.%n", patientId));
                         continue;
                     }
+                    // Then fetch meta data regrading file segments and build the query string
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
                     ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups,
                             columns, exportQuery, job.getAr());
@@ -241,6 +249,7 @@ public class AnalysisService {
                         continue;
                     }
                     logger.debug("Query for <{}>: {}", patientId, finalQueryString);
+                    // Execuate the query
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
 
                     if (res.length != 1) {
@@ -251,11 +260,6 @@ public class AnalysisService {
                     outputWriter.writeForOnePatient(patientId, res[0], eq, dtsb);
                     validPatientCounter.getAndIncrement();
 
-                    // This job marked as removed, so this thread should exit
-                    if (this.jobStopIndicator.containsKey(jobId)) {
-                        this.jobStopIndicator.put(jobId, true);
-                        return;
-                    }
                 } catch (Exception ee) {
                     // All exception will be logged (disregarded) and corresponding PID will be tried again
                     logger.error(String.format("%s: %s", patientId, Util.stackTraceErrorToString(ee)));
@@ -305,6 +309,7 @@ public class AnalysisService {
      */
     private void jobClosingHandler(boolean idbError, boolean isPscNeeded, ExportWithBLOBs job, File outputDir, ExportOutput eo, int validPatientNumber) {
         // We will leave the local Idb running after the job
+        boolean shouldStopRemote = this.queueHasNextPscJob().isPresent();
         if (isPscNeeded && !this.iss.stopRemoteInflux()) {
             idbError = true;
         }
@@ -320,6 +325,15 @@ public class AnalysisService {
         updateJob.setId(job.getId());
         updateJob.setFinished(true);
         exportDao.updateByPrimaryKeySelective(updateJob);
+    }
+
+    /**
+     * Find if current queue has a job that requires PSC
+     *
+     * @return Return the Optional job
+     */
+    private Optional<ExportWithBLOBs> queueHasNextPscJob() {
+        return this.jobQueue.parallelStream().findAny().filter(job -> job.getDbType().equals("psc"));
     }
 
     List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
