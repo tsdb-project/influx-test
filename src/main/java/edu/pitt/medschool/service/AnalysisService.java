@@ -160,7 +160,7 @@ public class AnalysisService {
         int paraCount = determineParaNumber();
         // Dirty hack to migrate timeout problems, should remove this some time later
         if (exportQuery.getPeriod() < 20 || labelCount > 8)
-            paraCount /= 2;
+            paraCount *= 0.8;
         InfluxDB idb = generateIdbClient(false);
         outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(idb, logger), patientIDs.size(), paraCount);
         idb.close();
