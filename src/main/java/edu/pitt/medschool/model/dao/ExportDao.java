@@ -14,7 +14,7 @@ import edu.pitt.medschool.model.mapper.ExportMapper;
 public class ExportDao {
     @Value("${machine}")
     private String machineId;
-    
+
     @Autowired
     ExportMapper exportMapper;
 
@@ -30,8 +30,12 @@ public class ExportDao {
         return exportMapper.selectAllExportJobOnLocalMachine(machineId);
     }
 
-    public void updateByPrimaryKeySelective(ExportWithBLOBs job) {
-        exportMapper.updateByPrimaryKeySelective(job);
+    public int updateByPrimaryKeySelective(ExportWithBLOBs job) {
+        return exportMapper.updateByPrimaryKeySelective(job);
+    }
+
+    public int deleteById(Integer id) {
+        return exportMapper.deleteByPrimaryKey(id);
     }
 
 }

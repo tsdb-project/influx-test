@@ -49,7 +49,6 @@ public class AnalysisService {
     private final ExportDao exportDao;
     private final ColumnService columnService;
     private final InfluxSwitcherService iss;
-    private final PatientDao patientDao;
     private final ImportedFileDao importedFileDao;
 
     /**
@@ -68,16 +67,16 @@ public class AnalysisService {
     private ScheduledFuture jobCheckerThread;
 
     @Autowired
-    public AnalysisService(DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, ExportDao exportDao, ColumnService columnService, InfluxSwitcherService iss, PatientDao patientDao, ImportedFileDao importedFileDao) {
+    public AnalysisService(DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, ExportDao exportDao, ColumnService columnService, InfluxSwitcherService iss, ImportedFileDao importedFileDao) {
         this.downsampleDao = downsampleDao;
         this.downsampleGroupDao = downsampleGroupDao;
         this.exportDao = exportDao;
         this.columnService = columnService;
         this.iss = iss;
-        this.patientDao = patientDao;
         this.importedFileDao = importedFileDao;
-        // Check the job queue every 20 seconds and have a initial delay of 60s
+        // Check the job queue every 30 seconds and have a initial delay of 100s
         this.jobCheckerThread = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            Thread.currentThread().setName("JobCheckerThread");
             ExportWithBLOBs target = null, previous = null;
             while ((target = this.jobQueue.poll()) != null) {
                 mainExportProcess(target);
@@ -85,12 +84,13 @@ public class AnalysisService {
                 // Sleep 10s for buffering program (and user)
                 try {
                     Thread.sleep(10 * 1000);
+                    logger.info("Finished one job #<{}>", target.getId());
                 } catch (InterruptedException e) {
                     logger.error("Job checker thread interrupted!");
                     return;
                 }
             }
-        }, 60, 20, TimeUnit.SECONDS);
+        }, 100, 30, TimeUnit.SECONDS);
     }
 
     /**
@@ -98,9 +98,9 @@ public class AnalysisService {
      *
      * @param jobId ID of the job
      */
-    public void addOneExportJob(Integer jobId) {
+    public boolean addOneExportJob(Integer jobId) {
         ExportWithBLOBs job = exportDao.selectByPrimaryKey(jobId);
-        this.jobQueue.add(job); // Using add because there is a jobCheckerThread (We can wait)
+        return this.jobQueue.add(job); // Using add because there is a jobCheckerThread (We can wait)
     }
 
     /**
