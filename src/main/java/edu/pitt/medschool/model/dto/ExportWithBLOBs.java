@@ -70,11 +70,14 @@ public class ExportWithBLOBs extends Export {
                 && (this.getAr() == null ? other.getAr() == null : this.getAr().equals(other.getAr()))
                 && (this.getLayout() == null ? other.getLayout() == null : this.getLayout().equals(other.getLayout()))
                 && (this.getFinished() == null ? other.getFinished() == null : this.getFinished().equals(other.getFinished()))
+                && (this.getCanceled() == null ? other.getCanceled() == null : this.getCanceled().equals(other.getCanceled()))
+                && (this.getFailed() == null ? other.getFailed() == null : this.getFailed().equals(other.getFailed()))
                 && (this.getMachine() == null ? other.getMachine() == null : this.getMachine().equals(other.getMachine()))
                 && (this.getDbType() == null ? other.getDbType() == null : this.getDbType().equals(other.getDbType()))
                 && (this.getDbVersion() == null ? other.getDbVersion() == null : this.getDbVersion().equals(other.getDbVersion()))
                 && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
                 && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()))
+                && (this.getDeleted() == null ? other.getDeleted() == null : this.getDeleted().equals(other.getDeleted()))
                 && (this.getPatientList() == null ? other.getPatientList() == null : this.getPatientList().equals(other.getPatientList()))
                 && (this.getQueryJson() == null ? other.getQueryJson() == null : this.getQueryJson().equals(other.getQueryJson()));
     }
@@ -92,11 +95,14 @@ public class ExportWithBLOBs extends Export {
         result = prime * result + ((getAr() == null) ? 0 : getAr().hashCode());
         result = prime * result + ((getLayout() == null) ? 0 : getLayout().hashCode());
         result = prime * result + ((getFinished() == null) ? 0 : getFinished().hashCode());
+        result = prime * result + ((getCanceled() == null) ? 0 : getCanceled().hashCode());
+        result = prime * result + ((getFailed() == null) ? 0 : getFailed().hashCode());
         result = prime * result + ((getMachine() == null) ? 0 : getMachine().hashCode());
         result = prime * result + ((getDbType() == null) ? 0 : getDbType().hashCode());
         result = prime * result + ((getDbVersion() == null) ? 0 : getDbVersion().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
         result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());
+        result = prime * result + ((getDeleted() == null) ? 0 : getDeleted().hashCode());
         result = prime * result + ((getPatientList() == null) ? 0 : getPatientList().hashCode());
         result = prime * result + ((getQueryJson() == null) ? 0 : getQueryJson().hashCode());
         return result;

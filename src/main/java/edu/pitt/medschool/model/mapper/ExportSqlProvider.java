@@ -51,6 +51,12 @@ public class ExportSqlProvider {
         if (record.getFinished() != null) {
             sql.VALUES("finished", "#{finished,jdbcType=BIT}");
         }
+        if (record.getCanceled() != null) {
+            sql.VALUES("canceled", "#{canceled,jdbcType=BIT}");
+        }
+        if (record.getFailed() != null) {
+            sql.VALUES("failed", "#{failed,jdbcType=BIT}");
+        }
         if (record.getMachine() != null) {
             sql.VALUES("machine", "#{machine,jdbcType=VARCHAR}");
         }
@@ -65,6 +71,9 @@ public class ExportSqlProvider {
         }
         if (record.getUpdateTime() != null) {
             sql.VALUES("update_time", "#{updateTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getDeleted() != null) {
+            sql.VALUES("deleted", "#{deleted,jdbcType=BIT}");
         }
         if (record.getPatientList() != null) {
             sql.VALUES("patient_list", "#{patientList,jdbcType=LONGVARCHAR}");
@@ -90,11 +99,14 @@ public class ExportSqlProvider {
         sql.SELECT("ar");
         sql.SELECT("layout");
         sql.SELECT("finished");
+        sql.SELECT("canceled");
+        sql.SELECT("failed");
         sql.SELECT("machine");
         sql.SELECT("db_type");
         sql.SELECT("db_version");
         sql.SELECT("create_time");
         sql.SELECT("update_time");
+        sql.SELECT("deleted");
         sql.SELECT("patient_list");
         sql.SELECT("query_json");
         sql.FROM("export");
@@ -120,11 +132,14 @@ public class ExportSqlProvider {
         sql.SELECT("ar");
         sql.SELECT("layout");
         sql.SELECT("finished");
+        sql.SELECT("canceled");
+        sql.SELECT("failed");
         sql.SELECT("machine");
         sql.SELECT("db_type");
         sql.SELECT("db_version");
         sql.SELECT("create_time");
         sql.SELECT("update_time");
+        sql.SELECT("deleted");
         sql.FROM("export");
         applyWhere(sql, example, false);
         if (example != null && example.getOrderByClause() != null) {
@@ -157,6 +172,12 @@ public class ExportSqlProvider {
         if (record.getFinished() != null) {
             sql.SET("finished = #{record.finished,jdbcType=BIT}");
         }
+        if (record.getCanceled() != null) {
+            sql.SET("canceled = #{record.canceled,jdbcType=BIT}");
+        }
+        if (record.getFailed() != null) {
+            sql.SET("failed = #{record.failed,jdbcType=BIT}");
+        }
         if (record.getMachine() != null) {
             sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
         }
@@ -171,6 +192,9 @@ public class ExportSqlProvider {
         }
         if (record.getUpdateTime() != null) {
             sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getDeleted() != null) {
+            sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
         }
         if (record.getPatientList() != null) {
             sql.SET("patient_list = #{record.patientList,jdbcType=LONGVARCHAR}");
@@ -194,11 +218,14 @@ public class ExportSqlProvider {
         sql.SET("ar = #{record.ar,jdbcType=BIT}");
         sql.SET("layout = #{record.layout,jdbcType=BIT}");
         sql.SET("finished = #{record.finished,jdbcType=BIT}");
+        sql.SET("canceled = #{record.canceled,jdbcType=BIT}");
+        sql.SET("failed = #{record.failed,jdbcType=BIT}");
         sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
         sql.SET("db_type = #{record.dbType,jdbcType=VARCHAR}");
         sql.SET("db_version = #{record.dbVersion,jdbcType=VARCHAR}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
+        sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
         sql.SET("patient_list = #{record.patientList,jdbcType=LONGVARCHAR}");
         sql.SET("query_json = #{record.queryJson,jdbcType=LONGVARCHAR}");
         ExportExample example = (ExportExample) parameter.get("example");
@@ -218,11 +245,14 @@ public class ExportSqlProvider {
         sql.SET("ar = #{record.ar,jdbcType=BIT}");
         sql.SET("layout = #{record.layout,jdbcType=BIT}");
         sql.SET("finished = #{record.finished,jdbcType=BIT}");
+        sql.SET("canceled = #{record.canceled,jdbcType=BIT}");
+        sql.SET("failed = #{record.failed,jdbcType=BIT}");
         sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
         sql.SET("db_type = #{record.dbType,jdbcType=VARCHAR}");
         sql.SET("db_version = #{record.dbVersion,jdbcType=VARCHAR}");
         sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
         sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
+        sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
         ExportExample example = (ExportExample) parameter.get("example");
         applyWhere(sql, example, true);
         return sql.toString();
@@ -247,6 +277,12 @@ public class ExportSqlProvider {
         if (record.getFinished() != null) {
             sql.SET("finished = #{finished,jdbcType=BIT}");
         }
+        if (record.getCanceled() != null) {
+            sql.SET("canceled = #{canceled,jdbcType=BIT}");
+        }
+        if (record.getFailed() != null) {
+            sql.SET("failed = #{failed,jdbcType=BIT}");
+        }
         if (record.getMachine() != null) {
             sql.SET("machine = #{machine,jdbcType=VARCHAR}");
         }
@@ -261,6 +297,9 @@ public class ExportSqlProvider {
         }
         if (record.getUpdateTime() != null) {
             sql.SET("update_time = #{updateTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getDeleted() != null) {
+            sql.SET("deleted = #{deleted,jdbcType=BIT}");
         }
         if (record.getPatientList() != null) {
             sql.SET("patient_list = #{patientList,jdbcType=LONGVARCHAR}");
