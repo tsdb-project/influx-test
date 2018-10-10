@@ -100,7 +100,7 @@ public class AnalysisService {
      */
     public boolean addOneExportJob(Integer jobId) {
         ExportWithBLOBs job = exportDao.selectByPrimaryKey(jobId);
-        return this.jobQueue.add(job); // Using add because there is a jobCheckerThread (We can wait)
+        return this.jobQueue.add(job);
     }
 
     /**

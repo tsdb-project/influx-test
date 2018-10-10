@@ -254,6 +254,21 @@ public class AnalysisController {
         return response;
     }
 
+    @DeleteMapping("api/export/export")
+    @ResponseBody
+    public RestfulResponse stopExportQuery(@RequestBody(required = true) ExportWithBLOBs job, RestfulResponse response) {
+        int jid = job.getId();
+        if (exportService.deleteExportJobById(jid) == 1) {
+            analysisService.removeOneExportJob(jid);
+            response.setCode(1);
+            response.setMsg("Successfully deleted job.");
+        } else {
+            response.setCode(0);
+            response.setMsg("Database error!");
+        }
+        return response;
+    }
+
     @PostMapping("api/export/patient_list/")
     @ResponseBody
     public RestfulResponse uploadPatientList(@RequestParam("plist") MultipartFile file) {
