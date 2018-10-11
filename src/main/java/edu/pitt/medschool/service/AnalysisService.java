@@ -83,7 +83,7 @@ public class AnalysisService {
                 previous = target;
                 // Sleep 10s for buffering program (and user)
                 try {
-                    Thread.sleep(10 * 1000);
+                    Thread.sleep(10_000);
                     logger.info("Finished one job #<{}>", target.getId());
                 } catch (InterruptedException e) {
                     logger.error("Job checker thread interrupted!");
@@ -106,9 +106,10 @@ public class AnalysisService {
     /**
      * Stop a running job
      */
-    public void removeOneExportJob(Integer jobId) {
+    public int removeOneExportJob(Integer jobId) {
         // Should also mark the DB as finished (or deleted)
         this.jobStopIndicator.putIfAbsent(jobId, false);
+        return exportDao.markAsCanceledById(jobId);
     }
 
     /**
@@ -174,7 +175,7 @@ public class AnalysisService {
             iss.stopLocalInflux();
             // Local DB may take up to 10s to stop
             try {
-                Thread.sleep(10 * 1000);
+                Thread.sleep(10_000);
             } catch (InterruptedException e) {
                 logger.error("Stop local Influx failed, {}", Util.stackTraceErrorToString(e));
                 return;

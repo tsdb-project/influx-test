@@ -47,7 +47,7 @@ public class ExportService {
     }
 
     public int deleteExportJobById(Integer exportId) {
-        return this.exportDao.deleteById(exportId);
+        return this.exportDao.markAsDeletedById(exportId);
     }
 
 }

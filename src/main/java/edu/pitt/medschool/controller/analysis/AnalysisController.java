@@ -254,14 +254,29 @@ public class AnalysisController {
         return response;
     }
 
-    @DeleteMapping("api/export/export")
+    @DeleteMapping("api/export/export/{id}")
     @ResponseBody
-    public RestfulResponse stopExportQuery(@RequestBody(required = true) ExportWithBLOBs job, RestfulResponse response) {
-        int jid = job.getId();
-        if (exportService.deleteExportJobById(jid) == 1) {
-            analysisService.removeOneExportJob(jid);
+    public RestfulResponse deleteExportQuery(@PathVariable(value = "id", required = true) Integer jobId, RestfulResponse response) {
+        if (exportService.deleteExportJobById(jobId) == 1) {
             response.setCode(1);
             response.setMsg("Successfully deleted job.");
+        } else {
+            response.setCode(0);
+            response.setMsg("Database error!");
+        }
+        return response;
+    }
+
+    @DeleteMapping("api/export/stop/{id}")
+    @ResponseBody
+    public RestfulResponse stopExportQuery(@PathVariable(value = "id", required = true) Integer jobId, RestfulResponse response) {
+        int res = analysisService.removeOneExportJob(jobId);
+        if (res == 1) {
+            response.setCode(1);
+            response.setMsg("Successfully stopped job.");
+        } else if (res == -1) {
+            response.setCode(1);
+            response.setMsg("Job already finished or canceled!");
         } else {
             response.setCode(0);
             response.setMsg("Database error!");

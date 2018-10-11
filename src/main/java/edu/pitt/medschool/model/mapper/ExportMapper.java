@@ -190,7 +190,7 @@ public interface ExportMapper {
     int updateByPrimaryKey(Export record);
 
     @Select({ "SELECT e.id, e.ar, e.machine, e.create_time, d.alias, e.finished FROM export e LEFT JOIN downsample d ON d.id = e.query_id",
-            "WHERE e.machine = #{machineId,jdbcType=VARCHAR} or e.machine = 'realpsc'" })
+            "WHERE e.deleted = 0 AND (e.machine = #{machineId,jdbcType=VARCHAR} or e.machine = 'realpsc')" })
     @ResultType(ExportVO.class)
     @Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
             @Result(column = "ar", property = "ar", jdbcType = JdbcType.BIT),
@@ -199,4 +199,9 @@ public interface ExportMapper {
             @Result(column = "alias", property = "alias", jdbcType = JdbcType.VARCHAR),
             @Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP) })
     List<ExportVO> selectAllExportJobOnLocalMachine(String machineId);
+
+    @Select({"SELECT (e.finished = 1) OR (e.canceled = 1) FROM export e WHERE e.id = #{jobid,jdbcType=INTEGER}"})
+    @ResultType(Boolean.class)
+    Boolean isGivenJobIdFinishOrCancel(Integer jobid);
+
 }

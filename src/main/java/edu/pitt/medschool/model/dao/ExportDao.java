@@ -34,8 +34,31 @@ public class ExportDao {
         return exportMapper.updateByPrimaryKeySelective(job);
     }
 
-    public int deleteById(Integer id) {
-        return exportMapper.deleteByPrimaryKey(id);
+    public int markAsFailedById(Integer id) {
+        if (exportMapper.isGivenJobIdFinishOrCancel(id))
+            return 1;
+        ExportWithBLOBs e = new ExportWithBLOBs();
+        e.setId(id);
+        e.setFailed(true);
+        return updateByPrimaryKeySelective(e);
+    }
+
+    public int markAsCanceledById(Integer id) {
+        if (exportMapper.isGivenJobIdFinishOrCancel(id))
+            return -1;
+        ExportWithBLOBs e = new ExportWithBLOBs();
+        e.setId(id);
+        e.setCanceled(true);
+        return updateByPrimaryKeySelective(e);
+    }
+
+    public int markAsDeletedById(Integer id) {
+        if (exportMapper.isGivenJobIdFinishOrCancel(id))
+            return -1;
+        ExportWithBLOBs e = new ExportWithBLOBs();
+        e.setId(id);
+        e.setDeleted(true);
+        return updateByPrimaryKeySelective(e);
     }
 
 }
