@@ -24,7 +24,7 @@ public class DataDeletionTest {
             "PUH-2012-005", "PUH-2012-082", "PUH-2012-082", "PUH-2012-157", "PUH-2012-211", "PUH-2013-116", "PUH-2013-198",
             "PUH-2014-038", "PUH-2014-271", "PUH-2014-271", "PUH-2015-208", "PUH-2015-278", "PUH-2016-147", "PUH-2017-071",
             "PUH-2017-199", "PUH-2017-199", "PUH-2018-008" };
-    static String[] completeDelete2 = new String[] { "PUH-2015-198" };
+    static String[] completeDelete2 = new String[] { "PUH-2015-220" };
 
     private static final Logger logger = LoggerFactory.getLogger(DataDeletionTest.class);
 
@@ -67,11 +67,11 @@ public class DataDeletionTest {
     }
 
     public static void main(String[] args) {
-        // for (int i = 0; i < completeDelete2.length; i++) {
-        // String string = completeDelete2[i];
-        // checkPatientFiles(string);
-        // }
-        AnalysisUtil.getPatientAllDataSpan(idb, logger, "PUH-2014-096");
+        for (int i = 0; i < completeDelete2.length; i++) {
+            String string = completeDelete2[i];
+            checkPatientFiles(string);
+        }
+//        AnalysisUtil.getPatientAllDataSpan(idb, logger, "PUH-2014-096");
     }
 
     private static InfluxDB generateIdbClient(boolean needGzip) {

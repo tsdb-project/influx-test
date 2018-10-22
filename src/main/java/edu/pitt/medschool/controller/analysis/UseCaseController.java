@@ -18,11 +18,21 @@ public class UseCaseController {
 
     @GetMapping("api/use/case/2")
     @ResponseBody
-    public RestfulResponse uploadPatientList() throws IOException {
+    public RestfulResponse caseTwo() throws IOException {
         RestfulResponse response = new RestfulResponse(1, "Finished");
         String msg = useCaseService.useCaseTwo();
         response.setData(msg);
         return response;
     }
+
+    @GetMapping("api/use/case/akoglu")
+    @ResponseBody
+    public RestfulResponse caseAkoglu() throws IOException {
+        RestfulResponse response = new RestfulResponse(1, "Finished");
+        String msg = useCaseService.useCaseAkoglu();
+        response.setData(msg);
+        return response;
+    }
+    
 
 }
