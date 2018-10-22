@@ -54,7 +54,7 @@ public class UseCaseService {
     private double loadFactor;
 
     private final static String dbName = DBConfiguration.Data.DBNAME;
-    private final static String DIRECTORY = "/pylon5/bi5fpep/quz3/tsdb/output/";
+    private final static String DIRECTORY = "/Volumes/CSV Export3/tsdb/output";
 
     @Autowired
     DownsampleDao downsampleDao;
