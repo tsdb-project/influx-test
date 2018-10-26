@@ -6,7 +6,6 @@ package edu.pitt.medschool.test;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
-import java.util.Map;
 import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,8 @@ public class StringAppender {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         String newTime = formatter.format(Date.from(Instant.ofEpochSecond(instant.getEpochSecond() + 18000)));
-        
-        System.out.println(formatter.format(Date.from(Instant.ofEpochSecond(instant.getEpochSecond() + 18000))));
+
+        System.out.println(newTime);
         // new StringAppender().akoglu();
 
         // System.out.println(query());
@@ -58,18 +57,6 @@ public class StringAppender {
                 + " + \"I78_3\" + \"I79_3\" + \"I80_3\" + \"I81_3\") / 18 as avg from \"%s\" "
                 + "where arType = 'ar' LIMIT 172800) where time >= '%s' and time < '%s' + 48h and avg > 2 group by time(1h, %ss)";
         return template;
-    }
-
-    public String akoglu() {
-
-        String qTemplate = "SELECT %s FROM \"%s\" WHERE time > '%s' and time < '%s' GROUP BY (10s, %s)";
-        String coloumns;
-
-        Map<String, Object> map = jdbcTemplate
-                .queryForMap("SELECT f.SID, f.SID_Count FROM feature f WHERE f.electrode NOT LIKE '%Av17%'");
-        System.out.println(map);
-
-        return "";
     }
 
 }

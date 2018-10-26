@@ -54,7 +54,7 @@ public class UseCaseService {
     private double loadFactor;
 
     private final static String dbName = DBConfiguration.Data.DBNAME;
-    private final static String DIRECTORY = "/Volumes/CSV Export3/tsdb/output";
+    private final static String DIRECTORY = "/tsdb/output/";
 
     @Autowired
     DownsampleDao downsampleDao;
@@ -319,21 +319,26 @@ public class UseCaseService {
                         String[] row = new String[TOTAL_COLUMNS + 2];
                         row[0] = patientId;
 
-                        List<List<Object>> res = result.getResults().get(0).getSeries().get(0).getValues();
-                        logger.debug(patientId + " : " + String.valueOf(res.size()));
+                        if (result.getResults().get(0).getSeries() != null) {
 
-                        for (int i = 0; i < res.size(); i++) {
-                            List<Object> rowData = res.get(i);
-                            for (int j = 0; j < TOTAL_COLUMNS + 1; j++) {
-                                Object data = rowData.get(j);
-                                if (data == null) {
-                                    row[j + 1] = "N/A";
-                                } else {
-                                    row[j + 1] = data.toString();
+                            List<List<Object>> res = result.getResults().get(0).getSeries().get(0).getValues();
+                            logger.debug(patientId + " : " + String.valueOf(res.size()));
+
+                            for (int i = 0; i < res.size(); i++) {
+                                List<Object> rowData = res.get(i);
+                                for (int j = 0; j < TOTAL_COLUMNS + 1; j++) {
+                                    Object data = rowData.get(j);
+                                    if (data == null) {
+                                        row[j + 1] = "N/A";
+                                    } else {
+                                        row[j + 1] = data.toString();
+                                    }
                                 }
+                                writer.writeNext(row);
+                                singleWriter.writeNext(row);
                             }
-                            writer.writeNext(row);
-                            singleWriter.writeNext(row);
+                        } else {
+                            logger.debug(patientId + " : No data in this chunk.");
                         }
                     }
                     singleWriter.close();
