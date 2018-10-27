@@ -164,6 +164,7 @@ public class AnalysisService {
         InfluxDB idb = generateIdbClient(false);
         outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(idb, logger), patientIDs.size(), paraCount);
         idb.close();
+        logger.info("Basic info got, ready to process...");
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
