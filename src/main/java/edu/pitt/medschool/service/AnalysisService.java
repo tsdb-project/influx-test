@@ -161,7 +161,7 @@ public class AnalysisService {
         // Dirty hack to migrate timeout problems, should remove this some time later
         if (exportQuery.getPeriod() < 20 || labelCount > 8)
             paraCount *= 0.8;
-        InfluxDB idb = generateIdbClient(false);
+        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
         outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(idb, logger), patientIDs.size(), paraCount);
         idb.close();
         logger.info("Basic info got, ready to process...");
