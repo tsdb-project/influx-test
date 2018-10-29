@@ -161,7 +161,10 @@ public class AnalysisService {
         // Dirty hack to migrate timeout problems, should remove this some time later
         if (exportQuery.getPeriod() < 20 || labelCount > 8)
             paraCount *= 0.8;
-        outputWriter.writeInitialMetaText(getNumOfPatients(), patientIDs.size(), paraCount);
+        int numP = getNumOfPatients();
+        // Try again only once
+        if (numP == -1) numP = getNumOfPatients();
+        outputWriter.writeInitialMetaText(numP, patientIDs.size(), paraCount);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
