@@ -16,21 +16,23 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
-public class ExportTransformation {
+@Service
+public class ExportPostProcessingService {
     public static final Integer MAX_LINE = 200000;
-    // 3 is the first aggr. group in a query, etc.
-    public static final Integer COLUMN_NUMBER = 3;
     public static final String DIR = "/tsdb/post-processing/out/";
 
-    public static Map<String, Integer> patientRowMap = new HashMap<>();
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public static void main(String[] args) throws IOException {
+    public String transform(int columnGroup) throws IOException {
 
-        readMap();
+        Map<String, Integer> patientRowMap = readMap();
         int longestPatient = 0;
         for (String key : patientRowMap.keySet()) {
             longestPatient = Math.max(patientRowMap.get(key), longestPatient);
@@ -71,7 +73,7 @@ public class ExportTransformation {
                 patientDataMap.put(id, new ArrayList<>());
             }
             List<String> patientDataList = patientDataMap.get(id);
-            patientDataList.add(row[COLUMN_NUMBER]);
+            patientDataList.add(row[columnGroup + 2]);
 
             if (patientDataList.size() == patientRowMap.get(id)) {
                 patientBatch.add(id);
@@ -128,15 +130,23 @@ public class ExportTransformation {
 
             i++;
             if (i % 10000 == 0) {
-                System.out.println(NumberFormat.getNumberInstance(Locale.US).format(i));
+                logger.debug("Processed number of lines: " + NumberFormat.getNumberInstance(Locale.US).format(i));
             }
 
         }
         csvReader.close();
         FileUtils.forceDelete(copyFile);
+
+        logger.debug("Processed number of lines in total: " + NumberFormat.getNumberInstance(Locale.US).format(i));
+        logger.debug("Transformation finished!");
+
+        return "Success";
     }
 
-    public static void readMap() throws IOException {
+    public Map<String, Integer> readMap() throws IOException {
+
+        Map<String, Integer> patientRowMap = new HashMap<>();
+
         File file = new File(DIR + "long.csv");
         Reader reader = new FileReader(file);
         CSVReader csvReader = new CSVReader(reader);
@@ -150,15 +160,17 @@ public class ExportTransformation {
             patientRowMap.put(id, patientRowMap.getOrDefault(id, 0) + 1);
             i++;
             if (i % 1000000 == 0) {
-                System.out.println(NumberFormat.getNumberInstance(Locale.US).format(i));
+                logger.debug("Number of lines in long.csv: " + NumberFormat.getNumberInstance(Locale.US).format(i));
             }
         }
 
-        System.out.println(NumberFormat.getNumberInstance(Locale.US).format(i));
+        logger.debug("Number of lines in long.csv: " + NumberFormat.getNumberInstance(Locale.US).format(i));
         csvReader.close();
+
+        return patientRowMap;
     }
 
-    public static void testRead() throws IOException {
+    public void testRead() throws IOException {
         File file = new File(DIR + "long.csv");
         Reader reader = new FileReader(file);
         CSVReader csvReader = new CSVReader(reader);
@@ -178,11 +190,11 @@ public class ExportTransformation {
             }
             i++;
             if (i % 1000000 == 0) {
-                System.out.println(NumberFormat.getNumberInstance(Locale.US).format(i));
+                logger.debug(NumberFormat.getNumberInstance(Locale.US).format(i).toString());
             }
         }
 
-        System.out.println(NumberFormat.getNumberInstance(Locale.US).format(i));
+        logger.debug(NumberFormat.getNumberInstance(Locale.US).format(i).toString());
         csvReader.close();
         csvWriter.close();
     }
