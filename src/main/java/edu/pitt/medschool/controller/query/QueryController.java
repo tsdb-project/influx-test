@@ -81,7 +81,8 @@ public class QueryController {
         }
         List<String> patientIDs = patientDao.selectIdByCustom(pe);
 
-        List<QueryResultBean> resultBeans = queryUserDefinedService.TypeAQuery(request.getColumn(), (double) request.getThreshold(), request.getCount(), patientIDs, null);
+        List<QueryResultBean> resultBeans = queryUserDefinedService.TypeAQuery(request.getColumn(), (double) request.getThreshold(),
+                request.getCount(), patientIDs, null);
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
         return map;
@@ -118,7 +119,8 @@ public class QueryController {
         }
         List<String> patientIDs = patientDao.selectIdByCustom(pe);
 
-        List<QueryResultBean> resultBeans = queryUserDefinedService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(), request.getCount(), patientIDs, null);
+        List<QueryResultBean> resultBeans = queryUserDefinedService.TypeBQuery(request.getColumnA(), request.getColumnB(), request.getThreshold(),
+                request.getCount(), patientIDs, null);
         Map<String, Object> map = new HashedMap<>();
         map.put("data", resultBeans);
         return map;
