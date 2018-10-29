@@ -494,7 +494,8 @@ public class ImportCsvService {
         idb.disableGzip();
         BatchOptions bo = BatchOptions.DEFAULTS.consistency(InfluxDB.ConsistencyLevel.ALL)
                 // Flush every 2000 Points, at least every 100ms, buffer for failed oper is 2200
-                .actions(2000).flushDuration(100).bufferLimit(2200);
+                .actions(2000).flushDuration(500).bufferLimit(10000).jitterDuration(200)
+                .exceptionHandler((p, t) -> logger.warn("Write point failed", t));
         idb.enableBatch(bo);
         idb.query(new Query(String.format("CREATE DATABASE \"%s\"", dbName), dbName));
 

@@ -23,8 +23,9 @@ public class InfluxUtil {
      */
     public static ResultTable[] justQueryData(InfluxDB i, boolean fastMethod, String query) {
         String dbName = DBConfiguration.Data.DBNAME;
-        if (fastMethod) return queryResultToTable(i.query(new Query(query, dbName))).toArray(new ResultTable[0]);
-        else return queryResultToKV(i.query(new Query(query, dbName))).toArray(new ResultTable[0]);
+        QueryResult qr = i.query(new Query(query, dbName));
+        if (fastMethod) return queryResultToTable(qr).toArray(new ResultTable[0]);
+        else return queryResultToKV(qr).toArray(new ResultTable[0]);
     }
 
     /**
