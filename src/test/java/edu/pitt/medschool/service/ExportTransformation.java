@@ -22,6 +22,9 @@ import com.opencsv.CSVWriter;
 
 public class ExportTransformation {
     public static final Integer MAX_LINE = 200000;
+    // 3 is the first aggr. group in a query, etc.
+    public static final Integer COLUMN_NUMBER = 3;
+    public static final String DIR = "/tsdb/post-processing/out/";
 
     public static Map<String, Integer> patientRowMap = new HashMap<>();
 
@@ -35,7 +38,7 @@ public class ExportTransformation {
 
         longestPatient = Math.min(longestPatient, MAX_LINE);
 
-        File newFile = new File("/Users/Isolachine/Downloads/out/transformed.csv");
+        File newFile = new File(DIR + "transformed.csv");
         Writer writer = new FileWriter(newFile);
         CSVWriter csvWriter = new CSVWriter(writer);
         csvWriter.writeNext(new String[] { "ID" });
@@ -44,10 +47,10 @@ public class ExportTransformation {
         }
         csvWriter.close();
 
-        File copyFile = new File("/Users/Isolachine/Downloads/out/transformed_copy.csv");
+        File copyFile = new File(DIR + "transformed_copy.csv");
         FileUtils.copyFile(newFile, copyFile);
 
-        File file = new File("/Users/Isolachine/Downloads/out/long.csv");
+        File file = new File(DIR + "long.csv");
         Reader reader = new FileReader(file);
         CSVReader csvReader = new CSVReader(reader);
 
@@ -68,7 +71,7 @@ public class ExportTransformation {
                 patientDataMap.put(id, new ArrayList<>());
             }
             List<String> patientDataList = patientDataMap.get(id);
-            patientDataList.add(row[4]);
+            patientDataList.add(row[COLUMN_NUMBER]);
 
             if (patientDataList.size() == patientRowMap.get(id)) {
                 patientBatch.add(id);
@@ -130,11 +133,11 @@ public class ExportTransformation {
 
         }
         csvReader.close();
-
+        FileUtils.forceDelete(copyFile);
     }
 
     public static void readMap() throws IOException {
-        File file = new File("/Users/Isolachine/Downloads/out/long.csv");
+        File file = new File(DIR + "long.csv");
         Reader reader = new FileReader(file);
         CSVReader csvReader = new CSVReader(reader);
 
@@ -156,11 +159,11 @@ public class ExportTransformation {
     }
 
     public static void testRead() throws IOException {
-        File file = new File("/Users/Isolachine/Downloads/out/long.csv");
+        File file = new File(DIR + "long.csv");
         Reader reader = new FileReader(file);
         CSVReader csvReader = new CSVReader(reader);
 
-        File newFile = new File("/Users/Isolachine/Downloads/out/transformed.csv");
+        File newFile = new File(DIR + "transformed.csv");
         Writer writer = new FileWriter(newFile);
         CSVWriter csvWriter = new CSVWriter(writer);
 
@@ -185,11 +188,11 @@ public class ExportTransformation {
     }
 
     public void original() throws IOException {
-        File file = new File("/Users/Isolachine/Downloads/out/long.csv");
+        File file = new File(DIR + "long.csv");
         Reader reader = new FileReader(file);
         CSVReader csvReader = new CSVReader(reader);
 
-        File newFile = new File("/Users/Isolachine/Downloads/out/transformed.csv");
+        File newFile = new File(DIR + "transformed.csv");
         Writer writer = new FileWriter(newFile);
         CSVWriter csvWriter = new CSVWriter(writer);
 
