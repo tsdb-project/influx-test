@@ -161,10 +161,7 @@ public class AnalysisService {
         // Dirty hack to migrate timeout problems, should remove this some time later
         if (exportQuery.getPeriod() < 20 || labelCount > 8)
             paraCount *= 0.8;
-        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(idb, logger), patientIDs.size(), paraCount);
-        idb.close();
-        logger.info("Basic info got, ready to process...");
+        outputWriter.writeInitialMetaText(getNumOfPatients(), patientIDs.size(), paraCount);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
@@ -234,6 +231,33 @@ public class AnalysisService {
         } finally {
             jobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, validPatientCounter.get());
         }
+    }
+
+    /**
+     * Limit running time for get num of patients
+     *
+     * @return Patients#
+     */
+    private int getNumOfPatients() {
+        FutureTask<Integer> task = new FutureTask<Integer>(() -> {
+            InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+                    new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(20, TimeUnit.SECONDS));
+            logger.info("Connected to InfluxDB...");
+            int numOfPatient = AnalysisUtil.numberOfPatientInDatabase(idb, logger);
+            logger.info("Basic info got, ready to process...");
+            idb.close();
+            return numOfPatient;
+        });
+        new Thread(task, "GetNumPaitnets").start();
+        int numP = -1;
+        try {
+            numP = task.get(1, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            logger.error("Timeout getting num of patients", e);
+            // Force stop the get # task
+            task.cancel(true);
+        }
+        return numP;
     }
 
     /**
