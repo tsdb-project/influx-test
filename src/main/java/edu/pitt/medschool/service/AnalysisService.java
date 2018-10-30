@@ -90,7 +90,12 @@ public class AnalysisService {
      */
     public boolean addOneExportJob(Integer jobId) {
         ExportWithBLOBs job = exportDao.selectByPrimaryKey(jobId);
-        return this.jobQueue.add(job);
+        try {
+            return this.jobQueue.add(job);
+        } catch (Exception e) {
+            logger.error("Add job failed.", e);
+            return false;
+        }
     }
 
     /**
