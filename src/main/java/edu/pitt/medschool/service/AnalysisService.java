@@ -211,9 +211,10 @@ public class AnalysisService {
             paraCount *= 0.8;
 
         // Get some basic info for exporting
-        InfluxDB idb = generateIdbClient(false);
-        outputWriter.writeInitialMetaText(AnalysisUtil.numberOfPatientInDatabase(idb, logger), patientIDs.size(), paraCount);
-        idb.close();
+        int numP = getNumOfPatients();
+        // Try again only once
+        if (numP == -1) numP = getNumOfPatients();
+        outputWriter.writeInitialMetaText(numP, patientIDs.size(), paraCount);
 
         // Final prep for running query task
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
@@ -303,6 +304,33 @@ public class AnalysisService {
             // Normal exit procedure
             jobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, validPatientCounter.get());
         }
+    }
+
+    /**
+     * Limit running time for get num of patients
+     *
+     * @return Patients#
+     */
+    private int getNumOfPatients() {
+        FutureTask<Integer> task = new FutureTask<Integer>(() -> {
+            InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+                    new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(20, TimeUnit.SECONDS));
+            logger.info("Connected to InfluxDB...");
+            int numOfPatient = AnalysisUtil.numberOfPatientInDatabase(idb, logger);
+            logger.info("Basic info got, ready to process...");
+            idb.close();
+            return numOfPatient;
+        });
+        new Thread(task, "GetNumPaitnets").start();
+        int numP = -1;
+        try {
+            numP = task.get(1, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            logger.error("Timeout getting num of patients", e);
+            // Force stop the get # task
+            task.cancel(true);
+        }
+        return numP;
     }
 
     /**

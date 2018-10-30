@@ -11,6 +11,7 @@ import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
+import edu.pitt.medschool.service.ExportPostProcessingService;
 import edu.pitt.medschool.service.ExportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,8 @@ public class AnalysisController {
     AnalysisService analysisService;
     @Autowired
     ExportService exportService;
+    @Autowired
+    ExportPostProcessingService exportPostProcessingService;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -95,7 +98,7 @@ public class AnalysisController {
         return analysisGenerateModel(model);
     }
 
-    @RequestMapping(value = {"analysis/edit/{id}", "analysis/edit"}, method = RequestMethod.GET)
+    @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
     public ModelAndView edit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
         modelAndView.addObject("nav", "analysis");
         modelAndView.addObject("subnav", "builder");
@@ -242,7 +245,8 @@ public class AnalysisController {
 
     @PostMapping("api/export/export")
     @ResponseBody
-    public RestfulResponse exportQuery(@RequestBody(required = true) ExportWithBLOBs job, RestfulResponse response) throws JsonProcessingException {
+    public RestfulResponse exportQuery(@RequestBody(required = true) ExportWithBLOBs job, RestfulResponse response)
+            throws JsonProcessingException {
         if (exportService.completeJobAndInsert(job) == 1) {
             analysisService.addOneExportJob(job.getId());
             response.setCode(1);
@@ -313,9 +317,9 @@ public class AnalysisController {
         return response;
     }
 
-    @GetMapping(value = "download", params = {"path", "id"})
-    public StreamingResponseBody getSteamingFile(HttpServletResponse response, @RequestParam("path") String path, @RequestParam("id") Integer id)
-            throws IOException {
+    @GetMapping(value = "download", params = { "path", "id" })
+    public StreamingResponseBody getSteamingFile(HttpServletResponse response, @RequestParam("path") String path,
+            @RequestParam("id") Integer id) throws IOException {
         response.setContentType("application/zip");
         Path p = Paths.get(".", path);
         response.setContentLengthLong(Files.size(p));
@@ -329,6 +333,15 @@ public class AnalysisController {
             }
             inputStream.close();
         };
+    }
+
+    @GetMapping("api/analysis/post-processing/{columnGroun}")
+    @ResponseBody
+    public RestfulResponse caseTwo(@PathVariable Integer columnGroun) throws IOException {
+        RestfulResponse response = new RestfulResponse(1, "Finished");
+        String msg = exportPostProcessingService.transform(columnGroun);
+        response.setData(msg);
+        return response;
     }
 
 }
