@@ -463,6 +463,126 @@ public class ExportExample {
             return (Criteria) this;
         }
 
+        public Criteria andCanceledIsNull() {
+            addCriterion("canceled is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andCanceledIsNotNull() {
+            addCriterion("canceled is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andCanceledEqualTo(Boolean value) {
+            addCriterion("canceled =", value, "canceled");
+            return (Criteria) this;
+        }
+
+        public Criteria andCanceledNotEqualTo(Boolean value) {
+            addCriterion("canceled <>", value, "canceled");
+            return (Criteria) this;
+        }
+
+        public Criteria andCanceledGreaterThan(Boolean value) {
+            addCriterion("canceled >", value, "canceled");
+            return (Criteria) this;
+        }
+
+        public Criteria andCanceledGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("canceled >=", value, "canceled");
+            return (Criteria) this;
+        }
+
+        public Criteria andCanceledLessThan(Boolean value) {
+            addCriterion("canceled <", value, "canceled");
+            return (Criteria) this;
+        }
+
+        public Criteria andCanceledLessThanOrEqualTo(Boolean value) {
+            addCriterion("canceled <=", value, "canceled");
+            return (Criteria) this;
+        }
+
+        public Criteria andCanceledIn(List<Boolean> values) {
+            addCriterion("canceled in", values, "canceled");
+            return (Criteria) this;
+        }
+
+        public Criteria andCanceledNotIn(List<Boolean> values) {
+            addCriterion("canceled not in", values, "canceled");
+            return (Criteria) this;
+        }
+
+        public Criteria andCanceledBetween(Boolean value1, Boolean value2) {
+            addCriterion("canceled between", value1, value2, "canceled");
+            return (Criteria) this;
+        }
+
+        public Criteria andCanceledNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("canceled not between", value1, value2, "canceled");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedIsNull() {
+            addCriterion("failed is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedIsNotNull() {
+            addCriterion("failed is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedEqualTo(Boolean value) {
+            addCriterion("failed =", value, "failed");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedNotEqualTo(Boolean value) {
+            addCriterion("failed <>", value, "failed");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedGreaterThan(Boolean value) {
+            addCriterion("failed >", value, "failed");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("failed >=", value, "failed");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedLessThan(Boolean value) {
+            addCriterion("failed <", value, "failed");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedLessThanOrEqualTo(Boolean value) {
+            addCriterion("failed <=", value, "failed");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedIn(List<Boolean> values) {
+            addCriterion("failed in", values, "failed");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedNotIn(List<Boolean> values) {
+            addCriterion("failed not in", values, "failed");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedBetween(Boolean value1, Boolean value2) {
+            addCriterion("failed between", value1, value2, "failed");
+            return (Criteria) this;
+        }
+
+        public Criteria andFailedNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("failed not between", value1, value2, "failed");
+            return (Criteria) this;
+        }
+
         public Criteria andMachineIsNull() {
             addCriterion("machine is null");
             return (Criteria) this;
@@ -790,6 +910,66 @@ public class ExportExample {
 
         public Criteria andUpdateTimeNotBetween(Date value1, Date value2) {
             addCriterion("update_time not between", value1, value2, "updateTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedIsNull() {
+            addCriterion("deleted is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedIsNotNull() {
+            addCriterion("deleted is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedEqualTo(Boolean value) {
+            addCriterion("deleted =", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedNotEqualTo(Boolean value) {
+            addCriterion("deleted <>", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedGreaterThan(Boolean value) {
+            addCriterion("deleted >", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("deleted >=", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedLessThan(Boolean value) {
+            addCriterion("deleted <", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedLessThanOrEqualTo(Boolean value) {
+            addCriterion("deleted <=", value, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedIn(List<Boolean> values) {
+            addCriterion("deleted in", values, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedNotIn(List<Boolean> values) {
+            addCriterion("deleted not in", values, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedBetween(Boolean value1, Boolean value2) {
+            addCriterion("deleted between", value1, value2, "deleted");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeletedNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("deleted not between", value1, value2, "deleted");
             return (Criteria) this;
         }
 

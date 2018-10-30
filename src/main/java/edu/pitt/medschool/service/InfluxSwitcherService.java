@@ -79,17 +79,17 @@ public class InfluxSwitcherService {
             if (submitStartPscInflux()) {
                 while (pscInfluxIsInQueue()) {
                     // Check every 30s to ensure that we are no longer in queue
-                    Thread.sleep(30 * 1000);
+                    Thread.sleep(30_000);
                 }
                 // InfluxDB takes over 3 min to start
-                Thread.sleep(200 * 1000);
+                Thread.sleep(200_000);
                 while (!hasPscInfluxStarted()) {
                     // Check every 15s to ensure that Influx is available
-                    Thread.sleep(15 * 1000);
+                    Thread.sleep(15_000);
                 }
                 while (!startPortForward()) {
                     // Check every 15s to start port forwaring
-                    Thread.sleep(15 * 1000);
+                    Thread.sleep(15_000);
                 }
                 this.hasStartedPscInflux.set(true);
             } else {
@@ -136,7 +136,7 @@ public class InfluxSwitcherService {
         try {
             Runtime.getRuntime().exec(new String[]{"/bin/bash", "/usr/local/influxdb/start_influxdb.sh"});
             // Local InfluxDB takes up to 20s for starting
-            Thread.sleep(20 * 1000);
+            Thread.sleep(20_000);
         } catch (Exception e) {
             logger.error("Start local failed: {}", Util.stackTraceErrorToString(e));
             // Local may still started in this case

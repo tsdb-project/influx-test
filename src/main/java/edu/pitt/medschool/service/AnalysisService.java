@@ -44,47 +44,97 @@ public class AnalysisService {
     @Value("${load}")
     private double loadFactor;
 
-    @Autowired
-    DownsampleDao downsampleDao;
-    @Autowired
-    DownsampleGroupDao downsampleGroupDao;
-    @Autowired
-    ExportDao exportDao;
-    @Autowired
-    ColumnService columnService;
-    @Autowired
-    InfluxSwitcherService iss;
-
-    /*
-     * Be able to restrict the epochs for which data are exported (e.g. specify to export up to the first 36 hours of available data, but truncate
-     * data thereafter). Be able to specify which columns are exported (e.g. I10_*, I10_2 only, all data, etc) Be able to export down sampled data
-     * (e.g. hourly mean, median, variance, etc)
-     */
-    @Autowired
-    PatientDao patientDao;
-    @Autowired
-    ImportedFileDao importedFileDao;
-
-    private Map<String, Integer> errorCount = new HashMap<>();
+    private final DownsampleDao downsampleDao;
+    private final DownsampleGroupDao downsampleGroupDao;
+    private final ExportDao exportDao;
+    private final ColumnService columnService;
+    private final InfluxSwitcherService iss;
+    private final ImportedFileDao importedFileDao;
 
     /**
-     * Export (downsample) a single query to files (Could be called mutiple times)
+     * Queue for managing jobs
      */
-    public void exportToFile(Integer exportId) {
-        ExportWithBLOBs job = exportDao.selectByPrimaryKey(exportId);
+    private LinkedBlockingQueue<ExportWithBLOBs> jobQueue = new LinkedBlockingQueue<>();
+
+    /**
+     * Indicate if a job should stop
+     */
+    private ConcurrentHashMap<Integer, Boolean> jobStopIndicator = new ConcurrentHashMap<>();
+
+    /**
+     * Thread for running managed jobs
+     */
+    private ScheduledFuture jobCheckerThread;
+
+    @Autowired
+    public AnalysisService(DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, ExportDao exportDao, ColumnService columnService, InfluxSwitcherService iss, ImportedFileDao importedFileDao) {
+        this.downsampleDao = downsampleDao;
+        this.downsampleGroupDao = downsampleGroupDao;
+        this.exportDao = exportDao;
+        this.columnService = columnService;
+        this.iss = iss;
+        this.importedFileDao = importedFileDao;
+        // Check the job queue every 30 seconds and have a initial delay of 100s
+        this.jobCheckerThread = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            Thread.currentThread().setName("JobCheckerThread");
+            ExportWithBLOBs target = null, previous = null;
+            while ((target = this.jobQueue.poll()) != null) {
+                mainExportProcess(target);
+                previous = target;
+                // Sleep 10s for buffering program (and user)
+                try {
+                    Thread.sleep(10_000);
+                    logger.info("Finished one job #<{}>", target.getId());
+                } catch (InterruptedException e) {
+                    logger.error("Job checker thread interrupted!");
+                    return;
+                }
+            }
+        }, 100, 30, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Add an export job to the job queue
+     *
+     * @param jobId ID of the job
+     */
+    public boolean addOneExportJob(Integer jobId) {
+        ExportWithBLOBs job = exportDao.selectByPrimaryKey(jobId);
+        return this.jobQueue.add(job);
+    }
+
+    /**
+     * Stop a running job
+     */
+    public int removeOneExportJob(Integer jobId) {
+        // Should also mark the DB as finished (or deleted)
+        this.jobStopIndicator.putIfAbsent(jobId, false);
+        return exportDao.markAsCanceledById(jobId);
+    }
+
+    /**
+     * Internal use only, export (downsample) a single query to files
+     */
+    private void mainExportProcess(ExportWithBLOBs job) {
+        int jobId = job.getId();
         int queryId = job.getQueryId();
         Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
         boolean isPscRequired = job.getDbType().equals("psc");
 
-        // Create Folder
+        // Create output folder, if failed, finish this process
         File outputDir = generateOutputDir(exportQuery.getAlias(), null);
         if (outputDir == null)
             return;
 
-        String projectRootFolder = outputDir.getAbsolutePath();
-        AtomicInteger validPatientCounter = new AtomicInteger(0);
         String pList = job.getPatientList();
         List<String> patientIDs;
+
+        if (pList == null || pList.isEmpty()) {
+            // Override UUID setting to match PSC database if necessary
+            patientIDs = importedFileDao.selectAllImportedPidOnMachine(isPscRequired ? "realpsc" : this.uuid);
+        } else {
+            patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
+        }
 
         // Get columns data
         List<DownsampleGroup> groups = downsampleGroupDao.selectAllDownsampleGroup(queryId);
@@ -101,28 +151,31 @@ public class AnalysisService {
             return;
         }
 
-        // Init the `outputWriter` ASAP
+        // Init the `outputWriter`
         ExportOutput outputWriter;
         try {
-            outputWriter = new ExportOutput(projectRootFolder, columnLabelName, exportQuery, job);
+            outputWriter = new ExportOutput(outputDir.getAbsolutePath(), columnLabelName, exportQuery, job);
         } catch (IOException e) {
             logger.error("Export writer failed to create: {}", Util.stackTraceErrorToString(e));
             jobClosingHandler(false, isPscRequired, job, outputDir, null, 0);
             return;
         }
 
+        // This job marked as removed
+        if (this.jobStopIndicator.containsKey(jobId)) {
+            this.jobStopIndicator.remove(jobId);
+            logger.warn("Job <{}> cancelled by user.", jobId);
+            outputWriter.writeMetaFile(String.format("%nJob cancelled by user.%n"));
+            jobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, 0);
+            return;
+        }
+
         if (isPscRequired) {
             // Prep PSC instance
             iss.stopLocalInflux();
-            if (pList == null || pList.isEmpty()) {
-                // Override UUID setting to match PSC database
-                patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
-            } else {
-                patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
-            }
             // Local DB may take up to 10s to stop
             try {
-                Thread.sleep(10 * 1000);
+                Thread.sleep(10_000);
             } catch (InterruptedException e) {
                 logger.error("Stop local Influx failed, {}", Util.stackTraceErrorToString(e));
                 return;
@@ -150,30 +203,37 @@ public class AnalysisService {
                 jobClosingHandler(true, isPscRequired, job, outputDir, null, 0);
                 return;
             }
-            if (pList == null || pList.isEmpty()) {
-                patientIDs = importedFileDao.selectAllImportedPidOnMachine(uuid);
-            } else {
-                patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
-            }
         }
 
         int paraCount = determineParaNumber();
         // Dirty hack to migrate timeout problems, should remove this some time later
         if (exportQuery.getPeriod() < 20 || labelCount > 8)
             paraCount *= 0.8;
+
+        // Get some basic info for exporting
         int numP = getNumOfPatients();
         // Try again only once
         if (numP == -1) numP = getNumOfPatients();
         outputWriter.writeInitialMetaText(numP, patientIDs.size(), paraCount);
+
+        // Final prep for running query task
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
+        Map<String, Integer> errorCount = new HashMap<>();
+        AtomicInteger validPatientCounter = new AtomicInteger(0);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
-        // Parallel query task
         Runnable queryTask = () -> {
             InfluxDB influxDB = generateIdbClient(false);
             String patientId;
             while ((patientId = idQueue.poll()) != null) {
                 try {
+                    // This job marked as removed, so this thread should exit
+                    if (this.jobStopIndicator.containsKey(jobId)) {
+                        this.jobStopIndicator.put(jobId, true);
+                        return;
+                    }
+
+                    // First get the group by time offset
                     ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
                             "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
                             patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
@@ -181,6 +241,7 @@ public class AnalysisService {
                         outputWriter.writeMetaFile(String.format("  PID <%s> don't have enough data to export.%n", patientId));
                         continue;
                     }
+                    // Then fetch meta data regrading file segments and build the query string
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
                     ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups,
                             columns, exportQuery, job.getAr());
@@ -190,6 +251,7 @@ public class AnalysisService {
                         continue;
                     }
                     logger.debug("Query for <{}>: {}", patientId, finalQueryString);
+                    // Execuate the query
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
 
                     if (res.length != 1) {
@@ -201,18 +263,18 @@ public class AnalysisService {
                     validPatientCounter.getAndIncrement();
 
                 } catch (Exception ee) {
+                    // All exception will be logged (disregarded) and corresponding PID will be tried again
                     logger.error(String.format("%s: %s", patientId, Util.stackTraceErrorToString(ee)));
-                    int alreadyFailed = this.errorCount.getOrDefault(patientId, -1);
+                    int alreadyFailed = errorCount.getOrDefault(patientId, -1);
                     if (alreadyFailed == -1) {
-                        this.errorCount.put(patientId, 0);
+                        errorCount.put(patientId, 0);
                         alreadyFailed = 0;
                     } else {
-                        this.errorCount.put(patientId, ++alreadyFailed);
+                        errorCount.put(patientId, ++alreadyFailed);
                     }
                     // Reinsert failed user into queue, but no more than 3 times
                     if (alreadyFailed < 3) {
-                        if (!idQueue.offer(patientId))
-                            logger.error(String.format("%s: Re-queue failed.", patientId));
+                        idQueue.add(patientId);
                     } else {
                         logger.error(String.format("%s: Failed more than 3 times.", patientId));
                         outputWriter.writeMetaFile(String.format("  PID <%s> failed multiple times, possible program error.%n", patientId));
@@ -228,10 +290,18 @@ public class AnalysisService {
         }
         scheduler.shutdown();
         try {
+            //TODO: PSC 2 day limit!
             scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
         } finally {
+            if (this.jobStopIndicator.getOrDefault(jobId, false).equals(true)) {
+                // Job removed special procedure
+                this.jobStopIndicator.remove(jobId);
+                outputWriter.writeMetaFile(String.format("%nJob cancelled by user during execution.%n"));
+                logger.warn("Job <{}> cancelled by user during execution.", jobId);
+            }
+            // Normal exit procedure
             jobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, validPatientCounter.get());
         }
     }
@@ -268,12 +338,13 @@ public class AnalysisService {
      */
     private void jobClosingHandler(boolean idbError, boolean isPscNeeded, ExportWithBLOBs job, File outputDir, ExportOutput eo, int validPatientNumber) {
         // We will leave the local Idb running after the job
-        if (isPscNeeded) {
-            if (!this.iss.stopRemoteInflux()) idbError = true;
+        boolean shouldStopRemote = this.queueHasNextPscJob().isPresent();
+        if (isPscNeeded && !this.iss.stopRemoteInflux()) {
+            idbError = true;
         }
         if (eo != null) {
             if (idbError) {
-                eo.writeMetaFile(String.format("InfluxDB probably failed on <%s>.%n", job.getDbType()));
+                eo.writeMetaFile(String.format("%nInfluxDB probably failed on <%s>.%n", job.getDbType()));
             }
             eo.close(validPatientNumber);
         }
@@ -283,6 +354,15 @@ public class AnalysisService {
         updateJob.setId(job.getId());
         updateJob.setFinished(true);
         exportDao.updateByPrimaryKeySelective(updateJob);
+    }
+
+    /**
+     * Find if current queue has a job that requires PSC
+     *
+     * @return Return the Optional job
+     */
+    private Optional<ExportWithBLOBs> queueHasNextPscJob() {
+        return this.jobQueue.parallelStream().findAny().filter(job -> job.getDbType().equals("psc"));
     }
 
     List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
@@ -406,6 +486,15 @@ public class AnalysisService {
             idb.disableGzip();
         }
         return idb;
+    }
+
+    /**
+     * Stop periodically checking for jobs (DO NOT INVOKE UNLESS TESTING)
+     *
+     * @param shouldForce Should interrupt the running job
+     */
+    protected void stopScheduler(boolean shouldForce) {
+        this.jobCheckerThread.cancel(shouldForce);
     }
 
 }
