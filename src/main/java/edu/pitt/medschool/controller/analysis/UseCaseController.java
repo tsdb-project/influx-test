@@ -42,7 +42,7 @@ public class UseCaseController {
     @ResponseBody
     public RestfulResponse performanceTest() throws IOException {
         RestfulResponse response = new RestfulResponse(1, "Finished");
-        for (int i = 1; i < InfluxappConfig.AvailableCores * 0.8; i++) {
+        for (int i = (int) (InfluxappConfig.AvailableCores * 0.8); i >= 1; i--) {
             performanceTest.multithreadTest(i);
         }
         return response;
