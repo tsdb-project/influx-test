@@ -50,21 +50,17 @@ public class AnalysisService {
     private final ColumnService columnService;
     private final InfluxSwitcherService iss;
     private final ImportedFileDao importedFileDao;
+    private final ScheduledFuture jobCheckerThread; // Thread for running managed jobs
 
     /**
      * Queue for managing jobs
      */
-    private LinkedBlockingQueue<ExportWithBLOBs> jobQueue = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<ExportWithBLOBs> jobQueue = new LinkedBlockingQueue<>();
 
     /**
      * Indicate if a job should stop
      */
-    private ConcurrentHashMap<Integer, Boolean> jobStopIndicator = new ConcurrentHashMap<>();
-
-    /**
-     * Thread for running managed jobs
-     */
-    private ScheduledFuture jobCheckerThread;
+    private final ConcurrentHashMap<Integer, Boolean> jobStopIndicator = new ConcurrentHashMap<>();
 
     @Autowired
     public AnalysisService(DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, ExportDao exportDao, ColumnService columnService, InfluxSwitcherService iss, ImportedFileDao importedFileDao) {
@@ -79,16 +75,10 @@ public class AnalysisService {
             Thread.currentThread().setName("JobCheckerThread");
             ExportWithBLOBs target = null, previous = null;
             while ((target = this.jobQueue.poll()) != null) {
+                logger.info("Start to process job #<{}>", target.getId());
                 mainExportProcess(target);
                 previous = target;
-                // Sleep 10s for buffering program (and user)
-                try {
-                    Thread.sleep(10_000);
-                    logger.info("Finished one job #<{}>", target.getId());
-                } catch (InterruptedException e) {
-                    logger.error("Job checker thread interrupted!");
-                    return;
-                }
+                logger.info("Finished one job #<{}>", target.getId());
             }
         }, 100, 30, TimeUnit.SECONDS);
     }
@@ -184,7 +174,7 @@ public class AnalysisService {
             if (!iss.getHasStartedPscInflux()) {
                 // Psc not working, should exit
                 logger.error("Selected PSC InfluxDB but failed to start!");
-                jobClosingHandler(true, isPscRequired, job, outputDir, null, 0);
+                jobClosingHandler(true, true, job, outputDir, null, 0);
                 return;
             }
         } else {
@@ -200,7 +190,7 @@ public class AnalysisService {
             if (!iss.getHasStartedLocalInflux()) {
                 // Local not working, should exit
                 logger.error("Selected local InfluxDB but failed to start!");
-                jobClosingHandler(true, isPscRequired, job, outputDir, null, 0);
+                jobClosingHandler(true, false, job, outputDir, null, 0);
                 return;
             }
         }
@@ -312,7 +302,7 @@ public class AnalysisService {
      * @return Patients#
      */
     private int getNumOfPatients() {
-        FutureTask<Integer> task = new FutureTask<Integer>(() -> {
+        FutureTask<Integer> task = new FutureTask<>(() -> {
             InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
                     new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(20, TimeUnit.SECONDS));
             logger.info("Connected to InfluxDB...");

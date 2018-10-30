@@ -248,9 +248,13 @@ public class AnalysisController {
     public RestfulResponse exportQuery(@RequestBody(required = true) ExportWithBLOBs job, RestfulResponse response)
             throws JsonProcessingException {
         if (exportService.completeJobAndInsert(job) == 1) {
-            analysisService.addOneExportJob(job.getId());
-            response.setCode(1);
-            response.setMsg("Successfully added job.");
+            if (analysisService.addOneExportJob(job.getId())) {
+                response.setCode(1);
+                response.setMsg("Successfully added job.");
+            } else {
+                response.setCode(2);
+                response.setMsg("Failed to add job into queue.");
+            }
         } else {
             response.setCode(0);
             response.setMsg("Database error!");
