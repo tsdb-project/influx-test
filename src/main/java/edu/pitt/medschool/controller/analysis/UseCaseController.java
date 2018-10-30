@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
+import edu.pitt.medschool.service.PerformanceTest;
 import edu.pitt.medschool.service.UseCaseService;
 
 @RestController
@@ -15,6 +17,8 @@ public class UseCaseController {
 
     @Autowired
     UseCaseService useCaseService;
+    @Autowired
+    PerformanceTest performanceTest;
 
     @GetMapping("api/use/case/2")
     @ResponseBody
@@ -33,6 +37,15 @@ public class UseCaseController {
         response.setData(msg);
         return response;
     }
-    
+
+    @GetMapping("api/performanceTest")
+    @ResponseBody
+    public RestfulResponse performanceTest() throws IOException {
+        RestfulResponse response = new RestfulResponse(1, "Finished");
+        for (int i = 1; i < InfluxappConfig.AvailableCores * 0.8; i++) {
+            performanceTest.multithreadTest(i);
+        }
+        return response;
+    }
 
 }
