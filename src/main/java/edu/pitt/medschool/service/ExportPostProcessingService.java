@@ -25,7 +25,7 @@ import com.opencsv.CSVWriter;
 
 @Service
 public class ExportPostProcessingService {
-    public static final Integer MAX_LINE = 200000;
+    public static final Integer MAX_LINE = 250000;
     public static final String DIR = "/tsdb/post-processing/out/";
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -39,6 +39,7 @@ public class ExportPostProcessingService {
         }
 
         longestPatient = Math.min(longestPatient, MAX_LINE);
+        System.out.println(longestPatient);
 
         File newFile = new File(DIR + "transformed.csv");
         Writer writer = new FileWriter(newFile);
@@ -59,7 +60,8 @@ public class ExportPostProcessingService {
         Map<String, List<String>> patientDataMap = new HashMap<>();
 
         Iterator<String[]> iterator = csvReader.iterator();
-        iterator.next();
+        // HAS HEADER OR NOT
+        // iterator.next();
 
         int i = 0;
 

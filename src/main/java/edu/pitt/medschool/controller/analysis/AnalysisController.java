@@ -341,7 +341,7 @@ public class AnalysisController {
 
     @GetMapping("api/analysis/post-processing/{columnGroun}")
     @ResponseBody
-    public RestfulResponse caseTwo(@PathVariable Integer columnGroun) throws IOException {
+    public RestfulResponse postProcessing(@PathVariable Integer columnGroun) throws IOException {
         RestfulResponse response = new RestfulResponse(1, "Finished");
         String msg = exportPostProcessingService.transform(columnGroun);
         response.setData(msg);
