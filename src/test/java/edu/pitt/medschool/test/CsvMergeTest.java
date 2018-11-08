@@ -5,12 +5,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class CsvMergeTest {
     final static String DIR = "/tsdb/merge/";
 
     public static void main(String[] args) throws IOException {
+
         File[] files = new File(DIR).listFiles();
+        Arrays.sort(files);
         FileWriter writer = new FileWriter(new File(DIR + "output.csv"));
 
         if (files.length > 0) {
@@ -27,7 +30,8 @@ public class CsvMergeTest {
             FileReader reader = new FileReader(file);
             BufferedReader br = new BufferedReader(reader);
             if (br.ready()) {
-                br.readLine();
+                // HAS HEADER OR NOT
+                // br.readLine();
             }
             while (br.ready()) {
                 writer.write(br.readLine() + "\n");
