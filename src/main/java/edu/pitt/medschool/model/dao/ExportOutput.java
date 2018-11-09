@@ -27,24 +27,24 @@ public class ExportOutput {
     private LocalDateTime outputStartTime;
 
     // Downsample values
-    private Export job;
-    private Downsample ds;
-    private int numberOfLabels;
-    private int minSecondsForBinPerRow;
-    private int minTotalBinForOne;
-    private boolean shouldOutputWide;
+    private final Export job;
+    private final Downsample ds;
+    private final int numberOfLabels;
+    private final int minSecondsForBinPerRow;
+    private final int minTotalBinForOne;
+    private final boolean shouldOutputWide;
 
-    private CSVWriter outputFileLongWriter;
-    private CSVWriter outputFileWideWriter;
-    private BufferedWriter outputMetaWriter;
-    private CSVWriter outputFileMetaWriter;
+    private final CSVWriter outputFileLongWriter;
+    private final CSVWriter outputFileWideWriter;
+    private final BufferedWriter outputMetaWriter;
+    private final CSVWriter outputFileMetaWriter;
+    private final AtomicInteger totalInvalidPatientCount = new AtomicInteger(0);
 
     // Runtime values
     private int numOfIntervalBins;
     private int mainHeaderLongSize;
     private int mainHeaderWideSize;
     private boolean initMetaWrote = false;
-    private AtomicInteger totalInvalidPatientCount = new AtomicInteger(0);
 
     /**
      * Init the output wrapper class for exporting
@@ -62,20 +62,21 @@ public class ExportOutput {
         this.minTotalBinForOne = ds.getMinBin();
         this.ds = ds;
         this.job = job;
+        int jid = this.job.getId();
         // Wide output won't work (and will be slow) if duration is not set
         this.shouldOutputWide = ds.getDuration() != null && ds.getDuration() > 0;
 
-        initWriters(rootDir);
-        initCsvHeaders(columnLabelName);
-    }
+        // Init writer specific variable
+        this.outputFileLongWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_long_%d.csv", rootDir, jid))));
+        if (this.shouldOutputWide) {
+            this.outputFileWideWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_wide_%d.csv", rootDir, jid))));
+        } else {
+            this.outputFileWideWriter = null;
+        }
+        this.outputFileMetaWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_meta_%d.csv", rootDir, jid))));
+        this.outputMetaWriter = new BufferedWriter(new FileWriter(String.format("%s/job_meta_%d.txt", rootDir, jid)));
 
-    private void initWriters(String root) throws IOException {
-        int jid = this.job.getId();
-        this.outputFileLongWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_long_%d.csv", root, jid))));
-        if (this.shouldOutputWide)
-            this.outputFileWideWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_wide_%d.csv", root, jid))));
-        this.outputFileMetaWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_meta_%d.csv", root, jid))));
-        this.outputMetaWriter = new BufferedWriter(new FileWriter(String.format("%s/job_meta_%d.txt", root, jid)));
+        initCsvHeaders(columnLabelName);
     }
 
     /**
@@ -134,7 +135,7 @@ public class ExportOutput {
         this.initMetaWrote = true;
     }
 
-    public void writeMetaFile(String data) {
+    public synchronized void writeMetaFile(String data) {
         try {
             this.outputMetaWriter.write(data);
         } catch (IOException e) {
@@ -193,7 +194,9 @@ public class ExportOutput {
                 }
             }
             thisPatientTotalCount += count;
-            this.outputFileLongWriter.writeNext(mainDataLong);
+            synchronized (this) {
+                this.outputFileLongWriter.writeNext(mainDataLong);
+            }
         }
 
         // Determine if data is enough or not
@@ -235,8 +238,10 @@ public class ExportOutput {
                         }
                     }
                 }
-                // Only one line for a patient in this mode
-                this.outputFileWideWriter.writeNext(mainDataWide);
+                synchronized (this) {
+                    // Only one line for a patient in this mode
+                    this.outputFileWideWriter.writeNext(mainDataWide);
+                }
             }
         }
 
@@ -258,7 +263,9 @@ public class ExportOutput {
         Instant start = eq.getQueryStartTime(), end = eq.getQueryEndTime();
         String[] data = {patientId, start.toString(), end.toString(), String.valueOf(numSegments), String.valueOf(totalDataSeconds),
                 String.valueOf(dataCount), String.valueOf(insuffCount), enoughData ? "Yes" : "No"};
-        this.outputFileMetaWriter.writeNext(data);
+        synchronized (this) {
+            this.outputFileMetaWriter.writeNext(data);
+        }
     }
 
     /**
