@@ -7,10 +7,12 @@ import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.Export;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
@@ -34,6 +36,9 @@ public class ExportOutput {
     private final int minTotalBinForOne;
     private final boolean shouldOutputWide;
 
+    private final String spiltLongRootPath;
+    private final String spiltWideRootPath;
+    private final String flatRootPath;
     private final CSVWriter outputFileLongWriter;
     private final CSVWriter outputFileWideWriter;
     private final BufferedWriter outputMetaWriter;
@@ -45,6 +50,7 @@ public class ExportOutput {
     private int mainHeaderLongSize;
     private int mainHeaderWideSize;
     private boolean initMetaWrote = false;
+    private boolean isClosed = false;
 
     /**
      * Init the output wrapper class for exporting
@@ -65,6 +71,16 @@ public class ExportOutput {
         int jid = this.job.getId();
         // Wide output won't work (and will be slow) if duration is not set
         this.shouldOutputWide = ds.getDuration() != null && ds.getDuration() > 0;
+
+        this.flatRootPath = String.format("%s/flat/", rootDir); //TODO: This needs discussion
+        this.spiltLongRootPath = String.format("%s_split/long/", rootDir);
+        FileUtils.forceMkdir(new File(this.spiltLongRootPath));
+        if (this.shouldOutputWide) {
+            this.spiltWideRootPath = String.format("%s_split/wide/", rootDir);
+            FileUtils.forceMkdir(new File(this.spiltWideRootPath));
+        } else {
+            this.spiltWideRootPath = "";
+        }
 
         // Init writer specific variable
         this.outputFileLongWriter = new CSVWriter(new BufferedWriter(new FileWriter(String.format("%s/output_all_long_%d.csv", rootDir, jid))));
@@ -168,7 +184,7 @@ public class ExportOutput {
 
         // A test on algorithm
         if (dataRows != this.numOfIntervalBins) {
-            logger.error("Test: dataRows!=numOfIntervalBins");
+            logger.error("Test: dataRows!=numOfIntervalBins. Actual: <{}> vs <{}>", dataRows, numOfIntervalBins);
         }
 
         // Output long form
@@ -194,6 +210,7 @@ public class ExportOutput {
                 }
             }
             thisPatientTotalCount += count;
+            writeOneSpiltFile(patientId, mainDataLong, false);
             synchronized (this) {
                 this.outputFileLongWriter.writeNext(mainDataLong);
             }
@@ -208,36 +225,38 @@ public class ExportOutput {
             this.writeMetaFile(String.format("  PID '%s' overall data insufficient.%n", patientId));
         }
 
-        if (enoughData) {
-            // Output wide form if data is enough
-            if (this.shouldOutputWide) {
-                String[] mainDataWide = new String[this.mainHeaderWideSize];
-                mainDataWide[0] = patientId;
-                mainDataWide[1] = String.valueOf(eq.getQueryStartTime());
-                int intervals = this.numOfIntervalBins, nLabels = this.numberOfLabels;
-                // Reference: c64e604145 from line 207-226
-                for (int i = 0; i < intervals; i++) {
-                    if (dataRows > i) {
-                        List<Object> row = r.getDatalistByRow(i);
-                        int resultSize = row.size(), count = (int) (double) row.get(resultSize - 1);
-                        boolean thisRowInsuffData = count < this.minSecondsForBinPerRow; // Based on the fact that single data per second
-                        for (int j = 1; j <= nLabels; j++) {
-                            Object data = row.get(j);
-                            if (data == null) {
-                                mainDataWide[2 + (j - 1) * intervals + i] = "N/A";
-                            } else if (thisRowInsuffData) {
-                                mainDataWide[2 + (j - 1) * intervals + i] = "Insuff. Data";
-                            } else {
-                                mainDataWide[2 + (j - 1) * intervals + i] = data.toString();
-                            }
-                        }
-                    } else {
-                        // This should probably not happen
-                        for (int j = 1; j <= nLabels; j++) {
-                            mainDataWide[2 + (j - 1) * intervals + i] = "";
+        if (this.shouldOutputWide) {
+            String[] mainDataWide = new String[this.mainHeaderWideSize];
+            mainDataWide[0] = patientId;
+            mainDataWide[1] = String.valueOf(eq.getQueryStartTime());
+            int intervals = this.numOfIntervalBins, nLabels = this.numberOfLabels;
+            // Reference: c64e604145 from line 207-226
+            for (int i = 0; i < intervals; i++) {
+                if (dataRows > i) {
+                    List<Object> row = r.getDatalistByRow(i);
+                    int resultSize = row.size(), count = (int) (double) row.get(resultSize - 1);
+                    boolean thisRowInsuffData = count < this.minSecondsForBinPerRow; // Based on the fact that single data per second
+                    for (int j = 1; j <= nLabels; j++) {
+                        Object data = row.get(j);
+                        if (data == null) {
+                            mainDataWide[2 + (j - 1) * intervals + i] = "N/A";
+                        } else if (thisRowInsuffData) {
+                            mainDataWide[2 + (j - 1) * intervals + i] = "Insuff. Data";
+                        } else {
+                            mainDataWide[2 + (j - 1) * intervals + i] = data.toString();
                         }
                     }
+                } else {
+                    // This should probably not happen
+                    for (int j = 1; j <= nLabels; j++) {
+                        mainDataWide[2 + (j - 1) * intervals + i] = "";
+                    }
                 }
+            }
+            // Always output wide in a separate file for debugging purpose
+            writeOneSpiltFile(patientId, mainDataWide, true);
+            // Output wide form to end-user only if data is enough
+            if (enoughData) {
                 synchronized (this) {
                     // Only one line for a patient in this mode
                     this.outputFileWideWriter.writeNext(mainDataWide);
@@ -246,6 +265,39 @@ public class ExportOutput {
         }
 
         this.writeTimeMeta(patientId, eq, thisPatientTotalCount, thisPatientTotalInsufficientCount, numSegments, totalDataSeconds, enoughData);
+    }
+
+    /**
+     * Write a single spilt file for a patient
+     *
+     * @param pid  PID
+     * @param data Data to write
+     */
+    private void writeOneSpiltFile(String pid, String[] data, boolean isWide) {
+        String path = (isWide ? this.spiltWideRootPath : this.spiltLongRootPath) + pid + ".txt";
+        if (isWide) {
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(path, false))) {
+                for (int i = 0; i < data.length - 1; i++) {
+                    bw.write(data[i]);
+                    bw.write("\t");
+                }
+                bw.write(data[data.length - 1]);
+                bw.newLine();
+            } catch (IOException e) {
+                logger.error("Write spilt wide file failed", e);
+            }
+        } else {
+            String dataToWrite = String.join("\t", data);
+            // Long format should be append, therefore requires a thread lock
+            synchronized (this) {
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter(path, true))) {
+                    bw.write(dataToWrite);
+                    bw.newLine();
+                } catch (IOException e) {
+                    logger.error("Write spilt long file failed", e);
+                }
+            }
+        }
     }
 
     /**
@@ -274,8 +326,11 @@ public class ExportOutput {
      * @param validNum # of valid patients
      */
     public void close(int validNum) {
+        if (this.isClosed)
+            return;
         this.closeCsv();
         this.closeMetaText(validNum);
+        this.isClosed = true;
     }
 
     /**
