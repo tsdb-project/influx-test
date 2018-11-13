@@ -70,7 +70,7 @@ public class AnalysisService {
         this.columnService = columnService;
         this.iss = iss;
         this.importedFileDao = importedFileDao;
-        // Check the job queue every 30 seconds and have a initial delay of 100s
+        // Check the job queue every 20 seconds and have a initial delay of 10s
         this.jobCheckerThread = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             Thread.currentThread().setName("JobCheckerThread");
             ExportWithBLOBs target = null, previous = null;
@@ -80,7 +80,7 @@ public class AnalysisService {
                 previous = target;
                 logger.info("Finished one job #<{}>", target.getId());
             }
-        }, 100, 30, TimeUnit.SECONDS);
+        }, 10, 20, TimeUnit.SECONDS);
     }
 
     /**
@@ -204,6 +204,7 @@ public class AnalysisService {
         // Dirty hack to migrate timeout problems, should remove this some time later
         if (exportQuery.getPeriod() < 20 || labelCount > 8)
             paraCount *= 0.8;
+        paraCount = paraCount > 0 ? paraCount : 1;
 
         // Get some basic info for exporting
         int numP = getNumOfPatients();
