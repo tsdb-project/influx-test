@@ -206,7 +206,7 @@ public class PerformanceTest {
                 60 * rowLimit);
         coloums.append(last);
 
-        // System.out.println(coloums.toString());
+        System.out.println(coloums.toString());
 
         long start = System.currentTimeMillis();
         idb.query(new Query(coloums.toString(), "data"));
@@ -220,7 +220,10 @@ public class PerformanceTest {
     }
 
     public String multithreadTest(int cores) throws IOException {
-
+//    	idb.query(new Query("drop database haha", "nothing"));
+//    	idb.query(new Query("create database haha", "nothing"));
+    	
+    	
         // Get Patient List by uuid
         List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine(uuid);
         idQueue = new LinkedBlockingQueue<>(patientIDs);
@@ -243,8 +246,8 @@ public class PerformanceTest {
             String patientId;
             while ((patientId = idQueue.poll()) != null) {
                 try {
-                    String template = "SELECT %s FROM \"%s\" WHERE time >= '%s' and time < '%s' "
-                            + "and arType = 'ar' GROUP BY time(10s, %ss) fill(none)";
+                    String template = "SELECT %s FROM \"haha\".\"autogen\".\"%s\" WHERE time >= '%s' and time <= '%s' "
+                            + "GROUP BY time(60s, %ss) fill(none)";
                     String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId + "\" where arType = 'ar' limit 1";
                     String lastRecordTimeQuery = "select \"I3_1\" from \"" + patientId
                             + "\" where arType = 'ar' order by time desc limit 1";
@@ -255,16 +258,18 @@ public class PerformanceTest {
                     String lastRecordTime = lastRecordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0)
                             .toString();
 
-                    int offset = Integer.valueOf(firstRecordTime.substring(18, 19));
+                    int offset = Integer.valueOf(firstRecordTime.substring(17, 19));
 
                     String queryString = String.format(template, allColumns, patientId, firstRecordTime, lastRecordTime,
                             offset);
+//                    System.out.println(queryString);
 
-                    Query query = new Query(queryString, dbName);
+                    Query query = new Query(queryString, "haha");
 
-                    idb.query(query);
-                    // System.out.println(queryString);
+                    QueryResult result = idb.query(query);
+                    System.out.println(patientId + ": " + result.getResults().get(0).getSeries().get(0).getValues().size());
                 } catch (Exception e) {
+                	e.printStackTrace();
                     idQueue.offer(patientId);
                 }
             }
@@ -286,9 +291,9 @@ public class PerformanceTest {
     }
 
     public static void main(String[] args) throws IOException {
+        colGroupRowTest(50, 60);
         // for (int i = 3; i <= 21; i += 3) {
         // for (int j = 25; j < 3 * 97; j += 25) {
-        // colGroupRowTest(j, i);
         // }
         // }
         for (int i = 1; i < InfluxappConfig.AvailableCores * 0.8; i++) {
