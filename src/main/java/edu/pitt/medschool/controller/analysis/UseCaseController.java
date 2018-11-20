@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
-import edu.pitt.medschool.service.PerformanceTest;
+import edu.pitt.medschool.service.TrajSqnTest;
 import edu.pitt.medschool.service.UseCaseService;
 
 @RestController
@@ -18,7 +18,7 @@ public class UseCaseController {
     @Autowired
     UseCaseService useCaseService;
     @Autowired
-    PerformanceTest performanceTest;
+    TrajSqnTest trajSqnTest;
 
     @GetMapping("api/use/case/2")
     @ResponseBody
@@ -38,13 +38,11 @@ public class UseCaseController {
         return response;
     }
 
-    @GetMapping("api/performanceTest")
+    @GetMapping("api/trjTrigger")
     @ResponseBody
     public RestfulResponse performanceTest() throws IOException {
         RestfulResponse response = new RestfulResponse(1, "Finished");
-        performanceTest.multithreadTest((int) (InfluxappConfig.AvailableCores * 0.6));
-        for (int i = (int) (InfluxappConfig.AvailableCores * 0.8); i >= 1; i--) {
-        }
+        new Thread(() -> trajSqnTest.mainProcess((int) (InfluxappConfig.AvailableCores * 0.8))).start();
         return response;
     }
 
