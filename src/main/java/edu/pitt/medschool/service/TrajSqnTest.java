@@ -12,6 +12,7 @@ import okhttp3.OkHttpClient;
 import org.apache.commons.io.FileUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import static edu.pitt.medschool.framework.influxdb.InfluxUtil.queryResultToTable;
 
 @Service
 public class TrajSqnTest {
@@ -54,7 +57,7 @@ public class TrajSqnTest {
     public void mainProcess(int cores) throws IOException {
         // 60/5*60/15*60/30*60/3600/3600*2/3600*4/3600*8   -- 3600*6/3600*12
         int[] periods = {60, 5 * 60, 15 * 60, 30 * 60, 3600, 3600 * 2, 3600 * 4, 3600 * 8};
-        String[] dsMethods = {"min(aggrm)", "max(aggrm)", "mean(aggrm)", "median(aggrm)", "PERCENTILE(aggrm,25)", "PERCENTILE(aggrm,75)", "stddev(aggrm)"};
+        String[] dsMethods = {"mean(aggrm)", "min(aggrm)", "max(aggrm)", "median(aggrm)", "PERCENTILE(aggrm,25)", "PERCENTILE(aggrm,75)", "stddev(aggrm)"};
         List<String> patientIDs = Files.readAllLines(Paths.get("E:\\MyDesktop\\plot\\good.txt"));
         ExecutorService scheduler = Executors.newFixedThreadPool(cores > 0 ? cores : 1);
         int dsSize = dsMethods.length;
@@ -107,11 +110,10 @@ public class TrajSqnTest {
                 for (String pid : patientIDs) {
                     scheduler.submit(() -> {
                         String[] dataTmp = new String[2 + totalBins * 2];
-                        dataTmp[0] = pid;
                         BufferedWriter meta = metas.get(id);
                         CSVWriter data = datas.get(id);
-                        Instant oneStart = Instant.now();
                         // Logic here
+                        Instant oneStart = Instant.now();
                         try {
                             Instant oneS = Instant.now();
                             Instant firstAvailData = Instant.MAX; // Immutable once set
@@ -128,34 +130,49 @@ public class TrajSqnTest {
                                 if (tmpE.compareTo(lastAvailData) > 0) lastAvailData = tmpE;
                             }
                             ResultTable[] testOffset = InfluxUtil.justQueryData(idb, true, String.format(
-                                    "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
+                                    "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) ORDER BY time ASC LIMIT 1",
                                     pid, "ar", period));
                             int offset = calcOffsetInSeconds(Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), firstAvailData);
 
+                            String resQuery = "SELECT " + dsMethod + " AS C FROM " +
+                                    "\"%s_1s_ar_mean\" WHERE (time >= '%s' AND time < '%s') GROUP BY time(%ds,%ds) ORDER BY time ASC";
+                            String finalQs = String.format(resQuery, pid, firstAvailData, lastAvailData, period, offset);
+                            ResultTable[] fRes = queryResultToTable(idb.query(new Query(finalQs, "sqn_tmp"))).toArray(new ResultTable[0]);
 
-                            String intoTmp = "SELECT" + interestRawCols + "INTO \"sqn_tmp\".\"autogen\".\"%s_1s_ar_mean\" " +
-                                    "FROM \"%s\" WHERE arType='ar' AND time >= '%s' AND time <= '%s'";
-                            String intoQs = String.format(intoTmp, pid, pid, firstAvailData, lastAvailData);
-
-                            ResultTable[] intoRes = InfluxUtil.justQueryData(idb, true, intoQs);
-                            Instant oneT = Instant.now();
-
-                            if (intoRes.length == 0) {
-                                System.err.println(pid + " length is 0: " + intoQs);
+                            if (fRes.length != 1) {
+                                System.err.println(pid + " length err: " + finalQs);
                                 return;
                             }
+                            ResultTable r = fRes[0];
+                            int dataRows = r.getRowCount();
 
-                            double count = (double) intoRes[0].getDataByColAndRow(1, 0);
+                            // Prep data buffer
+                            dataTmp[0] = pid;
+                            dataTmp[1] = firstAvailData.toString();
+                            for (int k = 0; k < totalBins; k++) {
+                                int idx = 2 + k;
+                                if (dataRows > k) {
+                                    List<Object> row = r.getDatalistByRow(k);
+                                    // Only 1 col
+                                    Object finalData = row.get(1);
+                                    if (finalData == null) {
+                                        dataTmp[idx] = "N/A";
+                                    } else {
+                                        dataTmp[idx] = finalData.toString();
+                                    }
+                                } else {
+                                    dataTmp[idx] = "N/A";
+                                }
+                                dataTmp[idx + totalBins] = String.format("%.1f", -0.1 * totalBins / 2 + 0.1 * (k + 1));
+                            }
 
                         } catch (Exception e) {
-                            logger.error("Process <{}> error", pid);
-                            logger.error("Reason", e);
+                            logger.error("Process <{}> error, reason: {}", pid, e);
                         }
                         // Finalize
                         Instant oneEnd = Instant.now();
                         try {
                             data.writeNext(dataTmp);
-                            meta.newLine();
                             writeNewLine(meta, String.format("%s,%s", pid, Duration.between(oneStart, oneEnd).toString().toLowerCase().replace("pt", "")));
                         } catch (IOException e) {
                             logger.error("Write final <{}> failed: {}", pid, e);
