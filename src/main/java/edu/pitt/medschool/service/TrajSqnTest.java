@@ -93,12 +93,17 @@ public class TrajSqnTest {
                         if (tmpE.compareTo(lastAvailData) > 0) lastAvailData = tmpE;
                     }
 
-                    String intoTmp = "SELECT" + interestRawCols + "INTO \"sqn_tmp\".\"autogen\".\"%s_1s_mean\" " +
-                            "FROM \"%s\" WHERE (arType='ar') AND time >= '%s' AND time <= '%s'";
+                    String intoTmp = "SELECT" + interestRawCols + "INTO \"sqn_tmp\".\"autogen\".\"%s_1s_ar_mean\" " +
+                            "FROM \"%s\" WHERE arType='ar' AND time >= '%s' AND time <= '%s'";
                     String intoQs = String.format(intoTmp, pid, pid, firstAvailData, lastAvailData);
 
                     ResultTable[] intoRes = InfluxUtil.justQueryData(idb, true, intoQs);
                     Instant oneT = Instant.now();
+
+                    if (intoRes.length == 0) {
+                        System.err.println(pid + " length is 0: " + intoQs);
+                        return;
+                    }
 
                     double count = (double) intoRes[0].getDataByColAndRow(1, 0);
 
@@ -127,7 +132,7 @@ public class TrajSqnTest {
 
     public static void main(String[] args) throws Exception {
         TrajSqnTest t = new TrajSqnTest(null);
-        t.mainProcess(28);
+        t.mainProcess(21);
     }
 
     public static synchronized void writeNewLine(BufferedWriter w, String s) throws IOException {
