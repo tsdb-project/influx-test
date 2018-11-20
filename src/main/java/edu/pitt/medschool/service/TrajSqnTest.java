@@ -58,7 +58,7 @@ public class TrajSqnTest {
         // 60/5*60/15*60/30*60/3600/3600*2/3600*4/3600*8   -- 3600*6/3600*12
         int[] periods = {60, 5 * 60, 15 * 60, 30 * 60, 3600, 3600 * 2, 3600 * 4, 3600 * 8};
         String[] dsMethods = {"mean(aggrm)", "min(aggrm)", "max(aggrm)", "median(aggrm)", "PERCENTILE(aggrm,25)", "PERCENTILE(aggrm,75)", "stddev(aggrm)"};
-        List<String> patientIDs = Files.readAllLines(Paths.get("E:\\MyDesktop\\plot\\good.txt"));
+        List<String> patientIDs = Files.readAllLines(Paths.get("good.txt"));
         ExecutorService scheduler = Executors.newFixedThreadPool(cores > 0 ? cores : 1);
         int dsSize = dsMethods.length;
         int pSize = periods.length;
@@ -202,7 +202,7 @@ public class TrajSqnTest {
 
     public static void main(String[] args) throws Exception {
         TrajSqnTest t = new TrajSqnTest(null);
-        t.mainProcess(1);
+        t.mainProcess(21);
     }
 
     public static synchronized void writeNewLine(BufferedWriter w, String s) throws IOException {
