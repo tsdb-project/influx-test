@@ -44,7 +44,7 @@ public class UseCaseController {
         RestfulResponse response = new RestfulResponse(1, "Finished");
         new Thread(() -> {
             try {
-                trajSqnTest.mainProcess((int) (InfluxappConfig.AvailableCores * 0.8));
+                trajSqnTest.mainProcess((int) (InfluxappConfig.AvailableCores * 0.6));
             } catch (IOException e) {
                 e.printStackTrace();
             }
