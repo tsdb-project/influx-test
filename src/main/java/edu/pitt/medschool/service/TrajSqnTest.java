@@ -68,6 +68,7 @@ public class TrajSqnTest {
             writeNewLine(meta, "36hr\tMin: 6hr\tAggr: Mean\tDs: Mean\tperiod: " + period);
             meta.newLine();
             meta.newLine();
+            writeNewLine(meta, "PID,INTO_Time,Records");
         } catch (IOException e) {
             logger.error("Initial failed", e);
             return;
@@ -107,7 +108,7 @@ public class TrajSqnTest {
 
                     double count = (double) intoRes[0].getDataByColAndRow(1, 0);
 
-                    writeNewLine(meta, String.format("PID <%s>, INTO time: %s, records: %f", pid, Duration.between(oneS, oneT).toString().toLowerCase(), count));
+                    writeNewLine(meta, String.format("%s,%s,%.0f", pid, Duration.between(oneS, oneT).toString().replace("pt", "").toLowerCase(), count));
                 } catch (Exception e) {
                     logger.error("Process <{}> error", pid);
                     logger.error("Reason", e);
