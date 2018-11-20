@@ -49,6 +49,11 @@ public class AnalysisUtil {
             ResultTable[] table = justQueryData(i, true,
                     String.format(template, uuid, "ASC", uuid, "DESC", uuid, uuid));
 
+            if (table.length < 2) {
+                logger.error("DataTimeSpanBean get failed for <{}>, result length <{}> bad.", pid, table.length);
+                return null;
+            }
+
             Instant start = Instant.parse((CharSequence) table[0].getDataByColAndRow(0, 0)),
                     end = Instant.parse((CharSequence) table[1].getDataByColAndRow(0, 0));
             List<Object> arType = table[2].getDatalistByColumnName("value");

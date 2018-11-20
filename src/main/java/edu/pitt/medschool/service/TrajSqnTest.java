@@ -48,13 +48,15 @@ public class TrajSqnTest {
         this.importedFileDao = importedFileDao;
     }
 
-    private final int interval = 36 * 3600;
+    private final int duration = 36 * 3600;
 
     public void mainProcess(int cores) {
+        // 60/5*60/15*60/30*60/3600/3600*2/3600*4/3600*8   -- 3600*6/3600*12
+        int interval = 60;
         List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
         ExecutorService scheduler = Executors.newFixedThreadPool(cores > 0 ? cores : 1);
-        String dataPath = InfluxappConfig.OUTPUT_DIRECTORY + "special_trj/A/data.csv";
-        String metaPath = InfluxappConfig.OUTPUT_DIRECTORY + "special_trj/A/meta.txt";
+        String dataPath = InfluxappConfig.OUTPUT_DIRECTORY + "special_trj/A/data_60.csv";
+        String metaPath = InfluxappConfig.OUTPUT_DIRECTORY + "special_trj/A/meta_60.txt";
         BufferedWriter meta;
         CSVWriter data;
         try {
@@ -62,7 +64,9 @@ public class TrajSqnTest {
             data = new CSVWriter(new BufferedWriter(new FileWriter(dataPath)));
             meta = new BufferedWriter(new FileWriter(metaPath));
             String[] header;
-            data.writeNext();
+            //data.writeNext();
+            meta.write("36hr\tMin: 6hr\tAggr: Mean\tDs: Mean\tinterval: " + interval);
+            meta.newLine();
         } catch (IOException e) {
             logger.error("Initial failed", e);
             return;
@@ -87,9 +91,8 @@ public class TrajSqnTest {
 
                     int offset = Integer.valueOf(firstRecordTime.substring(17, 19));
 
-                    String queryString = String.format(template, allColumns, pid, firstRecordTime, lastRecordTime,
+                    String queryString = String.format(template, interestRawCols, pid, firstRecordTime, lastRecordTime,
                             offset);
-//                    System.out.println(queryString);
 
                     Query query = new Query(queryString, "haha");
 
