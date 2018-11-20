@@ -3,21 +3,30 @@ package edu.pitt.medschool.service;
 import com.opencsv.CSVWriter;
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.model.dao.*;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
+import edu.pitt.medschool.model.DataTimeSpanBean;
+import edu.pitt.medschool.model.dao.AnalysisUtil;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
 import okhttp3.OkHttpClient;
 import org.apache.commons.io.FileUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.Query;
-import org.influxdb.dto.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,31 +38,22 @@ public class TrajSqnTest {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     private final static String dbName = DBConfiguration.Data.DBNAME;
-    private final static String intName = "sqn"; // Smart query navigator
 
-    private final DownsampleDao downsampleDao;
-    private final DownsampleGroupDao downsampleGroupDao;
-    private final ColumnService columnService;
-    private final PatientDao patientDao;
     private final ImportedFileDao importedFileDao;
 
-    private final String interestRawCols = " ((I213_1 + I214_1 + I215_1 + I216_1 + I217_1 + I218_1 + I219_1 + I220_1 + I221_1 + I222_1 + I223_1 + I224_1 + I225_1 + I226_1 + I227_1 + I228_1 + I229_1 + I230_1) / 18) AS aggr ";
+    private final String interestRawCols = " ((I213_1 + I214_1 + I215_1 + I216_1 + I217_1 + I218_1 + I219_1 + I220_1 + I221_1 + I222_1 + I223_1 + I224_1 + I225_1 + I226_1 + I227_1 + I228_1 + I229_1 + I230_1) / 18) AS aggrm ";
 
     @Autowired
-    public TrajSqnTest(DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, ColumnService columnService, PatientDao patientDao, ImportedFileDao importedFileDao) {
-        this.downsampleDao = downsampleDao;
-        this.downsampleGroupDao = downsampleGroupDao;
-        this.columnService = columnService;
-        this.patientDao = patientDao;
+    public TrajSqnTest(ImportedFileDao importedFileDao) {
         this.importedFileDao = importedFileDao;
     }
 
     private final int duration = 36 * 3600;
 
-    public void mainProcess(int cores) {
+    public void mainProcess(int cores) throws IOException {
         // 60/5*60/15*60/30*60/3600/3600*2/3600*4/3600*8   -- 3600*6/3600*12
-        int interval = 60;
-        List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
+        int period = 60;
+        List<String> patientIDs = Files.readAllLines(Paths.get("E:\\MyDesktop\\plot\\good.txt"));
         ExecutorService scheduler = Executors.newFixedThreadPool(cores > 0 ? cores : 1);
         String dataPath = InfluxappConfig.OUTPUT_DIRECTORY + "special_trj/A/data_60.csv";
         String metaPath = InfluxappConfig.OUTPUT_DIRECTORY + "special_trj/A/meta_60.txt";
@@ -65,39 +65,44 @@ public class TrajSqnTest {
             meta = new BufferedWriter(new FileWriter(metaPath));
             String[] header;
             //data.writeNext();
-            meta.write("36hr\tMin: 6hr\tAggr: Mean\tDs: Mean\tinterval: " + interval);
+            writeNewLine(meta, "36hr\tMin: 6hr\tAggr: Mean\tDs: Mean\tperiod: " + period);
+            meta.newLine();
             meta.newLine();
         } catch (IOException e) {
             logger.error("Initial failed", e);
             return;
         }
+        InfluxDB idb = generateIdbClient(true);
 
         Instant start = Instant.now();
         for (String pid : patientIDs) {
             scheduler.submit(() -> {
-                InfluxDB idb = generateIdbClient(true);
                 try {
-                    String template = "SELECT %s FROM \"haha\".\"autogen\".\"%s\" WHERE time >= '%s' and time <= '%s' "
-                            + "GROUP BY time(60s, %ss) fill(none)";
-                    String firstRecordTimeQuery = "select \"I3_1\" from \"" + pid + "\" where arType = 'ar' limit 1";
-                    String lastRecordTimeQuery = "select \"I3_1\" from \"" + pid
-                            + "\" where arType = 'ar' order by time desc limit 1";
-                    QueryResult firstRecordResult = idb.query(new Query(firstRecordTimeQuery, dbName));
-                    String firstRecordTime = firstRecordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0)
-                            .toString();
-                    QueryResult lastRecordResult = idb.query(new Query(lastRecordTimeQuery, dbName));
-                    String lastRecordTime = lastRecordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0)
-                            .toString();
+                    Instant oneS = Instant.now();
+                    Instant firstAvailData = Instant.MAX; // Immutable once set
+                    Instant lastAvailData = Instant.MIN; // Immutable once set
+                    List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(idb, logger, pid);
+                    if (dtsb == null) {
+                        System.err.println("NULL");
+                        return;
+                    }
+                    for (DataTimeSpanBean d : dtsb) {
+                        if (d.getArStat() == DataTimeSpanBean.ArStatus.NoArOnly) continue;
+                        Instant tmpS = d.getStart(), tmpE = d.getEnd();
+                        if (tmpS.compareTo(firstAvailData) < 0) firstAvailData = tmpS;
+                        if (tmpE.compareTo(lastAvailData) > 0) lastAvailData = tmpE;
+                    }
 
-                    int offset = Integer.valueOf(firstRecordTime.substring(17, 19));
+                    String intoTmp = "SELECT" + interestRawCols + "INTO \"sqn_tmp\".\"autogen\".\"%s_1s_mean\" " +
+                            "FROM \"%s\" WHERE (arType='ar') AND time >= '%s' AND time <= '%s'";
+                    String intoQs = String.format(intoTmp, pid, pid, firstAvailData, lastAvailData);
 
-                    String queryString = String.format(template, interestRawCols, pid, firstRecordTime, lastRecordTime,
-                            offset);
+                    ResultTable[] intoRes = InfluxUtil.justQueryData(idb, true, intoQs);
+                    Instant oneT = Instant.now();
 
-                    Query query = new Query(queryString, "haha");
+                    double count = (double) intoRes[0].getDataByColAndRow(1, 0);
 
-                    QueryResult result = idb.query(query);
-                    System.out.println(pid + ": " + result.getResults().get(0).getSeries().get(0).getValues().size());
+                    writeNewLine(meta, String.format("PID <%s>, INTO time: %s, records: %f", pid, Duration.between(oneS, oneT).toString().toLowerCase(), count));
                 } catch (Exception e) {
                     logger.error("Process <{}> error", pid);
                     logger.error("Reason", e);
@@ -109,10 +114,10 @@ public class TrajSqnTest {
         try {
             scheduler.awaitTermination(48, TimeUnit.HOURS);
             Instant end = Instant.now();
+            idb.close();
             meta.newLine();
-            meta.write("Threads: " + cores);
-            meta.newLine();
-            meta.write(String.format("Start: %s\tEnd: %s\tDur: <%s>", start, end, Duration.between(start, end)).toLowerCase());
+            writeNewLine(meta, "Threads: " + cores);
+            writeNewLine(meta, String.format("Start: %s\tEnd: %s\tDur: <%s>", start, end, Duration.between(start, end).toString().toLowerCase()));
             data.close();
             meta.close();
         } catch (Exception e) {
@@ -121,8 +126,20 @@ public class TrajSqnTest {
     }
 
     public static void main(String[] args) throws Exception {
-        TrajSqnTest t = new TrajSqnTest(null, null, null, null, null);
+        TrajSqnTest t = new TrajSqnTest(null);
+        t.mainProcess(28);
+    }
 
+    public static synchronized void writeNewLine(BufferedWriter w, String s) throws IOException {
+        w.write(s);
+        w.newLine();
+    }
+
+    private int calcOffsetInSeconds(Instant fakeStartTime, Instant queryStartTime) {
+        LocalDateTime fakeStart = LocalDateTime.ofInstant(fakeStartTime, ZoneOffset.UTC);
+        LocalDateTime acutalStart = LocalDateTime.ofInstant(queryStartTime, ZoneOffset.UTC);
+        return (acutalStart.getMinute() - fakeStart.getMinute()) * 60 +
+                (acutalStart.getSecond() - fakeStart.getSecond());
     }
 
     private static InfluxDB generateIdbClient(boolean needGzip) {
