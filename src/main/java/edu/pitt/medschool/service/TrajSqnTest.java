@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -52,88 +53,139 @@ public class TrajSqnTest {
 
     public void mainProcess(int cores) throws IOException {
         // 60/5*60/15*60/30*60/3600/3600*2/3600*4/3600*8   -- 3600*6/3600*12
-        int period = 60;
+        int[] periods = {60, 5 * 60, 15 * 60, 30 * 60, 3600, 3600 * 2, 3600 * 4, 3600 * 8};
+        String[] dsMethods = {"min(aggrm)", "max(aggrm)", "mean(aggrm)", "median(aggrm)", "PERCENTILE(aggrm,25)", "PERCENTILE(aggrm,75)", "stddev(aggrm)"};
         List<String> patientIDs = Files.readAllLines(Paths.get("E:\\MyDesktop\\plot\\good.txt"));
         ExecutorService scheduler = Executors.newFixedThreadPool(cores > 0 ? cores : 1);
-        String dataPath = InfluxappConfig.OUTPUT_DIRECTORY + "special_trj/A/data_60.csv";
-        String metaPath = InfluxappConfig.OUTPUT_DIRECTORY + "special_trj/A/meta_60.txt";
-        BufferedWriter meta;
-        CSVWriter data;
-        try {
-            FileUtils.forceMkdirParent(new File(dataPath));
-            data = new CSVWriter(new BufferedWriter(new FileWriter(dataPath)));
-            meta = new BufferedWriter(new FileWriter(metaPath));
-            String[] header;
-            //data.writeNext();
-            writeNewLine(meta, "36hr\tMin: 6hr\tAggr: Mean\tDs: Mean\tperiod: " + period);
-            meta.newLine();
-            meta.newLine();
-            writeNewLine(meta, "PID,INTO_Time,Records");
-        } catch (IOException e) {
-            logger.error("Initial failed", e);
-            return;
-        }
+        int dsSize = dsMethods.length;
+        int pSize = periods.length;
         InfluxDB idb = generateIdbClient(true);
+        ConcurrentHashMap<Integer, BufferedWriter> metas = new ConcurrentHashMap<>(dsSize * pSize);
+        ConcurrentHashMap<Integer, CSVWriter> datas = new ConcurrentHashMap<>(dsSize * pSize);
 
-        Instant start = Instant.now();
-        for (String pid : patientIDs) {
-            scheduler.submit(() -> {
+        // Init writers
+        for (int i = 0; i < periods.length; i++) {
+            int period = periods[i];
+            int totalBins = duration / period;
+            for (int j = 0; j < dsSize; j++) {
+                String dsMethod = dsMethods[j];
+                int id = dsSize * i + j;
+                String dataPath = String.format(InfluxappConfig.OUTPUT_DIRECTORY + "special_trj/B/data_%d.csv", id);
+                String metaPath = String.format(InfluxappConfig.OUTPUT_DIRECTORY + "special_trj/B/meta_%d.csv", id);
                 try {
-                    Instant oneS = Instant.now();
-                    Instant firstAvailData = Instant.MAX; // Immutable once set
-                    Instant lastAvailData = Instant.MIN; // Immutable once set
-                    List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(idb, logger, pid);
-                    if (dtsb == null) {
-                        System.err.println("NULL");
-                        return;
+                    FileUtils.forceMkdirParent(new File(dataPath));
+                    datas.put(id, new CSVWriter(new BufferedWriter(new FileWriter(dataPath))));
+                    metas.put(id, new BufferedWriter(new FileWriter(metaPath)));
+                    String[] header = new String[2 + totalBins * 2];
+                    header[0] = "PID";
+                    header[1] = "StartTime";
+                    for (int k = 0; k < totalBins; k++) {
+                        header[2 + k] = "sr" + (k + 1);
+                        header[2 + k + totalBins] = "ot" + (k + 1);
                     }
-                    for (DataTimeSpanBean d : dtsb) {
-                        if (d.getArStat() == DataTimeSpanBean.ArStatus.NoArOnly) continue;
-                        Instant tmpS = d.getStart(), tmpE = d.getEnd();
-                        if (tmpS.compareTo(firstAvailData) < 0) firstAvailData = tmpS;
-                        if (tmpE.compareTo(lastAvailData) > 0) lastAvailData = tmpE;
-                    }
-
-                    String intoTmp = "SELECT" + interestRawCols + "INTO \"sqn_tmp\".\"autogen\".\"%s_1s_ar_mean\" " +
-                            "FROM \"%s\" WHERE arType='ar' AND time >= '%s' AND time <= '%s'";
-                    String intoQs = String.format(intoTmp, pid, pid, firstAvailData, lastAvailData);
-
-                    ResultTable[] intoRes = InfluxUtil.justQueryData(idb, true, intoQs);
-                    Instant oneT = Instant.now();
-
-                    if (intoRes.length == 0) {
-                        System.err.println(pid + " length is 0: " + intoQs);
-                        return;
-                    }
-
-                    double count = (double) intoRes[0].getDataByColAndRow(1, 0);
-
-                    writeNewLine(meta, String.format("%s,%s,%.0f", pid, Duration.between(oneS, oneT).toString().replace("pt", "").toLowerCase(), count));
-                } catch (Exception e) {
-                    logger.error("Process <{}> error", pid);
-                    logger.error("Reason", e);
+                    datas.get(id).writeNext(header);
+                    writeNewLine(metas.get(id), String.format("36hr (Using SQN)\tCores: %d\t\tMin: 6hr\tAggr: Mean\tDs: %s\tperiod: %ds", cores, dsMethod, period));
+                    metas.get(id).newLine();
+                    metas.get(id).newLine();
+                    writeNewLine(metas.get(id), "PID,Operation_Time");
+                    metas.get(id).flush();
+                    datas.get(id).flush();
+                } catch (IOException e) {
+                    logger.error("Initial failed <{}>, {}", id, e);
                 }
-            });
+            }
         }
-        scheduler.shutdown();
 
+        Instant totalStart = Instant.now();
+        // Actual process
+        for (int i = 0; i < periods.length; i++) {
+            int period = periods[i];
+            int totalBins = duration / period;
+            for (int j = 0; j < dsSize; j++) {
+                String dsMethod = dsMethods[j];
+                int id = dsSize * i + j;
+                for (String pid : patientIDs) {
+                    scheduler.submit(() -> {
+                        String[] dataTmp = new String[2 + totalBins * 2];
+                        dataTmp[0] = pid;
+                        BufferedWriter meta = metas.get(id);
+                        CSVWriter data = datas.get(id);
+                        Instant oneStart = Instant.now();
+                        // Logic here
+                        try {
+                            Instant oneS = Instant.now();
+                            Instant firstAvailData = Instant.MAX; // Immutable once set
+                            Instant lastAvailData = Instant.MIN; // Immutable once set
+                            List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(idb, logger, pid);
+                            if (dtsb == null) {
+                                System.err.println("NULL");
+                                return;
+                            }
+                            for (DataTimeSpanBean d : dtsb) {
+                                if (d.getArStat() == DataTimeSpanBean.ArStatus.NoArOnly) continue;
+                                Instant tmpS = d.getStart(), tmpE = d.getEnd();
+                                if (tmpS.compareTo(firstAvailData) < 0) firstAvailData = tmpS;
+                                if (tmpE.compareTo(lastAvailData) > 0) lastAvailData = tmpE;
+                            }
+                            ResultTable[] testOffset = InfluxUtil.justQueryData(idb, true, String.format(
+                                    "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
+                                    pid, "ar", period));
+                            int offset = calcOffsetInSeconds(Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), firstAvailData);
+
+
+                            String intoTmp = "SELECT" + interestRawCols + "INTO \"sqn_tmp\".\"autogen\".\"%s_1s_ar_mean\" " +
+                                    "FROM \"%s\" WHERE arType='ar' AND time >= '%s' AND time <= '%s'";
+                            String intoQs = String.format(intoTmp, pid, pid, firstAvailData, lastAvailData);
+
+                            ResultTable[] intoRes = InfluxUtil.justQueryData(idb, true, intoQs);
+                            Instant oneT = Instant.now();
+
+                            if (intoRes.length == 0) {
+                                System.err.println(pid + " length is 0: " + intoQs);
+                                return;
+                            }
+
+                            double count = (double) intoRes[0].getDataByColAndRow(1, 0);
+
+                        } catch (Exception e) {
+                            logger.error("Process <{}> error", pid);
+                            logger.error("Reason", e);
+                        }
+                        // Finalize
+                        Instant oneEnd = Instant.now();
+                        try {
+                            data.writeNext(dataTmp);
+                            meta.newLine();
+                            writeNewLine(meta, String.format("%s,%s", pid, Duration.between(oneStart, oneEnd).toString().toLowerCase().replace("pt", "")));
+                        } catch (IOException e) {
+                            logger.error("Write final <{}> failed: {}", pid, e);
+                        }
+                    });
+                }
+            }
+        }
+
+        scheduler.shutdown();
         try {
             scheduler.awaitTermination(48, TimeUnit.HOURS);
-            Instant end = Instant.now();
-            idb.close();
-            meta.newLine();
-            writeNewLine(meta, "Threads: " + cores);
-            writeNewLine(meta, String.format("Start: %s\tEnd: %s\tDur: <%s>", start, end, Duration.between(start, end).toString().toLowerCase()));
-            data.close();
-            meta.close();
-        } catch (Exception e) {
-            logger.error("Finish failed", e);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return;
         }
+        Instant totalEnd = Instant.now();
+        for (int i : metas.keySet()) {
+            metas.get(i).close();
+        }
+        for (int i : datas.keySet()) {
+            datas.get(i).close();
+        }
+        idb.close();
+        System.err.println("Total process time: " + Duration.between(totalStart, totalEnd).toString().toLowerCase());
     }
 
     public static void main(String[] args) throws Exception {
         TrajSqnTest t = new TrajSqnTest(null);
-        t.mainProcess(21);
+        t.mainProcess(1);
     }
 
     public static synchronized void writeNewLine(BufferedWriter w, String s) throws IOException {
