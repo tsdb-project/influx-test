@@ -1,6 +1,7 @@
 package edu.pitt.medschool.model;
 
 import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
@@ -17,7 +18,7 @@ public class InfluxUtilTest {
 
     private void doQuery(String d, String db) {
         Query q = new Query(d, db);
-        QueryResult qr = InfluxappConfig.INFLUX_DB.query(q);
+        QueryResult qr = InfluxUtil.generateIdbClient(true).query(q);
         ResultTable[] data;
         data = queryResultToKV(qr).toArray(new ResultTable[0]);
         data = queryResultToTable(qr).toArray(new ResultTable[0]);

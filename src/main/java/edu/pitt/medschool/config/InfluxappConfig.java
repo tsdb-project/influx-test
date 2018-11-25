@@ -10,11 +10,6 @@ import org.springframework.boot.system.ApplicationTemp;
 public final class InfluxappConfig {
 
     /**
-     * A globally useable InfluxDB Client
-     */
-    public static final InfluxDB INFLUX_DB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
-
-    /**
      * Available cores on this system
      */
     public static final int AvailableCores = Runtime.getRuntime().availableProcessors();

@@ -23,7 +23,7 @@ import edu.pitt.medschool.model.dao.PatientDao;
 @Service
 public class QueryUserDefinedService {
 
-    private final InfluxDB influxDB = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD);
+    private final InfluxDB influxDB = InfluxUtil.generateIdbClient(true);
 
     @Autowired
     private PatientDao patientDao;

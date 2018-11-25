@@ -1,16 +1,13 @@
 package edu.pitt.medschool.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dao.DownsampleDao;
+import edu.pitt.medschool.model.dao.DownsampleGroupDao;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.PatientDao;
 import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,18 +16,16 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dao.DownsampleDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupDao;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.PatientDao;
-import okhttp3.OkHttpClient;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
+
+import static edu.pitt.medschool.framework.influxdb.InfluxUtil.generateIdbClient;
 
 @Service
 public class PerformanceTest {
-    static InfluxDB idb = generateIdbClient(true);
+    private static final InfluxDB idb = generateIdbClient(true);
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -222,8 +217,8 @@ public class PerformanceTest {
     public String multithreadTest(int cores) throws IOException {
 //    	idb.query(new Query("drop database haha", "nothing"));
 //    	idb.query(new Query("create database haha", "nothing"));
-    	
-    	
+
+
         // Get Patient List by uuid
         List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine(uuid);
         idQueue = new LinkedBlockingQueue<>(patientIDs);
@@ -269,7 +264,7 @@ public class PerformanceTest {
                     QueryResult result = idb.query(query);
                     System.out.println(patientId + ": " + result.getResults().get(0).getSeries().get(0).getValues().size());
                 } catch (Exception e) {
-                	e.printStackTrace();
+                    e.printStackTrace();
                     idQueue.offer(patientId);
                 }
             }
@@ -299,18 +294,6 @@ public class PerformanceTest {
         for (int i = 1; i < InfluxappConfig.AvailableCores * 0.8; i++) {
         }
 
-    }
-
-    private static InfluxDB generateIdbClient(boolean needGzip) {
-        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME,
-                InfluxappConfig.IFX_PASSWD, new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS)
-                        .readTimeout(90, TimeUnit.MINUTES).writeTimeout(120, TimeUnit.SECONDS));
-        if (needGzip) {
-            idb.enableGzip();
-        } else {
-            idb.disableGzip();
-        }
-        return idb;
     }
 
 }

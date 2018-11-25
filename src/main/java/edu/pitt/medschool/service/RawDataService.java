@@ -22,7 +22,6 @@ import java.util.List;
 @Service
 public class RawDataService {
 
-    private final InfluxDB influxDB = InfluxappConfig.INFLUX_DB;
     private final String dbDataName = DBConfiguration.Data.DBNAME;
 
     /**
@@ -49,6 +48,7 @@ public class RawDataService {
         String columns = String.join(", ", columnNames);
         String queryString = "Select " + columns + " from \"" + patientTable + "\"";
         Query q = new Query(queryString, dbDataName);
+        InfluxDB influxDB = InfluxUtil.generateIdbClient(true);
         QueryResult result = influxDB.query(q);
 
         List<RawData> data = new ArrayList<>();
@@ -67,11 +67,14 @@ public class RawDataService {
             }
 
         }
+        influxDB.close();
         return data;
     }
 
     private Instant availDataTimeQ(String qT, String pid, boolean hasAr) {
-        ResultTable[] res = InfluxUtil.justQueryData(this.influxDB, true, String.format(qT, pid, hasAr ? "ar" : "noar"));
+        InfluxDB influxDB = InfluxUtil.generateIdbClient(true);
+        ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, String.format(qT, pid, hasAr ? "ar" : "noar"));
+        influxDB.close();
 
         // Table does not exist
         if (res.length == 0)

@@ -31,6 +31,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static edu.pitt.medschool.framework.influxdb.InfluxUtil.generateIdbClient;
+
 /**
  * Export functions
  */
@@ -466,22 +468,6 @@ public class AnalysisService {
      */
     private ExecutorService generateNewThreadPool(int i) {
         return Executors.newFixedThreadPool(i);
-    }
-
-    /**
-     * Generate one IdbClient for one thread when doing exports
-     *
-     * @param needGzip Unless Idb not running with Brainflux, you should disable GZip
-     */
-    private InfluxDB generateIdbClient(boolean needGzip) {
-        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(90, TimeUnit.MINUTES).writeTimeout(120, TimeUnit.SECONDS));
-        if (needGzip) {
-            idb.enableGzip();
-        } else {
-            idb.disableGzip();
-        }
-        return idb;
     }
 
     /**

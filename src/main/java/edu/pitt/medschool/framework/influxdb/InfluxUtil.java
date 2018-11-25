@@ -2,13 +2,16 @@ package edu.pitt.medschool.framework.influxdb;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
+import okhttp3.OkHttpClient;
 import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utilities for InfluxDB Java Client
@@ -76,8 +79,10 @@ public class InfluxUtil {
      */
     public static List<String> getAllTables(String dbname) {
         Query q = new Query("SHOW MEASUREMENTS", dbname);
-        QueryResult qr = InfluxappConfig.INFLUX_DB.query(q);
+        InfluxDB i = generateIdbClient(true);
+        QueryResult qr = i.query(q);
         List<QueryResult.Series> s = qr.getResults().get(0).getSeries();
+        i.close();
         if (s == null) return new ArrayList<>(0);
 
         List<List<Object>> os = s.get(0).getValues();
@@ -96,7 +101,9 @@ public class InfluxUtil {
      */
     public static boolean hasDuplicateTagKeyValues(String keyName, String toCheckValue, String dbName) {
         Query q = new Query("SHOW TAG VALUES ON \"" + dbName + "\" WITH KEY = \"" + keyName + "\"", dbName);
-        List<DictionaryResultTable> qr = queryResultToKV(InfluxappConfig.INFLUX_DB.query(q));
+        InfluxDB i = generateIdbClient(true);
+        List<DictionaryResultTable> qr = queryResultToKV(i.query(q));
+        i.close();
         return qr.get(0).getRowCount() != 0 && qr.get(0).getDatalistByColumnName("value").contains(toCheckValue);
     }
 
@@ -108,9 +115,28 @@ public class InfluxUtil {
      */
     public static long getDataTableRows(String tn) {
         Query q = new Query("SELECT COUNT(\"Time\") FROM \"" + tn + "\"", DBConfiguration.Data.DBNAME);
-        QueryResult qr = InfluxappConfig.INFLUX_DB.query(q);
+        InfluxDB i = generateIdbClient(true);
+        QueryResult qr = i.query(q);
+        i.close();
         if (qr.getResults().get(0).getSeries() == null) return -1;
         return (long) qr.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
+    }
+
+    /**
+     * Generate one IdbClient for one thread when doing exports
+     *
+     * @param needGzip Unless Idb not running with Brainflux, you should disable GZip
+     */
+    public static InfluxDB generateIdbClient(boolean needGzip) {
+        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS)
+                        .readTimeout(1, TimeUnit.HOURS).writeTimeout(1, TimeUnit.HOURS));
+        if (needGzip) {
+            idb.enableGzip();
+        } else {
+            idb.disableGzip();
+        }
+        return idb;
     }
 
     public static void main(String[] args) {
