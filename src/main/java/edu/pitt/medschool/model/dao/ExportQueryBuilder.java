@@ -4,9 +4,8 @@ import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 
+import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,7 +47,7 @@ public class ExportQueryBuilder {
     private List<DataTimeSpanBean> timeseriesMetadata;
 
     // Meta that this class generated (That others may use)
-    private int downsampleOffset = 0;
+    private long downsampleOffset = 0;
     private List<Integer> validTimeSpanIds;
     private Instant firstAvailData = Instant.MAX; // Immutable once set
     private Instant lastAvailData = Instant.MIN; // Immutable once set
@@ -100,10 +99,7 @@ public class ExportQueryBuilder {
      * Find offset (in seconds) to match the start time
      */
     private void calcOffsetInSeconds(Instant fakeStartTime) {
-        LocalDateTime fakeStart = LocalDateTime.ofInstant(fakeStartTime, ZoneOffset.UTC);
-        LocalDateTime acutalStart = LocalDateTime.ofInstant(this.queryStartTime, ZoneOffset.UTC);
-        this.downsampleOffset = (acutalStart.getMinute() - fakeStart.getMinute()) * 60 +
-                (acutalStart.getSecond() - fakeStart.getSecond());
+        this.downsampleOffset = Duration.between(fakeStartTime, queryStartTime).getSeconds();
     }
 
     private void populateDownsampleGroup(List<DownsampleGroup> v) {
