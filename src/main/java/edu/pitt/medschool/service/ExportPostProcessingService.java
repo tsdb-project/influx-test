@@ -41,106 +41,119 @@ public class ExportPostProcessingService {
         longestPatient = Math.min(longestPatient, MAX_LINE);
         System.out.println(longestPatient);
 
-        File newFile = new File(DIR + "transformed.csv");
-        Writer writer = new FileWriter(newFile);
-        CSVWriter csvWriter = new CSVWriter(writer);
-        csvWriter.writeNext(new String[] { "ID" });
-        for (int i = 0; i < longestPatient; i++) {
-            csvWriter.writeNext(new String[] { Integer.toString(i) });
-        }
-        csvWriter.close();
-
-        File copyFile = new File(DIR + "transformed_copy.csv");
-        FileUtils.copyFile(newFile, copyFile);
-
-        File file = new File(DIR + "long.csv");
-        Reader reader = new FileReader(file);
-        CSVReader csvReader = new CSVReader(reader);
-
-        Map<String, List<String>> patientDataMap = new HashMap<>();
-
-        Iterator<String[]> iterator = csvReader.iterator();
-        // HAS HEADER OR NOT
-        // iterator.next();
-
-        int i = 0;
-
-        List<String> patientBatch = new ArrayList<>();
-
-        while (iterator.hasNext()) {
-            String[] row = iterator.next();
-            String id = row[0];
-
-            if (patientDataMap.get(id) == null) {
-                patientDataMap.put(id, new ArrayList<>());
+        File ff = new File(DIR + "oo2_output.csv");
+        CSVReader rr = new CSVReader(new FileReader(ff));
+        String[] cols = rr.readNext();
+        rr.close();
+        int colNum = 0;
+        for (String col : cols) {
+        	if (colNum < 3) {
+        		colNum++;
+        		continue;
+        	}
+        	
+            File newFile = new File(DIR + "kkk/" + col + ".csv");
+            Writer writer = new FileWriter(newFile);
+            CSVWriter csvWriter = new CSVWriter(writer);
+            csvWriter.writeNext(new String[] { "ID" });
+            for (int i = 0; i < longestPatient; i++) {
+                csvWriter.writeNext(new String[] { Integer.toString(i) });
             }
-            List<String> patientDataList = patientDataMap.get(id);
-            patientDataList.add(row[columnGroup + 2]);
+            csvWriter.close();
 
-            if (patientDataList.size() == patientRowMap.get(id)) {
-                patientBatch.add(id);
-            }
+            File copyFile = new File(DIR + "transformed_copy.csv");
+            FileUtils.copyFile(newFile, copyFile);
 
-            if (patientBatch.size() >= 50 || !iterator.hasNext()) {
+            File file = new File(DIR + "oo2_output.csv");
+            Reader reader = new FileReader(file);
+            CSVReader csvReader = new CSVReader(reader);
 
-                CSVReader copyReader = new CSVReader(new FileReader(copyFile));
+            Map<String, List<String>> patientDataMap = new HashMap<>();
 
-                Iterator<String[]> copyIterator = copyReader.iterator();
+            Iterator<String[]> iterator = csvReader.iterator();
+            // HAS HEADER OR NOT
+            iterator.next();
+             
+            int i = 0;
 
-                String[] ids = copyIterator.next();
-                List<String> idList = new ArrayList<>(Arrays.asList(ids));
-                idList.addAll(patientBatch);
+            List<String> patientBatch = new ArrayList<>();
 
-                int lineSize = idList.size();
+            while (iterator.hasNext()) {
+                String[] row = iterator.next();
+                String id = row[0];
 
-                ids = idList.toArray(new String[lineSize]);
-                Writer lineWriter = new FileWriter(newFile);
-                CSVWriter csvLineWriter = new CSVWriter(lineWriter);
-                csvLineWriter.writeNext(ids);
+                if (patientDataMap.get(id) == null) {
+                    patientDataMap.put(id, new ArrayList<>());
+                }
+                List<String> patientDataList = patientDataMap.get(id);
+                patientDataList.add(row[colNum]);
 
-                int index = 0;
-                while (copyIterator.hasNext()) {
-                    String[] newLine = copyIterator.next();
+                if (patientDataList.size() == patientRowMap.get(id)) {
+                    patientBatch.add(id);
+                }
 
-                    List<String> lineList = new ArrayList<>(Arrays.asList(newLine));
+                if (patientBatch.size() >= 50 || !iterator.hasNext()) {
 
-                    for (String batchId : patientBatch) {
-                        if (index >= patientDataMap.get(batchId).size()) {
-                            lineList.add("");
-                        } else {
-                            lineList.add(patientDataMap.get(batchId).get(index));
+                    CSVReader copyReader = new CSVReader(new FileReader(copyFile));
+
+                    Iterator<String[]> copyIterator = copyReader.iterator();
+
+                    String[] ids = copyIterator.next();
+                    List<String> idList = new ArrayList<>(Arrays.asList(ids));
+                    idList.addAll(patientBatch);
+
+                    int lineSize = idList.size();
+
+                    ids = idList.toArray(new String[lineSize]);
+                    Writer lineWriter = new FileWriter(newFile);
+                    CSVWriter csvLineWriter = new CSVWriter(lineWriter);
+                    csvLineWriter.writeNext(ids);
+
+                    int index = 0;
+                    while (copyIterator.hasNext()) {
+                        String[] newLine = copyIterator.next();
+
+                        List<String> lineList = new ArrayList<>(Arrays.asList(newLine));
+
+                        for (String batchId : patientBatch) {
+                            if (index >= patientDataMap.get(batchId).size()) {
+                                lineList.add("");
+                            } else {
+                                lineList.add(patientDataMap.get(batchId).get(index));
+                            }
                         }
+
+                        newLine = lineList.toArray(new String[lineSize]);
+
+                        csvLineWriter.writeNext(newLine);
+                        index++;
+
                     }
 
-                    newLine = lineList.toArray(new String[lineSize]);
+                    for (String batchId : patientBatch) {
+                        patientDataMap.remove(batchId);
+                    }
+                    patientBatch = new ArrayList<>();
 
-                    csvLineWriter.writeNext(newLine);
-                    index++;
-
+                    copyReader.close();
+                    csvLineWriter.close();
+                    FileUtils.forceDelete(copyFile);
+                    FileUtils.copyFile(newFile, copyFile);
                 }
 
-                for (String batchId : patientBatch) {
-                    patientDataMap.remove(batchId);
+                i++;
+                if (i % 10000 == 0) {
+                    logger.debug("Processed number of lines: " + NumberFormat.getNumberInstance(Locale.US).format(i));
                 }
-                patientBatch = new ArrayList<>();
 
-                copyReader.close();
-                csvLineWriter.close();
-                FileUtils.forceDelete(copyFile);
-                FileUtils.copyFile(newFile, copyFile);
             }
+            csvReader.close();
+            FileUtils.forceDelete(copyFile);
 
-            i++;
-            if (i % 10000 == 0) {
-                logger.debug("Processed number of lines: " + NumberFormat.getNumberInstance(Locale.US).format(i));
-            }
-
+            logger.debug("Processed number of lines in total: " + NumberFormat.getNumberInstance(Locale.US).format(i));
+            logger.debug("Transformation finished!");
+            colNum++;
         }
-        csvReader.close();
-        FileUtils.forceDelete(copyFile);
-
-        logger.debug("Processed number of lines in total: " + NumberFormat.getNumberInstance(Locale.US).format(i));
-        logger.debug("Transformation finished!");
 
         return "Success";
     }
