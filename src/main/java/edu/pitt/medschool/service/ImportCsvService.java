@@ -1,18 +1,28 @@
 package edu.pitt.medschool.service;
 
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.influxdb.InfluxUtil;
-import edu.pitt.medschool.framework.util.FileLockUtil;
-import edu.pitt.medschool.framework.util.TimeUtil;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.InfluxClusterDao;
-import edu.pitt.medschool.model.dto.ImportedFile;
-import okhttp3.OkHttpClient;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
@@ -22,16 +32,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.util.FileLockUtil;
+import edu.pitt.medschool.framework.util.TimeUtil;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.InfluxClusterDao;
+import edu.pitt.medschool.model.dto.ImportedFile;
 
 /**
  * Auto-parallel importing CSV data
@@ -157,6 +166,9 @@ public class ImportCsvService {
             throw new RuntimeException("Wrong PID in filename!");
         if (fLine.length() < 50)
             throw new RuntimeException("File UUID misformat!");
+        if (!fLine.substring(fLine.length() - 40, fLine.length() - 4)
+                .matches("([\\w\\d]){8}-([\\w\\d]){4}-([\\w\\d]){4}-([\\w\\d]){4}-([\\w\\d]){12}"))
+            throw new RuntimeException("File does not have a valid UUID!");
         return fLine.substring(fLine.length() - 40, fLine.length() - 4);
     }
 
@@ -176,9 +188,20 @@ public class ImportCsvService {
             // Ignore fails (res[2]="2")
             res[2] = "1";
         }
+        String fn_laterpart;
         // PUH-20xx_xxx
-        res[0] = filename.substring(0, 12).trim().toUpperCase();
-        String fn_laterpart = filename.substring(12).toLowerCase();
+        // UAB-010_xx
+        // TBI-1001_xxx
+        if (filename.startsWith("PUH-")) {
+            res[0] = filename.substring(0, 12).trim().toUpperCase();
+            fn_laterpart = filename.substring(12).toLowerCase();
+        } else if (filename.startsWith("UAB")) {
+            res[0] = filename.substring(0, 7).trim().toUpperCase();
+            fn_laterpart = filename.substring(7).toLowerCase();
+        } else {
+            res[0] = filename.substring(0, 8).trim().toUpperCase();
+            fn_laterpart = filename.substring(8).toLowerCase();
+        }
         // Ar or NoAr
         if (fn_laterpart.contains("noar")) {
             res[1] = "noar";
@@ -245,8 +268,8 @@ public class ImportCsvService {
             // 8th Line is column header line
             String eiL = reader.readLine();
             String[] columnNames = eiL.split(",");
-            int columnCount = columnNames.length,
-                    bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount, batchCount = 0;
+            int columnCount = columnNames.length, bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount,
+                    batchCount = 0;
 
             // More integrity checking
             if (!columnNames[0].equalsIgnoreCase("clockdatetime")) {
@@ -256,11 +279,8 @@ public class ImportCsvService {
             currentProcessed += eiL.length();
             totalProcessedSize.addAndGet(eiL.length());
 
-            BatchPoints records = BatchPoints.database(dbName)
-                    .tag("fileUUID", fileUUID)
-                    .tag("arType", ar_type)
-                    .tag("fileName", filename.substring(0, filename.length() - 4))
-                    .build();
+            BatchPoints records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type)
+                    .tag("fileName", filename.substring(0, filename.length() - 4)).build();
 
             long previousMeasurementEpoch = testStartTimeEpoch - 1000;
             String aLine;
@@ -284,10 +304,10 @@ public class ImportCsvService {
                 Date measurementDate = TimeUtil.serialTimeToDate(sTime, null);
                 long measurementEpoch = measurementDate.getTime();
 
-
                 // Measurement time should be later than test start time
                 if (measurementEpoch < testStartTimeEpoch) {
-                    String err_text = String.format("Measurement time earlier than test start time on line %d!", totalLines + 8);
+                    String err_text = String.format("Measurement time earlier than test start time on line %d!",
+                            totalLines + 8);
                     logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
                     continue;
                 }
@@ -303,7 +323,7 @@ public class ImportCsvService {
                 }
 
                 // Set initial capacity for better performance
-                Map<String, Object> lineKVMap = new HashMap<>((int) (columnCount + 1), 1.0f);
+                Map<String, Object> lineKVMap = new HashMap<>(columnCount + 1, 1.0f);
                 boolean gotParseProblem = false;
                 for (int i = 1; i < values.length; i++) {
                     try {
@@ -337,7 +357,8 @@ public class ImportCsvService {
                     logger.info("Write to InfluxDB used {}s.", (end - start) / 1000.0);
 
                     // Reset batch point
-                    records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type).tag("fileName", filename.substring(0, filename.length() - 4)).build();
+                    records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type)
+                            .tag("fileName", filename.substring(0, filename.length() - 4)).build();
                     batchCount = 0;
                     logImportingFile(file.toString(), aFileSize, currentProcessed, totalLines);
 
@@ -359,12 +380,12 @@ public class ImportCsvService {
             } catch (InterruptedException e1) {
                 logger.error(Util.stackTraceErrorToString(e1));
             }
-            return new Object[]{Util.stackTraceErrorToString(e), currentProcessed};
+            return new Object[] { Util.stackTraceErrorToString(e), currentProcessed };
         } finally {
             idb.close();
         }
 
-        return new Object[]{"OK", currentProcessed, totalLines};
+        return new Object[] { "OK", currentProcessed, totalLines };
     }
 
     /**
@@ -411,7 +432,8 @@ public class ImportCsvService {
                 iff.setUuid(taskUUID);
                 ifd.insert(iff);
             } catch (Exception e) {
-                logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileFullPath, Util.stackTraceErrorToString(e)));
+                logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileFullPath,
+                        Util.stackTraceErrorToString(e)));
             }
             // keep processed size consistent with the actual file size once a file is done with the import process
             totalProcessedSize.addAndGet(thisFileSize - (Long) impStr[1]);
@@ -456,23 +478,26 @@ public class ImportCsvService {
     }
 
     private void logQueuedFile(String fn, long thisFileSize) {
-        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, 0, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_QUEUED, null);
+        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, 0, totalProcessedSize.get(),
+                ImportProgressService.FileProgressStatus.STATUS_QUEUED, null);
     }
 
     private void logSuccessFiles(String fn, long thisFileSize, long thisFileProcessedSize) {
-        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FINISHED, null);
+        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(),
+                ImportProgressService.FileProgressStatus.STATUS_FINISHED, null);
     }
 
     private void logImportingFile(String fn, long thisFileSize, long thisFileProcessedSize, long currentLine) {
-        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_INPROGRESS,
-                String.valueOf(currentLine));
+        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(),
+                ImportProgressService.FileProgressStatus.STATUS_INPROGRESS, String.valueOf(currentLine));
     }
 
     private void logFailureFiles(String fn, String reason, long thisFileSize, long thisFileProcessedSize, boolean isSoftError) {
         if (!isSoftError) {
             totalAllSize.addAndGet(thisFileProcessedSize - thisFileSize);
         }
-        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
+        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(),
+                ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
     }
 
     private void transferFailedFiles(Path path) {

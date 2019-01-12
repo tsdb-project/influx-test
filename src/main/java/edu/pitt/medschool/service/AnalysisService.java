@@ -1,19 +1,28 @@
 package edu.pitt.medschool.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
-import edu.pitt.medschool.controller.analysis.vo.ExportVO;
-import edu.pitt.medschool.framework.influxdb.InfluxUtil;
-import edu.pitt.medschool.framework.influxdb.ResultTable;
-import edu.pitt.medschool.framework.util.FileZip;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dao.*;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.ExportWithBLOBs;
-import okhttp3.OkHttpClient;
+import static edu.pitt.medschool.framework.influxdb.InfluxUtil.generateIdbClient;
+
+import java.io.File;
+import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.slf4j.Logger;
@@ -22,16 +31,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static edu.pitt.medschool.framework.influxdb.InfluxUtil.generateIdbClient;
+import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.controller.analysis.vo.ColumnJSON;
+import edu.pitt.medschool.controller.analysis.vo.ExportVO;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
+import edu.pitt.medschool.framework.util.FileZip;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.DataTimeSpanBean;
+import edu.pitt.medschool.model.dao.AnalysisUtil;
+import edu.pitt.medschool.model.dao.DownsampleDao;
+import edu.pitt.medschool.model.dao.DownsampleGroupDao;
+import edu.pitt.medschool.model.dao.ExportDao;
+import edu.pitt.medschool.model.dao.ExportOutput;
+import edu.pitt.medschool.model.dao.ExportQueryBuilder;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.ExportWithBLOBs;
+import okhttp3.OkHttpClient;
 
 /**
  * Export functions
@@ -65,7 +85,8 @@ public class AnalysisService {
     private final ConcurrentHashMap<Integer, Boolean> jobStopIndicator = new ConcurrentHashMap<>();
 
     @Autowired
-    public AnalysisService(DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, ExportDao exportDao, ColumnService columnService, InfluxSwitcherService iss, ImportedFileDao importedFileDao) {
+    public AnalysisService(DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, ExportDao exportDao,
+            ColumnService columnService, InfluxSwitcherService iss, ImportedFileDao importedFileDao) {
         this.downsampleDao = downsampleDao;
         this.downsampleGroupDao = downsampleGroupDao;
         this.exportDao = exportDao;
@@ -211,7 +232,8 @@ public class AnalysisService {
         // Get some basic info for exporting
         int numP = getNumOfPatients();
         // Try again only once
-        if (numP == -1) numP = getNumOfPatients();
+        if (numP == -1)
+            numP = getNumOfPatients();
         outputWriter.writeInitialMetaText(numP, patientIDs.size(), paraCount);
 
         // Final prep for running query task
@@ -241,8 +263,9 @@ public class AnalysisService {
                     }
                     // Then fetch meta data regrading file segments and build the query string
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
-                    ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups,
-                            columns, exportQuery, job.getAr());
+                    ExportQueryBuilder eq = new ExportQueryBuilder(
+                            Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
+                            job.getAr());
                     String finalQueryString = eq.getQueryString();
                     if (finalQueryString.isEmpty()) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> no available data.%n", patientId));
@@ -275,7 +298,8 @@ public class AnalysisService {
                         idQueue.add(patientId);
                     } else {
                         logger.error(String.format("%s: Failed more than 3 times.", patientId));
-                        outputWriter.writeMetaFile(String.format("  PID <%s> failed multiple times, possible program error.%n", patientId));
+                        outputWriter.writeMetaFile(
+                                String.format("  PID <%s> failed multiple times, possible program error.%n", patientId));
                         idQueue.remove(patientId);
                     }
                 }
@@ -288,7 +312,7 @@ public class AnalysisService {
         }
         scheduler.shutdown();
         try {
-            //TODO: PSC 2 day limit!
+            // TODO: PSC 2 day limit!
             scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             logger.error(Util.stackTraceErrorToString(e));
@@ -311,7 +335,8 @@ public class AnalysisService {
      */
     private int getNumOfPatients() {
         FutureTask<Integer> task = new FutureTask<>(() -> {
-            InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
+            InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME,
+                    InfluxappConfig.IFX_PASSWD,
                     new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(20, TimeUnit.SECONDS));
             logger.info("Connected to InfluxDB...");
             int numOfPatient = AnalysisUtil.numberOfPatientInDatabase(idb, logger);
@@ -334,7 +359,8 @@ public class AnalysisService {
     /**
      * Handler when a job is finished (With error or not)
      */
-    private void jobClosingHandler(boolean idbError, boolean isPscNeeded, ExportWithBLOBs job, File outputDir, ExportOutput eo, int validPatientNumber) {
+    private void jobClosingHandler(boolean idbError, boolean isPscNeeded, ExportWithBLOBs job, File outputDir, ExportOutput eo,
+            int validPatientNumber) {
         // We will leave the local Idb running after the job
         boolean shouldStopRemote = this.queueHasNextPscJob().isPresent();
         if (isPscNeeded && !this.iss.stopRemoteInflux()) {

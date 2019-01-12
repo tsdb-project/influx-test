@@ -63,8 +63,9 @@ public class PatientController {
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.POST)
     public RestfulResponse getPatientWithCriteria() {
+        List<String> pids = importedFileDao.getAllImportedPid(uuid);
         RestfulResponse response = new RestfulResponse(1, "success");
-        response.setData(patientDao.selectAll());
+        response.setData(patientDao.selectByIds(pids));
         return response;
     }
 

@@ -1,15 +1,16 @@
 package edu.pitt.medschool.model.dao;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.pitt.medschool.framework.util.MysqlColumnBean;
 import edu.pitt.medschool.model.dto.Patient;
 import edu.pitt.medschool.model.dto.PatientExample;
 import edu.pitt.medschool.model.dto.PatientWithBLOBs;
 import edu.pitt.medschool.model.mapper.PatientMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Patient DAO
@@ -39,18 +40,16 @@ public class PatientDao {
      */
     public List<Patient> selectByGender(String gender) {
         PatientExample pe = new PatientExample();
-        pe.createCriteria()
-                .andFemaleEqualTo(gender.toUpperCase().equals("F"));
+        pe.createCriteria().andFemaleEqualTo(gender.toUpperCase().equals("F"));
         return patientMapper.selectByExample(pe);
     }
 
     public List<Patient> selectById(String pid) {
         PatientExample pe = new PatientExample();
-        pe.createCriteria()
-                .andIdEqualTo(pid.toUpperCase());
+        pe.createCriteria().andIdEqualTo(pid.toUpperCase());
         return patientMapper.selectByExample(pe);
     }
-    
+
     public List<Patient> selectAll() {
         PatientExample pe = new PatientExample();
         return patientMapper.selectByExample(pe);
@@ -59,8 +58,7 @@ public class PatientDao {
     public List<Patient> selectByIds(List<String> ids) {
         ids.replaceAll(String::toUpperCase);
         PatientExample pe = new PatientExample();
-        pe.createCriteria()
-                .andIdIn(ids);
+        pe.createCriteria().andIdIn(ids);
         return patientMapper.selectByExample(pe);
     }
 
@@ -73,8 +71,7 @@ public class PatientDao {
      */
     public List<Patient> selectByAgeLE(byte max) {
         PatientExample pe = new PatientExample();
-        pe.createCriteria()
-                .andAgeLessThanOrEqualTo(max);
+        pe.createCriteria().andAgeLessThanOrEqualTo(max);
         return patientMapper.selectByExample(pe);
     }
 
@@ -83,15 +80,13 @@ public class PatientDao {
      */
     public List<Patient> selectByAgeG(byte min) {
         PatientExample pe = new PatientExample();
-        pe.createCriteria()
-                .andAgeGreaterThan(min);
+        pe.createCriteria().andAgeGreaterThan(min);
         return patientMapper.selectByExample(pe);
     }
 
     public List<Patient> selectByAgeRange(byte min, byte max) {
         PatientExample pe = new PatientExample();
-        pe.createCriteria()
-                .andAgeBetween(min, max);
+        pe.createCriteria().andAgeBetween(min, max);
         return patientMapper.selectByExample(pe);
     }
 
