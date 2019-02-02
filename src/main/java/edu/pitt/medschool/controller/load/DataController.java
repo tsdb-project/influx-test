@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.pitt.medschool.service.ValidateCsvService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +38,8 @@ public class DataController {
     ImportProgressService importProgressService;
     @Autowired
     PatientService patientService;
+    @Autowired
+    ValidateCsvService validateCsvService;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -115,6 +118,23 @@ public class DataController {
         }
 
         importCsvService.AddArrayFiles(allAR);
+
+        return map;
+    }
+
+    // new part for data validation
+    @RequestMapping(value = "api/data/validate")
+    @ResponseBody
+    public Map<String, Object> dataValidate(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model){
+        Map<String, Object> map = new HashMap<>();
+
+        String[] allcsv = new String[dir.getFiles().size()];
+
+        for (int i = 0; i < allcsv.length; i++) {
+            System.out.println(validateCsvService.analyzeCsv(allcsv[i]).getStart_time());
+        }
+
+
 
         return map;
     }

@@ -83,4 +83,31 @@ $(document).ready(
                 });
 
             });
+
+            // new for validate csv
+            $("#analyzeButton").click(function() {
+                $("#analyzeButton").attr('disabled', '');
+
+                var data = {
+                    'files' : []
+                };
+                $.each($('.file-checkbox:checked'), function() {
+                    data['files'].push($(this).val());
+                });
+
+                var files = data;
+
+                $.ajax({
+                    'url' : "/api/data/analyze",
+                    'type' : 'post',
+                    'data' : JSON.stringify(files),
+                    'contentType' : "application/json",
+                    'dataType' : 'json',
+                    'success' : function(data) {
+                    },
+                    'error' : function() {
+                    }
+                });
+
+            });
         });
