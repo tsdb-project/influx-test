@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.model.ValidateBean;
 import edu.pitt.medschool.service.ValidateCsvService;
+import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -128,10 +131,19 @@ public class DataController {
     public Map<String, Object> dataValidate(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model){
         Map<String, Object> map = new HashMap<>();
 
-        String[] allcsv = new String[dir.getFiles().size()];
-
-        for (int i = 0; i < allcsv.length; i++) {
-            System.out.println(validateCsvService.analyzeCsv(allcsv[i]).getStart_time());
+        for (int i = 0; i < dir.getFiles().size(); i++) {
+//            System.out.println(dir.getFiles().get(i));
+            ValidateBean validateBean = validateCsvService.analyzeCsv(dir.getFiles().get(i));
+//            System.out.println(validateBean.getStart_time());
+//            System.out.println(validateBean.getEnd_time());
+//            System.out.println(validateBean.getFilename());
+//            System.out.println(validateBean.getHeader_time());
+//            System.out.println(validateBean.getLines());
+//            System.out.println(validateBean.getPath());
+//            System.out.println(validateBean.getPid());
+//            System.out.println(validateBean.getSize());
+//            System.out.println(validateBean.getUuid());
+            validateCsvService.addValidateResult(validateBean);
         }
 
 

@@ -98,7 +98,7 @@ $(document).ready(
                 var files = data;
 
                 $.ajax({
-                    'url' : "/api/data/analyze",
+                    'url' : "/api/data/validate",
                     'type' : 'post',
                     'data' : JSON.stringify(files),
                     'contentType' : "application/json",
