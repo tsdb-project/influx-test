@@ -92,6 +92,13 @@ public class AnalysisController {
         model.addAttribute("subnav", "job");
         return model;
     }
+    
+    @RequestMapping("analysis/chart")
+    public Model chartPage(Model model) {
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "chart");
+        return model;
+    }
 
     @RequestMapping("analysis/create")
     public Model createPage(Model model) {
