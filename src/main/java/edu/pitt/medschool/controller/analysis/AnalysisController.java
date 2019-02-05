@@ -1,11 +1,13 @@
 package edu.pitt.medschool.controller.analysis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
 import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
 import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.ValidateBean;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
@@ -13,6 +15,8 @@ import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
 import edu.pitt.medschool.service.ExportPostProcessingService;
 import edu.pitt.medschool.service.ExportService;
+import edu.pitt.medschool.service.ValidateCsvService;
+import org.json.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +52,9 @@ public class AnalysisController {
 
     @Value("${machine}")
     private String uuid;
+
+    @Autowired
+    ValidateCsvService validateCsvService;
 
     @Autowired
     ColumnService columnService;
@@ -94,11 +101,21 @@ public class AnalysisController {
     }
     
     @RequestMapping("analysis/chart")
+    @ResponseBody
     public Model chartPage(Model model) {
         model.addAttribute("nav", "analysis");
         model.addAttribute("subnav", "chart");
         return model;
     }
+
+    @RequestMapping("analysis/getAllPatient")
+    @ResponseBody
+    public String getAllPatient(Model model) {
+        List<ValidateBean> validateBeanList = validateCsvService.getAllPatient();
+        String data = new Gson().toJson(validateBeanList);
+        return data;
+    }
+
 
     @RequestMapping("analysis/create")
     public Model createPage(Model model) {

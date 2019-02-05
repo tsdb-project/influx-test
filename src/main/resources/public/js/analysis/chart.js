@@ -1,8 +1,18 @@
 $(document).ready(function() {
 	console.log("in charts");
 
+	// Get Json data from database
+	var response = '';
+	$.ajax({ type: "GET",
+		url: "/analysis/getAllPatient",
+		async: false,
+		success : function(text)
+		{
+			response = JSON.parse(text);
+		}
+	});
 
-});
+	console.log(response);
 
 var tasks = [
 	{"startDate":new Date("Sun Dec 09 01:36:45 EST 2012"),"endDate":new Date("Sun Dec 09 02:36:45 EST 2012"),"taskName":"E Job","status":"RUNNING"},
@@ -53,3 +63,5 @@ var format = "%H:%M";
 
 var gantt = d3.gantt().taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format);
 gantt(tasks);
+
+});

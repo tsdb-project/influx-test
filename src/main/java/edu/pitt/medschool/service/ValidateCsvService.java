@@ -13,12 +13,17 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ValidateCsvService {
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
     private Date strToDate(String str){
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
         Date date = null;
@@ -101,5 +106,12 @@ public class ValidateCsvService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    //get all patients method
+    public List<ValidateBean> getAllPatient(){
+        System.out.println("get all patients ...");
+        String sql = "select * from csv_file";
+        return this.jdbcTemplate.query(sql,new PatientRowMapper());
     }
 }

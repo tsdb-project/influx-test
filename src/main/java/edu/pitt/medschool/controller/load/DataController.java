@@ -132,17 +132,7 @@ public class DataController {
         Map<String, Object> map = new HashMap<>();
 
         for (int i = 0; i < dir.getFiles().size(); i++) {
-//            System.out.println(dir.getFiles().get(i));
             ValidateBean validateBean = validateCsvService.analyzeCsv(dir.getFiles().get(i));
-//            System.out.println(validateBean.getStart_time());
-//            System.out.println(validateBean.getEnd_time());
-//            System.out.println(validateBean.getFilename());
-//            System.out.println(validateBean.getHeader_time());
-//            System.out.println(validateBean.getLines());
-//            System.out.println(validateBean.getPath());
-//            System.out.println(validateBean.getPid());
-//            System.out.println(validateBean.getSize());
-//            System.out.println(validateBean.getUuid());
             validateCsvService.addValidateResult(validateBean);
         }
 
