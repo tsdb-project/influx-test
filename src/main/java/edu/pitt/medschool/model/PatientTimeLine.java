@@ -5,8 +5,8 @@ import java.util.Date;
 public class PatientTimeLine {
     private String filename;
     private Date arrestTime;
-    private long relevantStartTime;
-    private long relevantEndTime;
+    private long relativeStartTime;
+    private long relativeEndTime;
 
 
     public String getFilename() {
@@ -25,20 +25,20 @@ public class PatientTimeLine {
         this.arrestTime = arrestTime;
     }
 
-    public long getRelevantStartTime() {
-        return relevantStartTime;
+    public long getRelativeStartTime() {
+        return relativeStartTime;
     }
 
-    public void setRelevantStartTime(long relevantStartTime) {
-        this.relevantStartTime = relevantStartTime;
+    public void setRelativeStartTime(long relevantStartTime) {
+        this.relativeStartTime = relevantStartTime;
     }
 
-    public long getRelevantEndTime() {
-        return relevantEndTime;
+    public long getRelativeEndTime() {
+        return relativeEndTime;
     }
 
-    public void setRelevantEndTime(long relevantEndTime) {
-        this.relevantEndTime = relevantEndTime;
+    public void setRelativeEndTime(long relevantEndTime) {
+        this.relativeEndTime = relevantEndTime;
     }
 
 }
