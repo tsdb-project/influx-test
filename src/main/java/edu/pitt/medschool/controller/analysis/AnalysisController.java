@@ -7,6 +7,7 @@ import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
 import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.PatientTimeLine;
 import edu.pitt.medschool.model.ValidateBean;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
@@ -108,12 +109,10 @@ public class AnalysisController {
         return model;
     }
 
-    @RequestMapping("analysis/getAllPatient")
+    @RequestMapping("analysis/getPatientTimelines")
     @ResponseBody
-    public String getAllPatient(Model model) {
-        List<ValidateBean> validateBeanList = validateCsvService.getAllPatient();
-        String data = new Gson().toJson(validateBeanList);
-        return data;
+    public String getPatientTimelines(Model model) {
+        return new Gson().toJson(validateCsvService.getPatientTimelines());
     }
 
 

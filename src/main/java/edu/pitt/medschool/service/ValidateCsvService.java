@@ -1,6 +1,7 @@
 package edu.pitt.medschool.service;
 
 import edu.pitt.medschool.framework.util.TimeUtil;
+import edu.pitt.medschool.model.PatientTimeLine;
 import edu.pitt.medschool.model.ValidateBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,10 +14,8 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ValidateCsvService {
@@ -108,10 +107,9 @@ public class ValidateCsvService {
         }
     }
 
-    //get all patients method
-    public List<ValidateBean> getAllPatient(){
-        System.out.println("get all patients ...");
-        String sql = "select * from csv_file";
+    //get all patients Timelines
+    public List<PatientTimeLine> getPatientTimelines(){
+        String sql = "select c.filename as filename,c.start_time as start_time,c.end_time as end_time,p.arrestdate as arrestdate,p.arresttime as arresttime from csv_file c , patient p where c.pid = p.id";
         return this.jdbcTemplate.query(sql,new PatientRowMapper());
     }
 }

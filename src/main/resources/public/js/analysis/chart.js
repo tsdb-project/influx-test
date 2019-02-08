@@ -4,7 +4,7 @@ $(document).ready(function() {
 	// Get Json data from database
 	var response = '';
 	$.ajax({ type: "GET",
-		url: "/analysis/getAllPatient",
+		url: "/analysis/getPatientTimelines",
 		async: false,
 		success : function(text)
 		{
