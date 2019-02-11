@@ -22,12 +22,14 @@ public class PatientRowMapper implements RowMapper<PatientTimeLine> {
        }
         long relativeStartTime = (resultSet.getTimestamp("start_time").getTime() - arrestTime.getTime())/1000;
         long relativeEndTime = (resultSet.getTimestamp("end_time").getTime() - arrestTime.getTime())/1000;
+        int len = resultSet.getInt("len");
 
        PatientTimeLine patientTimeLine =  new PatientTimeLine();
        patientTimeLine.setArrestTime(arrestTime);
        patientTimeLine.setFilename(filename);
        patientTimeLine.setRelativeStartTime(relativeStartTime);
        patientTimeLine.setRelativeEndTime(relativeEndTime);
+       patientTimeLine.setLength(len);
 
        return patientTimeLine;
     }

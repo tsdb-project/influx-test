@@ -109,7 +109,7 @@ public class ValidateCsvService {
 
     //get all patients Timelines
     public List<PatientTimeLine> getPatientTimelines(){
-        String sql = "select c.filename as filename,c.start_time as start_time,c.end_time as end_time,p.arrestdate as arrestdate,p.arresttime as arresttime from csv_file c , patient p where c.pid = p.id";
+        String sql = "select c.filename as filename,c.start_time as start_time,c.end_time as end_time,p.arrestdate as arrestdate,c.length as len, p.arresttime as arresttime from csv_file c , patient p where c.pid = p.id";
         return this.jdbcTemplate.query(sql,new PatientRowMapper());
     }
 }

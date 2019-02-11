@@ -7,7 +7,7 @@ public class PatientTimeLine {
     private Date arrestTime;
     private long relativeStartTime;
     private long relativeEndTime;
-
+    private int length;
 
     public String getFilename() {
         return filename;
@@ -40,5 +40,9 @@ public class PatientTimeLine {
     public void setRelativeEndTime(long relevantEndTime) {
         this.relativeEndTime = relevantEndTime;
     }
+
+    public int getLength() { return length;}
+
+    public void setLength(int length) { this.length = length; }
 
 }
