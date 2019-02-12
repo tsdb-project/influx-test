@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class PatientTimeLine {
     private String filename;
+    private String filetype;
     private Date arrestTime;
     private long relativeStartTime;
     private long relativeEndTime;
@@ -15,6 +16,14 @@ public class PatientTimeLine {
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    public String getFiletype() {
+        return filetype;
+    }
+
+    public void setFiletype(String filetype) {
+        this.filetype = filetype;
     }
 
     public Date getArrestTime() {

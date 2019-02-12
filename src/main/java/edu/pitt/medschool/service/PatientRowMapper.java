@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 // Class for reading a row of database
 public class PatientRowMapper implements RowMapper<PatientTimeLine> {
@@ -27,6 +28,8 @@ public class PatientRowMapper implements RowMapper<PatientTimeLine> {
        PatientTimeLine patientTimeLine =  new PatientTimeLine();
        patientTimeLine.setArrestTime(arrestTime);
        patientTimeLine.setFilename(filename);
+       if (Pattern.matches(".*noar.*",filename)) patientTimeLine.setFiletype("noar");
+       else patientTimeLine.setFiletype("ar");
        patientTimeLine.setRelativeStartTime(relativeStartTime);
        patientTimeLine.setRelativeEndTime(relativeEndTime);
        patientTimeLine.setLength(len);
