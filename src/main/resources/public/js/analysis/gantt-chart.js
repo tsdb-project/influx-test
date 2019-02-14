@@ -1,9 +1,4 @@
-/**
- * @author Dimitry Kudrayvtsev
- * @version 2.0
- */
-
-d3.gantt = function() {
+d3.gantt = function(tasks) {
     var FIT_TIME_DOMAIN_MODE = "fit";
     var FIXED_TIME_DOMAIN_MODE = "fixed";
     
@@ -13,26 +8,49 @@ d3.gantt = function() {
 		bottom : 20,
 		left : 150
     };
-    var timeDomainStart = d3.time.day.offset(new Date(),-3);
-    var timeDomainEnd = d3.time.hour.offset(new Date(),+3);
+    //var timeDomainStart = d3.time.day.offset(new Date(),-3);
+    //var timeDomainEnd = d3.time.hour.offset(new Date(),+3);
+    var dataStartDate, dataEndDate, offset;
+    if(tasks == undefined || tasks.length <= 0){
+    	dataStartDate = new Date();
+    	offset = 0;
+    	console.log("if before init");
+    }else{
+    	dataStartDate = new Date(tasks[0].arrestTime);
+    	offset = tasks[tasks.length - 1].relativeEndTime;
+    }
+    console.log("dataStartDate :" + dataStartDate);
+    
+    var timeDomainStart = d3.time.second(dataStartDate);
+    var timeDomainEnd = d3.time.second.offset(dataStartDate, offset);
+    
+    console.log("timeDomainStart" + timeDomainStart);
+    console.log("timeDomainEnd" + timeDomainEnd);
     var timeDomainMode = FIT_TIME_DOMAIN_MODE;// fixed or fit
     var taskTypes = [];
     var taskStatus = [];
     var height = document.getElementById("chart-container").clientHeight - margin.top - margin.bottom;
     var width = document.getElementById("chart-container").clientWidth - margin.right - margin.left;
+    ///console.log("height before: " + document.getElementById("chart-container").clientHeight);
+    ///console.log("width before: " + document.getElementById("chart-container").clientWidth);
+    ///console.log("height: " + height);
+    ///console.log("width: " + width);
 
-    var tickFormat = "%H:%M";
+    //var tickFormat = "%H:%M";
+    var tickFormat = "%d";
 
     var keyFunction = function(d) {
-		return d.startDate + d.taskName + d.endDate;
+		return d.relativeStartTime + d.arrestTime + d.relativeEndTime;
     };
 
     var rectTransform = function(d) {
-		return "translate(" + x(d.startDate) + "," + y(d.taskName) + ")";
+    	///console.log(x(d.startDate));
+    	///console.log(y(d.taskName));
+		return "translate(" + x(d3.time.second.offset(timeDomainStart, d.relativeStartTime)) + "," + y(d.arrestTime) + ")";
     };
 
     var x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
-
+    ///console.log(taskTypes);
     var y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
     
     var xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
@@ -40,21 +58,37 @@ d3.gantt = function() {
 
     var yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);
 
-    var initTimeDomain = function() {
+    var initTimeDomain = function(tasks) {
 		if (timeDomainMode === FIT_TIME_DOMAIN_MODE) {
-		    if (tasks === undefined || tasks.length < 1) {
-			timeDomainStart = d3.time.day.offset(new Date(), -3);
-			timeDomainEnd = d3.time.hour.offset(new Date(), +3);
-			return;
+		    /*if (tasks === undefined || tasks.length < 1) {
+				timeDomainStart = d3.time.day.offset(new Date(), -3);
+				timeDomainEnd = d3.time.hour.offset(new Date(), +3);
+				return;
 		    }
 		    tasks.sort(function(a, b) {
-			return a.endDate - b.endDate;
+		    	return a.endDate - b.endDate;
 		    });
 		    timeDomainEnd = tasks[tasks.length - 1].endDate;
 		    tasks.sort(function(a, b) {
-			return a.startDate - b.startDate;
+		    	return a.startDate - b.startDate;
 		    });
-		    timeDomainStart = tasks[0].startDate;
+		    timeDomainStart = tasks[0].startDate;*/
+			if (tasks === undefined || tasks.length < 1) {
+				timeDomainStart = d3.time.day.offset(new Date(), -3);
+				timeDomainEnd = d3.time.hour.offset(new Date(), +3);
+				return;
+		    }
+			let dataStartDate, dataEndDate, offset;
+		    if(tasks == undefined || tasks.length <= 0){
+		    	dataStartDate = new Date();
+		    	offset = 0;
+		    }else{
+		    	dataStartDate = new Date(tasks[0].arrestTime);
+		    	offset = tasks[tasks.length - 1].relativeEndTime;
+		    }
+		    timeDomainStart = d3.time.second(dataStartDate);
+		    timeDomainEnd = d3.time.second.offset(dataStartDate, offset);
+		    console.log("init: " + timeDomainStart + " - " + timeDomainEnd);
 		}
     };
 
@@ -70,7 +104,7 @@ d3.gantt = function() {
     
     function gantt(tasks) {
 	
-		initTimeDomain();
+		initTimeDomain(tasks);
 		initAxis();
 		
 		var svg = d3.select("#chart-container")
@@ -102,7 +136,7 @@ d3.gantt = function() {
 			.attr("transform", rectTransform)
 			.attr("height", function(d) { return y.rangeBand(); })
 			.attr("width", function(d) { 
-				return (x(d.endDate) - x(d.startDate)); 
+				return (x(d.relativeEndTime) - x(d.relativeStartTime)); 
 			})
 			.on("mouseover", function(d) {
 				div.transition()		
@@ -154,14 +188,14 @@ d3.gantt = function() {
 	 	.attr("transform", rectTransform)
 	 	.attr("height", function(d) { return y.rangeBand(); })
 	 	.attr("width", function(d) { 
-	    	return (x(d.endDate) - x(d.startDate)); 
+	    	return (x(d.relativeEndTime) - x(d.relativeStartTime)); 
 	    });
 
 	    rect.transition()
 	    .attr("transform", rectTransform)
 	 	.attr("height", function(d) { return y.rangeBand(); })
 	 	.attr("width", function(d) { 
-	     	return (x(d.endDate) - x(d.startDate)); 
+	     	return (x(d.relativeEndTime) - x(d.relativeStartTime)); 
 	    });
 	        
 		rect.exit().remove();
