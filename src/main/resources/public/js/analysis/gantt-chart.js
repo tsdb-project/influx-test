@@ -49,8 +49,8 @@ d3.gantt = function(tasks) {
 		return "translate(" + x(d3.time.second.offset(timeDomainStart, d.relativeStartTime)) + "," + y(d.arrestTime) + ")";
     };
 
-    var x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
-    ///console.log(taskTypes);
+
+	var x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
     var y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
     
     var xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
@@ -83,17 +83,19 @@ d3.gantt = function(tasks) {
 		    	dataStartDate = new Date();
 		    	offset = 0;
 		    }else{
-		    	dataStartDate = new Date(tasks[0].arrestTime);
+				//dataStartDate = new Date(tasks[0].arrestTime);
+		    	dataStartDate = 0;
 		    	offset = tasks[tasks.length - 1].relativeEndTime;
 		    }
 		    timeDomainStart = d3.time.second(dataStartDate);
-		    timeDomainEnd = d3.time.second.offset(dataStartDate, offset);
+		    timeDomainEnd = d3.time.second(d3.time.second.offset(dataStartDate, offset) - timeDomainStart);
+
 		    console.log("init: " + timeDomainStart + " - " + timeDomainEnd);
 		}
     };
 
     var initAxis = function() {
-		x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
+		x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd]).range([ 0, width ]).clamp(true);
 		y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
 
 		xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
@@ -135,16 +137,18 @@ d3.gantt = function(tasks) {
 			.attr("y", 0)
 			.attr("transform", rectTransform)
 			.attr("height", function(d) { return y.rangeBand(); })
-			.attr("width", function(d) { 
-				return (x(d.relativeEndTime) - x(d.relativeStartTime)); 
+			.attr("width", function(d) {
+				var x = d3.time.scale().domain([ 0, (timeDomainEnd-timeDomainStart)/(1000) ]).range([ 0, width ]).clamp(true);
+				return (x(d.relativeEndTime - d.relativeStartTime));
+				//return ((d.relativeEndTime - d.relativeStartTime)/((timeDomainEnd-timeDomainStart)/(1000*60)) * width);
 			})
 			.on("mouseover", function(d) {
 				div.transition()		
 	                .duration(200)		
 	                .style("opacity", .9);		
 	            div.html(d.fname)	
-	            	.style("left", (d3.event.pageX) + "px")		
-	                .style("top", (d3.event.pageY - 28) + "px");	
+	            	.style("left", (d3.event.pageX) + "px")
+					.style("top", (d3.event.pageY - 28) + "px");
 			})
 			.on("mouseout", function(d) {
 				div.transition()		
@@ -195,7 +199,7 @@ d3.gantt = function(tasks) {
 	    .attr("transform", rectTransform)
 	 	.attr("height", function(d) { return y.rangeBand(); })
 	 	.attr("width", function(d) { 
-	     	return (x(d.relativeEndTime) - x(d.relativeStartTime)); 
+	     	return (x(d.relativeEndTime) - x(d.relativeStartTime));
 	    });
 	        
 		rect.exit().remove();

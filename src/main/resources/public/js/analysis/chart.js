@@ -19,8 +19,19 @@ $(document).ready(function() {
 
 
 data_test = function(response) {
-	
-	console.log(response);
+
+	var tasks = new Array();
+
+	for (r in response)
+	{
+		if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 ){
+			continue;
+		}
+		response[r].status = "KILLED";
+		response[r].fname = response[r].filename;
+		tasks.push(response[r]);
+	}
+
 
 	/*var tasks = [
 	{"startDate":new Date("Sun Dec 09 01:36:45 EST 2012"),"endDate":new Date("Sun Dec 09 02:36:45 EST 2012"),"taskName":"E Job","status":"RUNNING","fname":"file1"},
@@ -50,19 +61,18 @@ data_test = function(response) {
 	{"startDate":new Date("Sat Dec 08 23:12:24 EST 2012"),"endDate":new Date("Sun Dec 09 00:26:13 EST 2012"),"taskName":"A Job","status":"KILLED","fname":"file25"}
 	];*/
 	
-	var tasks = [
-			{"filename":"PUH-2013-119-01ar.csv", "arrestTime":"Mon Aug 12 22:39:00 EST 2013", "relativeStartTime": 37667, "relativeEndTime": 39217, "length": 1504, "status":"KILLED","fname":"file25"},
-			{"filename":"PUH-2013-119-01ar.csv", "arrestTime":"Mon Aug 12 22:39:00 EST 2013", "relativeStartTime": 52067, "relativeEndTime": 53617, "length": 1504, "status":"KILLED","fname":"file25"},
-			{"filename":"PUH-2013-122-01ar.csv", "arrestTime":"Mon Aug 19 08:00:00 EST 2013", "relativeStartTime": 64390, "relativeEndTime": 66018, "length": 1510, "status":"KILLED","fname":"file25"},
-			{"filename":"PUH-2015-015_01ar.csv", "arrestTime":"Tue Jan 27 15:13:00 EST 2015", "relativeStartTime": 69577, "relativeEndTime": 71145, "length": 1505, "status":"KILLED","fname":"file25"},
-			{"filename":"PUH-2017-243-01ar.csv", "arrestTime":"Mon Sep 25 00:00:00 EST 2017", "relativeStartTime": 85076, "relativeEndTime": 87665, "length": 1505, "status":"KILLED","fname":"file25"},
-			{"filename":"PUH-2015-009_01ar.csv", "arrestTime":"Sat Jan 10 00:00:00 EST 2015", "relativeStartTime": 110461, "relativeEndTime": 112201, "length": 1526, "status":"KILLED","fname":"file25"},
-			{"filename":"PUH-2017-315_04ar.csv", "arrestTime":"Sat Dec 09 00:00:00 EST 2017", "relativeStartTime": 613581, "relativeEndTime": 615157, "length": 1511, "status":"KILLED","fname":"file25"},
-			{"filename":"PUH-2017-315_04ar.csv", "arrestTime":"Sat Dec 09 00:00:00 EST 2017", "relativeStartTime": 613581, "relativeEndTime": 615157, "length": 1511, "status":"KILLED","fname":"file25"},
-			{"filename":"PUH-2013-154_12ar.csv", "arrestTime":"Thu Oct 10 09:20:00 EST 2013", "relativeStartTime":1523044,"relativeEndTime": 1526146, "length": 1507, "status":"KILLED","fname":"file25"}
-		];
-	
-	//var tasks = response;
+	// var tasks = [
+	// 		{"filename":"PUH-2013-119-01ar.csv", "arrestTime":"Mon Aug 12 22:39:00 EST 2013", "relativeStartTime": 37667, "relativeEndTime": 39217, "length": 1504, "status":"KILLED","fname":"file25"},
+	// 		{"filename":"PUH-2013-119-01ar.csv", "arrestTime":"Mon Aug 12 22:39:00 EST 2013", "relativeStartTime": 52067, "relativeEndTime": 53617, "length": 1504, "status":"KILLED","fname":"file25"},
+	// 		{"filename":"PUH-2013-122-01ar.csv", "arrestTime":"Mon Aug 19 08:00:00 EST 2013", "relativeStartTime": 64390, "relativeEndTime": 66018, "length": 1510, "status":"KILLED","fname":"file25"},
+	// 		{"filename":"PUH-2015-015_01ar.csv", "arrestTime":"Tue Jan 27 15:13:00 EST 2015", "relativeStartTime": 69577, "relativeEndTime": 71145, "length": 1505, "status":"KILLED","fname":"file25"},
+	// 		{"filename":"PUH-2017-243-01ar.csv", "arrestTime":"Mon Sep 25 00:00:00 EST 2017", "relativeStartTime": 85076, "relativeEndTime": 87665, "length": 1505, "status":"KILLED","fname":"file25"},
+	// 		{"filename":"PUH-2015-009_01ar.csv", "arrestTime":"Sat Jan 10 00:00:00 EST 2015", "relativeStartTime": 110461, "relativeEndTime": 112201, "length": 1526, "status":"KILLED","fname":"file25"},
+	// 		{"filename":"PUH-2017-315_04ar.csv", "arrestTime":"Sat Dec 09 00:00:00 EST 2017", "relativeStartTime": 613581, "relativeEndTime": 615157, "length": 1511, "status":"KILLED","fname":"file25"},
+	// 		{"filename":"PUH-2017-315_04ar.csv", "arrestTime":"Sat Dec 09 00:00:00 EST 2017", "relativeStartTime": 613581, "relativeEndTime": 615157, "length": 1511, "status":"KILLED","fname":"file25"},
+	// 		{"filename":"PUH-2013-154_12ar.csv", "arrestTime":"Thu Oct 10 09:20:00 EST 2013", "relativeStartTime":1523044,"relativeEndTime": 1526146, "length": 1507, "status":"KILLED","fname":"file25"}
+	// 	];
+
 
 	var taskStatus = {
 	    "SUCCEEDED" : "bar",
@@ -84,7 +94,7 @@ data_test = function(response) {
 	    return a.startDate - b.startDate;
 	});
 	var minDate = tasks[0].startDate;*/
-	
+
 	tasks.sort(function(a, b) {
 		return new Date(a.arrestTime) - new Date(b.arrestTime);
 	})
@@ -93,12 +103,14 @@ data_test = function(response) {
 	    return a.relativeEndTime - b.relativeEndTime;
 	});
 	var maxDate = tasks[tasks.length - 1].relativeEndTime;
-	
+
 	console.log("mindate: " + minDate);
 	console.log("maxdate: " + maxDate);
-	
-	var format = "%H:%M";
-	
+
+	var format = "%d";
+
+	console.log(tasks);
+
 	var gantt = d3.gantt(tasks).taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format);
 	gantt(tasks);
 
