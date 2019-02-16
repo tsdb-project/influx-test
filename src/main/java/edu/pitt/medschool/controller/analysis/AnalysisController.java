@@ -8,6 +8,7 @@ import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.PatientTimeLine;
+import edu.pitt.medschool.model.dao.CsvFileDao;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
@@ -111,7 +112,7 @@ public class AnalysisController {
     @RequestMapping("analysis/getPatientTimelines")
     @ResponseBody
     public String getPatientTimelines(Model model) {
-        return new Gson().toJson(validateCsvService.getPatientTimelines());
+        return new Gson().toJson(validateCsvService.getPatientTimeLines());
     }
 
 
@@ -126,7 +127,7 @@ public class AnalysisController {
         modelAndView.addObject("subnav", "builder");
         modelAndView.setViewName("analysis/edit");
         if (id.isPresent()) {
-            modelAndView.addObject("edit", true);
+            modelAndView.addObject("edit", true);  
             Downsample downsample = analysisService.selectByPrimaryKey(id.get());
             DownsampleEditResponse downsampleEditResponse = new DownsampleEditResponse(downsample);
             modelAndView.addObject("query", downsampleEditResponse);

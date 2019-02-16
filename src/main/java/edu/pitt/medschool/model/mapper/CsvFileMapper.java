@@ -1,7 +1,10 @@
 package edu.pitt.medschool.model.mapper;
 
+import edu.pitt.medschool.model.PatientTimeLine;
 import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.CsvFileExample;
+import edu.pitt.medschool.model.dto.TimeLine;
+
 import java.util.List;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.DeleteProvider;
@@ -199,4 +202,10 @@ public interface CsvFileMapper {
         "where id = #{id,jdbcType=INTEGER}"
     })
     int updateByPrimaryKey(CsvFile record);
+    
+    
+    @Select({
+    	"select c.filename as filename,c.start_time as start_time,c.end_time as end_time,p.arrestdate as arrestdate,c.length as len, p.arresttime as arresttime from csv_file c , patient p where c.pid = p.id and c.machine='shl174'"
+    })
+    List<TimeLine> getPatientTimeLines();
 }

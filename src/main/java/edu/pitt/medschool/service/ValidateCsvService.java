@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -123,8 +124,13 @@ public class ValidateCsvService {
     }
 
     //get all patients Timelines
-    public List<PatientTimeLine> getPatientTimelines(){
-        String sql = "select c.filename as filename,c.start_time as start_time,c.end_time as end_time,p.arrestdate as arrestdate,c.length as len, p.arresttime as arresttime from csv_file c , patient p where c.pid = p.id and c.machine='shl174'";
-        return this.jdbcTemplate.query(sql,new PatientRowMapper());
+//    public List<PatientTimeLine> getPatientTimelines(){
+//        String sql = "select c.filename as filename,c.start_time as start_time,c.end_time as end_time,p.arrestdate as arrestdate,c.length as len, p.arresttime as arresttime from csv_file c , patient p where c.pid = p.id and c.machine='shl174'";
+//        return this.jdbcTemplate.query(sql,new PatientRowMapper());
+//    }
+    
+    public ArrayList<PatientTimeLine> getPatientTimeLines(){
+    	return csvFileDao.getPatientTimeLines();
     }
+ 
 }
