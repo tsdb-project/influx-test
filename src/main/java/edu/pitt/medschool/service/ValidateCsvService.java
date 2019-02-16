@@ -2,8 +2,11 @@ package edu.pitt.medschool.service;
 
 import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.model.PatientTimeLine;
-import edu.pitt.medschool.model.ValidateBean;
+import edu.pitt.medschool.model.dao.CsvFileDao;
+import edu.pitt.medschool.model.dto.CsvFile;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -22,6 +25,13 @@ public class ValidateCsvService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Value("${machine}")
+    private String machineId;
+    private final CsvFileDao csvFileDao;
+    
+    public ValidateCsvService(CsvFileDao csvFileDao) {
+    	this.csvFileDao = csvFileDao;
+    }
 
     private Date strToDate(String str){
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
@@ -43,8 +53,8 @@ public class ValidateCsvService {
             throw new RuntimeException("File does not have a valid UUID!");
         return fLine.substring(fLine.length() - 40, fLine.length() - 4);
     }
-    public ValidateBean analyzeCsv(String dir){
-        ValidateBean validateBean = new ValidateBean();
+    public CsvFile analyzeCsv(String dir){
+        CsvFile validateBean = new CsvFile();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(dir));
             String line;
@@ -69,47 +79,52 @@ public class ValidateCsvService {
             validateBean.setSize((int) file.length());
             validateBean.setPath(dir);
             validateBean.setFilename(file.getName());
-            validateBean.setLines(count);
+            validateBean.setLength(count);
             TimeUtil timeUtil = new TimeUtil();
-            validateBean.setStart_time(timeUtil.serialTimeToDate(start_time,timeUtil.nycTimeZone));
-            validateBean.setEnd_time(timeUtil.serialTimeToDate(Double.valueOf(end_time.split(",")[0]),timeUtil.nycTimeZone));
+            validateBean.setStartTime(timeUtil.serialTimeToDate(start_time,timeUtil.nycTimeZone));
+            validateBean.setEndTime(timeUtil.serialTimeToDate(Double.valueOf(end_time.split(",")[0]),timeUtil.nycTimeZone));
             validateBean.setPid(pid);
             validateBean.setUuid(processFirstLineInCSV(firstline, validateBean.getPid()));
-            validateBean.setHeader_time(strToDate(header_time));
+            validateBean.setHeaderTime(strToDate(header_time));
+            validateBean.setMachine(machineId);
         }catch (Exception e){
             e.printStackTrace();
         }
         return validateBean;
     }
-    public Boolean addValidateResult(ValidateBean validateBean){
-        System.out.println("add validate result...");
-        String sql = "insert into csv_file (pid, filename, path, size, uuid, header_time, start_time, end_time, length)"+"values(?,?,?,?,?,?,?,?,?)";
-        try {
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1,validateBean.getPid());
-                ps.setString(2,validateBean.getFilename());
-                ps.setString(3,validateBean.getPath());
-                ps.setInt(4,validateBean.getSize());
-                ps.setString(5,validateBean.getUuid());
-                ps.setTimestamp(6, new java.sql.Timestamp(validateBean.getHeader_time().getTime()));
-                ps.setTimestamp(7, new java.sql.Timestamp(validateBean.getStart_time().getTime()));
-                ps.setTimestamp(8, new java.sql.Timestamp(validateBean.getEnd_time().getTime()));
-                ps.setInt(9,validateBean.getLines());
-                return ps;
-            },keyHolder);
-            System.out.println("Success");
-            return true;
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
+//    public Boolean addValidateResult(ValidateBean validateBean){
+//        System.out.println("add validate result...");
+//        String sql = "insert into csv_file (pid, filename, path, size, uuid, header_time, start_time, end_time, length)"+"values(?,?,?,?,?,?,?,?,?)";
+//        try {
+//            KeyHolder keyHolder = new GeneratedKeyHolder();
+//            jdbcTemplate.update(connection -> {
+//                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+//                ps.setString(1,validateBean.getPid());
+//                ps.setString(2,validateBean.getFilename());
+//                ps.setString(3,validateBean.getPath());
+//                ps.setInt(4,validateBean.getSize());
+//                ps.setString(5,validateBean.getUuid());
+//                ps.setTimestamp(6, new java.sql.Timestamp(validateBean.getHeader_time().getTime()));
+//                ps.setTimestamp(7, new java.sql.Timestamp(validateBean.getStart_time().getTime()));
+//                ps.setTimestamp(8, new java.sql.Timestamp(validateBean.getEnd_time().getTime()));
+//                ps.setInt(9,validateBean.getLines());
+//                return ps;
+//            },keyHolder);
+//            System.out.println("Success");
+//            return true;
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
+    
+    public int insertCsvFile(CsvFile csvFile) throws Exception{
+    	return csvFileDao.insert(csvFile);
     }
 
     //get all patients Timelines
     public List<PatientTimeLine> getPatientTimelines(){
-        String sql = "select c.filename as filename,c.start_time as start_time,c.end_time as end_time,p.arrestdate as arrestdate,c.length as len, p.arresttime as arresttime from csv_file c , patient p where c.pid = p.id";
+        String sql = "select c.filename as filename,c.start_time as start_time,c.end_time as end_time,p.arrestdate as arrestdate,c.length as len, p.arresttime as arresttime from csv_file c , patient p where c.pid = p.id and c.machine='shl174'";
         return this.jdbcTemplate.query(sql,new PatientRowMapper());
     }
 }

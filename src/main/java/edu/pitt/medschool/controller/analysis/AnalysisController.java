@@ -8,7 +8,6 @@ import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.PatientTimeLine;
-import edu.pitt.medschool.model.ValidateBean;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
