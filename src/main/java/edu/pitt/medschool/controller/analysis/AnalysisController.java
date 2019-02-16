@@ -112,7 +112,7 @@ public class AnalysisController {
     @RequestMapping("analysis/getPatientTimelines")
     @ResponseBody
     public String getPatientTimelines(Model model) {
-        return new Gson().toJson(validateCsvService.getPatientTimeLines());
+        return new Gson().toJson(validateCsvService.getPatientTimeLines("je1"));
     }
 
 

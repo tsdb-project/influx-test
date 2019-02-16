@@ -129,8 +129,8 @@ public class ValidateCsvService {
 //        return this.jdbcTemplate.query(sql,new PatientRowMapper());
 //    }
     
-    public ArrayList<PatientTimeLine> getPatientTimeLines(){
-    	return csvFileDao.getPatientTimeLines();
+    public ArrayList<PatientTimeLine> getPatientTimeLines(String machine){
+    	return csvFileDao.getPatientTimeLines(machine);
     }
  
 }

@@ -24,8 +24,8 @@ public class CsvFileDao {
     }
 	
 	@SuppressWarnings("null")
-	public ArrayList<PatientTimeLine> getPatientTimeLines(){
-		List<TimeLine> array = csvFileMapper.getPatientTimeLines();
+	public ArrayList<PatientTimeLine> getPatientTimeLines(String machine){
+		List<TimeLine> array = csvFileMapper.getPatientTimeLines(machine);
 		ArrayList<PatientTimeLine> patientTimeLines = new ArrayList<PatientTimeLine>();
 		for (int i = 0; i < array.size(); i++) {
 //			System.out.println(array.get(i).getStart_time());

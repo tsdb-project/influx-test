@@ -69,6 +69,8 @@ public class TimeLine {
        patientTimeLine.setRelativeStartTime(relativeStartTime);
        patientTimeLine.setRelativeEndTime(relativeEndTime);
        patientTimeLine.setLength(len);
+       patientTimeLine.setFilename(filename);
+       patientTimeLine.setArrestTime(arrestTime);
 		return patientTimeLine;
 	}
 	
