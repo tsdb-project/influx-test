@@ -1,20 +1,23 @@
 package edu.pitt.medschool.framework.util;
 
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.poi.ss.usermodel.DateUtil;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.poi.ss.usermodel.DateUtil;
+
 /**
- * Utilities regarding time problems
- * Time is IMPORTANT in this project
+ * Utilities regarding time problems Time is IMPORTANT in this project
  */
 public class TimeUtil {
 
@@ -129,21 +132,20 @@ public class TimeUtil {
         return Period.between(dob, now).getYears();
     }
 
-
     public static String[] secondToString(int totalSeconds) {
         if (totalSeconds == 0) {
-            return new String[]{"", ""};
+            return new String[] { "", "" };
         }
         if (totalSeconds % 86400 == 0) {
-            return new String[]{String.valueOf((totalSeconds / 86400)), "86400"};
+            return new String[] { String.valueOf((totalSeconds / 86400)), "86400" };
         }
         if (totalSeconds % 3600 == 0) {
-            return new String[]{String.valueOf((totalSeconds / 3600)), "3600"};
+            return new String[] { String.valueOf((totalSeconds / 3600)), "3600" };
         }
         if (totalSeconds % 60 == 0) {
-            return new String[]{String.valueOf((totalSeconds / 60)), "60"};
+            return new String[] { String.valueOf((totalSeconds / 60)), "60" };
         }
-        return new String[]{String.valueOf(totalSeconds), "1"};
+        return new String[] { String.valueOf(totalSeconds), "1" };
     }
 
     /**
@@ -184,6 +186,10 @@ public class TimeUtil {
 
     public static boolean dateIsSameDay(Date a, Date b) {
         return DateUtils.isSameDay(a, b);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(serialTimeToDate(41499.5643171296, null));
     }
 
 }
