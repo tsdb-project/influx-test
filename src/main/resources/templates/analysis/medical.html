@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Brain Flux</title>
+<!-- Vendor styles -->
+<link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.css">
+<link rel="stylesheet" href="/vendors/bower_components/select2/dist/css/select2.min.css">
+<link rel="stylesheet" href="/vendors/flatpickr/flatpickr.min.css" />
+<link rel="stylesheet" href="/vendors/bower_components/dropzone/dist/dropzone.css">
+<link rel="stylesheet" href="/vendors/bower_components/nouislider/distribute/nouislider.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
+<link rel="stylesheet" href="/vendors/bower_components/trumbowyg/dist/ui/trumbowyg.min.css">
+<link rel="icon" type="image/ico" href="/img/favicon.ico">
+<!-- App styles -->
+<link rel="stylesheet" href="/css/app.min.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+</head>
+
+<body data-ma-theme="blue">
+    <main class="main">
+    <div th:insert="fragments/page-loader :: div"></div>
+    <div th:insert="fragments/header :: header"></div>
+    <div th:insert="fragments/sidebar :: aside"></div>
+    <section class="content">
+        <div class="content__inner">
+            <!-- PUT THE MAIN CONTENT HERE -->
+            <header class="content__title">
+                <h1>Analytical Query Builder</h1>
+                <small>Build analytical queries from scratch or using an existing query as template.</small>
+                <br>
+                <a href="/analysis/medicalbuilder">
+                    <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>
+                    Return to Main Menu
+                </a>
+            </header>
+            <div class="card">
+                <div class="card-body">
+                    <form role="form" id="parameter-form">
+                        <h4 class="card-title">Create New Query For Medical</h4>
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12">
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
+                                        <label>Alias</label>
+                                        <div class="input-group mb-3">
+                                            <input type="text" class="form-control" id="alias" placeholder="Input the name of the query" required>
+                                            <i class="form-group__bar"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
+                                        <label>Medicine name</label>
+                                        <div class="input-group mb-3">
+                                            <input type="text" class="form-control" id="medicine" placeholder="Input the name of the query" required autocomplete="off">
+                                            <i class="form-group__bar"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4 col-md-4">
+                                        <label>Downsample Interval</label>
+                                        <div class="input-group mb-3">
+                                            <input type="number" min="0" step="1" class="form-control" id="period" placeholder="Leave empty for no downsampling">
+                                            <div class="input-group-append">
+                                                <select class="select2" data-placeholder="Time Unit" id="period_unit" data-minimum-results-for-search="Infinity">
+                                                    <option disabled="disabled" selected="selected" value="">Select Time Unit</option>
+                                                    <option value="1">Seconds</option>
+                                                    <option value="60">Minutes</option>
+                                                    <option value="3600">Hours</option>
+                                                    <option value="86400">Days</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <label>Time before Medicine</label>
+                                        <div class="input-group mb-3">
+                                            <input type="number" min="0" step="1" class="form-control" id="beforemedicine" placeholder="Leave empty to start at beginning">
+                                            <div class="input-group-append">
+                                                <select class="select2" data-placeholder="Time Unit" id="beforemedicine_unit" data-minimum-results-for-search="Infinity">
+                                                    <option disabled="disabled" selected="selected" value="">Select Time Unit</option>
+                                                    <option value="1">Seconds</option>
+                                                    <option value="60">Minutes</option>
+                                                    <option value="3600">Hours</option>
+                                                    <option value="86400">Days</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <label>Time after Medicine</label>
+                                        <div class="input-group mb-3">
+                                            <input type="number" min="0" step="1" class="form-control" id="aftermedicine" placeholder="Leave empty for the whole measure process">
+                                            <div class="input-group-append">
+                                                <select class="select2" data-placeholder="Time Unit" id="aftermedicine_unit" data-minimum-results-for-search="Infinity">
+                                                    <option disabled="disabled" selected="selected" value="">Select Time Unit</option>
+                                                    <option value="1">Seconds</option>
+                                                    <option value="60">Minutes</option>
+                                                    <option value="3600">Hours</option>
+                                                    <option value="86400">Days</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4 col-md-2">
+                                <div class="form-group">
+                                    <label>&nbsp</label>
+                                    <input type="submit" class="btn btn-primary btn-lg btn-block" autocomplete="off" id="medicalButton" value="Create">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div th:insert="fragments/footer :: footer"></div>
+        </div>
+    </section>
+    </main>
+    <div th:insert="fragments/ie-warning :: div"></div>
+    <!-- Javascript -->
+    <!-- Vendors -->
+    <script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="/vendors/bower_components/tether/dist/js/tether.min.js"></script>
+    <script src="/vendors/bower_components/popper.js/dist/umd/popper.min.js"></script>
+    <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+    <script src="/vendors/bower_components/jquery-mask-plugin/dist/jquery.mask.min.js"></script>
+    <script src="/vendors/bower_components/select2/dist/js/select2.full.min.js"></script>
+    <script src="/vendors/bower_components/dropzone/dist/min/dropzone.min.js"></script>
+    <script src="/vendors/bower_components/moment/min/moment.min.js"></script>
+    <script src="/vendors/flatpickr/flatpickr.min.js"></script>
+    <script src="/vendors/bower_components/nouislider/distribute/nouislider.min.js"></script>
+    <script src="/vendors/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
+    <script src="/vendors/bower_components/trumbowyg/dist/trumbowyg.min.js"></script>
+    <!-- Vendors: Data tables -->
+    <script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="/vendors/bower_components/jszip/dist/jszip.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net/js/moment.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net/js/datetime-moment.js"></script>
+    <!-- App functions and actions -->
+    <script src="/js/navigation.js"></script>
+    <script src="/js/app.min.js"></script>
+    <script src="/js/analysis/medical.js"></script>
+	<script src="/js/analysis/jquery.autocomplete.js"></script>
+    
+</body>
+
+</html>
