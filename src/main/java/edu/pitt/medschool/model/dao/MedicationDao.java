@@ -39,4 +39,18 @@ public class MedicationDao {
         }
         return MedInfoById;
     }
+    public List<String> selectAllMedication(String name){
+        List<String> list = medicationMapper.getAllMedicine(name);
+        return list;
+    }
+
+    public List<Medication> selectAllbyMedications(String drugName, List<String> patientIDs){
+        List<Medication> list = medicationMapper.selectAllbyMedication(drugName,patientIDs);
+        return list;
+    }
+
+    public List<String> selectPatientbyMedications(String drugName){
+        List<String> list = medicationMapper.selectPatientsbyMedications(drugName);
+        return list;
+    }
 }

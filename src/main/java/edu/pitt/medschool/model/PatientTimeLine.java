@@ -12,14 +12,6 @@ public class PatientTimeLine {
     private int length;
     private String uuid;
 
-    /*public String getPid() {
-        return pid;
-    }
-
-    public void setPid(String pid) {
-        this.pid = pid;*/
-    //}
-
     public String getPid() {
         return pid;
     }

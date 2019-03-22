@@ -161,4 +161,19 @@ public interface MedicationMapper {
             "where c.pid = m.id and m.id = '${patientId}' and c.machine= '${machine}'"
     })
     List<Medication> getMedInfoById (@Param("machine") String machine,@Param("patientId") String patientId);
+
+    @Select({
+            "SELECT distinct drug_name FROM upmc.medication where drug_name like '${name}%'"
+    })
+    List<String> getAllMedicine(@Param("name") String name);
+
+    @Select({
+            "SELECT m.bolus_flag as bolusFlag, m.chart_date as chartDate, m.dose as dose, m.dose_unit as doseUnit, m.drug_name as drugName, m.id as id, m.infused_vol as infusedVol, m.infused_vol_unit as infusedVolUnit, m.infuse_ind as infuseInd, m.iv_flag as ivFlag, m.ordered_as as orderedAs, m.rate as rate, m.rate_unit as rateUnit, m.route as route, m.site as site, m.status as status, m.tdrip_ind as tdripInd FROM upmc.medication m where drug_name='${drugName}' and id in '${id}'"
+    })
+    List<Medication> selectAllbyMedication(@Param("drugName") String drugName, @Param("id") List<String> patientIDs);
+
+    @Select({
+            "SELECT id FROM upmc.medication where drug_name='${drugName}'"
+    })
+    List<String> selectPatientsbyMedications(@Param("drugName") String drugName);
 }
