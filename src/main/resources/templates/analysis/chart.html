@@ -16,6 +16,9 @@
 <link rel="stylesheet" href="/vendors/bower_components/trumbowyg/dist/ui/trumbowyg.min.css">
 <link rel="icon" type="image/ico" href="/img/favicon.ico">
 
+<!-- App styles -->
+<link rel="stylesheet" href="/css/app.min.css">
+
 <!--TEMP-->
 <style>
     .chart {
@@ -35,6 +38,7 @@
      
     .bar-failed {
         fill: #CC0000;
+        opacity: 0.5;
     }
      
     .bar-running {
@@ -47,6 +51,7 @@
      
     .bar-killed {
         fill: #ffbb33;
+        opacity: 0.5;
     }
      
     #forkme_banner {
@@ -69,14 +74,14 @@
 
     #chart-container {
         width: 100%;
-        height: 800px;
+        height: 110000px;
     }
 
     div.tooltip {   
         position: absolute;         
         text-align: center;         
-        width: 40px;                    
-        height: 19px;                   
+        width: 177px;                    
+        height: 47px;                   
         padding: 2px;               
         font: 12px sans-serif;      
         background: lightsteelblue; 
@@ -110,29 +115,44 @@
             </header>
             <div class="card">
                 <div class="card-body">
-                    <h3 class="card-title">
-                        Data
-                    </h3>
-                    <!--div class="table-responsive">
-                        <table id="queryTable" class="table table-bordered">
-                            <thead class="thead-default">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Alias</th>
-                                    <th>Downsample Interval</th>
-                                    <th>Starting Time</th>
-                                    <th>Duration</th>
-                                    <th>Create Time</th>
-                                    <th>Update Time</th>
-                                    <th>Execution Time</th>
-                                </tr>
-                            </thead>
-                            <tbody style="cursor: pointer">
-                                <tr>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div-->
+                    <h3 class="card-title">Data</h3>
+                    <div class="input_fields_wrap col-sm-12 col-md-12">
+                        <form role="form" id="filterForm" novalidate>
+                            <div class="row" style="margin-bottom: 10px;">
+                                <div class="col-sm-2 col-md-2">
+                                    <button class="btn btn-primary btn-sm btn-block" id="addFilter">Add Filter</button>
+                                </div>
+                                <div class="col-sm-2 col-md-2">
+                                    <button class="btn btn-success btn-sm btn-block" id="queryFilter">Go</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3 col-md-3">
+                                    <select class="init-select2 field" data-placeholder="Filter Field" id="field[]" required>
+                                        <option disabled="disabled" selected="selected" value="">Filter Field</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2 col-md-2">
+                                    <select class="init-select2 operator" data-placeholder="Filter Method" id="operator[]" required>
+                                        <option value="=">=</option>
+                                        <option value="!=">&ne;</option>
+                                        <option value=">">&gt;</option>
+                                        <option value=">=">&ge;</option>
+                                        <option value="<">&lt;</option>
+                                        <option value="<=">&le;</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2 col-md-2">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="value[]" placeholder="Input value" required>
+                                    </div>
+                                </div>
+                                <div class="col-sm-1 col-md-1" style="margin-top: 6px;">
+                                    <a href="#" class="remove_field btn btn-sm btn-outline-danger">remove</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                     <div id="chart-container">
                     </div>
                 </div>
@@ -142,8 +162,16 @@
     </section>
     </main>
 
+
     <div th:insert="fragments/ie-warning :: div"></div>
     <!-- Javascript -->
+
+    <!-- Javascript -->
+    <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    var columns = /*[[${columns}]]*/null;
+                    /*]]>*/
+                </script>
     <!-- Vendors -->
     <script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>
     <script src="/vendors/bower_components/tether/dist/js/tether.min.js"></script>
@@ -160,6 +188,8 @@
     <script src="/vendors/bower_components/nouislider/distribute/nouislider.min.js"></script>
     <script src="/vendors/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
     <script src="/vendors/bower_components/trumbowyg/dist/trumbowyg.min.js"></script>
+
+    <script src="/vendors/bower_components/remarkable-bootstrap-notify/dist/bootstrap-notify.min.js"></script>
 
     <!-- Vendors: Data tables -->
     <script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>

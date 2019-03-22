@@ -4,6 +4,7 @@ import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.model.PatientTimeLine;
 import edu.pitt.medschool.model.dao.CsvFileDao;
 import edu.pitt.medschool.model.dto.CsvFile;
+import edu.pitt.medschool.model.dto.GraphFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -131,6 +132,10 @@ public class ValidateCsvService {
     
     public ArrayList<PatientTimeLine> getPatientTimeLines(String machine){
     	return csvFileDao.getPatientTimeLines(machine);
+    }
+    
+    public String getFilteredtPatientTimeLines(String machine, GraphFilter filter) throws Exception{
+        throw new NumberFormatException();
     }
  
 }

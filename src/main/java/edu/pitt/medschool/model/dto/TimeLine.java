@@ -15,6 +15,7 @@ public class TimeLine {
 	private Timestamp arrestdate;
 	private int len;
 	private java.sql.Timestamp  arresttime;
+	private String uuid;
 	public String getFilename() {
 		return filename;
 	}
@@ -51,6 +52,18 @@ public class TimeLine {
 	public void setArresttime(Timestamp arresttime) {
 		this.arresttime = arresttime;
 	}
+	public String getUuid() {
+        return uuid;
+    }
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+    public String getPid() {
+        return uuid;
+    }
+    public void setPid(String pid) {
+        this.uuid = pid;
+    }
 	public PatientTimeLine toPatientTimeLine() {
 		// TODO Auto-generated method stub
 		PatientTimeLine patientTimeLine = new PatientTimeLine();
@@ -62,6 +75,8 @@ public class TimeLine {
         long relativeStartTime = (this.getStart_time().getTime() - arrestTime.getTime())/1000;
         long relativeEndTime = (this.getEnd_time().getTime() - arrestTime.getTime())/1000;
         int len = this.getLen();
+        String uuid = this.getUuid();
+        String pid = this.getPid();
        patientTimeLine.setArrestTime(arrestTime);
        patientTimeLine.setFilename(filename);
        if (Pattern.matches(".*noar.*",filename)) patientTimeLine.setFiletype("noar");
@@ -71,6 +86,8 @@ public class TimeLine {
        patientTimeLine.setLength(len);
        patientTimeLine.setFilename(filename);
        patientTimeLine.setArrestTime(arrestTime);
+       patientTimeLine.setUuid(uuid);
+       patientTimeLine.setPid(pid);
 		return patientTimeLine;
 	}
 	

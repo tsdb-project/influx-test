@@ -23,6 +23,11 @@ d3.gantt = function(tasks) {
     
     var timeDomainStart = d3.time.second(dataStartDate);
     var timeDomainEnd = d3.time.second.offset(dataStartDate, offset);
+
+    var formatDate = d3.time.format("%m/%d/%Y %H:%M:%S");
+
+    console.log("s time format: " + typeof formatDate(timeDomainStart));
+    console.log("e time format: " + typeof formatDate(timeDomainEnd));
     
     console.log("timeDomainStart" + timeDomainStart);
     console.log("timeDomainEnd" + timeDomainEnd);
@@ -40,13 +45,21 @@ d3.gantt = function(tasks) {
     var tickFormat = "%d";
 
     var keyFunction = function(d) {
-		return d.relativeStartTime + d.arrestTime + d.relativeEndTime;
+		//return d.relativeStartTime + d.arrestTime + d.relativeEndTime + d.uuid + d.filetype;
+		//var arrestTime = formatDate(d3.time.second(new Date(d.arrestTime)));
+		return d.relativeStartTime + d.arrestTime + d.relativeEndTime + d.pid + d.filetype;
     };
 
     var rectTransform = function(d) {
     	///console.log(x(d.startDate));
     	///console.log(y(d.taskName));
-		return "translate(" + x(d3.time.second.offset(timeDomainStart, d.relativeStartTime)) + "," + y(d.arrestTime) + ")";
+		// // return "translate(" + x(d3.time.second.offset(timeDomainStart, d.relativeStartTime)) + "," + y(d.filename + '#' + d.arrestTime) + ")";
+		// // //return "translate(" + x(d3.time.second.offset(timeDomainStart, d.relativeStartTime)) + "," + y(d.arrestTime) + ")";
+		// return "translate(" + x(d3.time.second.offset(timeDomainStart, d.relativeStartTime)) + "," + y(d.uuid + "#" + d.arrestTime + "#" + d.filetype) + ")";
+		
+		//console.log(typeof formatDate(d3.time.second(new Date(d.arrestTime))));
+		//var arrestTime = formatDate(d3.time.second(new Date(d.arrestTime)));
+		return "translate(" + x(d3.time.second.offset(timeDomainStart, d.relativeStartTime)) + "," + y(d.pid + "#" + d.arrestTime + "#" + d.filetype) + ")";
     };
 
 
@@ -143,10 +156,14 @@ d3.gantt = function(tasks) {
 				//return ((d.relativeEndTime - d.relativeStartTime)/((timeDomainEnd-timeDomainStart)/(1000*60)) * width);
 			})
 			.on("mouseover", function(d) {
+				var startTime = new Date(d.arrestTime);
+				startTime.setSeconds( startTime.getSeconds() + d.relativeStartTime );
+				var endTime = new Date(d.arrestTime);
+				endTime.setSeconds( endTime.getSeconds() + d.relativeEndTime );
 				div.transition()		
 	                .duration(200)		
 	                .style("opacity", .9);		
-	            div.html(d.fname)	
+	            div.html("f: " + d.fname + "<br>" + "s: " + startTime.toISOString() + "<br>" + "e: " + endTime.toISOString())	
 	            	.style("left", (d3.event.pageX) + "px")
 					.style("top", (d3.event.pageY - 28) + "px");
 			})
@@ -163,7 +180,26 @@ d3.gantt = function(tasks) {
 			.transition()
 			.call(xAxis);
 			 
-		svg.append("g").attr("class", "y axis").transition().call(yAxis);
+		svg.append("g")
+			.attr("class", "y axis")
+			.transition()
+			.call(yAxis)
+			.selectAll('.y .tick text')
+			.call(function(t){                
+	            t.each(function(d){ // for each one
+	            	var self = d3.select(this);
+	            	var s = self.text().split('#');  // get the text and split it
+	            	self.text(''); // clear it out
+	            	self.append("tspan") // insert two tspans
+	                	.attr("x", -10)
+	                	.attr("dy","-0.4em")
+	                	.text(s[0] + " " + s[2]);
+	              	self.append("tspan")
+	                	.attr("x", -10)
+	                	.attr("dy","1.4em")
+	                	.text(s[1]);
+	            })
+            });
 			 
 		return gantt;
 
@@ -171,7 +207,7 @@ d3.gantt = function(tasks) {
     
     gantt.redraw = function(tasks) {
 
-		initTimeDomain();
+		/*initTimeDomain();
 		initAxis();
 		
 	    var svg = d3.select("svg");
@@ -207,6 +243,90 @@ d3.gantt = function(tasks) {
 		svg.select(".x").transition().call(xAxis);
 		svg.select(".y").transition().call(yAxis);
 		
+		return gantt;*/
+
+		initTimeDomain(tasks);
+		initAxis();
+		
+		var svg = d3.select("#chart-container")
+			.append("svg")
+			.attr("class", "chart")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+		        .attr("class", "gantt-chart")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+		// Define the div for the tooltip
+		var div = d3.select("body").append("div")	
+		    .attr("class", "tooltip")				
+		    .style("opacity", 0);
+			
+		svg.selectAll(".chart")
+			.data(tasks, keyFunction).enter()
+			.append("rect")
+			.attr("rx", 5)
+		    .attr("ry", 5)
+			.attr("class", function(d){ 
+			    if(taskStatus[d.status] == null){ return "bar";}
+			    return taskStatus[d.status];
+			}) 
+			.attr("y", 0)
+			.attr("transform", rectTransform)
+			.attr("height", function(d) { return y.rangeBand(); })
+			.attr("width", function(d) {
+				var x = d3.time.scale().domain([ 0, (timeDomainEnd-timeDomainStart)/(1000) ]).range([ 0, width ]).clamp(true);
+				return (x(d.relativeEndTime - d.relativeStartTime));
+				//return ((d.relativeEndTime - d.relativeStartTime)/((timeDomainEnd-timeDomainStart)/(1000*60)) * width);
+			})
+			.on("mouseover", function(d) {
+				var startTime = new Date(d.arrestTime);
+				startTime.setSeconds( startTime.getSeconds() + d.relativeStartTime );
+				var endTime = new Date(d.arrestTime);
+				endTime.setSeconds( endTime.getSeconds() + d.relativeEndTime );
+				div.transition()		
+	                .duration(200)		
+	                .style("opacity", .9);		
+	            div.html("f: " + d.fname + "<br>" + "s: " + startTime.toISOString() + "<br>" + "e: " + endTime.toISOString())	
+	            	.style("left", (d3.event.pageX) + "px")
+					.style("top", (d3.event.pageY - 28) + "px");
+			})
+			.on("mouseout", function(d) {
+				div.transition()		
+	                .duration(500)		
+	                .style("opacity", 0);
+			});
+			 
+			 
+		svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0, " + (height - margin.top - margin.bottom) + ")")
+			.transition()
+			.call(xAxis);
+			 
+		svg.append("g")
+			.attr("class", "y axis")
+			.transition()
+			.call(yAxis)
+			.selectAll('.y .tick text')
+			.call(function(t){                
+	            t.each(function(d){ // for each one
+	            	var self = d3.select(this);
+	            	var s = self.text().split('#');  // get the text and split it
+	            	self.text(''); // clear it out
+	            	self.append("tspan") // insert two tspans
+	                	.attr("x", 0)
+	                	.attr("dy",".8em")
+	                	.text(s[0]);
+	              	self.append("tspan")
+	                	.attr("x", 0)
+	                	.attr("dy",".8em")
+	                	.text(s[1]);
+	            })
+            });
+			 
 		return gantt;
     };
 

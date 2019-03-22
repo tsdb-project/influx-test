@@ -9,6 +9,8 @@ public class PatientTimeLine {
     private long relativeStartTime;
     private long relativeEndTime;
     private int length;
+    private String uuid;
+    private String pid;
 
     public String getFilename() {
         return filename;
@@ -48,6 +50,22 @@ public class PatientTimeLine {
 
     public void setRelativeEndTime(long relevantEndTime) {
         this.relativeEndTime = relevantEndTime;
+    }
+    
+    public String getUuid() {
+        return uuid;
+    }
+    
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+    
+    public String getPid() {
+        return pid;
+    }
+    
+    public void setPid(String pid) {
+        this.pid = pid;
     }
 
     public int getLength() { return length;}

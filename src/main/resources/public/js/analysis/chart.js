@@ -3,31 +3,120 @@ $(document).ready(function() {
 
 	// Get Json data from database
 	var response = '';
-	$.ajax({ type: "GET",
-		url: "/analysis/getPatientTimelines",
-		async: false,
-		success : function(text)
-		{
-			response = JSON.parse(text);
-			data_test(response);
-		}
-	});
+	var columns = [];
+
+	// Initial load of data
+	function load_page_data() {
+		$.ajax({ 
+			type: "GET",
+			url: "/analysis/getPatientTimelines",
+			async: false,
+			success : function(text)
+			{
+				response = JSON.parse(text);
+				draw_graph(response);
+			}
+		});
+	}
+
+	// fetching column names and description for filter dropdown
+	function fetch_columns_data() {
+		$.ajax({ 
+			type: "GET",
+			url: "/apis/patients/columns",
+			async: false,
+			success : function(text)
+			{
+				columns = text;
+			}
+		});
+	}
+
+	// fetching filtered data
+	function filtered_data() {
+		console.log("triggering filtered")
+		filter = {
+			"age": 6
+		};
+		$.ajax({ 
+			type: "POST",
+			url: "/analysis/getPatientTimelines",
+			data : JSON.stringify(filter),
+            contentType : "application/json",
+            dataType : "json",
+			async: false,
+			success : function(text)
+			{
+				response = JSON.parse(text);
+				draw_graph(response);
+			}
+		});
+	}
 	
-	//console.log(response);
+	load_page_data();
+	fetch_columns_data();
+
+    console.log(columns);
+
+	var columnData = $.map(columns, function (obj) {
+        obj.text = obj.text || obj.field; // replace name with the property used for the text
+        obj.id = obj.id || obj.field;
+        return obj;
+    });
+
+    
+    $(".field").select2({
+        width: '100%',
+        data : columnData
+    });
+
+    $(".operator").select2({
+        width: '100%'
+    });
+
+    var wrapper = $("#filterForm"); //Fields wrapper
+    var add_button = $("#addFilter"); //Add button ID
+
+    var x = 1; //initlal text box count
+    $(add_button).click(function(e) { //on add input button click
+        e.preventDefault();
+        var html = '<div class="row"><div class="col-sm-3 col-md-3"><select class="init-select2 field" data-placeholder="Filter Field" id="field[]" required><option disabled="disabled" selected="selected" value="">Filter Field</option></select></div><div class="col-sm-2 col-md-2"><select class="init-select2 operator" data-placeholder="Filter Method" id="operator[]" required><option value="=">=</option><option value="!=">&ne;</option><option value=">">&gt;</option><option value=">=">&ge;</option><option value="<">&lt;</option><option value="<=">&le;</option></select></div><div class="col-sm-2 col-md-2"><div class="input-group mb-3"><input type="text" class="form-control" id="value[]" placeholder="Input value" required></div></div><div class="col-sm-1 col-md-1" style="margin-top:6px"><a href="#" class="remove_field btn btn-sm btn-outline-danger">remove</a></div></div>';
+        $(wrapper).append(html);
+
+        $(".field").select2({
+            width: '100%',
+            data : columnData
+        });
+
+        $(".operator").select2({
+            width: '100%'
+        });
+    });
+    $(wrapper).on("click", ".remove_field", function(e) { //user click on remove text
+        e.preventDefault();
+        $(this).parent('div').parent('div').remove();
+    });
+
+    $("#queryFilter").click(function() {
+    	filtered_data();
+    	load_page_data();
+    });
+	
 
 });
 
 
-data_test = function(response) {
+draw_graph = function(response) {
 
 	var tasks = new Array();
 
 	for (r in response)
 	{
-		if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 ){
+		if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 4000000){
 			continue;
 		}
-		response[r].status = "KILLED";
+		//response[r].arrestTime = Date.parse(response[r].arrestTime).toString("yyyy-MM-dd HH:mm:ss");
+		response[r].status = response[r].filetype === "ar" ? "KILLED" : "FAILED";
 		response[r].fname = response[r].filename;
 		tasks.push(response[r]);
 	}
@@ -83,7 +172,10 @@ data_test = function(response) {
 	
 	//var taskNames = [ "D Job", "P Job", "E Job", "A Job", "N Job" ];
 	
-	var taskNames = tasks.map(a => a.arrestTime);
+	//var taskNames = tasks.map(a => a.filename + '#' + a.arrestTime);
+	//var taskNames = tasks.map(a => a.arrestTime);
+	//var taskNames = tasks.map(a => a.uuid + '#' + a.arrestTime + '#' + a.filetype);
+	var taskNames = tasks.map(a => a.pid + '#' + a.arrestTime + '#' + a.filetype);
 	
 	/*tasks.sort(function(a, b) {
 	    return a.relativeEndTime - b.relativeEndTime;
@@ -109,7 +201,7 @@ data_test = function(response) {
 
 	var format = "%d";
 
-	console.log(tasks);
+	//console.log(tasks);
 
 	var gantt = d3.gantt(tasks).taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format);
 	gantt(tasks);

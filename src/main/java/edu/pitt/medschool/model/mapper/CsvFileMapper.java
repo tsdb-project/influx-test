@@ -205,7 +205,7 @@ public interface CsvFileMapper {
     
     
     @Select({
-    	"select c.filename as filename,c.start_time as start_time,c.end_time as end_time,p.arrestdate as arrestdate,c.length as len, p.arresttime as arresttime from csv_file c , patient p where c.pid = p.id and c.machine= '${machine}'"
+    	"select c.filename as filename,c.start_time as start_time,c.end_time as end_time,p.arrestdate as arrestdate,c.length as len, p.arresttime as arresttime, c.uuid as uuid, p.id as pid from csv_file c , patient p where c.pid = p.id and c.machine= '${machine}' and p.arrestdate is not null"
     })
     List<TimeLine> getPatientTimeLines(@Param("machine") String machine);
 }

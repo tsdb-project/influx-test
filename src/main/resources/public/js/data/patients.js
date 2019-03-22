@@ -151,6 +151,8 @@ $(document).ready(function() {
         ],
     });
 
+    console.log(columns);
+
     $("#refreshButton").click(function() {
         table.ajax.reload();
     });
@@ -161,6 +163,8 @@ $(document).ready(function() {
         obj.id = obj.id || obj.field;
         return obj;
     });
+
+    console.log(columnData);
 
     
     $(".field").select2({

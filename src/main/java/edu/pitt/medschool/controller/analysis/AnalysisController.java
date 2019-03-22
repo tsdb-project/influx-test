@@ -12,6 +12,7 @@ import edu.pitt.medschool.model.dao.CsvFileDao;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
+import edu.pitt.medschool.model.dto.GraphFilter;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.ColumnService;
 import edu.pitt.medschool.service.ExportPostProcessingService;
@@ -112,7 +113,15 @@ public class AnalysisController {
     @RequestMapping("analysis/getPatientTimelines")
     @ResponseBody
     public String getPatientTimelines(Model model) {
-        return new Gson().toJson(validateCsvService.getPatientTimeLines("je1"));
+        return new Gson().toJson(validateCsvService.getPatientTimeLines("realpsc"));
+    }
+    
+    @RequestMapping(value = { "analysis/getPatientTimelines" }, method = RequestMethod.POST)
+    @ResponseBody
+    public String getFilteredPatientTimelines(@RequestBody(required = true) GraphFilter filter) throws Exception {
+        System.out.println("Debug");
+        System.out.println(filter.getAge());
+        return validateCsvService.getFilteredtPatientTimeLines("realpsc", filter);
     }
 
 
