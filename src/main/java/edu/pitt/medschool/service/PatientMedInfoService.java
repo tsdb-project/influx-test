@@ -22,9 +22,9 @@ public class PatientMedInfoService {
 
     public PatientMedInfoService(MedicationDao medicationDao){this.medicationDao = medicationDao;}
 
-    public ArrayList<Medication> getAllMedInfo(String machine) {
+    public List<Medication> getAllMedInfo(String machine) {
         return medicationDao.getAllMedInfo(machine);
     }
 
-    public ArrayList<Medication> getMedInfoById(String machine, String id) { return medicationDao.getMedInfoById(machine,id);}
+    public List<Medication> getMedInfoById(String machine, String id) { return medicationDao.getMedInfoById(machine,id);}
 }

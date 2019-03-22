@@ -17,28 +17,18 @@ public class MedicationDao {
     MedicationMapper medicationMapper;
 
     @Transactional(rollbackFor = Exception.class)
-    public int insert(Medication medication) throws Exception {
+    public int insert(Medication medication){
         return medicationMapper.insertSelective(medication);
     }
 
-
-    public ArrayList<Medication> getAllMedInfo(String machine){
-        List<Medication> array = medicationMapper.getAllMedInfo(machine);
-        ArrayList<Medication> allMedInfo = new ArrayList<>();
-        for (int i = 0; i < array.size(); i++) {
-            allMedInfo.add(array.get(i));
-        }
-        return allMedInfo;
+    public List<Medication> getAllMedInfo(String machine){
+        return medicationMapper.getAllMedInfo(machine);
     }
 
-    public ArrayList<Medication> getMedInfoById (String machine, String id){
-        List<Medication> array = medicationMapper.getMedInfoById(machine,id);
-        ArrayList<Medication> MedInfoById = new ArrayList<>();
-        for (int i = 0; i < array.size(); i++) {
-            MedInfoById.add(array.get(i));
-        }
-        return MedInfoById;
+    public List<Medication> getMedInfoById (String machine, String id){
+        return medicationMapper.getMedInfoById(machine,id);
     }
+
     public List<String> selectAllMedication(String name){
         List<String> list = medicationMapper.getAllMedicine(name);
         return list;
