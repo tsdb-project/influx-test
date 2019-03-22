@@ -1,4 +1,6 @@
 d3.gantt = function(tasks) {
+	// test comment
+	
     var FIT_TIME_DOMAIN_MODE = "fit";
     var FIXED_TIME_DOMAIN_MODE = "fixed";
     
