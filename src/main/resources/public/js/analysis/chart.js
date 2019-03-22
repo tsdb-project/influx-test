@@ -101,6 +101,7 @@ $(document).ready(function() {
     	load_page_data();
     });
 
+
 	// Get Json data from medication table
 	// var medInfo = '';
 	// $.ajax({ type: "GET",

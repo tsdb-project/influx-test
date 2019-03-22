@@ -11,7 +11,6 @@ public class PatientTimeLine {
     private long relativeEndTime;
     private int length;
     private String uuid;
-    private String pid;
 
     /*public String getPid() {
         return pid;
@@ -19,6 +18,14 @@ public class PatientTimeLine {
 
     public void setPid(String pid) {
         this.pid = pid;*/
+    //}
+
+    public String getPid() {
+        return pid;
+    }
+
+    public void setPid(String pid) {
+        this.pid = pid;
     }
 
     public String getFilename() {
@@ -67,14 +74,6 @@ public class PatientTimeLine {
     
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-    
-    public String getPid() {
-        return pid;
-    }
-    
-    public void setPid(String pid) {
-        this.pid = pid;
     }
 
     public int getLength() { return length;}

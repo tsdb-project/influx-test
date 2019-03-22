@@ -70,7 +70,7 @@ d3.gantt = function(tasks) {
 
 
 	var x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
-    var y = d3.scale.ordinal().domain(fileName).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
+    var y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
 
     var xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
 	    .tickSize(8).tickPadding(8);
@@ -115,7 +115,7 @@ d3.gantt = function(tasks) {
 
     var initAxis = function() {
 		x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd]).range([ 0, width ]).clamp(true);
-		y = d3.scale.ordinal().domain(fileName).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
+		y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
 
 		xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
 			.tickSize(8).tickPadding(8);
@@ -166,7 +166,7 @@ d3.gantt = function(tasks) {
 				var endTime = new Date(d.arrestTime);
 				endTime.setSeconds( endTime.getSeconds() + d.relativeEndTime );
 				div.transition()		
-	                .duration(200)		
+	                .duration(200)
 	                .style("opacity", .9);
 	            div.html("f: " + d.fname + "<br>" + "s: " + startTime.toISOString() + "<br>" + "e: " + endTime.toISOString())	
 					.style("left", (d3.event.pageX) + "px")
@@ -210,7 +210,7 @@ d3.gantt = function(tasks) {
 		// Get Json data from medication table By Id and redirect
 		svg.select(".y").filter(".axis").selectAll(".tick")
 			.on("click",function () {
-				window.location.href = '/analysis/medInfo/' + $(this).text();
+				window.location.href = '/analysis/medInfo/' + $(this).text().split(' ')[0];
 			});
 		return gantt;
 
