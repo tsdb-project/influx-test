@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Brain Flux</title>
+    <!-- Vendor styles -->
+    <link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
+    <link rel="stylesheet" href="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.css">
+    <link rel="stylesheet" href="/vendors/bower_components/select2/dist/css/select2.min.css">
+    <link rel="stylesheet" href="/vendors/flatpickr/flatpickr.min.css" />
+    <link rel="stylesheet" href="/vendors/bower_components/dropzone/dist/dropzone.css">
+    <link rel="stylesheet" href="/vendors/bower_components/nouislider/distribute/nouislider.min.css">
+    <link rel="stylesheet" href="/vendors/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
+    <link rel="stylesheet" href="/vendors/bower_components/trumbowyg/dist/ui/trumbowyg.min.css">
+    <link rel="icon" type="image/ico" href="/img/favicon.ico">
+
+    <!-- App styles -->
+    <link rel="stylesheet" href="/css/app.min.css">
+
+</head>
+
+<body data-ma-theme="blue">
+<main class="main">
+    <div th:insert="fragments/page-loader :: div"></div>
+    <div th:insert="fragments/header :: header"></div>
+    <div th:insert="fragments/sidebar :: aside"></div>
+
+    <section class="content">
+        <div class="content__inner">
+            <!-- PUT THE MAIN CONTENT HERE -->
+            <header class="content__title">
+                <h1>Patient medication Information</h1>
+                <small>Detailed information for treatments.</small>
+            </header>
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Data Overview of <strong id="patientId" th:text="${patientId}"></strong>
+                        <br>
+                        <br>
+                        <a href="/analysis/chart">
+                            <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>
+                            Return to Charts
+                        </a>
+                        <br>
+                        <br>
+                        <div class="input_fields_wrap col-sm-12 col-md-12">
+                            <div class="row" style="margin-bottom: 10px;">
+                                <div class="col-sm-2 col-md-2">
+                                    <button class="btn btn-primary btn-sm btn-block" id="addDrug">Add Drug</button>
+                                </div>
+                                <div class="col-sm-2 col-md-2">
+                                    <button class="btn btn-success btn-sm btn-block" id="queryDrug">Go</button>
+                                </div>
+                            </div>
+                            <form role="form" id="filterForm">
+                                <div class="row">
+                                    <div class="col-sm-3 col-md-3">
+                                        <select class="init-select2 field" data-placeholder="Drug" id="drugSelector">
+                                            <option  selected="selected" value="">Drugs</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-1 col-md-1" style="margin-top: 6px;">
+                                        <a href="#" class="remove_field btn btn-sm btn-outline-danger">remove</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </h3>
+                    <!--<div class="table-responsive">-->
+                        <!--<table id="medInfoTable" class="table table-bordered">-->
+                            <!--<thead class="thead-default">-->
+                            <!--<tr>-->
+                                <!--<th>Id</th>-->
+                                <!--<th>Infused Vol</th>-->
+                                <!--<th>Chart Date</th>-->
+                                <!--<th>Drug Name</th>-->
+                                <!--<th>Dose</th>-->
+                                <!--<th>Dose Unit</th>-->
+                                <!--<th>Rate</th>-->
+                                <!--<th>Rate Unit</th>-->
+                                <!--<th>Order As</th>-->
+                                <!--<th>Route</th>-->
+                                <!--<th>Status</th>-->
+                                <!--<th>Site</th>-->
+                                <!--<th>Infused Vol Unit</th>-->
+                                <!--<th>Infuse Ind</th>-->
+                                <!--<th>Iv Flag</th>-->
+                                <!--<th>Bolus Flag</th>-->
+                                <!--<th>Tdrip Ind</th>-->
+                                <!--<th>Operation</th>-->
+                            <!--</tr>-->
+                            <!--</thead>-->
+                            <!--<tbody style="cursor: pointer">-->
+                            <!--<tr>-->
+                            <!--</tr>-->
+                            <!--</tbody>-->
+                        <!--</table>-->
+                    <!--</div>-->
+                    <div class="chart-container" style="position: relative; height: auto; width: 100%">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div th:insert="fragments/footer :: footer"></div>
+        </div>
+    </section>
+</main>
+
+<div th:insert="fragments/ie-warning :: div"></div>
+<!-- Javascript -->
+
+<!-- Vendors -->
+<script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="/vendors/bower_components/tether/dist/js/tether.min.js"></script>
+<script src="/vendors/bower_components/popper.js/dist/umd/popper.min.js"></script>
+<script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
+<script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+
+<script src="/vendors/bower_components/jquery-mask-plugin/dist/jquery.mask.min.js"></script>
+<script src="/vendors/bower_components/select2/dist/js/select2.full.min.js"></script>
+<script src="/vendors/bower_components/dropzone/dist/min/dropzone.min.js"></script>
+<script src="/vendors/bower_components/moment/min/moment.min.js"></script>
+<script src="/vendors/flatpickr/flatpickr.min.js"></script>
+<script src="/vendors/bower_components/nouislider/distribute/nouislider.min.js"></script>
+<script src="/vendors/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
+<script src="/vendors/bower_components/trumbowyg/dist/trumbowyg.min.js"></script>
+
+<script src="/vendors/bower_components/remarkable-bootstrap-notify/dist/bootstrap-notify.min.js"></script>
+
+<!-- Vendors: Data tables -->
+<script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="/vendors/bower_components/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+<script src="/vendors/bower_components/datatables.net-buttons/js/buttons.print.min.js"></script>
+<script src="/vendors/bower_components/jszip/dist/jszip.min.js"></script>
+<script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
+<script src="/vendors/bower_components/datatables.net/js/moment.min.js"></script>
+<script src="/vendors/bower_components/datatables.net/js/datetime-moment.js"></script>
+
+<!-- Charts and maps-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+<script src="/vendors/bower_components/flot/jquery.flot.js"></script>
+<script src="/vendors/bower_components/flot/jquery.flot.pie.js"></script>
+<script src="/vendors/bower_components/flot/jquery.flot.resize.js"></script>
+<script src="/vendors/bower_components/flot.curvedlines/curvedLines.js"></script>
+<script src="/vendors/bower_components/flot.orderbars/js/jquery.flot.orderBars.js"></script>
+
+<!-- App functions and actions -->
+<script src="/js/navigation.js"></script>
+<script src="/js/app.min.js"></script>
+<script src="/js/analysis/MedInfo.js"></script>
+</body>
+</html>

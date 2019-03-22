@@ -1,7 +1,6 @@
 $(document).ready(function() {
-	console.log("in charts");
 
-	// Get Json data from database
+	// Get Json data from csv_file table
 	var response = '';
 	var columns = [];
 
@@ -101,8 +100,19 @@ $(document).ready(function() {
     	filtered_data();
     	load_page_data();
     });
-	
 
+	// Get Json data from medication table
+	// var medInfo = '';
+	// $.ajax({ type: "GET",
+	// 	url: "/analysis/getAllPatientMedInfo",
+	// 	async: false,
+	// 	success : function(text)
+	// 	{
+	// 		medInfo = JSON.parse(text);
+	// 	}
+	// });
+	//
+	// console.log(medInfo);
 });
 
 
@@ -171,11 +181,12 @@ draw_graph = function(response) {
 	};
 	
 	//var taskNames = [ "D Job", "P Job", "E Job", "A Job", "N Job" ];
-	
+
 	//var taskNames = tasks.map(a => a.filename + '#' + a.arrestTime);
 	//var taskNames = tasks.map(a => a.arrestTime);
 	//var taskNames = tasks.map(a => a.uuid + '#' + a.arrestTime + '#' + a.filetype);
 	var taskNames = tasks.map(a => a.pid + '#' + a.arrestTime + '#' + a.filetype);
+	var patientFile = tasks.map(a => a.fname);
 	
 	/*tasks.sort(function(a, b) {
 	    return a.relativeEndTime - b.relativeEndTime;

@@ -11,6 +11,8 @@ d3.gantt = function(tasks) {
     //var timeDomainStart = d3.time.day.offset(new Date(),-3);
     //var timeDomainEnd = d3.time.hour.offset(new Date(),+3);
     var dataStartDate, dataEndDate, offset;
+	var fileName = new Array();
+
     if(tasks == undefined || tasks.length <= 0){
     	dataStartDate = new Date();
     	offset = 0;
@@ -18,6 +20,9 @@ d3.gantt = function(tasks) {
     }else{
     	dataStartDate = new Date(tasks[0].arrestTime);
     	offset = tasks[tasks.length - 1].relativeEndTime;
+    	for (p in tasks){
+    		fileName.push(tasks[p].pid);
+		}
     }
     console.log("dataStartDate :" + dataStartDate);
     
@@ -33,6 +38,7 @@ d3.gantt = function(tasks) {
     console.log("timeDomainEnd" + timeDomainEnd);
     var timeDomainMode = FIT_TIME_DOMAIN_MODE;// fixed or fit
     var taskTypes = [];
+    var patientFile = [];
     var taskStatus = [];
     var height = document.getElementById("chart-container").clientHeight - margin.top - margin.bottom;
     var width = document.getElementById("chart-container").clientWidth - margin.right - margin.left;
@@ -64,8 +70,8 @@ d3.gantt = function(tasks) {
 
 
 	var x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
-    var y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
-    
+    var y = d3.scale.ordinal().domain(fileName).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
+
     var xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
 	    .tickSize(8).tickPadding(8);
 
@@ -109,11 +115,10 @@ d3.gantt = function(tasks) {
 
     var initAxis = function() {
 		x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd]).range([ 0, width ]).clamp(true);
-		y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
+		y = d3.scale.ordinal().domain(fileName).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
 
 		xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
 			.tickSize(8).tickPadding(8);
-
 		yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);
     };
     
@@ -162,9 +167,9 @@ d3.gantt = function(tasks) {
 				endTime.setSeconds( endTime.getSeconds() + d.relativeEndTime );
 				div.transition()		
 	                .duration(200)		
-	                .style("opacity", .9);		
+	                .style("opacity", .9);
 	            div.html("f: " + d.fname + "<br>" + "s: " + startTime.toISOString() + "<br>" + "e: " + endTime.toISOString())	
-	            	.style("left", (d3.event.pageX) + "px")
+					.style("left", (d3.event.pageX) + "px")
 					.style("top", (d3.event.pageY - 28) + "px");
 			})
 			.on("mouseout", function(d) {
@@ -200,7 +205,13 @@ d3.gantt = function(tasks) {
 	                	.text(s[1]);
 	            })
             });
-			 
+
+
+		// Get Json data from medication table By Id and redirect
+		svg.select(".y").filter(".axis").selectAll(".tick")
+			.on("click",function () {
+				window.location.href = '/analysis/medInfo/' + $(this).text();
+			});
 		return gantt;
 
     };
@@ -363,6 +374,7 @@ d3.gantt = function(tasks) {
 		taskTypes = value;
 		return gantt;
     };
+
     
     gantt.taskStatus = function(value) {
 		if (!arguments.length)

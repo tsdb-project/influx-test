@@ -3,6 +3,7 @@ package edu.pitt.medschool.model;
 import java.util.Date;
 
 public class PatientTimeLine {
+    private String pid;
     private String filename;
     private String filetype;
     private Date arrestTime;
@@ -11,6 +12,14 @@ public class PatientTimeLine {
     private int length;
     private String uuid;
     private String pid;
+
+    /*public String getPid() {
+        return pid;
+    }
+
+    public void setPid(String pid) {
+        this.pid = pid;*/
+    }
 
     public String getFilename() {
         return filename;

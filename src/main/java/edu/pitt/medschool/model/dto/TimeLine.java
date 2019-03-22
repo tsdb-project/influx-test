@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.DataConsolidateFunction;
 import edu.pitt.medschool.model.PatientTimeLine;
 
 public class TimeLine {
+	private String pid;
 	private String filename;
 	private Timestamp start_time;
 	private java.sql.Timestamp  end_time;
@@ -67,6 +68,7 @@ public class TimeLine {
 	public PatientTimeLine toPatientTimeLine() {
 		// TODO Auto-generated method stub
 		PatientTimeLine patientTimeLine = new PatientTimeLine();
+		//String pid = this.getPid();
 		String filename = this.getFilename();
         Timestamp arrestTime = this.getArresttime();
         if (arrestTime == null){
@@ -78,6 +80,7 @@ public class TimeLine {
         String uuid = this.getUuid();
         String pid = this.getPid();
        patientTimeLine.setArrestTime(arrestTime);
+       //patientTimeLine.setPid(pid);
        patientTimeLine.setFilename(filename);
        if (Pattern.matches(".*noar.*",filename)) patientTimeLine.setFiletype("noar");
        else patientTimeLine.setFiletype("ar");

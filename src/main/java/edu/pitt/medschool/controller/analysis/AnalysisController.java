@@ -2,6 +2,7 @@ package edu.pitt.medschool.controller.analysis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
+import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
 import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
@@ -13,12 +14,14 @@ import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import edu.pitt.medschool.model.dto.GraphFilter;
+import edu.pitt.medschool.model.dto.Medication;
+import edu.pitt.medschool.model.dao.MedicationDao;
 import edu.pitt.medschool.service.AnalysisService;
+import edu.pitt.medschool.service.PatientMedInfoService;
 import edu.pitt.medschool.service.ColumnService;
 import edu.pitt.medschool.service.ExportPostProcessingService;
 import edu.pitt.medschool.service.ExportService;
 import edu.pitt.medschool.service.ValidateCsvService;
-import org.json.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +60,8 @@ public class AnalysisController {
 
     @Autowired
     ValidateCsvService validateCsvService;
+    @Autowired
+    PatientMedInfoService patientMedInfoService;
 
     @Autowired
     ColumnService columnService;
@@ -122,6 +127,36 @@ public class AnalysisController {
         System.out.println("Debug");
         System.out.println(filter.getAge());
         return validateCsvService.getFilteredtPatientTimeLines("realpsc", filter);
+    }
+
+    @RequestMapping("analysis/getAllPatientMedInfo")
+    @ResponseBody
+    public Map<String, Object> getAllMedInfo(Model model) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", patientMedInfoService.getAllMedInfo("realpsc"));
+        return map;
+    }
+
+    @RequestMapping("analysis/getPatientMedInfoById/{id}")
+    @ResponseBody
+    public Map<String, Object> getMedInfoById(Model model,@PathVariable String id) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", patientMedInfoService.getMedInfoById("realpsc",id));
+        return map;
+    }
+
+    @RequestMapping(value = {"analysis/medInfo/{id}","analysis/medInfo" } , method = RequestMethod.GET)
+    @ResponseBody
+    public ModelAndView medInfoPage(@PathVariable Optional<String> id,ModelAndView modelAndView) {
+        modelAndView.addObject("nav", "analysis");
+        modelAndView.addObject("subnav", "chart");
+        modelAndView.setViewName("analysis/medInfo");
+        if (id.isPresent()) {
+            modelAndView.addObject("patientId",id.get());
+        }else{
+            modelAndView.addObject("patientId","Not Found");
+        }
+        return modelAndView;
     }
 
 
