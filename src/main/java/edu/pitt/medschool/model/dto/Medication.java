@@ -1,5 +1,7 @@
 package edu.pitt.medschool.model.dto;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Date;
 
 public class Medication {
@@ -629,5 +631,9 @@ public class Medication {
         result = prime * result + ((getBolusFlag() == null) ? 0 : getBolusFlag().hashCode());
         result = prime * result + ((getTdripInd() == null) ? 0 : getTdripInd().hashCode());
         return result;
+    }
+
+    public Instant DatetoInstant(Date date){
+        return date.toInstant();
     }
 }
