@@ -170,6 +170,7 @@ public class AnalysisController {
         }else{
             modelAndView.addObject("patientId","Not Found");
         }
+        modelAndView.addObject("measures", columnService.selectAllMeasures());
         return modelAndView;
     }
 
