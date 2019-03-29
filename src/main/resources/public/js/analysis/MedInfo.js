@@ -1,7 +1,6 @@
 $(document).ready(function () {
 
-    var CColorSet = ['rgba(255, 48, 48, 1)','rgba(255, 127, 36, 1)','rgba(255, 165, 0, 1)','rgba(178, 34, 34, 1)'];
-    var IColorSet = ['rgba(0, 0, 205, 1)','rgba(0, 191, 255, 1)','rgba(0, 139, 69, 1)','rgba(0, 197, 205, 1)'];
+    var rgbaSet = ['rgba(192, 135, 3, 1)','rgba(50, 3, 135, 1)','rgba(50, 199, 135, 1)','rgba(200, 5, 5, 1)'];
 
     function isEmpty(obj)
     {
@@ -12,74 +11,25 @@ $(document).ready(function () {
         return true;
     };
 
-
-
     dataVisualization = function(response,selecteddrugs) {
 
-        //handle the logic of the single graph
+        //clear the canvas
+        $('#myChart').remove();
+        $('.chart-container').append('<canvas id="myChart"></canvas>');
 
-        var allDatasets = []; // for store all points
-        var allLabels = []; // store all timestamp for chart
-        var allYAxes = []; // store all yAxis in case there are multiple units
-
-        if ($('#myChart').length > 0) {
-            var allGraph = $("#myChart").data('graph');
-
-            for (i in allGraph.data.datasets){
-                if (allGraph.data.datasets[i].label == "EEG"){
-                    allDatasets.push(allGraph.data.datasets[i]);
-                    for (j in allDatasets.data){
-                        allLabels.push(allDatasets.data[j].x);
-                    }
-
-                    allYAxes.push({
-                        id: 'EEG',
-                        position: 'left',
-                        scaleLabel: {
-                            display: true,
-                            fontSize: 14,
-                            labelString: 'EEG',
-                        },
-                        ticks : {
-                            min : 0
-                        }
-                    });
-                    break;
-                }
-            }
-        }
-
+        var datasets = []; // for store points
+        var labels = new Set(); // store timestamp for chart
         var medInfo = new Map(); // store extra information like route
-        if ($('.medPanel').length > 0) { $('.medPanel').remove();}
+        var yAxes = []; // store yAxis in case there are multiple units
 
         for ( d in selecteddrugs){
             var curDrug = drug.get(selecteddrugs[d])
             curDrug.sort(function ( a ,b ) {return a.chartDate > b.chartDate ? 1 : -1;}); // sort based on chartDate
-
-            var datasets = []; // for store points
             var cPoint = [];  // Continuous infusion points
             var iPoint = []; // Intermittent infusion points
-
             var unit = new Map(); // store units
             var route = new Map(); // store routes
 
-            var labels = new Set(); // store timestamp for chart
-            var yAxes = []; // store yAxis in case there are multiple units
-
-
-            var MedPanel =
-                "    <div class=\" medPanel panel panel-info\" >\n" +
-                "      <div class=\"panel-heading\">\n" +
-                "        <h4 class=\"panel-title\">\n" +
-                "          <a data-toggle=\"collapse\" data-parent=\"showEEG\" href=\"#collapse" + d + "\">" + selecteddrugs[d] +"</a>\n" +
-                "        </h4>\n" +
-                "      </div>\n" +
-                "      <div id=\"collapse" + d +"\" class=\"panel-collapse collapse\">\n" +
-                "        <div class=\"panel-body\"><canvas id= \"" + d + "\"  ></canvas></div>\n" +
-                "      </div>\n" +
-                "    </div>\n";
-
-            $('#medChart').append(MedPanel);
 
             for (var point in curDrug){
                 // skip the redundant points for continuous infusion
@@ -105,7 +55,7 @@ $(document).ready(function () {
                             scaleLabel: {
                                 display: true,
                                 fontSize: 14,
-                                labelString: selecteddrugs[d] + ' [' + curDrug[point].unit + ']',
+                                labelString: selecteddrugs[d] + ' (' + curDrug[point].unit + ')',
                             },
                             ticks : {
                                 min : 0
@@ -127,7 +77,7 @@ $(document).ready(function () {
                             scaleLabel: {
                                 display: true,
                                 fontSize: 14,
-                                labelString: selecteddrugs[d] + ' [' + curDrug[point].unit + ']',
+                                labelString: selecteddrugs[d] + ' (' + curDrug[point].unit + ')',
                             },
                             ticks : {
                                 min : 0
@@ -138,15 +88,16 @@ $(document).ready(function () {
             }
 
             medInfo.set(selecteddrugs[d],route); // store routes for current drug
+            var color;
 
             if (!isEmpty(cPoint)){  //push continuous infusion points to the dataset
                 datasets.push({
-                    pointRadius: 2,
+                    pointRadius: 1,
                     steppedLine : 'before',
                     yAxisID:selecteddrugs[d] + ' C',
-                    label: selecteddrugs[d]+ ' [' + unit.get('Continuous') + ']',
-                    borderColor: CColorSet[d % CColorSet.length],
-                    borderWidth : 1,
+                    label: selecteddrugs[d] + ' (' + unit.get('Continuous') + ')',
+                    borderColor: rgbaSet[d % rgbaSet.length],
+                    borderWidth : 3,
                     fill: false,
                     data: cPoint
                 })
@@ -154,126 +105,62 @@ $(document).ready(function () {
 
             if (!isEmpty(iPoint)){ //push intermittent infusion points to the dataset
                 datasets.push({
-                    pointRadius: 2,
+                    pointRadius: 1,
                     steppedLine : 'before',
                     showLine: false,
                     yAxisID:selecteddrugs[d] + ' I',
-                    label:  selecteddrugs[d] + ' [' + unit.get('Intermittent') + ']',
-                    borderColor: IColorSet[d % IColorSet.length],
-                    borderWidth : 1,
+                    label: selecteddrugs[d] + ' (' + unit.get('Intermittent') + ')',
+                    borderColor: rgbaSet[d % rgbaSet.length],
+                    borderWidth : 3,
                     data: iPoint
                 })
             }
-
-            //setting for chart
-            var timeLabels = Array.from(labels).sort();
-            var timeUnit = (new Date(timeLabels[timeLabels.length-1]) - new Date(timeLabels[0]) > 24*60*60*1000) ? 'day':'hour';
-
-            var MedGraph = new Chart($("#" + d ), {
-                type : 'line',
-                data : {
-                    labels : timeLabels,
-                    datasets : datasets
-                },
-                options : {
-                    elements: {
-                        line: {
-                            steppedLine : 'before'
-                        }
-                    },
-                    tooltips: {
-                        callbacks: {
-                            title: function (item,data) {
-                                var label = data.datasets[item[0].datasetIndex].label;
-                                var MedName = label.split('[')[0].trim();
-                                return 'Time: ' + item[0].xLabel + '\n'+
-                                        'Route: '+ medInfo.get(MedName).get(item[0].xLabel);
-                            }
-                        }
-                    },
-                    events : [ "mousemove", "touchstart", "touchmove", "touchend", "click"
-                    ],
-                    onClick : function() {$("#collapseExample").collapse('toggle');},
-                    scales : {
-                        xAxes: [{
-                            type: 'time',
-                            distribution: 'linear',
-                            ticks: {
-                                source: 'label'
-                            },
-                            time: {
-                                unit: timeUnit,
-                            }
-                        }],
-                        yAxes : yAxes
-                    }
-                }
-            });
-
-            Array.prototype.push.apply(allDatasets,datasets);
-            Array.prototype.push.apply(allLabels,Array.from(labels));
-            Array.prototype.push.apply(allYAxes,yAxes);
         }
 
-        $("#saveMedInfo").data('route',medInfo);  // Save medInfo of route
+        //setting for chart
+        var timeLabels = Array.from(labels).sort();
+        var timeUnit = (new Date(timeLabels[timeLabels.length-1]) - new Date(timeLabels[0]) > 24*60*60*1000) ? 'day':'hour';
 
-        //setting for single chart
-        var sortedTimeLabels = allLabels.sort();
-        var allTimeUnit = (new Date(sortedTimeLabels[sortedTimeLabels.length-1]) - new Date(sortedTimeLabels[0]) > 24*60*60*1000) ? 'day':'hour';
-
-        if($('#myChart').length > 0){
-            allGraph.data.datasets = allDatasets;
-            allGraph.data.labels = allLabels;
-            allGraph.options.scales.yAxes = allYAxes;
-            allGraph.update();
-        }else{
-            $('#single_Chart').append('<canvas id="myChart"></canvas>');
-            var allGraph = new Chart($("#myChart"), {
-                type : 'line',
-                data : {
-                    labels : sortedTimeLabels,
-                    datasets : allDatasets
-                },
-                options : {
-                    elements: {
-                        line: {
-                            steppedLine : 'before',
-                        }
-                    },
-                    tooltips: {
-                        callbacks: {
-                            title: function (item,data) {
-                                var label = data.datasets[item[0].datasetIndex].label
-                                if (label == 'EEG'){
-                                    return 'Time: ' + item[0].xLabel
-                                }else{
-                                    var MedName = label.split('[')[0].trim();
-                                    return 'Time: ' + item[0].xLabel + '\n'+
-                                        'Route: '+ $("#saveMedInfo").data('route').get(MedName).get(item[0].xLabel);
-                                }
-                            }
-                        }
-                    },
-                    events : [ "mousemove", "touchstart", "touchmove", "touchend", "click"
-                    ],
-                    onClick : function() {$("#collapseExample").collapse('toggle');},
-                    scales : {
-                        xAxes: [{
-                            type: 'time',
-                            distribution: 'linear',
-                            ticks: {
-                                source: 'label'
-                            },
-                            time: {
-                                unit: allTimeUnit,
-                            }
-                        }],
-                        yAxes : allYAxes
+        var myChart = new Chart($("#myChart"), {
+            type : 'line',
+            data : {
+                labels : timeLabels,
+                datasets : datasets
+            },
+            options : {
+                elements: {
+                    line: {
+                        steppedLine : 'before',
                     }
+                },
+                tooltips: {
+                    callbacks: {
+                        title: function (item,data) {
+                            var label = data.datasets[item[0].datasetIndex].label
+                            var MedName = label.split('(')[0].trim()
+                            return 'Time: ' + item[0].xLabel + '\n'+
+                                    'Route: '+ medInfo.get(MedName).get(item[0].xLabel);
+                        }
+                    }
+                },
+                events : [ "mousemove", "touchstart", "touchmove", "touchend", "click"
+                ],
+                onClick : function() {$("#collapseExample").collapse('toggle');},
+                scales : {
+                    xAxes: [{
+                        type: 'time',
+                        distribution: 'linear',
+                        ticks: {
+                            source: 'label'
+                        },
+                        time: {
+                            unit: timeUnit,
+                        }
+                    }],
+                    yAxes : yAxes
                 }
-            });
-            $("#myChart").data('graph',allGraph);
-        }
+            }
+        });
     };
 
     $.ajax({ type: "GET",
@@ -367,8 +254,7 @@ $(document).ready(function () {
             }
         }
         dataVisualization(response,Array.from(selectedDrugs));
-    });
-
+    })
     // var table = $('#medInfoTable').DataTable({
     //     ajax: {
     //         "url": "/analysis/getPatientMedInfoById/" + $("#patientId").text()
