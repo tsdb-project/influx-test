@@ -16,6 +16,13 @@
             password="${mysql.password}">
         </jdbcConnection>
 
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="true"/>
+            <!-- This property is used to specify whether MyBatis Generator should force the use of JSR-310 data types for DATE, TIME,
+            and TIMESTAMP fields, rather than using java.util.Date -->
+            <property name="useJSR310Types" value="true"/>
+        </javaTypeResolver>
+
         <javaModelGenerator targetPackage="${package.dto}" targetProject="${project}">
             <property name="enableSubPackages" value="true" />
             <property name="trimStrings" value="true" />

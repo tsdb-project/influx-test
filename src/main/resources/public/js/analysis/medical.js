@@ -1,5 +1,20 @@
 $(document).ready(function() {
 
+
+    $.ajax({ type: "GET",
+        url: "/analysis/getAllMedicine/",
+        async: false,
+        success : function(text)
+        {
+            response = text.data;
+        }
+    });
+
+    $(".field").select2({
+        width: '100%',
+        data : response
+    });
+
     $("#medicalButton").click(function() {
 
         if ($('#parameter-form')[0].checkValidity()) {
@@ -28,12 +43,5 @@ $(document).ready(function() {
             return true;
         }
 
-    });   
-    
-    $('#medicine').autocomplete({
-    serviceUrl: 'analysis/allMedicine',
-    onSelect: function (suggestion) {
-        alert('You selected: ' + suggestion.value + ', ' + suggestion.data);
-    }
-}); 
+    });
 });

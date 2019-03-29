@@ -1,4 +1,7 @@
 $(document).ready(function() {
+
+
+
     function notify(from, align, icon, type, animIn, animOut, msg) {
         $.notify({
             icon: icon,

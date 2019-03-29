@@ -8,12 +8,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.MedicalDownsampleExample;
 import edu.pitt.medschool.model.dto.MedicalDownsampleGroup;
 import edu.pitt.medschool.model.dto.MedicalDownsampleGroupExample;
 import edu.pitt.medschool.model.mapper.MedicalDownsampleGroupMapper;

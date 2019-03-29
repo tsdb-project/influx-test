@@ -1,7 +1,7 @@
 package edu.pitt.medschool.model.dto;
 
 import java.time.Instant;
-import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 public class Medication {
@@ -634,6 +634,7 @@ public class Medication {
     }
 
     public Instant DatetoInstant(Date date){
-        return date.toInstant();
+        Instant tmp = date.toInstant();
+        return tmp.minus(5, ChronoUnit.HOURS);
     }
 }

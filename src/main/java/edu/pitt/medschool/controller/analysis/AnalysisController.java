@@ -159,6 +159,13 @@ public class AnalysisController {
         return map;
     }
 
+    @RequestMapping("analysis/getAllMedicine")
+    @ResponseBody
+    public  Map<String, Object> getAllMedicine(Model model){
+        Map<String,Object> map = new HashMap<>();
+        map.put("data",analysisService.selectAllMedicine());
+        return map;
+    }
     @RequestMapping(value = {"analysis/medInfo/{id}","analysis/medInfo" } , method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView medInfoPage(@PathVariable Optional<String> id,ModelAndView modelAndView) {
@@ -354,15 +361,7 @@ public class AnalysisController {
     	map.put("res",response);
     	return map;
     }
-    
-    @RequestMapping(value = "analysis/analysis/allMedicine", method = RequestMethod.GET)
-    @ResponseBody
-    public RestfulResponse allMedicine(String name){
-    	RestfulResponse response = new RestfulResponse(1, "success");
-    	List<String> list = analysisService.selectAllMedicine(name);
-    	response.setData(list);
-    	return response;
-    }
+
 
     @RequestMapping(value = "analysis/group", method = RequestMethod.POST)
     @ResponseBody

@@ -2,14 +2,14 @@ package edu.pitt.medschool.model.dao;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.MedicalDownsampleGroup;
+import edu.pitt.medschool.model.dto.*;
 
 public class ExportMedicalQueryBuilder {
 	
@@ -26,18 +26,18 @@ public class ExportMedicalQueryBuilder {
 	
 	// Downsample configs
     private int numOfDownsampleGroups;
-    private DownsampleGroup[] downsampleGroups;
+    private MedicalDownsampleGroup[] medicalDownsampleGroups;
     private boolean isDownSampleFirst;
     private boolean isAr;
     private List<List<String>> columnNames;
     private int exportTotalDuration; // In 's'
-    private int exportStartOffset; // In 's'
+    private int exportStartOffsets; // In 's'
     private int downsampleInterval; // In 's'
 
     // Prebuilt final query string and related
     private String globalTimeLimitWhere = null;
     private ArrayList<String> columnNameAliases;
-    private String queryString = "";
+    private String queryString;
 
     // Metadata for patients
     private String pid;
@@ -49,8 +49,13 @@ public class ExportMedicalQueryBuilder {
     private List<Integer> validTimeSpanIds;
     private Instant firstAvailData = Instant.MAX; // Immutable once set
     private Instant lastAvailData = Instant.MIN; // Immutable once set
-    private Instant queryStartTime = null;
-    private Instant queryEndTime = null;
+    private Instant queryStartTime;
+    private Instant queryEndTime;
+
+    // Meta for medication
+    private Instant medicalTime;
+    private Instant expectStartTime;
+    private Instant expectEndTime;
     
     /**
      * Initialize this class (Generate nothing if dts is empty)
@@ -59,34 +64,46 @@ public class ExportMedicalQueryBuilder {
      * @param dts           Data
      * @param v             List of DownsampleGroup
      * @param columns       Columns for every downsample group
-     * @param ds            Downsample itself
+     * @param ds            MedicalDownsample itself
      * @param needAr        This job is Ar or NoAr
      */
-    public ExportMedicalQueryBuilder(Instant fakeStartTime, List<DataTimeSpanBean> dts, List<MedicalDownsampleGroup> v,List<List<String>> columns,
-    		Downsample ds, boolean needAr) {
+    public ExportMedicalQueryBuilder(Instant fakeStartTime, List<DataTimeSpanBean> dts, List<MedicalDownsampleGroup> v, List<List<String>> columns,
+                                     MedicalDownsample ds, boolean needAr, Medication records) {
     	 if (dts == null || dts.isEmpty()) {
              return;
          }
+    	 this.queryString ="";
          this.pid = dts.get(0).getPid();
          this.numDataSegments = dts.size();
          this.timeseriesMetadata = dts;
          this.columnNames = columns;
          this.validTimeSpanIds = new ArrayList<>(this.numDataSegments);
          this.isAr = needAr;
-
+         this.medicalTime = records.DatetoInstant(records.getChartDate());
          populateDownsampleGroup(v);
          populateDownsampleData(ds);
          findValidFirstLastData();
 
          // If no available data then stop building
          if (this.validTimeSpanIds.isEmpty()) return;
-
          if (this.exportTotalDuration > 0) {
              this.queryEndTime = this.firstAvailData.plusSeconds(this.exportTotalDuration);
          }
-         if (this.exportStartOffset > 0) {
-             this.queryStartTime = this.firstAvailData.plusSeconds(this.exportStartOffset);
-             this.queryEndTime = this.lastAvailData.plusSeconds(this.exportStartOffset);
+         this.queryStartTime = this.firstAvailData;
+         this.queryEndTime = this.lastAvailData;
+         this.expectStartTime = this.medicalTime.minus(ds.getBeforeMedicine(),ChronoUnit.SECONDS);
+         this.expectEndTime = this.medicalTime.plusSeconds(ds.getAfterMedicine());
+
+         // If medical date is not in valid time range, stop builder
+         if (this.queryStartTime.compareTo(this.medicalTime)<0 && this.queryEndTime.compareTo(this.medicalTime)>0) {
+             if(this.queryStartTime.compareTo(this.expectStartTime)<0){
+                 this.queryStartTime=this.expectStartTime;
+             }
+             if(this.queryEndTime.compareTo(this.expectEndTime)>0){
+                 this.queryEndTime=this.expectEndTime;
+             }
+         }else{
+             return;
          }
          calcOffsetInSeconds(fakeStartTime);
          this.globalTimeLimitWhere = String.format(Template.timeCondition, this.queryStartTime.toString(), this.queryEndTime.toString());
@@ -105,15 +122,15 @@ public class ExportMedicalQueryBuilder {
         this.columnNameAliases = new ArrayList<>(this.numOfDownsampleGroups);
         String prefix = isDownSampleFirst ? Template.defaultDownsampleColName : Template.defaultAggregationColName;
 
-        this.downsampleGroups = v.stream().peek(dvo -> this.columnNameAliases.add(prefix + String.valueOf(dvo.getId())))
-                .toArray(DownsampleGroup[]::new);
+        this.medicalDownsampleGroups = v.stream().peek(dvo -> this.columnNameAliases.add(prefix + String.valueOf(dvo.getId())))
+                .toArray(MedicalDownsampleGroup[]::new);
     }
 
-    private void populateDownsampleData(Downsample ds) {
-        this.exportStartOffset = ds.getOrigin();
+    private void populateDownsampleData(MedicalDownsample ds) {
+        this.exportStartOffsets = 0;
         this.downsampleInterval = ds.getPeriod();
         this.isDownSampleFirst = ds.getDownsampleFirst();
-        this.exportTotalDuration = ds.getDuration();
+        this.exportTotalDuration = ds.getAfterMedicine()+ds.getBeforeMedicine();
     }
 
     // Find first, last data and if ArType matches
@@ -126,9 +143,9 @@ public class ExportMedicalQueryBuilder {
             this.validTimeSpanIds.add(i);
             Instant tmpS = d.getStart(), tmpE = d.getEnd();
             if (tmpS.compareTo(this.firstAvailData) < 0)
-                this.queryStartTime = this.firstAvailData = tmpS;
+                this.firstAvailData = tmpS;
             if (tmpE.compareTo(this.lastAvailData) > 0)
-                this.queryEndTime = this.lastAvailData = tmpE;
+                this.lastAvailData = tmpE;
         }
     }
 
@@ -156,6 +173,18 @@ public class ExportMedicalQueryBuilder {
         return queryEndTime;
     }
 
+    public Instant getMedicalTime() {
+        return medicalTime;
+    }
+
+    public Instant getExpectStartTime() {
+        return expectStartTime;
+    }
+
+    public Instant getExpectEndTime() {
+        return expectEndTime;
+    }
+
     // Lookup all in one query, DO NOT lookup by files
     private void buildQuery() {
         String whereClause = this.artypeWhereClause(this.isAr) + " AND " + this.globalTimeLimitWhere;
@@ -174,7 +203,7 @@ public class ExportMedicalQueryBuilder {
     private String aggregationWhenAggregationFirst(String locator) {
         String[] cols = new String[this.numOfDownsampleGroups];
         for (int i = 0; i < this.numOfDownsampleGroups; i++) {
-            DownsampleGroup dg = this.downsampleGroups[i];
+            MedicalDownsampleGroup dg = this.medicalDownsampleGroups[i];
             cols[i] = populateByAggregationType(this.columnNames.get(i), this.columnNameAliases.get(i), dg, "\"");
         }
         return String.format(Template.basicAggregationInner, String.join(", ", cols), this.pid, locator);
@@ -186,14 +215,13 @@ public class ExportMedicalQueryBuilder {
     private String downsampleWhenAggregationFirst(String aggrQuery) {
         StringBuilder cols = new StringBuilder();
         for (int i = 0; i < this.numOfDownsampleGroups; i++) {
-            String template = formDownsampleFunctionTemplate(this.downsampleGroups[i]);
+            String template = formDownsampleFunctionTemplate(this.medicalDownsampleGroups[i]);
             cols.append(String.format(template, this.columnNameAliases.get(i)));
             cols.append(", ");
         }
         // A count column
         cols.append(String.format(Template.aggregationCount, this.columnNameAliases.get(0)));
         String timeBoud = String.format(Template.timeCondition, this.queryStartTime.toString(), this.queryEndTime.toString());
-
         return String.format(Template.basicDownsampleOuter, cols.toString(), wrapByBracket(aggrQuery), timeBoud,
                 this.downsampleInterval, this.downsampleOffset);
     }
@@ -204,7 +232,7 @@ public class ExportMedicalQueryBuilder {
     private String whenDownsampleFirst(String locator) {
         String[] cols = new String[this.numOfDownsampleGroups + 1];
         for (int i = 0; i < this.numOfDownsampleGroups; i++) {
-            DownsampleGroup dg = this.downsampleGroups[i];
+            MedicalDownsampleGroup dg = this.medicalDownsampleGroups[i];
 
             // Generate downsample InfluxQLs
             String downsampleTemplate = formDownsampleFunctionTemplate(dg);
@@ -229,7 +257,7 @@ public class ExportMedicalQueryBuilder {
      * @param dg            Downsample group data
      * @param delimter      Delimter for wrapping every column name
      */
-    private String populateByAggregationType(List<String> aggregateName, String columnAlias, DownsampleGroup dg, String delimter) {
+    private String populateByAggregationType(List<String> aggregateName, String columnAlias, MedicalDownsampleGroup dg, String delimter) {
         switch (dg.getAggregation().toLowerCase()) {
             case "mean":
                 return columnsMeanQuery(aggregateName, columnAlias, delimter);
@@ -243,7 +271,7 @@ public class ExportMedicalQueryBuilder {
     /**
      * MEAN(%s)
      */
-    private String formDownsampleFunctionTemplate(DownsampleGroup dg) {
+    private String formDownsampleFunctionTemplate(MedicalDownsampleGroup dg) {
         switch (dg.getDownsample().toLowerCase()) {
             case "mean":
                 return "MEAN(%s)";
@@ -327,5 +355,4 @@ public class ExportMedicalQueryBuilder {
             return !as.equals(DataTimeSpanBean.ArStatus.ArOnly);
         }
     }
-
 }

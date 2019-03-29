@@ -163,14 +163,16 @@ public interface MedicationMapper {
     List<Medication> getMedInfoById (@Param("machine") String machine,@Param("patientId") String patientId);
 
     @Select({
-            "SELECT distinct drug_name FROM upmc.medication where drug_name like '${name}%'"
+            "SELECT distinct drug_name FROM upmc.medication"
     })
-    List<String> getAllMedicine(@Param("name") String name);
+    List<String> getAllMedicine();
 
     @Select({
-            "SELECT m.bolus_flag as bolusFlag, m.chart_date as chartDate, m.dose as dose, m.dose_unit as doseUnit, m.drug_name as drugName, m.id as id, m.infused_vol as infusedVol, m.infused_vol_unit as infusedVolUnit, m.infuse_ind as infuseInd, m.iv_flag as ivFlag, m.ordered_as as orderedAs, m.rate as rate, m.rate_unit as rateUnit, m.route as route, m.site as site, m.status as status, m.tdrip_ind as tdripInd FROM upmc.medication m where drug_name='${drugName}' and id in '${id}'"
+            "SELECT m.bolus_flag as bolusFlag, m.chart_date as chartDate, m.dose as dose, m.dose_unit as doseUnit, m.drug_name as drugName, m.id as id, m.infused_vol as infusedVol, m.infused_vol_unit as infusedVolUnit, m.infuse_ind as infuseInd, m.iv_flag as ivFlag, m.ordered_as as orderedAs, m.rate as rate, m.rate_unit as rateUnit, m.route as route, m.site as site, m.status as status, m.tdrip_ind as tdripInd FROM upmc.medication m",
+            "WHERE drug_name='${drugName}' and m.id IN (${ids})" +
+                    "order by m.id, m.chart_date;"
     })
-    List<Medication> selectAllbyMedication(@Param("drugName") String drugName, @Param("id") List<String> patientIDs);
+    List<Medication> selectAllbyMedication(@Param("drugName") String drugName, @Param("ids") String ids);
 
     @Select({
             "SELECT id FROM upmc.medication where drug_name='${drugName}'"

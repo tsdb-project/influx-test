@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import edu.pitt.medschool.model.dao.*;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.slf4j.Logger;
@@ -41,19 +42,6 @@ import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.FileZip;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dao.AnalysisUtil;
-import edu.pitt.medschool.model.dao.CsvFileDao;
-import edu.pitt.medschool.model.dao.DownsampleDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupDao;
-import edu.pitt.medschool.model.dao.ExportDao;
-import edu.pitt.medschool.model.dao.ExportOutput;
-import edu.pitt.medschool.model.dao.ExportQueryBuilder;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.MedicalDownsampleDao;
-import edu.pitt.medschool.model.dao.MedicalDownsampleGroupDao;
-import edu.pitt.medschool.model.dao.MedicationDao;
-import edu.pitt.medschool.model.dao.PatientDao;
-import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
@@ -294,6 +282,7 @@ public class AnalysisService {
                             Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
                             job.getAr());
                     String finalQueryString = eq.getQueryString();
+                    logger.info(finalQueryString);
                     if (finalQueryString.isEmpty()) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> no available data.%n", patientId));
                         continue;
@@ -378,14 +367,12 @@ public class AnalysisService {
     		 patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
     	 }
     	// Get columns data
-         List<MedicalDownsampleGroup> tmpList = medicalDownsampleGroupDao.selectAllMedicalDownsampleGroups(queryId);
-         
-         List<DownsampleGroup> groups = medicalDownsampleGroupDao.translateList(tmpList);
+         List<MedicalDownsampleGroup> groups = medicalDownsampleGroupDao.selectAllMedicalDownsampleGroups(queryId);
          int labelCount = groups.size();
          List<List<String>> columns = new ArrayList<>(labelCount);
          List<String> columnLabelName = new ArrayList<>(labelCount);
          try {
-             for (DownsampleGroup group : groups) {
+             for (MedicalDownsampleGroup group : groups) {
                  columns.add(parseAggregationGroupColumnsString(group.getColumns()));
                  columnLabelName.add(group.getLabel());
              }
@@ -394,42 +381,23 @@ public class AnalysisService {
              return;
          }
 
+         //medicalRecordList save all medical records of all selected patients
          List<Medication> medicalRecordList = new ArrayList<Medication>();
          logger.info("patientIDS:"+Integer.toString(patientIDs.size()));
-         /////change map <patient:>
-//         for (String pid : patientIDs) {
-//        	 List<Medication> list = medicationDao.selectAllbyMedications(exportQuery.getMedicine(), pid);
-//        	 if(!list.isEmpty()) {
-//        	 medicalRecordList.addAll(list);
-//        	 }
-//         }
          medicalRecordList = medicationDao.selectAllbyMedications(exportQuery.getMedicine(),patientIDs);
          logger.info("medicalRecordList:"+Integer.toString(medicalRecordList.size()));
-         
-         //this list saves medication record(drug time,id,drug dose) and the downsample way
-         List<MedicalQuery> medicalQueries = new ArrayList<MedicalQuery>();
-         MedicalQuery mq = new MedicalQuery();
-         for (Medication m:medicalRecordList) {
-        	 logger.info("medication time:"+m.getChartDate());
-        	 List<Patient> p = patientDao.selectById(m.getId());
-        	 logger.info("arrest time:"+p.get(0).getArresttime());
-        	 
-        	 Downsample ds = medicalDownsampleDao.translate(exportQuery, m, p.get(0));
-        	 mq.setDownsample(ds);
-        	 mq.setMedication(m);
-        	 medicalQueries.add(mq);
-         }
-         
-         logger.info("Number of queries: "+Integer.toString(medicalQueries.size()));
-         
-         // Init the `outputWriter`
-         ExportOutput outputWriter;
+//         for (int i=0;i<medicalRecordList.size();i++){
+//             logger.info("medical time out:"+Integer.toString(i)+medicalRecordList.get(i).getChartDate().toString());
+//             logger.info("medical time in:"+Integer.toString(i)+medicalRecordList.get(i).getChartDate().toInstant().toString());
+//         }
+
+         ExportMedicalOutput outputWriter;
          try {
         	 logger.info("init output");
-             outputWriter = new ExportOutput(outputDir.getAbsolutePath(), columnLabelName, medicalQueries.get(0).getDownsample(), job);
+             outputWriter = new ExportMedicalOutput(outputDir.getAbsolutePath(), columnLabelName,exportQuery, job);
          } catch (IOException e) {
              logger.error("Export writer failed to create: {}", Util.stackTraceErrorToString(e));
-             jobClosingHandler(false, isPscRequired, job, outputDir, null, 0);
+             medicaljobClosingHandler(false, isPscRequired, job, outputDir, null, 0);
              return;
          }
          
@@ -438,7 +406,7 @@ public class AnalysisService {
              this.jobStopIndicator.remove(jobId);
              logger.warn("Job <{}> cancelled by user.", jobId);
              outputWriter.writeMetaFile(String.format("%nJob cancelled by user.%n"));
-             jobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, 0);
+             medicaljobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, 0);
              return;
          }
 
@@ -456,7 +424,7 @@ public class AnalysisService {
              if (!iss.getHasStartedPscInflux()) {
                  // Psc not working, should exit
                  logger.error("Selected PSC InfluxDB but failed to start!");
-                 jobClosingHandler(true, true, job, outputDir, null, 0);
+                 medicaljobClosingHandler(true, true, job, outputDir, null, 0);
                  return;
              }
          } else {
@@ -472,7 +440,7 @@ public class AnalysisService {
              if (!iss.getHasStartedLocalInflux()) {
                  // Local not working, should exit
                  logger.error("Selected local InfluxDB but failed to start!");
-                 jobClosingHandler(true, false, job, outputDir, null, 0);
+                 medicaljobClosingHandler(true, false, job, outputDir, null, 0);
                  return;
              }
          }
@@ -488,18 +456,20 @@ public class AnalysisService {
          // Try again only once
          if (numP == -1)
              numP = getNumOfPatients();
-         outputWriter.writeInitialMetaText(numP, medicalQueries.size(), paraCount);
+         outputWriter.writeInitialMetaText(numP, medicalRecordList.size(), paraCount);
 
          // Final prep for running query task
-         BlockingQueue<MedicalQuery> idQueue = new LinkedBlockingQueue<>(medicalQueries);
-         Map<MedicalQuery, Integer> errorCount = new HashMap<>();
+         BlockingQueue<Medication> idQueue = new LinkedBlockingQueue<>(medicalRecordList);
+         Map<Medication, Integer> errorCount = new HashMap<>();
          AtomicInteger validPatientCounter = new AtomicInteger(0);
 
          ExecutorService scheduler = generateNewThreadPool(paraCount);
+         List<Medication> finalMedicalRecordList = medicalRecordList;
          Runnable queryTask = () -> {
              InfluxDB influxDB = generateIdbClient(false);
-             MedicalQuery patientQuery;
-             while ((patientQuery = idQueue.poll()) != null) {
+             Medication onerecord;
+             while ((onerecord = idQueue.poll()) != null) {
+                 logger.info("date:"+onerecord.getChartDate().toString());
                  try {
                      // This job marked as removed, so this thread should exit
                      if (this.jobStopIndicator.containsKey(jobId)) {
@@ -510,51 +480,58 @@ public class AnalysisService {
                      // First get the group by time offset
                      ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
                              "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
-                             patientQuery.getMedication().getId(), job.getAr() ? "ar" : "noar", patientQuery.getDownsample().getPeriod()));
+                             onerecord.getId(), job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
                      if (testOffset.length != 1) {
-                         outputWriter.writeMetaFile(String.format("  PID <%s> don't have enough data to export.%n", patientQuery.getMedication().getId()));
+                         outputWriter.writeMetaFile(String.format("  PID <%s> don't have enough data to export.%n", onerecord.getId()));
                          continue;
                      }
                      // Then fetch meta data regrading file segments and build the query string
-                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientQuery.getMedication().getId());
-                     ExportQueryBuilder eq = new ExportQueryBuilder(
-                             Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, patientQuery.getDownsample(),
-                             job.getAr());
-                     String finalQueryString = eq.getQueryString();
-                     if (finalQueryString.isEmpty()) {
-                         outputWriter.writeMetaFile(String.format("  PID <%s> no available data.%n", patientQuery.getMedication().getId()));
-                         continue;
-                     }
-                     logger.debug("Query for <{}>: {}", patientQuery.getMedication().getId(), finalQueryString);
-                     // Execuate the query
-                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
+                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, onerecord.getId());
+                     ExportMedicalQueryBuilder eq = new ExportMedicalQueryBuilder(
+                             Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
+                             job.getAr(), onerecord);
+                     String finalQueryStrings = eq.getQueryString();
+                     logger.info("medical time out:"+onerecord.getChartDate().toString());
+                     logger.info("medical time in:"+eq.getMedicalTime().toString());
+                     logger.info("query start:"+eq.getQueryStartTime().toString());
+                     logger.info("expect start:"+eq.getExpectStartTime());
+                     logger.info("query end:"+ eq.getQueryEndTime());
+                     logger.info("expect end:"+eq.getExpectEndTime());
+                     logger.info(finalQueryStrings);
+                         if (finalQueryStrings.isEmpty()) {
+                             outputWriter.writeMetaFile(String.format("  PID <%s> no available data.%n", onerecord.getId()));
+                             continue;
+                         }
+                         logger.debug("Query for <{}>: {}", onerecord.getId(), finalQueryStrings);
+                         // Execuate the query
+                         ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryStrings);
+                         if (res.length != 1) {
+                             outputWriter.writeMetaFile(String.format("  PID <%s> incorrect result from database.%n", onerecord.getId()));
+                             continue;
+                         }
+                         //write into csv file
+                         outputWriter.writeForOnePatient(onerecord.getId(), res[0], eq, dtsb,onerecord);
 
-                     if (res.length != 1) {
-                         outputWriter.writeMetaFile(String.format("  PID <%s> incorrect result from database.%n", patientQuery.getMedication().getId()));
-                         continue;
-                     }
 
-                     outputWriter.writeForOnePatient(patientQuery.getMedication().getId(), res[0], eq, dtsb);
-                     validPatientCounter.getAndIncrement();
-
+                         validPatientCounter.getAndIncrement();
                  } catch (Exception ee) {
                      // All exception will be logged (disregarded) and corresponding PID will be tried again
-                     logger.error(String.format("%s: %s", patientQuery.getMedication().getId(), Util.stackTraceErrorToString(ee)));
-                     int alreadyFailed = errorCount.getOrDefault(patientQuery, -1);
+                     logger.error(String.format("%s: %s", onerecord.getId(), Util.stackTraceErrorToString(ee)));
+                     int alreadyFailed = errorCount.getOrDefault(onerecord, -1);
                      if (alreadyFailed == -1) {
-                         errorCount.put(patientQuery, 0);
+                         errorCount.put(onerecord, 0);
                          alreadyFailed = 0;
                      } else {
-                         errorCount.put(patientQuery, ++alreadyFailed);
+                         errorCount.put(onerecord, ++alreadyFailed);
                      }
                      // Reinsert failed user into queue, but no more than 3 times
                      if (alreadyFailed < 3) {
-                         idQueue.add(patientQuery);
+                         idQueue.add(onerecord);
                      } else {
-                         logger.error(String.format("%s: Failed more than 3 times.", patientQuery.getMedication().getId()));
+                         logger.error(String.format("%s: Failed more than 3 times.", onerecord.getId()));
                          outputWriter.writeMetaFile(
-                                 String.format("  PID <%s> failed multiple times, possible program error.%n", patientQuery.getMedication().getId()));
-                         idQueue.remove(patientQuery);
+                                 String.format("  PID <%s> failed multiple times, possible program error.%n", onerecord.getId()));
+                         idQueue.remove(onerecord);
                      }
                  }
              }
@@ -578,7 +555,7 @@ public class AnalysisService {
                  logger.warn("Job <{}> cancelled by user during execution.", jobId);
              }
              // Normal exit procedure
-             jobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, validPatientCounter.get());
+             medicaljobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, validPatientCounter.get());
          }
          
      }
@@ -634,6 +611,32 @@ public class AnalysisService {
         updateJob.setFinished(true);
         exportDao.updateByPrimaryKeySelective(updateJob);
     }
+
+    /**
+     * handler when a medical job is finished
+     */
+    private void medicaljobClosingHandler(boolean idbError, boolean isPscNeeded, ExportWithBLOBs job, File outputDir, ExportMedicalOutput eo,
+                                   int validPatientNumber) {
+        // We will leave the local Idb running after the job
+        boolean shouldStopRemote = this.queueHasNextPscJob().isPresent();
+        if (isPscNeeded && !this.iss.stopRemoteInflux()) {
+            idbError = true;
+        }
+        if (eo != null) {
+            if (idbError) {
+                eo.writeMetaFile(String.format("%nInfluxDB probably failed on <%s>.%n", job.getDbType()));
+            }
+            eo.close(validPatientNumber);
+        }
+        FileZip.zip(outputDir.getAbsolutePath(), InfluxappConfig.ARCHIVE_DIRECTORY + "/output_" + job.getId() + ".zip", "");
+        job.setFinished(true);
+        ExportWithBLOBs updateJob = new ExportWithBLOBs();
+        updateJob.setId(job.getId());
+        updateJob.setFinished(true);
+        exportDao.updateByPrimaryKeySelective(updateJob);
+    }
+
+
 
     /**
      * Find if current queue has a job that requires PSC
@@ -800,9 +803,9 @@ public class AnalysisService {
         this.jobCheckerThread.cancel(shouldForce);
     }
 
-	public List<String> selectAllMedicine(String name) {
+	public List<String> selectAllMedicine() {
 		// TODO Auto-generated method stub
-		return medicationDao.selectAllMedication(name);
+		return medicationDao.selectAllMedication();
 	}
 
 

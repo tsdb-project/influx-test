@@ -9,7 +9,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 /**
  * Queries for doing the downsample-aggregation query Refactor from AnalysisService.exportToFile
  */
@@ -66,6 +65,7 @@ public class ExportQueryBuilder {
      */
     public ExportQueryBuilder(Instant fakeStartTime, List<DataTimeSpanBean> dts, List<DownsampleGroup> v, List<List<String>> columns,
                               Downsample ds, boolean needAr) {
+        //no available data
         if (dts == null || dts.isEmpty()) {
             return;
         }
@@ -127,6 +127,7 @@ public class ExportQueryBuilder {
             }
             this.validTimeSpanIds.add(i);
             Instant tmpS = d.getStart(), tmpE = d.getEnd();
+            // take the first(smallest) time of strat as firstAvailData, the last (largest) time of end as lastAvailData
             if (tmpS.compareTo(this.firstAvailData) < 0)
                 this.queryStartTime = this.firstAvailData = tmpS;
             if (tmpE.compareTo(this.lastAvailData) > 0)
@@ -329,5 +330,7 @@ public class ExportQueryBuilder {
             return !as.equals(DataTimeSpanBean.ArStatus.ArOnly);
         }
     }
+
+
 
 }
