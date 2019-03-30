@@ -155,11 +155,11 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6">
+                                    <div class="col-sm-4 col-md-4">
                                         <label>Downsample Interval</label>
                                         <div class="input-group mb-3">
                                             <input type="number" min="0" step="1" class="form-control" id="period" placeholder="Leave empty for no downsampling">
-                                            <div class="input-group-append col-sm-3 col-md-3">
+                                            <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Time Unit" id="period_unit" data-minimum-results-for-search="Infinity">
                                                     <option disabled="disabled" value="">Select Time Unit</option>
                                                     <option  value="1">Seconds</option>
@@ -170,12 +170,12 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-sm-6 col-md-6">
+                                    <div class="col-sm-4 col-md-4">
                                         <label>Minimal records in a valid bin</label>
                                         <div class="input-group mb-2">
                                             <input type="number" min="0" step="1" class="form-control" id="min_bin_row"
                                                    placeholder="Input minimal rows / interval percentage for a valid bin">
-                                            <div class="input-group-append col-sm-3 col-md-3">
+                                            <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Unit" id="minBinRowUnit" data-minimum-results-for-search="Infinity">
                                                     <option disabled="disabled"  value="">Select Unit</option>
                                                     <option  value="%">%</option>
@@ -185,6 +185,19 @@
                                                     <option  value="86400">Days</option>
                                                 </select>
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <label>Choose ar/noar file</label>
+                                        <div class="btn-group btn-group-toggle input-group mb-2" data-toggle="buttons" id="ARFile">
+                                            <label class="btn col-sm-6 col-md-6">
+                                                <input type="radio" value="true" autocomplete="off" name="ARFile">
+                                                AR
+                                            </label>
+                                            <label class="btn col-sm-6 col-md-6">
+                                                <input type="radio" value="false" autocomplete="off" name="ARFile">
+                                                NOAR
+                                            </label>
                                         </div>
                                     </div>
                                 </div>

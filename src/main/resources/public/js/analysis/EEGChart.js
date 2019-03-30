@@ -235,8 +235,10 @@ $(document).ready(function () {
                 "period_unit":$("#period_unit").val(),
                 "min_bin_row":$("#min_bin_row").val(),
                 "minBinRowUnit":$("#minBinRowUnit").val(),
-                "columns": JSON.stringify(map)
+                "columns": JSON.stringify(map),
+                "AR":$('#ARFile label.active input').val() == "true" ? true : false
             };
+
 
             // $.ajax({
             //     'url': "/analysis/getPatientMedInfoById/" + $("#patientId").text(),  // modify the URL
@@ -251,8 +253,7 @@ $(document).ready(function () {
             //     'error': function() {}
             // });
 
-
-
+            console.log(form);
             var allDatasets = []; // for store all points
             var allLabels = []; // store all timestamp for chart
             var allYAxes = []; // store all yAxis in case there are multiple units
