@@ -1,22 +1,21 @@
 package edu.pitt.medschool.model.dto;
 
 public class EEGChart {
-    private String patinetID;
+    private String patientID;
     private Integer period;
-    private Integer minBin;
     private Integer minBinRow;
     private Boolean downsampleFirst;
-    private String downsample;
-    private String aggregation;
     private String columns;
     private boolean ar;
+    private String downsampleMethod;
+    private String aggregationMethod;
 
-    public String getPatinetID() {
-        return patinetID;
+    public String getPatientID() {
+        return patientID;
     }
 
-    public void setPatinetID(String patinetID) {
-        this.patinetID = patinetID;
+    public void setPatientID(String patientID) {
+        this.patientID = patientID;
     }
 
     public Integer getPeriod() {
@@ -25,14 +24,6 @@ public class EEGChart {
 
     public void setPeriod(Integer period) {
         this.period = period;
-    }
-
-    public Integer getMinBin() {
-        return minBin;
-    }
-
-    public void setMinBin(Integer minBin) {
-        this.minBin = minBin;
     }
 
     public Integer getMinBinRow() {
@@ -51,22 +42,6 @@ public class EEGChart {
         this.downsampleFirst = downsampleFirst;
     }
 
-    public String getDownsample() {
-        return downsample;
-    }
-
-    public void setDownsample(String downsample) {
-        this.downsample = downsample;
-    }
-
-    public String getAggregation() {
-        return aggregation;
-    }
-
-    public void setAggregation(String aggregation) {
-        this.aggregation = aggregation;
-    }
-
     public String getColumns() {
         return columns;
     }
@@ -81,5 +56,21 @@ public class EEGChart {
 
     public void setAr(boolean ar) {
         this.ar = ar;
+    }
+
+    public String getDownsampleMethod() {
+        return downsampleMethod;
+    }
+
+    public void setDownsampleMethod(String downsampleMethod) {
+        this.downsampleMethod = downsampleMethod;
+    }
+
+    public String getAggregationMethod() {
+        return aggregationMethod;
+    }
+
+    public void setAggregationMethod(String aggregationMethod) {
+        this.aggregationMethod = aggregationMethod;
     }
 }

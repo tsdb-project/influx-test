@@ -672,38 +672,40 @@ public class AnalysisService {
      */
 
 
-    public ResultTable[] getEEGChartData(EEGChart eegChart){
+    public ArrayList <List<Object>> getEEGChartData(EEGChart eegChart){
         List<List<String>> columns = new ArrayList<>(1);
         List<DownsampleGroup> groups = new ArrayList<>(1);
+        ArrayList <List<Object>> rows = new ArrayList<>();
         DownsampleGroup downsampleGroup = new DownsampleGroup();
         Downsample downsample = new Downsample();
-        downsampleGroup.setAggregation(eegChart.getAggregation());
-        downsampleGroup.setDownsample(eegChart.getDownsample());
+        downsampleGroup.setAggregation(eegChart.getAggregationMethod());
+        downsampleGroup.setDownsample(eegChart.getAggregationMethod());
         downsampleGroup.setColumns(eegChart.getColumns());
         downsample.setPeriod(eegChart.getPeriod());
-        downsample.setMinBin(eegChart.getMinBin());
         downsample.setMinBinRow(eegChart.getMinBinRow());
         downsample.setDownsampleFirst(eegChart.getDownsampleFirst());
         groups.add(downsampleGroup);
+        downsample.setDuration(0);
+        downsample.setOrigin(0);
         ResultTable[] res = new ResultTable[1];
 
         try {
             columns.add(parseAggregationGroupColumnsString(eegChart.getColumns()));
         }catch (IOException e) {
             logger.error("Parse aggregation group failed: {}", Util.stackTraceErrorToString(e));
-            return res;
         }
 
         InfluxDB influxDB = generateIdbClient(false);
         try {
+            logger.info(eegChart.getPatientID());
             ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
                     "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
-                    eegChart.getPatinetID(), eegChart.isAr() ? "ar" : "noar", eegChart.getPeriod()));
+                    eegChart.getPatientID(), eegChart.isAr() ? "ar" : "noar", eegChart.getPeriod()));
             if (testOffset.length != 1) {
                logger.info("no enough data");
             }
             // Then fetch meta data regrading file segments and build the query string
-            List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, eegChart.getPatinetID());
+            List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, eegChart.getPatientID());
             ExportQueryBuilder eq = new ExportQueryBuilder(
                     Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, downsample,
                     eegChart.isAr());
@@ -711,13 +713,22 @@ public class AnalysisService {
             if (finalQueryString.isEmpty()) {
                 logger.info("fail to generate query");
             }
+            logger.info(finalQueryString);
             // Execuate the query
             res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
+            // covert res to map or list and return list
+            int dataRows = res[0].getRowCount();
+            for(int i =0;i<dataRows;i++){
+                List<Object> tmp = new ArrayList<>();
+                tmp.add(res[0].getDatalistByRow(i).get(0));
+                tmp.add(res[0].getDatalistByRow(i).get(1));
+                rows.add(tmp);
+            }
         }catch (Exception ee) {
             logger.info("get eeg chart data failed");
         }
         influxDB.close();
-        return res;
+        return rows;
     }
     
     

@@ -51,10 +51,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -163,8 +160,8 @@ public class AnalysisController {
     @ResponseBody
     public Map<String, Object> geteegChart(@RequestBody(required = true) EEGChart eegChart){
         Map<String, Object> map = new HashMap<>();
-        ResultTable[] res = analysisService.getEEGChartData(eegChart);
-        map.put("data",res);
+        ArrayList<List<Object>> rows = analysisService.getEEGChartData(eegChart);
+        map.put("data",rows);
         return map;
     }
 

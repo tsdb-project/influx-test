@@ -9,10 +9,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Queries for doing the downsample-aggregation query Refactor from AnalysisService.exportToFile
  */
 public class ExportQueryBuilder {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static class Template {
         static final String defaultDownsampleColName = "ds_label_";
@@ -81,8 +85,10 @@ public class ExportQueryBuilder {
         findValidFirstLastData();
 
         // If no available data then stop building
-        if (this.validTimeSpanIds.isEmpty()) return;
-
+        if (this.validTimeSpanIds.isEmpty()) {
+            logger.info("no valid data");
+            return;
+        }
         if (this.exportTotalDuration > 0) {
             this.queryEndTime = this.firstAvailData.plusSeconds(this.exportTotalDuration);
         }

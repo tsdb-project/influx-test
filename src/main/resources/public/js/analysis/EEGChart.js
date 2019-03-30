@@ -227,33 +227,47 @@ $(document).ready(function () {
             $("#eeg-modal").modal('hide');
 
             var form = {
-                "id": $("#patientId").text(),
-                "downsample": $("#method").val(),
-                "aggregation": $("#aggregation").val(),
-                "downsample_first":$('#downsample_first label.active input').val() == "true" ? true : false,
-                "period":$("#period").val(),
-                "period_unit":$("#period_unit").val(),
-                "min_bin_row":$("#min_bin_row").val(),
-                "minBinRowUnit":$("#minBinRowUnit").val(),
+                "patientID": $("#patientId").text(),
+                "downsampleMethod": $("#method").val(),
+                "aggregationMethod": $("#aggregation").val(),
+                "downsampleFirst":$('#downsample_first label.active input').val() == "true" ? true : false,
+                "period":$("#period").val()*$("#period_unit").val(),
+                "minBinRow":$("#min_bin_row").val()*$("#minBinRowUnit").val(),
                 "columns": JSON.stringify(map),
-                "AR":$('#ARFile label.active input').val() == "true" ? true : false
+                "ar":$('#ARFile label.active input').val() == "true" ? true : false
             };
 
 
-            // $.ajax({
-            //     'url': "/analysis/getPatientMedInfoById/" + $("#patientId").text(),  // modify the URL
-            //     'type': requestMethod,
-            //     'data': JSON.stringify(form),
-            //     'contentType': "application/json",
-            //     'dataType': 'json',
-            //     'success': function(text) {
-            //         $("#eeg-modal").modal('hide');
-            //         response = text.data;
-            //     },
-            //     'error': function() {}
-            // });
+            var eegChart;
+            var EEGData = [];
+            var EEGlabels = [];
+            var EEGYAxes = [];
+            var EEGdatasets = [];
 
-            console.log(form);
+            $.ajax({
+                'url': "/analysis/eegChart",  // modify the URL
+                'type': 'POST',
+                'data': JSON.stringify(form),
+                'contentType': "application/json",
+                'dataType': 'json',
+                'success': function(text) {
+                    $("#eeg-modal").modal('hide');
+                    eegChart = text.data;
+
+                    console.log(eegChart);
+
+                    for (i in eegChart){
+                        EEGlabels.push(eegChart[i][0]);
+                        EEGData.push({
+                            x: eegChart[i][0],
+                            y: eegChart[i][1]
+                        });
+                    }
+                },
+                'error': function() {}
+            });
+
+
             var allDatasets = []; // for store all points
             var allLabels = []; // store all timestamp for chart
             var allYAxes = []; // store all yAxis in case there are multiple units
@@ -272,24 +286,10 @@ $(document).ready(function () {
                 allYAxes = allGraph.options.scales.yAxes;
             }
 
-            var EEGData = [];
-            var EEGlabels = [];
-            var EEGYAxes = [];
-            var EEGdatasets = [];
 
             //Test data
+            
 
-            EEGData.push({
-                x: "2010-05-27T13:57:00-04:00",
-                y: 10
-            });  // used for store EEG data
-            EEGData.push({
-                x: "2010-05-28T15:57:00-04:00",
-                y: 20
-            });  // used for store EEG data
-
-            EEGlabels.push("2010-05-27T13:57:00-04:00");
-            EEGlabels.push("2010-05-28T15:57:00-04:00");
             EEGlabels = EEGlabels.sort();
 
 
