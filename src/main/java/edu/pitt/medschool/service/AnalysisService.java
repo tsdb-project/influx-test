@@ -4,6 +4,7 @@ import static edu.pitt.medschool.framework.influxdb.InfluxUtil.generateIdbClient
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
