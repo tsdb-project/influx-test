@@ -22,7 +22,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
 import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.*;
 import org.influxdb.InfluxDB;
@@ -43,6 +42,27 @@ import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.FileZip;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
+import edu.pitt.medschool.model.dao.AnalysisUtil;
+import edu.pitt.medschool.model.dao.CsvFileDao;
+import edu.pitt.medschool.model.dao.DownsampleDao;
+import edu.pitt.medschool.model.dao.DownsampleGroupDao;
+import edu.pitt.medschool.model.dao.ExportDao;
+import edu.pitt.medschool.model.dao.ExportOutput;
+import edu.pitt.medschool.model.dao.ExportQueryBuilder;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.MedicalDownsampleDao;
+import edu.pitt.medschool.model.dao.MedicalDownsampleGroupDao;
+import edu.pitt.medschool.model.dao.MedicationDao;
+import edu.pitt.medschool.model.dao.PatientDao;
+import edu.pitt.medschool.model.dto.CsvFile;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.ExportWithBLOBs;
+import edu.pitt.medschool.model.dto.MedicalDownsample;
+import edu.pitt.medschool.model.dto.MedicalDownsampleGroup;
+import edu.pitt.medschool.model.dto.MedicalQuery;
+import edu.pitt.medschool.model.dto.Medication;
+import edu.pitt.medschool.model.dto.Patient;
 import okhttp3.OkHttpClient;
 
 /**
@@ -698,7 +718,6 @@ public class AnalysisService {
         influxDB.close();
         return res;
     }
-
     
     
     
