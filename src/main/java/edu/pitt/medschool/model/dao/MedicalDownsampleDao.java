@@ -51,38 +51,4 @@ public class MedicalDownsampleDao {
 	public int deleteByPrimaryKey(int id) {
 		return medicalDownsampleMapper.deleteByPrimaryKey(id);
 	}
-	public Downsample translate(MedicalDownsample md, Medication m,Patient p) {
-		if (md==null) {
-			logger.error("md empty");
-		}
-		if (m==null) {
-			logger.error("m empty");
-		}
-		if (p == null) {
-			logger.error("p empty");
-		}
-		Downsample ds = new Downsample();
-		ds.setAlias(md.getAlias());
-		ds.setCreateTime(md.getCreateTime());
-		ds.setDeleted(md.getDeleted());
-		ds.setDownsampleFirst(md.getDownsampleFirst());
-		ds.setDuration(md.getBeforeMedicine()+md.getAfterMedicine());
-		ds.setId(md.getId());
-		ds.setMinBin(md.getMinBin());
-		ds.setMinBinRow(md.getMinBinRow());
-		logger.info("medication time:"+m.getChartDate().getTime());
-		logger.info("arrest time:"+p.getArresttime().getTime());
-		int time = (int) (m.getChartDate().getTime() - p.getArresttime().getTime())/1000 - md.getBeforeMedicine();
-		if(time<0) {
-			ds.setOrigin(0);
-		}else {
-			ds.setOrigin(time);
-		}
-		logger.info("time:"+Integer.toString(ds.getOrigin()));
-		logger.info("origin:"+ Integer.toString(time));
-		logger.info("here3");
-		ds.setPeriod(md.getPeriod());
-		ds.setUpdateTime(md.getUpdateTime());
-		return ds;
-	}
 }

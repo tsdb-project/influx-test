@@ -8,18 +8,13 @@ import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
 import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
 import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.controller.analysis.vo.MedicalDownsampleEditResponse;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.PatientTimeLine;
 import edu.pitt.medschool.model.dao.CsvFileDao;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.ExportWithBLOBs;
-import edu.pitt.medschool.model.dto.GraphFilter;
-import edu.pitt.medschool.model.dto.Medication;
+import edu.pitt.medschool.model.dto.*;
 import edu.pitt.medschool.model.dao.MedicationDao;
-import edu.pitt.medschool.model.dto.MedicalDownsample;
-import edu.pitt.medschool.model.dto.MedicalDownsampleGroup;
 import edu.pitt.medschool.service.AnalysisService;
 import edu.pitt.medschool.service.PatientMedInfoService;
 import edu.pitt.medschool.service.ColumnService;
@@ -156,6 +151,15 @@ public class AnalysisController {
     public Map<String, Object> getMedInfoById(Model model,@PathVariable String id) {
         Map<String, Object> map = new HashMap<>();
         map.put("data", patientMedInfoService.getMedInfoById("realpsc",id));
+        return map;
+    }
+
+    @RequestMapping(value = {"analysis/eegChart"}, method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> geteegChart(@RequestBody(required = true) EEGChart eegChart){
+        Map<String, Object> map = new HashMap<>();
+        ResultTable[] res = analysisService.getEEGChartData(eegChart);
+        map.put("data",res);
         return map;
     }
 

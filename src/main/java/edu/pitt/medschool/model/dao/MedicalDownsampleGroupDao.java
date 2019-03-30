@@ -44,27 +44,7 @@ public class MedicalDownsampleGroupDao {
 		example.createCriteria().andQueryIdEqualTo(queryId);
 		return medicalDownsampleGroupMapper.selectByExampleWithBLOBs(example);
 	}
-	
-	// ???????????
-	@SuppressWarnings("null")
-	public List<DownsampleGroup> translateList(List<MedicalDownsampleGroup> list){
-		List<DownsampleGroup> res = new ArrayList<DownsampleGroup>();
-		DownsampleGroup dsg = new DownsampleGroup();
-		for (int i=0; i<list.size();i++) {
-			dsg.setAggregation(list.get(i).getAggregation());
-			dsg.setColumns(list.get(i).getColumns());
-			dsg.setCreateTime(list.get(i).getCreateTime());
-			dsg.setDeleted(list.get(i).getDeleted());
-			dsg.setDownsample(list.get(i).getDownsample());
-			dsg.setId(list.get(i).getId());
-			dsg.setLabel(list.get(i).getLabel());
-			dsg.setQueryId(list.get(i).getQueryId());
-			dsg.setUpdateTime(list.get(i).getUpdateTime());
-			res.add(dsg);
-			
-		}
-		return res;
-	}
+
 	
 	public MedicalDownsampleGroup seleMedicalDownsampleGroup(Integer groupId) {
 		return medicalDownsampleGroupMapper.selectByPrimaryKey(groupId);
