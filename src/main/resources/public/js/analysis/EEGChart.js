@@ -224,8 +224,6 @@ $(document).ready(function () {
                 return false;
             }
 
-            $("#eeg-modal").modal('hide');
-
             var form = {
                 "patientID": $("#patientId").text(),
                 "downsampleMethod": $("#method").val(),
@@ -263,9 +261,12 @@ $(document).ready(function () {
                             y: eegChart[i][1]
                         });
                     }
+                    response = text.data;
                 },
                 'error': function() {}
             });
+
+            console.log(response);
 
 
             var allDatasets = []; // for store all points
