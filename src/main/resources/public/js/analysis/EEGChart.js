@@ -224,36 +224,32 @@ $(document).ready(function () {
                 return false;
             }
 
-            $("#eeg-modal").modal('hide');
-
             var form = {
-                "id": $("#patientId").text(),
-                "downsample": $("#method").val(),
-                "aggregation": $("#aggregation").val(),
-                "downsample_first":$('#downsample_first label.active input').val() == "true" ? true : false,
-                "period":$("#period").val(),
-                "period_unit":$("#period_unit").val(),
-                "min_bin_row":$("#min_bin_row").val(),
-                "minBinRowUnit":$("#minBinRowUnit").val(),
+                "patientID": $("#patientId").text(),
+                "downsampleMethod": $("#method").val(),
+                "aggregationMethod": $("#aggregation").val(),
+                "downsampleFirst":$('#downsample_first label.active input').val() == "true" ? true : false,
+                "period":$("#period").val() * $("#period_unit").val(),
+                "minBinRow":$("#min_bin_row").val() * $("#minBinRowUnit").val(),
                 "columns": JSON.stringify(map),
-                "AR":$('#ARFile label.active input').val() == "true" ? true : false
+                "ar":$('#ARFile label.active input').val() == "true" ? true : false
             };
 
 
-            // $.ajax({
-            //     'url': "/analysis/getPatientMedInfoById/" + $("#patientId").text(),  // modify the URL
-            //     'type': requestMethod,
-            //     'data': JSON.stringify(form),
-            //     'contentType': "application/json",
-            //     'dataType': 'json',
-            //     'success': function(text) {
-            //         $("#eeg-modal").modal('hide');
-            //         response = text.data;
-            //     },
-            //     'error': function() {}
-            // });
+            $.ajax({
+                'url': "/analysis/eegChart/",  // modify the URL
+                'type': 'POST',
+                'data': JSON.stringify(form),
+                'contentType': "application/json",
+                'dataType': 'json',
+                'success': function(text) {
+                    $("#eeg-modal").modal('hide');
+                    response = text.data;
+                },
+                'error': function() {}
+            });
 
-            console.log(form);
+            console.log(response);
             var allDatasets = []; // for store all points
             var allLabels = []; // store all timestamp for chart
             var allYAxes = []; // store all yAxis in case there are multiple units
