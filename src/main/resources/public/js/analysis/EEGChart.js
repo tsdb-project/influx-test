@@ -229,8 +229,8 @@ $(document).ready(function () {
                 "downsampleMethod": $("#method").val(),
                 "aggregationMethod": $("#aggregation").val(),
                 "downsampleFirst":$('#downsample_first label.active input').val() == "true" ? true : false,
-                "period":$("#period").val()*$("#period_unit").val(),
-                "minBinRow":$("#min_bin_row").val()*$("#minBinRowUnit").val(),
+                "period":$("#period").val() * $("#period_unit").val(),
+                "minBinRow":$("#min_bin_row").val() * $("#minBinRowUnit").val(),
                 "columns": JSON.stringify(map),
                 "ar":$('#ARFile label.active input').val() == "true" ? true : false
             };
@@ -267,8 +267,7 @@ $(document).ready(function () {
             });
 
             console.log(response);
-
-
+            
             var allDatasets = []; // for store all points
             var allLabels = []; // store all timestamp for chart
             var allYAxes = []; // store all yAxis in case there are multiple units
