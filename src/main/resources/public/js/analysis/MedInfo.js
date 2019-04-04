@@ -53,6 +53,7 @@ $(document).ready(function () {
         if ($('.medPanel').length > 0) { $('.medPanel').remove();}
 
         for ( d in selecteddrugs){
+            console.log(selecteddrugs[d]);
             var curDrug = drug.get(selecteddrugs[d])
             curDrug.sort(function ( a ,b ) {return a.chartDate > b.chartDate ? 1 : -1;}); // sort based on chartDate
 
