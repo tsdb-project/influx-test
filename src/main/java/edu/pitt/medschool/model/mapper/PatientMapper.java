@@ -1236,10 +1236,10 @@ public interface PatientMapper {
 			"core_dataset_complete = #{coreDatasetComplete,jdbcType=INTEGER}", "where id = #{id,jdbcType=CHAR}" })
 	int updateByPrimaryKey(Patient record);
 
-	@Select({ "SELECT id", "FROM patient", "WHERE female = #{isFemale}" })
+	@Select({ "SELECT id FROM patient ${whereCondition}" })
     @ResultType(String.class)
     @Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.VARCHAR) })
-    List<String> selectIdByGender(boolean isFemale);
+    List<String> selecIdByfilter( @Param("whereCondition") String whereCondition);
 
     @Select({ "SELECT id FROM patient" })
     @ResultType(String.class)

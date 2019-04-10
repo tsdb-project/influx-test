@@ -65,6 +65,8 @@ public class AnalysisController {
     private String uuid;
 
     @Autowired
+    PatientService PatientService;
+    @Autowired
     ValidateCsvService validateCsvService;
     @Autowired
     PatientMedInfoService patientMedInfoService;
@@ -135,9 +137,13 @@ public class AnalysisController {
     @RequestMapping(value = { "analysis/getPatientTimelines" }, method = RequestMethod.POST)
     @ResponseBody
     public String getFilteredPatientTimelines(@RequestBody(required = true) GraphFilter filter) throws Exception {
-        System.out.println("Debug");
-        System.out.println(filter.getAge());
         return validateCsvService.getFilteredtPatientTimeLines("realpsc", filter);
+    }
+
+    @RequestMapping(value = { "analysis/selecIdByfilter/{condition}" })
+    @ResponseBody
+    public List<String> selecIdByfilter(@PathVariable String condition) throws Exception {
+        return PatientService.selecIdByfilter(condition);
     }
 
     @RequestMapping("analysis/getAllPatientMedInfo")

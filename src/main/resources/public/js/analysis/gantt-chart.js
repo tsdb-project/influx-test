@@ -26,28 +26,17 @@ d3.gantt = function(tasks) {
     		fileName.push(tasks[p].pid);
 		}
     }
-    console.log("dataStartDate :" + dataStartDate);
     
     var timeDomainStart = d3.time.second(dataStartDate);
     var timeDomainEnd = d3.time.second.offset(dataStartDate, offset);
 
     var formatDate = d3.time.format("%m/%d/%Y %H:%M:%S");
-
-    console.log("s time format: " + typeof formatDate(timeDomainStart));
-    console.log("e time format: " + typeof formatDate(timeDomainEnd));
-    
-    console.log("timeDomainStart" + timeDomainStart);
-    console.log("timeDomainEnd" + timeDomainEnd);
     var timeDomainMode = FIT_TIME_DOMAIN_MODE;// fixed or fit
     var taskTypes = [];
     var patientFile = [];
     var taskStatus = [];
     var height = document.getElementById("chart-container").clientHeight - margin.top - margin.bottom;
     var width = document.getElementById("chart-container").clientWidth - margin.right - margin.left;
-    ///console.log("height before: " + document.getElementById("chart-container").clientHeight);
-    ///console.log("width before: " + document.getElementById("chart-container").clientWidth);
-    ///console.log("height: " + height);
-    ///console.log("width: " + width);
 
     //var tickFormat = "%H:%M";
     var tickFormat = "%d";
@@ -111,7 +100,6 @@ d3.gantt = function(tasks) {
 		    timeDomainStart = d3.time.second(dataStartDate);
 		    timeDomainEnd = d3.time.second(d3.time.second.offset(dataStartDate, offset) - timeDomainStart);
 
-		    console.log("init: " + timeDomainStart + " - " + timeDomainEnd);
 		}
     };
 
@@ -125,12 +113,15 @@ d3.gantt = function(tasks) {
     };
     
     function gantt(tasks) {
-	
+
+		d3.select("#PatientTimeLine").remove();
+
 		initTimeDomain(tasks);
 		initAxis();
 		
 		var svg = d3.select("#chart-container")
 			.append("svg")
+			.attr("id", "PatientTimeLine")
 			.attr("class", "chart")
 			.attr("width", width + margin.left + margin.right)
 			.attr("height", height + margin.top + margin.bottom)

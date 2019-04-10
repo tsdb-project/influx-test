@@ -19,7 +19,6 @@ $(document).ready(function () {
         //handle the logic of the single graph
 
         var allDatasets = []; // for store all points
-        var allLabels = []; // store all timestamp for chart
         var allYAxes = []; // store all yAxis in case there are multiple units
 
         if ($('#myChart').length > 0) {
@@ -28,9 +27,6 @@ $(document).ready(function () {
             for (i in allGraph.data.datasets){
                 if (allGraph.data.datasets[i].label == "EEG"){
                     allDatasets.push(allGraph.data.datasets[i]);
-                    for (j in allDatasets.data){
-                        allLabels.push(allDatasets.data[j].x);
-                    }
 
                     allYAxes.push({
                         id: 'EEG',
@@ -53,7 +49,6 @@ $(document).ready(function () {
         if ($('.medPanel').length > 0) { $('.medPanel').remove();}
 
         for ( d in selecteddrugs){
-            console.log(selecteddrugs[d]);
             var curDrug = drug.get(selecteddrugs[d])
             curDrug.sort(function ( a ,b ) {return a.chartDate > b.chartDate ? 1 : -1;}); // sort based on chartDate
 
@@ -64,7 +59,6 @@ $(document).ready(function () {
             var unit = new Map(); // store units
             var route = new Map(); // store routes
 
-            var labels = new Set(); // store timestamp for chart
             var yAxes = []; // store yAxis in case there are multiple units
 
 
@@ -86,9 +80,9 @@ $(document).ready(function () {
                 // skip the redundant points for continuous infusion
                 if(cPoint.length>=1 && curDrug[point].dose == cPoint[cPoint.length - 1].y){continue;}
 
-                time = new moment (curDrug[point].chartDate).format().toString(); // format current data point
+                var time = new moment (curDrug[point].chartDate).format().toString(); // format current data point
 
-                labels.add(time);
+                //labels.add(time);
                 route.set(time,curDrug[point].route); // store routes used for current time point
 
                 if(curDrug[point].type == "Continuous"){
@@ -167,22 +161,29 @@ $(document).ready(function () {
             }
 
             //setting for chart
-            var timeLabels = Array.from(labels).sort();
-            var timeUnit = (new Date(timeLabels[timeLabels.length-1]) - new Date(timeLabels[0]) > 24*60*60*1000) ? 'day':'hour';
+            //var timeLabels = Array.from(labels).sort();
 
             var MedGraph = new Chart($("#" + d ), {
                 type : 'line',
                 data : {
-                    labels : timeLabels,
                     datasets : datasets
                 },
                 options : {
-                    elements: {
-                        line: {
-                            steppedLine : 'before'
+                    legend:{
+                        onClick : function(event, legendItem) {
+                            allGraph.resetZoom();
+
+                            var index = legendItem.datasetIndex;
+                            var ci = this.chart;
+                            var meta = ci.getDatasetMeta(index);
+                            meta.hidden = meta.hidden === null? !ci.data.datasets[index].hidden : null;
+                            ci.update();
                         }
                     },
+                    bezierCurve : true,
+                    bezierCurveTension: 1,
                     tooltips: {
+                        mode: 'nearest',
                         callbacks: {
                             title: function (item,data) {
                                 var label = data.datasets[item[0].datasetIndex].label;
@@ -194,54 +195,63 @@ $(document).ready(function () {
                     },
                     events : [ "mousemove", "touchstart", "touchmove", "touchend", "click"
                     ],
-                    onClick : function() {$("#collapseExample").collapse('toggle');},
                     scales : {
                         xAxes: [{
                             type: 'time',
                             distribution: 'linear',
                             ticks: {
                                 source: 'label'
-                            },
-                            time: {
-                                unit: timeUnit,
                             }
                         }],
                         yAxes : yAxes
+                    },
+                    pan:{
+                        enabled:true,
+                        mode: 'xy',
+                        speed: 1
+                    },
+                    zoom:{
+                        enabled:true,
+                        mode: 'x'
                     }
                 }
             });
 
             Array.prototype.push.apply(allDatasets,datasets);
-            Array.prototype.push.apply(allLabels,Array.from(labels));
             Array.prototype.push.apply(allYAxes,yAxes);
         }
 
         $("#saveMedInfo").data('route',medInfo);  // Save medInfo of route
 
-        //setting for single chart
-        var sortedTimeLabels = allLabels.sort();
-        var allTimeUnit = (new Date(sortedTimeLabels[sortedTimeLabels.length-1]) - new Date(sortedTimeLabels[0]) > 24*60*60*1000) ? 'day':'hour';
 
         if($('#myChart').length > 0){
             allGraph.data.datasets = allDatasets;
-            allGraph.data.labels = allLabels;
             allGraph.options.scales.yAxes = allYAxes;
             allGraph.update();
+            allGraph.resetZoom();
         }else{
             $('#single_Chart').append('<canvas id="myChart"></canvas>');
             var allGraph = new Chart($("#myChart"), {
                 type : 'line',
                 data : {
-                    labels : sortedTimeLabels,
                     datasets : allDatasets
                 },
                 options : {
-                    elements: {
-                        line: {
-                            steppedLine : 'before',
+                    legend:{
+                        onClick : function(event, legendItem) {
+                            allGraph.resetZoom();
+
+                            var index = legendItem.datasetIndex;
+                            var ci = this.chart;
+                            var meta = ci.getDatasetMeta(index);
+                            meta.hidden = meta.hidden === null? !ci.data.datasets[index].hidden : null;
+                            ci.update();
                         }
                     },
+                    bezierCurve : true,
+                    bezierCurveTension: 1,
                     tooltips: {
+                        mode: 'nearest',
                         callbacks: {
                             title: function (item,data) {
                                 var label = data.datasets[item[0].datasetIndex].label
@@ -257,19 +267,24 @@ $(document).ready(function () {
                     },
                     events : [ "mousemove", "touchstart", "touchmove", "touchend", "click"
                     ],
-                    onClick : function() {$("#collapseExample").collapse('toggle');},
                     scales : {
                         xAxes: [{
                             type: 'time',
                             distribution: 'linear',
                             ticks: {
                                 source: 'label'
-                            },
-                            time: {
-                                unit: allTimeUnit,
                             }
                         }],
                         yAxes : allYAxes
+                    },
+                    pan:{
+                        enabled:true,
+                        mode: 'xy',
+                        speed: 1
+                    },
+                    zoom:{
+                        enabled:true,
+                        mode: 'x'
                     }
                 }
             });
@@ -369,70 +384,4 @@ $(document).ready(function () {
         }
         dataVisualization(response,Array.from(selectedDrugs));
     });
-
-    // var table = $('#medInfoTable').DataTable({
-    //     ajax: {
-    //         "url": "/analysis/getPatientMedInfoById/" + $("#patientId").text()
-    //     },
-    //     data: Patient.data,
-    //     columnDefs: [{
-    //         "targets": [0],
-    //         "visible": false,
-    //         "searchable": false
-    //     }],
-    //     columns: [{
-    //         data: 'id'
-    //     },{
-    //         data: 'infusedVol'
-    //     },{
-    //         data: null,
-    //         render: function (data) {
-    //             return new Date(data.chartDate);
-    //         }
-    //     }, {
-    //         data: 'drugName'
-    //     }, {
-    //         data: 'dose'
-    //     },{
-    //         data: 'doseUnit'
-    //     },{
-    //         data: 'rate'
-    //     }, {
-    //         data: 'rateUnit'
-    //     },{
-    //         data: 'orderedAs'
-    //     },{
-    //         data: 'route'
-    //     }, {
-    //         data: 'status'
-    //     }, {
-    //         data: 'site'
-    //     }, {
-    //         data: 'infusedVolUnit'
-    //     }, {
-    //         data: 'infuseInd'
-    //     }, {
-    //         data: 'ivFlag'
-    //     }, {
-    //         data: 'bolusFlag'
-    //     }, {
-    //         data: 'tdripInd'
-    //     },{
-    //         data: null,
-    //         render: function(data) {
-    //             return "<th><button class=\"btn btn-primary btn-sm\" data-toggle=\"modal\" data-target=\"#edit-group-modal\" data-id=\"" +
-    //                 data + "\"> Export</button> " + "</th>";
-    //         }
-    //     }],
-    //     order: [[2, 'desc']],
-    // });
-
-    // $('#medInfoTable tbody').on('mouseover', 'tr', function () {
-    //     $(this).attr("style", "background-color:#ffffdd");
-    // });
-    //
-    // $('#medInfoTable tbody').on('mouseout', 'tr', function () {
-    //     $(this).removeAttr('style');
-    // });
-
 });

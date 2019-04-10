@@ -26,12 +26,11 @@ public class PatientDao {
     }
 
     /**
-     * @param gender F: Female; M: Male
+     * @param condition Where condition for filter
      * @return List of PIDs
      */
-    public List<String> selecIdByGender(String gender) {
-        gender = gender.toUpperCase();
-        return patientMapper.selectIdByGender(gender.equals("F"));
+    public List<String> selecIdByfilter(String condition) {
+        return patientMapper.selecIdByfilter(condition);
     }
 
     /**

@@ -218,6 +218,18 @@ $(document).ready(function () {
 
         if ($('#aggregation-form')[0].checkValidity()) {
 
+            if ($('#downsample_first label.active input').val() == null) {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Please choose downsample first or aggregation first.');
+                return false;
+            }
+
+            if ($('#ARFile label.active input').val() == null) {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Please choose AR or NOAR file.');
+                return false;
+            }
+
             if (map.type == null) {
                 notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
                     'Please add at least one column to the final aggregation group list.');
@@ -236,61 +248,46 @@ $(document).ready(function () {
             };
 
 
-            var eegChart;
             var EEGData = [];
-            var EEGlabels = [];
             var EEGYAxes = [];
             var EEGdatasets = [];
 
             $.ajax({
                 'url': "/analysis/eegChart",  // modify the URL
                 'type': 'POST',
+                'async': false,
                 'data': JSON.stringify(form),
                 'contentType': "application/json",
                 'dataType': 'json',
                 'success': function(text) {
                     $("#eeg-modal").modal('hide');
-                    eegChart = text.data;
-
-                    console.log(eegChart);
-
-                    for (i in eegChart){
-                        EEGlabels.push(eegChart[i][0]);
-                        EEGData.push({
-                            x: eegChart[i][0],
-                            y: eegChart[i][1]
-                        });
-                    }
-                    response = text.data;
+                    eegResponse = text.data;
                 },
                 'error': function() {}
             });
 
-            console.log(response);
-            
+
+            for (i in eegResponse){
+                EEGData.push({
+                    x: eegResponse[i][0],
+                    y: eegResponse[i][1]
+                });
+            }
+
             var allDatasets = []; // for store all points
-            var allLabels = []; // store all timestamp for chart
             var allYAxes = []; // store all yAxis in case there are multiple units
 
             if ($('#myChart').length > 0) {
                 var allGraph = $("#myChart").data('graph');
-                var medInfo = $("#myChart").data('medInfo');
                 for (i in allGraph.data.datasets){
                     if (allGraph.data.datasets[i].label != "EEG"){
                         allDatasets.push(allGraph.data.datasets[i]);
-                        for (j in allDatasets.data){
-                            allLabels.push(allDatasets.data[j].x);
-                        }
                     }
                 }
                 allYAxes = allGraph.options.scales.yAxes;
             }
 
 
-            //Test data
-            
-
-            EEGlabels = EEGlabels.sort();
 
 
             EEGdatasets.push({
@@ -318,32 +315,39 @@ $(document).ready(function () {
                 }
             });
 
-            //Test data end
 
             Array.prototype.push.apply(allDatasets,EEGdatasets);
-            Array.prototype.push.apply(allLabels,EEGlabels);
             Array.prototype.push.apply(allYAxes,EEGYAxes);
+
 
             if ($('#myChart').length > 0){
                 allGraph.data.datasets = allDatasets;
-                allGraph.data.labels = allLabels;
-                allGraph.update()
+                allGraph.update();
+                allGraph.resetZoom();
             }else{
                 $('#single_Chart').append('<canvas id="myChart"></canvas>');
-                var allTimeUnit = (new Date(allLabels[allLabels.length-1]) - new Date(allLabels[0]) > 24*60*60*1000) ? 'day':'hour';
+
                 var allGraph = new Chart($("#myChart"), {
                     type : 'line',
                     data : {
-                        labels : allLabels,
                         datasets : allDatasets
                     },
                     options : {
-                        elements: {
-                            line: {
-                                steppedLine : 'before',
+                        legend:{
+                            onClick : function(event, legendItem) {
+                                allGraph.resetZoom();
+
+                                var index = legendItem.datasetIndex;
+                                var ci = this.chart;
+                                var meta = ci.getDatasetMeta(index);
+                                meta.hidden = meta.hidden === null? !ci.data.datasets[index].hidden : null;
+                                ci.update();
                             }
                         },
+                        bezierCurve : true,
+                        bezierCurveTension: 1,
                         tooltips: {
+                            mode: 'nearest',
                             callbacks: {
                                 title: function (item,data) {
                                     var label = data.datasets[item[0].datasetIndex].label
@@ -359,19 +363,24 @@ $(document).ready(function () {
                         },
                         events : [ "mousemove", "touchstart", "touchmove", "touchend", "click"
                         ],
-                        onClick : function() {$("#collapseExample").collapse('toggle');},
                         scales : {
                             xAxes: [{
                                 type: 'time',
                                 distribution: 'linear',
                                 ticks: {
                                     source: 'label'
-                                },
-                                time: {
-                                    unit: allTimeUnit,
                                 }
                             }],
                             yAxes : allYAxes
+                        },
+                        pan:{
+                            enabled:true,
+                            mode: 'xy',
+                            speed: 1
+                        },
+                        zoom:{
+                            enabled:true,
+                            mode: 'x'
                         }
                     }
                 });
@@ -381,6 +390,7 @@ $(document).ready(function () {
 
             //Handle stack representation
             if($("#EEGChart").length > 0){
+                $("#EEGChart").data('graph').data.datasets = EEGdatasets;
                 $("#EEGChart").data('graph').update();
             }else{
                 var EEGPanel =
@@ -397,22 +407,28 @@ $(document).ready(function () {
                 $('#EEG_Chart_Container').addClass("panel panel-info");
 
 
-                var timeUnit = (new Date(EEGlabels[EEGlabels.length-1]) - new Date(EEGlabels[0]) > 24*60*60*1000) ? 'day':'hour';
-
                 var eegGraph = new Chart($("#EEGChart"), {
                     type : 'line',
                     data : {
-                        labels : EEGlabels,
                         datasets : EEGdatasets
                     },
                     options : {
-                        elements: {
-                            line: {
-                                steppedLine : 'before'
+                        legend:{
+                            onClick : function(event, legendItem) {
+                                allGraph.resetZoom();
+
+                                var index = legendItem.datasetIndex;
+                                var ci = this.chart;
+                                var meta = ci.getDatasetMeta(index);
+                                meta.hidden = meta.hidden === null? !ci.data.datasets[index].hidden : null;
+                                ci.update();
                             }
                         },
+                        bezierCurve : true,
+                        bezierCurveTension: 1,
                         tooltips: {
                             callbacks: {
+                                mode: 'nearest',
                                 title: function (item,data) {
                                     return 'Time: ' + item[0].xLabel
                                 }
@@ -420,78 +436,30 @@ $(document).ready(function () {
                         },
                         events : [ "mousemove", "touchstart", "touchmove", "touchend", "click"
                         ],
-                        onClick : function() {$("#collapseExample").collapse('toggle');},
                         scales : {
                             xAxes: [{
                                 type: 'time',
                                 distribution: 'linear',
                                 ticks: {
                                     source: 'label'
-                                },
-                                time: {
-                                    unit: timeUnit
                                 }
                             }],
                             yAxes : EEGYAxes
+                        },
+                        pan:{
+                            enabled:true,
+                            mode: 'xy',
+                            speed: 1
+                        },
+                        zoom:{
+                            enabled:true,
+                            mode: 'x'
                         }
                     }
                 });
                 $("#EEGChart").data('graph',eegGraph);
             }
 
-
-            // for (point in response){
-            //     time = new moment (response[point].EEGtime).format().toString(); // format current data point
-            //     EEGlabels.add(time);
-            // }
-
-
-
-            //clear the canvas
-            // if ($('#eegGraph')) { $('#eegGraph').remove();}
-            // $('#EEG_Chart').append('<canvas id="eegGraph"></canvas>');
-
-            //     var myChart = new Chart($("#eegGraph" ), {
-            //         type : 'line',
-            //         data : {
-            //             labels : timeLabels,
-            //             datasets : datasets
-            //         },
-            //         options : {
-            //             elements: {
-            //                 line: {
-            //                     steppedLine : 'before',
-            //                 }
-            //             },
-            //             tooltips: {
-            //                 callbacks: {
-            //                     title: function (item,data) {
-            //                         var label = data.datasets[item[0].datasetIndex].label
-            //                         var MedName = label.split('(')[0].trim()
-            //                         return 'Time: ' + item[0].xLabel + '\n'+
-            //                             'Route: '+ medInfo.get(MedName).get(item[0].xLabel);
-            //                     }
-            //                 }
-            //             },
-            //             events : [ "mousemove", "touchstart", "touchmove", "touchend", "click"
-            //             ],
-            //             onClick : function() {$("#collapseExample").collapse('toggle');},
-            //             scales : {
-            //                 xAxes: [{
-            //                     type: 'time',
-            //                     distribution: 'linear',
-            //                     ticks: {
-            //                         source: 'label'
-            //                     },
-            //                     time: {
-            //                         unit: timeUnit,
-            //                     }
-            //                 }],
-            //                 yAxes : yAxes
-            //             }
-            //         }
-            //     });
-            // }
             return false;
         }else{
             console.log("invalid form");
