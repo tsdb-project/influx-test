@@ -229,7 +229,7 @@ $(document).ready(function() {
 		});
 		var maxDate = tasks[tasks.length - 1].relativeEndTime;
 
-		var format = "%j";
+		var format = "%d";
 
 		var gantt = d3.gantt(tasks).taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format);
 		gantt(tasks);
@@ -287,7 +287,7 @@ $(document).ready(function() {
 	});
 	var maxDate = tasks[tasks.length - 1].relativeEndTime;
 
-	var format = "%j";
+	var format = "%d";
 
 	var gantt = d3.gantt(tasks).taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format);
 	gantt(tasks);

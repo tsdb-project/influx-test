@@ -37,7 +37,7 @@
     }
      
     .bar-failed {
-        fill: #33b5e5;
+        fill: #CC0000;
         opacity: 0.5;
     }
      
@@ -50,7 +50,7 @@
     }
      
     .bar-killed {
-        fill: #32c787;
+        fill: #ffbb33;
         opacity: 0.5;
     }
      
@@ -72,11 +72,6 @@
         text-decoration: none;
     }
 
-    /*#chart-container {
-        width: 100%;
-        height: 110000px;
-    }*/
-
     #chart-container {
         width: 100%;
         height: 110000px;
@@ -97,9 +92,8 @@
 </style>
 
 <!--script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script-->
-<script type="text/javascript" src="https://d3js.org/d3.v4.js"></script>
+<script type="text/javascript" src="https://d3js.org/d3.v3.js"></script>
 <script type="text/javascript" src="/js/analysis/gantt-chart.js"></script>
-<script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
 
 <!-- App styles -->
 <link rel="stylesheet" href="/css/app.min.css">
@@ -129,7 +123,7 @@
                                     <button class="btn btn-primary btn-sm btn-block" id="addFilter">Add Filter</button>
                                 </div>
                                 <div class="col-sm-2 col-md-2">
-                                    <button class="btn btn-success btn-sm btn-block" id="queryFilter">Go</button>
+                                    <button type="button" class="btn btn-success btn-sm btn-block" id="queryFilter">Go</button>
                                 </div>
                             </div>
                             <div class="row">
@@ -146,11 +140,12 @@
                                         <option value=">=">&ge;</option>
                                         <option value="<">&lt;</option>
                                         <option value="<=">&le;</option>
+                                        <option value="LIKE">like</option>
                                     </select>
                                 </div>
                                 <div class="col-sm-2 col-md-2">
                                     <div class="input-group mb-3">
-                                        <input type="text" class="form-control" id="value[]" placeholder="Input value" required>
+                                        <input type="text" class="form-control value" id="value[]" placeholder="Input value" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-1 col-md-1" style="margin-top: 6px;">
@@ -210,6 +205,5 @@
     <script src="/js/navigation.js"></script>
     <script src="/js/app.min.js"></script>
     <script src="/js/analysis/chart.js"></script>
-
 </body>
 </html>
