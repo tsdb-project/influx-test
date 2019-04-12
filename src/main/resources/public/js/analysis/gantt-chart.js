@@ -128,6 +128,7 @@ d3.gantt = function(tasks) {
 		
 		var svg = d3.select("#chart-container")
 			.append("svg")
+				.attr("id", "PatientTimeLine")
 				.attr("class", "chart")
 				.attr("width", width + margin.left + margin.right)
 				.attr("height", height + margin.top + margin.bottom)

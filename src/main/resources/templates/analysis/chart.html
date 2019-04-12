@@ -129,7 +129,7 @@
                                     <button class="btn btn-primary btn-sm btn-block" id="addFilter">Add Filter</button>
                                 </div>
                                 <div class="col-sm-2 col-md-2">
-                                    <button class="btn btn-success btn-sm btn-block" id="queryFilter">Go</button>
+                                    <button type="button" class="btn btn-success btn-sm btn-block" id="queryFilter">Go</button>
                                 </div>
                             </div>
                             <div class="row">
@@ -146,11 +146,12 @@
                                         <option value=">=">&ge;</option>
                                         <option value="<">&lt;</option>
                                         <option value="<=">&le;</option>
+                                        <option value="LIKE">like</option>
                                     </select>
                                 </div>
                                 <div class="col-sm-2 col-md-2">
                                     <div class="input-group mb-3">
-                                        <input type="text" class="form-control" id="value[]" placeholder="Input value" required>
+                                        <input type="text" class="form-control value" id="value[]" placeholder="Input value" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-1 col-md-1" style="margin-top: 6px;">
