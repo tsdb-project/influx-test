@@ -97,7 +97,9 @@ public class AnalysisController {
     
     @RequestMapping("analysis/medicalbuilder")
     public Model medicalBuilderPage(Model model) {
-    	return analysisGenerateModel(model);
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "medicalbuilder");
+    	return model;
     }
     
     @RequestMapping("analysis/job")
