@@ -34,19 +34,22 @@ public class MedicationDao {
     }
 
     public List<String> selectAllMedication(){
-        List<String> list = medicationMapper.getAllMedicine();
-        return list;
+        return medicationMapper.getAllMedicine();
     }
 
     public List<Medication> selectAllbyMedications(String drugName, List<String> patientIDs){
         String patients = Util.wrapAndConcatStringList("'", ", ", patientIDs);
         logger.info(patients);
-        List<Medication> list = medicationMapper.selectAllbyMedication(drugName,patients);
-        return list;
+        return medicationMapper.selectAllbyMedication(drugName,patients);
     }
 
     public List<String> selectPatientbyMedications(String drugName){
-        List<String> list = medicationMapper.selectPatientsbyMedications(drugName);
-        return list;
+        return medicationMapper.selectPatientsbyMedications(drugName);
+    }
+
+    public List<Medication> selectFirstbyMedications(String medicine, List<String> patientIDs) {
+        String patients = Util.wrapAndConcatStringList("'", ", ", patientIDs);
+        logger.info("first"+patients);
+        return medicationMapper.selectFirstMedication(medicine,patients);
     }
 }

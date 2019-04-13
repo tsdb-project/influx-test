@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,7 +78,7 @@ public class ExportMedicalQueryBuilder {
          this.columnNames = columns;
          this.validTimeSpanIds = new ArrayList<>(this.numDataSegments);
          this.isAr = needAr;
-         this.medicalTime = records.DatetoInstant(records.getChartDate());
+         this.medicalTime = records.getChartDate().toInstant();
          populateDownsampleGroup(v);
          populateDownsampleData(ds);
          findValidFirstLastData();

@@ -3,6 +3,7 @@ package edu.pitt.medschool.model.dto;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.time.LocalDateTime;
 
 public class MedicalDownsampleExample {
     /**
@@ -900,6 +901,126 @@ public class MedicalDownsampleExample {
 
 		public Criteria andDeletedNotBetween(Boolean value1, Boolean value2) {
 			addCriterion("deleted not between", value1, value2, "deleted");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineIsNull() {
+			addCriterion("data_before_medicine is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineIsNotNull() {
+			addCriterion("data_before_medicine is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineEqualTo(Boolean value) {
+			addCriterion("data_before_medicine =", value, "dataBeforeMedicine");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineNotEqualTo(Boolean value) {
+			addCriterion("data_before_medicine <>", value, "dataBeforeMedicine");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineGreaterThan(Boolean value) {
+			addCriterion("data_before_medicine >", value, "dataBeforeMedicine");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineGreaterThanOrEqualTo(Boolean value) {
+			addCriterion("data_before_medicine >=", value, "dataBeforeMedicine");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineLessThan(Boolean value) {
+			addCriterion("data_before_medicine <", value, "dataBeforeMedicine");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineLessThanOrEqualTo(Boolean value) {
+			addCriterion("data_before_medicine <=", value, "dataBeforeMedicine");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineIn(List<Boolean> values) {
+			addCriterion("data_before_medicine in", values, "dataBeforeMedicine");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineNotIn(List<Boolean> values) {
+			addCriterion("data_before_medicine not in", values, "dataBeforeMedicine");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineBetween(Boolean value1, Boolean value2) {
+			addCriterion("data_before_medicine between", value1, value2, "dataBeforeMedicine");
+			return (Criteria) this;
+		}
+
+		public Criteria andDataBeforeMedicineNotBetween(Boolean value1, Boolean value2) {
+			addCriterion("data_before_medicine not between", value1, value2, "dataBeforeMedicine");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstIsNull() {
+			addCriterion("only_first is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstIsNotNull() {
+			addCriterion("only_first is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstEqualTo(Boolean value) {
+			addCriterion("only_first =", value, "onlyFirst");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstNotEqualTo(Boolean value) {
+			addCriterion("only_first <>", value, "onlyFirst");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstGreaterThan(Boolean value) {
+			addCriterion("only_first >", value, "onlyFirst");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstGreaterThanOrEqualTo(Boolean value) {
+			addCriterion("only_first >=", value, "onlyFirst");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstLessThan(Boolean value) {
+			addCriterion("only_first <", value, "onlyFirst");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstLessThanOrEqualTo(Boolean value) {
+			addCriterion("only_first <=", value, "onlyFirst");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstIn(List<Boolean> values) {
+			addCriterion("only_first in", values, "onlyFirst");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstNotIn(List<Boolean> values) {
+			addCriterion("only_first not in", values, "onlyFirst");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstBetween(Boolean value1, Boolean value2) {
+			addCriterion("only_first between", value1, value2, "onlyFirst");
+			return (Criteria) this;
+		}
+
+		public Criteria andOnlyFirstNotBetween(Boolean value1, Boolean value2) {
+			addCriterion("only_first not between", value1, value2, "onlyFirst");
 			return (Criteria) this;
 		}
 

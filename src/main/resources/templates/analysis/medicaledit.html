@@ -127,6 +127,32 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <label>Only show the result of first medicine record</label>
+                                        <div class="btn-group btn-group-toggle input-group mb-2" data-toggle="buttons" id="onlyfirst">
+                                            <label class="btn col-sm-6 col-md-6" th:classappend="${medicalquery.medicalDownsample.onlyFirst} == false ? 'active' : ''">
+                                                <input type="radio" value="false" autocomplete="off" name="onlyfirst">
+                                                no
+                                            </label>
+                                            <label class="btn col-sm-6 col-md-6" th:classappend="${medicalquery.medicalDownsample.onlyFirst} == true ? 'active' : ''">
+                                                <input type="radio" value="true" autocomplete="off" name="onlyfirst">
+                                                yes
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <label>Make sure eeg data before first medicine record</label>
+                                        <div class="btn-group btn-group-toggle input-group mb-2" data-toggle="buttons" id="eegbefore">
+                                            <label class="btn col-sm-6 col-md-6" th:classappend="${medicalquery.medicalDownsample.dataBeforeMedicine} == false ? 'active' : ''">
+                                                <input type="radio" value="false" autocomplete="off" name="eegbefore">
+                                                no
+                                            </label>
+                                            <label class="btn col-sm-6 col-md-6" th:classappend="${medicalquery.medicalDownsample.dataBeforeMedicine} == true ? 'active' : ''">
+                                                <input type="radio" value="true" autocomplete="off" name="eegbefore">
+                                                yes
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-4 col-md-4">

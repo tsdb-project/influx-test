@@ -1,7 +1,6 @@
 package edu.pitt.medschool.controller.analysis.vo;
 
 import edu.pitt.medschool.framework.util.TimeUtil;
-
 import edu.pitt.medschool.model.dto.MedicalDownsample;
 
 public class MedicalDownsampleEditResponse {
