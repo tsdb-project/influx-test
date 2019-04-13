@@ -1,21 +1,15 @@
 package edu.pitt.medschool.model.dao;
 
-import java.sql.Date;
 import java.util.List;
-import static java.lang.Math.toIntExact;
 
+import edu.pitt.medschool.model.dto.MedicalDownsample;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.pitt.medschool.model.dto.CsvFile;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.MedicalDownsample;
 import edu.pitt.medschool.model.dto.MedicalDownsampleExample;
-import edu.pitt.medschool.model.dto.Medication;
-import edu.pitt.medschool.model.dto.Patient;
 import edu.pitt.medschool.model.mapper.MedicalDownsampleMapper;
 
 

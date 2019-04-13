@@ -1,6 +1,5 @@
 package edu.pitt.medschool.model.mapper;
 
-import edu.pitt.medschool.model.dto.MedicalDownsample;
 import edu.pitt.medschool.model.dto.MedicalDownsampleExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Delete;
@@ -18,6 +17,7 @@ import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.JdbcType;
+import edu.pitt.medschool.model.dto.MedicalDownsample;
 
 @Mapper
 public interface MedicalDownsampleMapper {
@@ -48,12 +48,14 @@ public interface MedicalDownsampleMapper {
 	 * @mbg.generated
 	 */
 	@Insert({ "insert into medical_downsample (alias, medicine, ", "before_medicine, after_medicine, ",
-			"period, min_bin, ", "min_bin_row, downsample_first, ", "create_time, update_time, ", "deleted)",
+			"period, min_bin, ", "min_bin_row, downsample_first, ", "create_time, update_time, ",
+			"deleted, data_before_medicine, ", "only_first)",
 			"values (#{alias,jdbcType=VARCHAR}, #{medicine,jdbcType=VARCHAR}, ",
 			"#{beforeMedicine,jdbcType=INTEGER}, #{afterMedicine,jdbcType=INTEGER}, ",
 			"#{period,jdbcType=INTEGER}, #{minBin,jdbcType=INTEGER}, ",
 			"#{minBinRow,jdbcType=INTEGER}, #{downsampleFirst,jdbcType=BIT}, ",
-			"#{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, ", "#{deleted,jdbcType=BIT})" })
+			"#{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, ",
+			"#{deleted,jdbcType=BIT}, #{dataBeforeMedicine,jdbcType=BIT}, ", "#{onlyFirst,jdbcType=BIT})" })
 	@SelectKey(statement = "SELECT LAST_INSERT_ID()", keyProperty = "id", before = false, resultType = Integer.class)
 	int insert(MedicalDownsample record);
 
@@ -81,7 +83,9 @@ public interface MedicalDownsampleMapper {
 			@Result(column = "downsample_first", property = "downsampleFirst", jdbcType = JdbcType.BIT),
 			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "update_time", property = "updateTime", jdbcType = JdbcType.TIMESTAMP),
-			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT) })
+			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
+			@Result(column = "data_before_medicine", property = "dataBeforeMedicine", jdbcType = JdbcType.BIT),
+			@Result(column = "only_first", property = "onlyFirst", jdbcType = JdbcType.BIT) })
 	List<MedicalDownsample> selectByExampleWithRowbounds(MedicalDownsampleExample example, RowBounds rowBounds);
 
 	/**
@@ -100,7 +104,9 @@ public interface MedicalDownsampleMapper {
 			@Result(column = "downsample_first", property = "downsampleFirst", jdbcType = JdbcType.BIT),
 			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "update_time", property = "updateTime", jdbcType = JdbcType.TIMESTAMP),
-			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT) })
+			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
+			@Result(column = "data_before_medicine", property = "dataBeforeMedicine", jdbcType = JdbcType.BIT),
+			@Result(column = "only_first", property = "onlyFirst", jdbcType = JdbcType.BIT) })
 	List<MedicalDownsample> selectByExample(MedicalDownsampleExample example);
 
 	/**
@@ -108,8 +114,8 @@ public interface MedicalDownsampleMapper {
 	 * @mbg.generated
 	 */
 	@Select({ "select", "id, alias, medicine, before_medicine, after_medicine, period, min_bin, min_bin_row, ",
-			"downsample_first, create_time, update_time, deleted", "from medical_downsample",
-			"where id = #{id,jdbcType=INTEGER}" })
+			"downsample_first, create_time, update_time, deleted, data_before_medicine, only_first",
+			"from medical_downsample", "where id = #{id,jdbcType=INTEGER}" })
 	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
 			@Result(column = "alias", property = "alias", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "medicine", property = "medicine", jdbcType = JdbcType.VARCHAR),
@@ -121,7 +127,9 @@ public interface MedicalDownsampleMapper {
 			@Result(column = "downsample_first", property = "downsampleFirst", jdbcType = JdbcType.BIT),
 			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "update_time", property = "updateTime", jdbcType = JdbcType.TIMESTAMP),
-			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT) })
+			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
+			@Result(column = "data_before_medicine", property = "dataBeforeMedicine", jdbcType = JdbcType.BIT),
+			@Result(column = "only_first", property = "onlyFirst", jdbcType = JdbcType.BIT) })
 	MedicalDownsample selectByPrimaryKey(Integer id);
 
 	/**
@@ -155,7 +163,8 @@ public interface MedicalDownsampleMapper {
 			"after_medicine = #{afterMedicine,jdbcType=INTEGER},", "period = #{period,jdbcType=INTEGER},",
 			"min_bin = #{minBin,jdbcType=INTEGER},", "min_bin_row = #{minBinRow,jdbcType=INTEGER},",
 			"downsample_first = #{downsampleFirst,jdbcType=BIT},", "create_time = #{createTime,jdbcType=TIMESTAMP},",
-			"update_time = #{updateTime,jdbcType=TIMESTAMP},", "deleted = #{deleted,jdbcType=BIT}",
+			"update_time = #{updateTime,jdbcType=TIMESTAMP},", "deleted = #{deleted,jdbcType=BIT},",
+			"data_before_medicine = #{dataBeforeMedicine,jdbcType=BIT},", "only_first = #{onlyFirst,jdbcType=BIT}",
 			"where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(MedicalDownsample record);
 }

@@ -162,7 +162,9 @@ $(document).ready(function() {
                 "medicine":$("#medicine").val(), 
                 "beforeMedicine": $("#before").val() * $("#before_unit").val(),
                 "afterMedicine": $("#after").val() * $("#after_unit").val(),
-                "downsampleFirst": $('#downsample_first label.active input').val() == "true" ? true : false
+                "downsampleFirst": $('#downsample_first label.active input').val() == "true" ? true : false,
+                "onlyFirst":$('#onlyfirst label.active input').val() == "true" ? true : false,
+                "dataBeforeMedicine":$('#eegbefore label.active input').val() == "true" ? true : false
             };
             if ($("#minBinRowUnit").val() == '%') {
                 form.minBinRow = form.period * $("#min_bin_row").val() / 100;

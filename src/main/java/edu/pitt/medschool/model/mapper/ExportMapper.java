@@ -238,7 +238,7 @@ public interface ExportMapper {
 			"update_time = #{updateTime,jdbcType=TIMESTAMP},", "deleted = #{deleted,jdbcType=BIT},",
 			"medical = #{medical,jdbcType=BIT}", "where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(Export record);
-	
+
 	@Select({"SELECT e.id, e.ar, e.machine, e.create_time, d.alias, e.finished FROM export e, downsample d WHERE e.query_id=d.id and e.medical=0 and e.deleted = 0 AND (e.machine = #{machineId,jdbcType=VARCHAR} or e.machine = 'realpsc')\r\n" + 
 			"union \r\n" + 
 			"SELECT e.id, e.ar, e.machine, e.create_time, md.alias, e.finished FROM export e, medical_downsample md where md.id = e.query_id and e.medical=1 and e.deleted = 0 AND (e.machine = #{machineId,jdbcType=VARCHAR} or e.machine = 'realpsc')"})

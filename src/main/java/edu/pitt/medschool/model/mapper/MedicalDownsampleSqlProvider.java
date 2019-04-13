@@ -1,12 +1,12 @@
 package edu.pitt.medschool.model.mapper;
 
-import edu.pitt.medschool.model.dto.MedicalDownsample;
 import edu.pitt.medschool.model.dto.MedicalDownsampleExample.Criteria;
 import edu.pitt.medschool.model.dto.MedicalDownsampleExample.Criterion;
 import edu.pitt.medschool.model.dto.MedicalDownsampleExample;
 import java.util.List;
 import java.util.Map;
 import org.apache.ibatis.jdbc.SQL;
+import edu.pitt.medschool.model.dto.MedicalDownsample;
 
 public class MedicalDownsampleSqlProvider {
 
@@ -72,6 +72,12 @@ public class MedicalDownsampleSqlProvider {
 		if (record.getDeleted() != null) {
 			sql.VALUES("deleted", "#{deleted,jdbcType=BIT}");
 		}
+		if (record.getDataBeforeMedicine() != null) {
+			sql.VALUES("data_before_medicine", "#{dataBeforeMedicine,jdbcType=BIT}");
+		}
+		if (record.getOnlyFirst() != null) {
+			sql.VALUES("only_first", "#{onlyFirst,jdbcType=BIT}");
+		}
 		return sql.toString();
 	}
 
@@ -97,6 +103,8 @@ public class MedicalDownsampleSqlProvider {
 		sql.SELECT("create_time");
 		sql.SELECT("update_time");
 		sql.SELECT("deleted");
+		sql.SELECT("data_before_medicine");
+		sql.SELECT("only_first");
 		sql.FROM("medical_downsample");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -150,6 +158,12 @@ public class MedicalDownsampleSqlProvider {
 		if (record.getDeleted() != null) {
 			sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
 		}
+		if (record.getDataBeforeMedicine() != null) {
+			sql.SET("data_before_medicine = #{record.dataBeforeMedicine,jdbcType=BIT}");
+		}
+		if (record.getOnlyFirst() != null) {
+			sql.SET("only_first = #{record.onlyFirst,jdbcType=BIT}");
+		}
 		applyWhere(sql, example, true);
 		return sql.toString();
 	}
@@ -173,6 +187,8 @@ public class MedicalDownsampleSqlProvider {
 		sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
 		sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
 		sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
+		sql.SET("data_before_medicine = #{record.dataBeforeMedicine,jdbcType=BIT}");
+		sql.SET("only_first = #{record.onlyFirst,jdbcType=BIT}");
 		MedicalDownsampleExample example = (MedicalDownsampleExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -217,6 +233,12 @@ public class MedicalDownsampleSqlProvider {
 		}
 		if (record.getDeleted() != null) {
 			sql.SET("deleted = #{deleted,jdbcType=BIT}");
+		}
+		if (record.getDataBeforeMedicine() != null) {
+			sql.SET("data_before_medicine = #{dataBeforeMedicine,jdbcType=BIT}");
+		}
+		if (record.getOnlyFirst() != null) {
+			sql.SET("only_first = #{onlyFirst,jdbcType=BIT}");
 		}
 		sql.WHERE("id = #{id,jdbcType=INTEGER}");
 		return sql.toString();
