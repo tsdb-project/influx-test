@@ -16,8 +16,6 @@ import edu.pitt.medschool.model.dao.ImportProgressDao;
 import edu.pitt.medschool.model.dao.MedicalDownsampleDao;
 import edu.pitt.medschool.model.dao.MedicalDownsampleGroupDao;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
-import edu.pitt.medschool.model.dto.MedicalDownsample;
-import edu.pitt.medschool.model.dto.MedicalDownsampleGroup;
 
 @Service
 public class ExportService {

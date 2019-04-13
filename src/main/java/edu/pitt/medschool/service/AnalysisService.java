@@ -4,15 +4,9 @@ import static edu.pitt.medschool.framework.influxdb.InfluxUtil.generateIdbClient
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -44,7 +38,6 @@ import edu.pitt.medschool.framework.util.FileZip;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dao.AnalysisUtil;
-import edu.pitt.medschool.model.dao.CsvFileDao;
 import edu.pitt.medschool.model.dao.DownsampleDao;
 import edu.pitt.medschool.model.dao.DownsampleGroupDao;
 import edu.pitt.medschool.model.dao.ExportDao;
@@ -55,15 +48,11 @@ import edu.pitt.medschool.model.dao.MedicalDownsampleDao;
 import edu.pitt.medschool.model.dao.MedicalDownsampleGroupDao;
 import edu.pitt.medschool.model.dao.MedicationDao;
 import edu.pitt.medschool.model.dao.PatientDao;
-import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
-import edu.pitt.medschool.model.dto.MedicalDownsample;
 import edu.pitt.medschool.model.dto.MedicalDownsampleGroup;
-import edu.pitt.medschool.model.dto.MedicalQuery;
 import edu.pitt.medschool.model.dto.Medication;
-import edu.pitt.medschool.model.dto.Patient;
 import okhttp3.OkHttpClient;
 
 /**
@@ -397,8 +386,42 @@ public class AnalysisService {
 
          //medicalRecordList save all medical records of all selected patients
          List<Medication> medicalRecordList = new ArrayList<Medication>();
+         List<Medication> medicalRecordList_full = new ArrayList<Medication>();
+         List<Medication> medicalRecordList_first = new ArrayList<Medication>();
          logger.info("patientIDS:"+Integer.toString(patientIDs.size()));
-         medicalRecordList = medicationDao.selectAllbyMedications(exportQuery.getMedicine(),patientIDs);
+         medicalRecordList_full = medicationDao.selectAllbyMedications(exportQuery.getMedicine(),patientIDs);
+         medicalRecordList_first = medicationDao.selectFirstbyMedications(exportQuery.getMedicine(),patientIDs);
+         if(exportQuery.getOnlyFirst() && exportQuery.getDataBeforeMedicine()){
+             logger.info("only first and before first");
+             medicalRecordList = medicalRecordList_first;
+         } else if(exportQuery.getDataBeforeMedicine() && !exportQuery.getOnlyFirst()){
+             logger.info("not only first and before first");
+             InfluxDB influxDB = generateIdbClient(false);
+             Set<String> patients = new HashSet<String>();
+             for(Medication medication: medicalRecordList_first){
+                 List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, medication.getId());
+                 ExportMedicalQueryBuilder eq = new ExportMedicalQueryBuilder(Instant.now(), dtsb, groups, columns, exportQuery,
+                         job.getAr(), medication);
+                 Instant valid = eq.getFirstAvailData();
+                 if (valid.compareTo(medication.getChartDate().toInstant())<0){
+                     patients.add(medication.getId());
+                 }
+             }
+
+             for(Medication m: medicalRecordList_full){
+                 if (patients.contains(m.getId())){
+                     medicalRecordList.add(m);
+                 }
+             }
+
+         } else if(exportQuery.getOnlyFirst() && !exportQuery.getDataBeforeMedicine()){
+             logger.info("only first and not before first");
+             medicalRecordList = medicalRecordList_first;
+         } else {
+             logger.info("not only first and not before first");
+             medicalRecordList = medicalRecordList_full;
+         }
+
          logger.info("medicalRecordList:"+Integer.toString(medicalRecordList.size()));
 //         for (int i=0;i<medicalRecordList.size();i++){
 //             logger.info("medical time out:"+Integer.toString(i)+medicalRecordList.get(i).getChartDate().toString());
@@ -478,7 +501,6 @@ public class AnalysisService {
          AtomicInteger validPatientCounter = new AtomicInteger(0);
 
          ExecutorService scheduler = generateNewThreadPool(paraCount);
-         List<Medication> finalMedicalRecordList = medicalRecordList;
          Runnable queryTask = () -> {
              InfluxDB influxDB = generateIdbClient(false);
              Medication onerecord;
@@ -505,29 +527,28 @@ public class AnalysisService {
                              Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
                              job.getAr(), onerecord);
                      String finalQueryStrings = eq.getQueryString();
-                     logger.info("medical time out:"+onerecord.getChartDate().toString());
-                     logger.info("medical time in:"+eq.getMedicalTime().toString());
-                     logger.info("query start:"+eq.getQueryStartTime().toString());
-                     logger.info("expect start:"+eq.getExpectStartTime());
-                     logger.info("query end:"+ eq.getQueryEndTime());
-                     logger.info("expect end:"+eq.getExpectEndTime());
+//                     logger.info("medical time out:"+onerecord.getChartDate().toString());
+//                     logger.info("medical time in:"+eq.getMedicalTime().toEpochMilli());
+//                     logger.info("query start:"+eq.getQueryStartTime().toEpochMilli());
+//                     logger.info("expect start:"+eq.getExpectStartTime().toEpochMilli());
+//                     logger.info("query end:"+ eq.getQueryEndTime().toEpochMilli());
+//                     logger.info("expect end:"+eq.getExpectEndTime().toEpochMilli());
                      logger.info(finalQueryStrings);
-                         if (finalQueryStrings.isEmpty()) {
-                             outputWriter.writeMetaFile(String.format("  PID <%s> no available data.%n", onerecord.getId()));
-                             continue;
-                         }
-                         logger.debug("Query for <{}>: {}", onerecord.getId(), finalQueryStrings);
-                         // Execuate the query
-                         ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryStrings);
-                         if (res.length != 1) {
-                             outputWriter.writeMetaFile(String.format("  PID <%s> incorrect result from database.%n", onerecord.getId()));
-                             continue;
-                         }
-                         //write into csv file
-                         outputWriter.writeForOnePatient(onerecord.getId(), res[0], eq, dtsb,onerecord);
+                     if (finalQueryStrings.isEmpty()) {
+                         outputWriter.writeMetaFile(String.format("  PID <%s> <%s> no available data.%n", onerecord.getId(),onerecord.getChartDate()));
+                         continue;
+                     }
+                     logger.debug("Query for <{}>: {}", onerecord.getId(), finalQueryStrings);
+                     // Execuate the query
+                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryStrings);
+                     if (res.length != 1) {
+                         outputWriter.writeMetaFile(String.format("  PID <%s> <%s> incorrect result from database.%n", onerecord.getId(),onerecord.getChartDate()));
+                         continue;
+                     }
+                     //write into csv file
+                     outputWriter.writeForOnePatient(onerecord.getId(), res[0], eq, dtsb,onerecord);
+                     validPatientCounter.getAndIncrement();
 
-
-                         validPatientCounter.getAndIncrement();
                  } catch (Exception ee) {
                      // All exception will be logged (disregarded) and corresponding PID will be tried again
                      logger.error(String.format("%s: %s", onerecord.getId(), Util.stackTraceErrorToString(ee)));
@@ -670,8 +691,6 @@ public class AnalysisService {
     /**
      * get the eeg data for chart.
      */
-
-
     public ArrayList <List<Object>> getEEGChartData(EEGChart eegChart){
         List<List<String>> columns = new ArrayList<>(1);
         List<DownsampleGroup> groups = new ArrayList<>(1);
@@ -884,6 +903,5 @@ public class AnalysisService {
 		// TODO Auto-generated method stub
 		return medicationDao.selectAllMedication();
 	}
-
 
 }
