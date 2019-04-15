@@ -535,14 +535,14 @@ public class AnalysisService {
 //                     logger.info("expect end:"+eq.getExpectEndTime().toEpochMilli());
                      logger.info(finalQueryStrings);
                      if (finalQueryStrings.isEmpty()) {
-                         outputWriter.writeMetaFile(String.format("  PID <%s> <%s> no available data.%n", onerecord.getId(),onerecord.getChartDate()));
+                         outputWriter.writeMetaFile(String.format("  PID <%s> <%s> no available data.%n", onerecord.getId(),onerecord.getChartDate().toInstant()));
                          continue;
                      }
                      logger.debug("Query for <{}>: {}", onerecord.getId(), finalQueryStrings);
                      // Execuate the query
                      ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryStrings);
                      if (res.length != 1) {
-                         outputWriter.writeMetaFile(String.format("  PID <%s> <%s> incorrect result from database.%n", onerecord.getId(),onerecord.getChartDate()));
+                         outputWriter.writeMetaFile(String.format("  PID <%s> <%s> empty result from database.%n", onerecord.getId(),onerecord.getChartDate().toInstant()));
                          continue;
                      }
                      //write into csv file
