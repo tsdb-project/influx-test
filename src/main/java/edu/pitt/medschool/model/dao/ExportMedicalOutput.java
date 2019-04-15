@@ -213,7 +213,7 @@ public class ExportMedicalOutput {
                 }
             }
             mainDataLong[this.numberOfLabels+3] = record.getDrugName();
-            mainDataLong[this.numberOfLabels+4] = record.getChartDate().toString();
+            mainDataLong[this.numberOfLabels+4] = record.getChartDate().toInstant().toString();
             mainDataLong[this.numberOfLabels+5] = record.getDose().toString();
             mainDataLong[this.numberOfLabels+6] = record.getDoseUnit();
             thisPatientTotalCount += count;
