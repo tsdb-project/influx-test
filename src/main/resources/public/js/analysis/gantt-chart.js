@@ -258,7 +258,7 @@ d3.gantt = function(tasks) {
 
 			// Update axis and line position
 			// console.log(xAxis);
-			xAxis.transition().duration(1000).call(d3.axisBottom(x))
+			xAxis.transition().duration(1000).call(d3.axisBottom(x).tickFormat(d3.timeFormat(tickFormat)))
 			bar
 				.transition()
 				.duration(1000)
@@ -277,7 +277,7 @@ d3.gantt = function(tasks) {
 			// If user double click, reinitialize the chart
 			svg.on("dblclick",function(){
 				x.domain([ timeDomainStart, timeDomainEnd ])
-				xAxis.transition().call(d3.axisBottom(x))
+				xAxis.transition().call(d3.axisBottom(x).tickFormat(d3.timeFormat(tickFormat)))
 				bar
 					.transition()
 					.attr("transform", rectTransform)
