@@ -6,7 +6,7 @@ d3.gantt = function(tasks) {
     
     //var margin = {top : 20, right : 40, bottom : 20, left : 150};
     var margin = {top : 20, right : 40, bottom : 20, left : 200},
-    margin2 = {top: 20, right: 900, bottom: 20, left: 150};
+    margin2 = {top: 20, right: 1050, bottom: 20, left: 150};
     
     var dataStartDate, dataEndDate, offset;
     var fileName = new Array();
