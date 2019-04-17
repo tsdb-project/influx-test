@@ -55,7 +55,7 @@ $(document).ready(function() {
 	load_page_data();
 	fetch_columns_data();
 
-    console.log(columns);
+    //console.log(columns);
 
 	var columnData = $.map(columns, function (obj) {
         obj.text = obj.text || obj.field; // replace name with the property used for the text
@@ -123,7 +123,8 @@ draw_graph = function(response) {
 
 	for (r in response)
 	{
-		if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 4000000){
+		//if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 4000000){
+		if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 40000){
 			continue;
 		}
 		//response[r].arrestTime = Date.parse(response[r].arrestTime).toString("yyyy-MM-dd HH:mm:ss");
@@ -131,6 +132,8 @@ draw_graph = function(response) {
 		response[r].fname = response[r].filename;
 		tasks.push(response[r]);
 	}
+
+	//console.log(tasks);
 
 
 	/*var tasks = [
@@ -188,6 +191,7 @@ draw_graph = function(response) {
 	//var taskNames = tasks.map(a => a.uuid + '#' + a.arrestTime + '#' + a.filetype);
 	var taskNames = tasks.map(a => a.pid + '#' + a.arrestTime + '#' + a.filetype);
 	var patientFile = tasks.map(a => a.fname);
+	console.log(tasks);
 	
 	/*tasks.sort(function(a, b) {
 	    return a.relativeEndTime - b.relativeEndTime;
@@ -211,10 +215,11 @@ draw_graph = function(response) {
 	console.log("mindate: " + minDate);
 	console.log("maxdate: " + maxDate);
 
-	var format = "%d";
+	var format = "%j";
 
 	//console.log(tasks);
 
+	//var gantt = d3.gantt(tasks).taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format);
 	var gantt = d3.gantt(tasks).taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format);
 	gantt(tasks);
 

@@ -4,8 +4,8 @@ d3.gantt = function(tasks) {
     var FIXED_TIME_DOMAIN_MODE = "fixed";
     
     //var margin = {top : 20, right : 40, bottom : 20, left : 150};
-    var margin = {top : 20, right : 40, bottom : 20, left : 200},
-    	margin2 = {top: 20, right: 900, bottom: 20, left: 150};
+    var margin = {top : 20, right : 40, bottom : 20, left : 320},
+    	margin2 = {top: 20, right: 1030, bottom: 20, left: 50};
 
     var dataStartDate, dataEndDate, offset;
 	var fileName = new Array();
@@ -20,8 +20,8 @@ d3.gantt = function(tasks) {
     		fileName.push(tasks[p].pid);
 		}
     }
-    // console.log("dataStartDate");
-    // console.log("Date : " + dataStartDate.toString("MMMM yyyy"));
+    console.log("dataStartDate");
+    console.log("Date : " + dataStartDate.toString("MMMM yyyy"));
     
     var timeDomainStart = d3.timeSecond(dataStartDate);
     var timeDomainEnd = d3.timeSecond.offset(dataStartDate, offset);
@@ -39,14 +39,10 @@ d3.gantt = function(tasks) {
     var tickFormat = "%j";
 
     var keyFunction = function(d) {
-    	//console.log(d.relativeStartTime + d.arrestTime + d.relativeEndTime + d.pid + d.filetype);
 		return d.relativeStartTime + d.arrestTime + d.relativeEndTime + d.pid + d.filetype;
     };
 
     var rectTransform = function(d) {
-    	//console.log("Rect x: " + d3.timeSecond.offset(timeDomainStart, d.relativeStartTime) + " y: " + d.pid + "#" + d.arrestTime + "#" + d.filetype);
-    	//console.log("y dom: " + y.domain());
-    	//console.log("xTrans x: " + x(d3.timeSecond.offset(timeDomainStart, d.relativeStartTime)) + " y: " + y(d.pid + "#" + d.arrestTime + "#" + d.filetype));
 		return "translate(" + x(d3.timeSecond.offset(timeDomainStart, d.relativeStartTime)) + "," + y(d.pid + "#" + d.arrestTime + "#" + d.filetype) + ")";
     };
 
@@ -55,27 +51,26 @@ d3.gantt = function(tasks) {
     	y = d3.scaleBand().domain(taskTypes).rangeRound([ 0, height - margin.top - margin.bottom ], .1),
     	x2 = d3.scaleTime().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width2 ]).clamp(true),
     	y2 = d3.scaleBand().domain(taskTypes).rangeRound([ 0, height2 - margin2.top - margin2.bottom ], .1);
-    //console.log("domainy2: " + taskTypes);
+    console.log("domainy2: " + taskTypes);
 
    	// custom invert function
 	y2.invertCust = (function(){
-		console.log("in invertCust");
 	    var domain = y2.domain();
 	    var range = y2.range();
-	    //console.log("d: " + domain + " r: " + range);
+	    console.log("d: " + domain + " r: " + range);
 	    var scale = d3.scaleQuantize().domain(range).range(domain);
 
-	    return function(val){
-	        return scale(val);
+	    return function(x){
+	        return scale(x);
 	    }
 	})()
 
     var xAxisConfig = d3.axisBottom(x).tickFormat(d3.timeFormat(tickFormat))
 	    .tickSize(8).tickPadding(8),
-    	yAxisConfig = d3.axisLeft(y).tickSize(5).tickPadding(8),
+    	yAxisConfig = d3.axisLeft(y),
     	xAxisConfig2 = d3.axisBottom(x2).tickFormat(d3.timeFormat(tickFormat))
 	    .tickSize(8).tickPadding(8),
-	    yAxisConfig2 = d3.axisLeft(y2).tickSize(5).tickPadding(8);
+	    yAxisConfig2 = d3.axisLeft(y2);
 
     var initTimeDomain = function(tasks) {
 		if (timeDomainMode === FIT_TIME_DOMAIN_MODE) {
@@ -99,19 +94,19 @@ d3.gantt = function(tasks) {
 
     var initAxis = function() {
 		x = d3.scaleTime().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
-		// console.log("init");
-		// console.log(timeDomainEnd);
-		// console.log(timeDomainEnd - timeDomainStart);
+		console.log("init");
+		console.log(timeDomainEnd);
+		console.log(timeDomainEnd - timeDomainStart);
     	y = d3.scaleBand().domain(taskTypes).rangeRound([ 0, height - margin.top - margin.bottom ], .1);
     	x2 = d3.scaleTime().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width2 ]).clamp(true);
     	y2 = d3.scaleBand().domain(taskTypes).rangeRound([ 0, height2 - margin2.top - margin2.bottom ], .1);
 
 		var xAxisConfig = d3.axisBottom(x).tickFormat(d3.timeFormat(tickFormat))
 	    .tickSize(8).tickPadding(8),
-    	yAxisConfig = d3.axisLeft(y).tickSize(5).tickPadding(8),
+    	yAxisConfig = d3.axisLeft(y),
     	xAxisConfig2 = d3.axisBottom(x2).tickFormat(d3.timeFormat(tickFormat))
 	    .tickSize(8).tickPadding(8),
-	    yAxisConfig2 = d3.axisLeft(y2).tickSize(5).tickPadding(8);
+	    yAxisConfig2 = d3.axisLeft(y2);
     };
 
     var wrapLabel = function(text, width){ 
@@ -174,12 +169,6 @@ d3.gantt = function(tasks) {
 		    .extent([[0, 0], [width2, height]])
 		    .on("brush end", brushed);
 
-		var zoom = d3.zoom()
-		    .scaleExtent([1, Infinity])
-		    .translateExtent([[0, 0], [width, height]])
-		    .extent([[0, 0], [width, height]])
-		    .on("zoom", zoomed);
-
 	    // Create the line variable: where both the line and the brush take place
 	    var focus = svg.append('g')
 	      .attr("clip-path", "url(#clip)")
@@ -229,11 +218,48 @@ d3.gantt = function(tasks) {
 	                .style("opacity", 0);
 			});
 
+		/*var barMini = context.selectAll(".chart")
+			.data(tasks, keyFunction)
+			.enter()
+			.append("rect")
+			.attr("rx", 5)
+		    .attr("ry", 5)
+			.attr("class", function(d){ 
+			    if(taskStatus[d.status] == null){ return "bar";}
+			    return taskStatus[d.status];
+			}) 
+			.attr("y", 0)
+			.attr("transform", rectTransform)
+			.attr("height", function(d) { return y.bandwidth(); })
+			.attr("width", function(d) {
+				var x = d3.scaleTime().domain([ 0, (timeDomainEnd-timeDomainStart)/1000 ]).range([ 0, width2 ]).clamp(true);
+				var x2 = d3.scaleTime().domain([ 0, (timeDomainEnd-timeDomainStart)/1000 ]).range([ 0, width2 ]).clamp(true);
+				return x(d.relativeEndTime - d.relativeStartTime);
+			})
+			.on("mouseover", function(d) {
+				var startTime = new Date(d.arrestTime);
+				startTime.setSeconds( startTime.getSeconds() + d.relativeStartTime );
+				var endTime = new Date(d.arrestTime);
+				endTime.setSeconds( endTime.getSeconds() + d.relativeEndTime );
+				div.transition()		
+	                .duration(200)
+	                .style("opacity", .9);
+	            div.html("f: " + d.fname + "<br>" + "s: " + startTime.toISOString() + "<br>" + "e: " + endTime.toISOString())	
+					.style("left", (d3.event.pageX) + "px")
+					.style("top", (d3.event.pageY - 28) + "px");
+			})
+			.on("mouseout", function(d) {
+				div.transition()		
+	                .duration(500)		
+	                .style("opacity", 0);
+			});*/
+
 		// Add the brushing
 	    focus
 	      .append("g")
 	        .attr("class", "brushX")
-	        .call(brushX); 
+	        .call(brushX);
+			 
 			 
 		xAxis = focus.append("g")
 			.attr("class", "x axis")
@@ -241,13 +267,11 @@ d3.gantt = function(tasks) {
 			.call(xAxisConfig);
 			 
 		yAxis = focus.append("g")
-			.attr("class", "y axis one")
+			.attr("class", "y axis")
+			.transition()
 			.call(yAxisConfig)
-			
-		console.log("Y AXIS DEBUG");
-		console.log(focus.selectAll('.y .tick text'));
-		focus.selectAll('.one .tick text')
-			.remove()
+			.selectAll('.y .tick text')
+			.call(wrapLabel, y.bandwidth());
 
 		// xAxis2 = context.append("g")
 		// 	.attr("class", "x axis two")
@@ -259,27 +283,12 @@ d3.gantt = function(tasks) {
 	      .call(brushY)
 	      .call(brushY.move, y.range());
 
-		/* BACKUP
 		yAxis2 = context.append("g")
 			.attr("class", "y axis two")
 			.transition()
 			.call(yAxisConfig2)
 			.selectAll('.y .tick text')
-			.call(wrapLabel, y2.bandwidth());*/
-
-		yAxis2 = context.append("g")
-			.attr("class", "y axis two")
-			.call(yAxisConfig2)
-			
-		/* BACKUP
-		context.selectAll('.y .tick text')
-			.call(wrapLabel, y2.bandwidth());*/
-
-		context.selectAll('.two .tick text')
-			.text(function(d){
-				var s = d.split("#");
-				return s[0]+" "+s[2];
-			});
+			.call(wrapLabel, y.bandwidth());
 
 		// A function that set idleTimeOut to null
 	    var idleTimeout
@@ -287,18 +296,10 @@ d3.gantt = function(tasks) {
 
 
 		// Get Json data from medication table By Id and redirect
-		svg.select(".two").selectAll(".tick")
+		svg.select(".y").filter(".axis").selectAll(".tick")
 			.on("click",function () {
-				console.log("IN CLICK");
 				window.location.href = '/analysis/medInfo/' + $(this).text().split(' ')[0];
 			});
-
-		/*svg.append("rect")
-	        .attr("class", "zoom")
-	        .attr("width", width)
-	        .attr("height", height)
-	        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-	        .call(zoom);*/
 
 		// A function that update the chart for given boundaries
 	    function updateChart() {
@@ -319,7 +320,7 @@ d3.gantt = function(tasks) {
 
 			// Update axis and line position
 			// console.log(xAxis);
-			xAxis.transition().duration(1000).call(d3.axisBottom(x).tickFormat(d3.timeFormat(tickFormat)))
+			xAxis.transition().duration(1000).call(d3.axisBottom(x))
 			bar
 				.transition()
 				.duration(1000)
@@ -335,7 +336,7 @@ d3.gantt = function(tasks) {
 			// If user double click, reinitialize the chart
 		    svg.on("dblclick",function(){
 		    	x.domain([ timeDomainStart, timeDomainEnd ])
-		    	xAxis.transition().call(d3.axisBottom(x).tickFormat(d3.timeFormat(tickFormat)))
+		    	xAxis.transition().call(d3.axisBottom(x))
 		    	bar
 				.transition()
 				.attr("transform", rectTransform)
@@ -346,138 +347,40 @@ d3.gantt = function(tasks) {
 		    });
 	    }
 
-/*	    BACKUP
-		function brushed() {
-	      console.log("340");
+	    function brushed() {
 		  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
 		  var s = d3.event.selection || y2.range();
+		  console.log(y2.domain());
 
 		  console.log(s);
 		  y2.invertCust = (function(){
-		  		//console.log("brushed invert");
 			    var domain = y2.domain();
 			    var range = y2.range();
-			    //console.log("cust d: " + domain + " r: " + range);
+			    console.log("d: " + domain + " r: " + range);
 			    var scale = d3.scaleQuantize().domain(range).range(domain);
 
-			    return function(val){
-			    	//console.log(val);
-			    	//console.log(scale(val));
-			        return scale(val);
+			    return function(x){
+			        return scale(x);
 			    }
 			})()
-		  console.log("s1 " + s[1] + " s0 " +  s[0]);
-		  updatedS = Array(s[1] - s[0] + 1).fill().map((item, index) => s[0] + index);
-		  //console.log(updatedS);
-
-		  y.domain(updatedS.map(y2.invertCust, y2));
-		  //console.log(y.domain());
-
-		  /* BACKUP
-		  bar
-			.transition()
-			.duration(1000)
-			.attr("transform", rectTransform)
-			.attr("height", function(d) { 
-				console.log("ybw: " + y.bandwidth());
-				return y.bandwidth(); 
-			})*/
-/*		  console.log("373");
-		  yAxis.transition().duration(1000).call(yAxisConfig);
-		  console.log("375");
-		  bar
-			.transition()
-			.duration(1000)
-			.attr("transform", rectTransform)
-			.attr("height", function(d) { 
-				console.log("ybw: " + y.bandwidth());
-				return y.bandwidth(); 
-			})
-
-
+		  console.log(y2.invertCust);
+		  y.domain(s.map(y2.invertCust, y2));
+		  console.log(s.map(y2.invertCust, y2));
 		  //focus.select(".area").attr("d", area);
-		  //focus.select(".y").call(yAxis);
-		  console.log(yAxis);
-		  
-		  //xAxis.transition().duration(1000).call(d3.axisBottom(x))
-		  console.log("418");
-		  /*svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
+		  focus.select(".area").attr("d", area);
+		  focus.select(".axis--y").call(yAxis);
+		  svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
 		      .scale(height / (s[1] - s[0]))
-		      .translate(0, -s[0]));*/
-/*		  console.log("422");
-		
+		      .translate(0, -s[0]));
 		}
-*/
-
-		function brushed() {
-	      console.log("340");
-		  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-		  var s = d3.event.selection || y2.range();
-
-		  console.log(s);
-		  y2.invertCust = (function(){
-		  		//console.log("brushed invert");
-			    var domain = y2.domain();
-			    var range = y2.range();
-			    //console.log("cust d: " + domain + " r: " + range);
-			    var scale = d3.scaleQuantize().domain(range).range(domain);
-
-			    return function(val){
-			    	//console.log(val);
-			    	//console.log(scale(val));
-			        return scale(val);
-			    }
-			})()
-		  console.log("s1 " + s[1] + " s0 " +  s[0]);
-		  updatedS = Array(s[1] - s[0] + 1).fill().map((item, index) => s[0] + index);
-		  //console.log(updatedS);
-
-		  y.domain(updatedS.map(y2.invertCust, y2));
-		  //console.log(y.domain());
-
-		  /* BACKUP
-		  bar
-			.transition()
-			.duration(1000)
-			.attr("transform", rectTransform)
-			.attr("height", function(d) { 
-				console.log("ybw: " + y.bandwidth());
-				return y.bandwidth(); 
-			})*/
-		  console.log("373");
-		  yAxis.transition().duration(1000).call(yAxisConfig);
-		  console.log("375");
-		  bar
-			.transition()
-			.duration(1000)
-			.attr("transform", rectTransform)
-			.attr("height", function(d) {
-				return y.bandwidth(); 
-			})
-
-
-		  //focus.select(".area").attr("d", area);
-		  //focus.select(".y").call(yAxis);
-		  console.log(yAxis);
-		  
-		  //xAxis.transition().duration(1000).call(d3.axisBottom(x))
-		  console.log("418");
-		  /*svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
-		      .scale(height / (s[1] - s[0]))
-		      .translate(0, -s[0]));*/
-		  console.log("422");
-		
-		}
-
 
 		function zoomed() {
-		  console.log("426");
 		  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brushY") return; // ignore zoom-by-brush
 		  var t = d3.event.transform;
-		  //y.domain(t.rescaleY(y2).domain());
-		  //focus.select(".area").attr("d", area);
-		  //focus.select(".y").call(yAxis);
-		  //context.select(".brushY").call(brushY.move, y.range().map(t.invertCust, t));
+		  y.domain(t.rescaleY(y2).domain());
+		  focus.select(".area").attr("d", area);
+		  focus.select(".axis--y").call(yAxis);
+		  context.select(".brushY").call(brushY.move, y.range().map(t.invertCust, t));
 		}
 
 		return gantt;
