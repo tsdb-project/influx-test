@@ -104,6 +104,7 @@ $(document).ready(
                     'contentType' : "application/json",
                     'dataType' : 'json',
                     'success' : function(data) {
+                        window.alert("analyze finished");
                     },
                     'error' : function() {
                     }
