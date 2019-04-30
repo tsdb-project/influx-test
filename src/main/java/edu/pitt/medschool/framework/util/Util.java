@@ -108,10 +108,11 @@ public class Util {
     }
 
     public static String wrapAndConcatStringList(String wrapper, String concat, List<String> list) {
-        for (int i = 0; i < list.size(); i++) {
-            list.set(i, wrapper + list.get(i) + wrapper);
+        List<String> tmp = new ArrayList<>(list);
+        for (int i = 0; i < tmp.size(); i++) {
+            tmp.set(i, wrapper + tmp.get(i) + wrapper);
         }
-        return String.join(concat, list);
+        return String.join(concat, tmp);
     }
 
     /**

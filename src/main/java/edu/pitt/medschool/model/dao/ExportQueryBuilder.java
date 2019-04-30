@@ -1,19 +1,25 @@
 package edu.pitt.medschool.model.dao;
 
-import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import edu.pitt.medschool.model.DataTimeSpanBean;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+
 /**
  * Queries for doing the downsample-aggregation query Refactor from AnalysisService.exportToFile
  */
 public class ExportQueryBuilder {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    static final int TRIMMING_OFFSET = 120;
 
     private static class Template {
         static final String defaultDownsampleColName = "ds_label_";
@@ -64,8 +70,9 @@ public class ExportQueryBuilder {
      * @param ds            Downsample itself
      * @param needAr        This job is Ar or NoAr
      */
-    public ExportQueryBuilder(Instant fakeStartTime, List<DataTimeSpanBean> dts, List<DownsampleGroup> v, List<List<String>> columns,
-                              Downsample ds, boolean needAr) {
+    public ExportQueryBuilder(Instant fakeStartTime, List<DataTimeSpanBean> dts, List<DownsampleGroup> v,
+            List<List<String>> columns, Downsample ds, boolean needAr) {
+        // no available data
         if (dts == null || dts.isEmpty()) {
             return;
         }
@@ -81,8 +88,10 @@ public class ExportQueryBuilder {
         findValidFirstLastData();
 
         // If no available data then stop building
-        if (this.validTimeSpanIds.isEmpty()) return;
-
+        if (this.validTimeSpanIds.isEmpty()) {
+            logger.info("no valid data");
+            return;
+        }
         if (this.exportTotalDuration > 0) {
             this.queryEndTime = this.firstAvailData.plusSeconds(this.exportTotalDuration);
         }
@@ -91,7 +100,8 @@ public class ExportQueryBuilder {
             this.queryEndTime = this.lastAvailData.plusSeconds(this.exportStartOffset);
         }
         calcOffsetInSeconds(fakeStartTime);
-        this.globalTimeLimitWhere = String.format(Template.timeCondition, this.queryStartTime.toString(), this.queryEndTime.toString());
+        this.globalTimeLimitWhere = String.format(Template.timeCondition, this.queryStartTime.toString(),
+                this.queryEndTime.toString());
         buildQuery();
     }
 
@@ -112,7 +122,7 @@ public class ExportQueryBuilder {
     }
 
     private void populateDownsampleData(Downsample ds) {
-        this.exportStartOffset = ds.getOrigin();
+        this.exportStartOffset = ds.getOrigin() + TRIMMING_OFFSET;
         this.downsampleInterval = ds.getPeriod();
         this.isDownSampleFirst = ds.getDownsampleFirst();
         this.exportTotalDuration = ds.getDuration();
@@ -127,6 +137,7 @@ public class ExportQueryBuilder {
             }
             this.validTimeSpanIds.add(i);
             Instant tmpS = d.getStart(), tmpE = d.getEnd();
+            // take the first(smallest) time of strat as firstAvailData, the last (largest) time of end as lastAvailData
             if (tmpS.compareTo(this.firstAvailData) < 0)
                 this.queryStartTime = this.firstAvailData = tmpS;
             if (tmpE.compareTo(this.lastAvailData) > 0)
@@ -231,7 +242,8 @@ public class ExportQueryBuilder {
      * @param dg            Downsample group data
      * @param delimter      Delimter for wrapping every column name
      */
-    private String populateByAggregationType(List<String> aggregateName, String columnAlias, DownsampleGroup dg, String delimter) {
+    private String populateByAggregationType(List<String> aggregateName, String columnAlias, DownsampleGroup dg,
+            String delimter) {
         switch (dg.getAggregation().toLowerCase()) {
             case "mean":
                 return columnsMeanQuery(aggregateName, columnAlias, delimter);
@@ -274,7 +286,8 @@ public class ExportQueryBuilder {
      * @param alias Alias for this list, null for not using
      */
     private String columnsSumQuery(List<String> names, String alias, String delimter) {
-        return selectQueryWithAlias(wrapByBracket(names.stream().map(s -> delimter + s + delimter).collect(Collectors.joining("+"))), alias);
+        return selectQueryWithAlias(
+                wrapByBracket(names.stream().map(s -> delimter + s + delimter).collect(Collectors.joining("+"))), alias);
     }
 
     /**

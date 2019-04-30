@@ -27,4 +27,6 @@ public class PatientService {
     public List<MysqlColumnBean> getColumnInfo() {
         return patientDao.getColumnInfo();
     }
+
+    public List<String> selecIdByfilter(String condition) { return patientDao.selecIdByfilter(condition); }
 }

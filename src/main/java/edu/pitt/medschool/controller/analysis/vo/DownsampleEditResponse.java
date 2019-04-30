@@ -41,6 +41,7 @@ public class DownsampleEditResponse {
 
         this.downsampleFirst = downsample.getDownsampleFirst();
     }
+   
 
     public int getMinBin() {
         return minBin;

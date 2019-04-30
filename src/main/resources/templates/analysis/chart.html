@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Brain Flux</title>
+<!-- Vendor styles -->
+<link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.css">
+<link rel="stylesheet" href="/vendors/bower_components/select2/dist/css/select2.min.css">
+<link rel="stylesheet" href="/vendors/flatpickr/flatpickr.min.css" />
+<link rel="stylesheet" href="/vendors/bower_components/dropzone/dist/dropzone.css">
+<link rel="stylesheet" href="/vendors/bower_components/nouislider/distribute/nouislider.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
+<link rel="stylesheet" href="/vendors/bower_components/trumbowyg/dist/ui/trumbowyg.min.css">
+<link rel="icon" type="image/ico" href="/img/favicon.ico">
+
+<!-- App styles -->
+<link rel="stylesheet" href="/css/app.min.css">
+
+<!--TEMP-->
+<style>
+    .chart {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+    }
+     
+    .axis path,.axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+     
+    .bar {
+        fill: #33b5e5;
+    }
+     
+    .bar-failed {
+        fill: #33b5e5;
+        opacity: 0.5;
+    }
+     
+    .bar-running {
+        fill: #669900;
+    }
+     
+    .bar-succeeded {
+        fill: #33b5e5;
+    }
+     
+    .bar-killed {
+        fill: #32c787;
+        opacity: 0.5;
+    }
+     
+    #forkme_banner {
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 10px;
+        z-index: 10;
+        padding: 10px 50px 10px 10px;
+        color: #fff;
+        background:
+            url('http://dk8996.github.io/Gantt-Chart/images/blacktocat.png')
+            #0090ff no-repeat 95% 50%;
+        font-weight: 700;
+        box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+        border-bottom-left-radius: 2px;
+        border-bottom-right-radius: 2px;
+        text-decoration: none;
+    }
+
+    /*#chart-container {
+        width: 100%;
+        height: 110000px;
+    }*/
+
+    #chart-container {
+        width: 100%;
+        height: 3800px;
+    }
+
+    div.tooltip {   
+        position: absolute;         
+        text-align: center;         
+        width: 177px;                    
+        height: 47px;                   
+        padding: 2px;               
+        font: 12px sans-serif;      
+        background: lightsteelblue; 
+        border: 0px;        
+        border-radius: 8px;         
+        pointer-events: none;           
+    }
+
+    .zoom {
+      cursor: move;
+      fill: none;
+      pointer-events: all;
+    }
+</style>
+
+<!--script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script-->
+<script type="text/javascript" src="https://d3js.org/d3.v4.js"></script>
+<script type="text/javascript" src="/js/analysis/gantt-chart.js"></script>
+<script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+
+<!-- App styles -->
+<link rel="stylesheet" href="/css/app.min.css">
+
+</head>
+
+<body data-ma-theme="blue">
+    <main class="main">
+    <div th:insert="fragments/page-loader :: div"></div>
+    <div th:insert="fragments/header :: header"></div>
+    <div th:insert="fragments/sidebar :: aside"></div>
+
+    <section class="content">
+        <div class="content__inner">
+            <!-- PUT THE MAIN CONTENT HERE -->
+            <header class="content__title">
+                <h1>Data Visualization Chart</h1>
+                <small>View file data</small>
+            </header>
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Data</h3>
+                    <div class="input_fields_wrap col-sm-12 col-md-12">
+                        <form role="form" id="filterForm" novalidate>
+                            <div class="row" style="margin-bottom: 10px;">
+                                <div class="col-sm-2 col-md-2">
+                                    <button class="btn btn-primary btn-sm btn-block" id="addFilter">Add Filter</button>
+                                </div>
+                                <div class="col-sm-2 col-md-2">
+                                    <button type="button" class="btn btn-success btn-sm btn-block" id="queryFilter">Go</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3 col-md-3">
+                                    <select class="init-select2 field" data-placeholder="Filter Field" id="field[]" required>
+                                        <option disabled="disabled" selected="selected" value="">Filter Field</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2 col-md-2">
+                                    <select class="init-select2 operator" data-placeholder="Filter Method" id="operator[]" required>
+                                        <option value="=">=</option>
+                                        <option value="!=">&ne;</option>
+                                        <option value=">">&gt;</option>
+                                        <option value=">=">&ge;</option>
+                                        <option value="<">&lt;</option>
+                                        <option value="<=">&le;</option>
+                                        <option value="LIKE">like</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2 col-md-2">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control value" id="value[]" placeholder="Input value" required>
+                                    </div>
+                                </div>
+                                <div class="col-sm-1 col-md-1" style="margin-top: 6px;">
+                                    <a href="#" class="remove_field btn btn-sm btn-outline-danger">remove</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="chart-container">
+                    </div>
+                </div>
+            </div>
+            <div th:insert="fragments/footer :: footer"></div>
+        </div>
+    </section>
+    </main>
+
+
+    <div th:insert="fragments/ie-warning :: div"></div>
+    <!-- Javascript -->
+
+    <!-- Javascript -->
+    <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    var columns = /*[[${columns}]]*/null;
+                    /*]]>*/
+                </script>
+    <!-- Vendors -->
+    <script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="/vendors/bower_components/tether/dist/js/tether.min.js"></script>
+    <script src="/vendors/bower_components/popper.js/dist/umd/popper.min.js"></script>
+    <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+
+    <script src="/vendors/bower_components/jquery-mask-plugin/dist/jquery.mask.min.js"></script>
+    <script src="/vendors/bower_components/select2/dist/js/select2.full.min.js"></script>
+    <script src="/vendors/bower_components/dropzone/dist/min/dropzone.min.js"></script>
+    <script src="/vendors/bower_components/moment/min/moment.min.js"></script>
+    <script src="/vendors/flatpickr/flatpickr.min.js"></script>
+    <script src="/vendors/bower_components/nouislider/distribute/nouislider.min.js"></script>
+    <script src="/vendors/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
+    <script src="/vendors/bower_components/trumbowyg/dist/trumbowyg.min.js"></script>
+
+    <script src="/vendors/bower_components/remarkable-bootstrap-notify/dist/bootstrap-notify.min.js"></script>
+
+    <!-- Vendors: Data tables -->
+    <script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="/vendors/bower_components/jszip/dist/jszip.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net/js/moment.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net/js/datetime-moment.js"></script>
+
+    <!-- App functions and actions -->
+    <script src="/js/navigation.js"></script>
+    <script src="/js/app.min.js"></script>
+    <script src="/js/analysis/chart.js"></script>
+
+</body>
+</html>

@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.service.ValidateCsvService;
+import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +23,7 @@ import edu.pitt.medschool.controller.load.vo.SearchFileVO;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.FileBean;
 import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.ImportProgress;
 import edu.pitt.medschool.service.ImportCsvService;
 import edu.pitt.medschool.service.ImportProgressService;
@@ -37,6 +41,8 @@ public class DataController {
     ImportProgressService importProgressService;
     @Autowired
     PatientService patientService;
+    @Autowired
+    ValidateCsvService validateCsvService;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -116,6 +122,20 @@ public class DataController {
 
         importCsvService.AddArrayFiles(allAR);
 
+        return map;
+    }
+
+    // new part for data validation
+    @RequestMapping(value = "api/data/validate")
+    @ResponseBody
+    public Map<String, Object> dataValidate(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model) throws Exception{
+        Map<String, Object> map = new HashMap<>();
+
+        for (int i = 0; i < dir.getFiles().size(); i++) {
+            CsvFile csvFile = validateCsvService.analyzeCsv(dir.getFiles().get(i));
+            validateCsvService.insertCsvFile(csvFile);
+        }
+        System.out.println("***********************************************Analyze finished*****************************************");
         return map;
     }
 

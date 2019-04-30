@@ -38,5 +38,14 @@
         <table tableName="export">
             <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
         </table>
+        <table tableName="medical_downsample">
+        	<generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()"/>
+        </table>
+        <table tableName="medical_downsample_group">
+            <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
+        </table>
+        <table tableName="medication">
+            <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
+        </table>
     </context>
 </generatorConfiguration>

@@ -1,30 +1,5 @@
 package edu.pitt.medschool.controller.analysis;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
-import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
-import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
-import edu.pitt.medschool.framework.rest.RestfulResponse;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.ExportWithBLOBs;
-import edu.pitt.medschool.service.AnalysisService;
-import edu.pitt.medschool.service.ColumnService;
-import edu.pitt.medschool.service.ExportPostProcessingService;
-import edu.pitt.medschool.service.ExportService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-
-import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,11 +8,58 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
+
+import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
+import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
+import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
+import edu.pitt.medschool.controller.analysis.vo.MedicalDownsampleEditResponse;
+import edu.pitt.medschool.framework.rest.RestfulResponse;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dto.Downsample;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
+import edu.pitt.medschool.model.dto.EEGChart;
+import edu.pitt.medschool.model.dto.ExportWithBLOBs;
+import edu.pitt.medschool.model.dto.GraphFilter;
+import edu.pitt.medschool.model.dto.MedicalDownsample;
+import edu.pitt.medschool.model.dto.MedicalDownsampleGroup;
+import edu.pitt.medschool.service.AnalysisService;
+import edu.pitt.medschool.service.ColumnService;
+import edu.pitt.medschool.service.ExportPostProcessingService;
+import edu.pitt.medschool.service.ExportService;
+import edu.pitt.medschool.service.PatientMedInfoService;
+import edu.pitt.medschool.service.PatientService;
+import edu.pitt.medschool.service.ValidateCsvService;
 
 /**
  * @author Isolachine
@@ -48,6 +70,13 @@ public class AnalysisController {
 
     @Value("${machine}")
     private String uuid;
+
+    @Autowired
+    PatientService PatientService;
+    @Autowired
+    ValidateCsvService validateCsvService;
+    @Autowired
+    PatientMedInfoService patientMedInfoService;
 
     @Autowired
     ColumnService columnService;
@@ -86,6 +115,13 @@ public class AnalysisController {
         return analysisGenerateModel(model);
     }
 
+    @RequestMapping("analysis/medicalbuilder")
+    public Model medicalBuilderPage(Model model) {
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "medicalbuilder");
+        return model;
+    }
+
     @RequestMapping("analysis/job")
     public Model jobPage(Model model) {
         model.addAttribute("nav", "analysis");
@@ -93,8 +129,87 @@ public class AnalysisController {
         return model;
     }
 
+    @RequestMapping("analysis/chart")
+    @ResponseBody
+    public Model chartPage(Model model) {
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "chart");
+        return model;
+    }
+
+    @RequestMapping("analysis/getPatientTimelines")
+    @ResponseBody
+    public String getPatientTimelines(Model model) {
+        return new Gson().toJson(validateCsvService.getPatientTimeLines("realpsc"));
+    }
+
+    @RequestMapping(value = { "analysis/getPatientTimelines" }, method = RequestMethod.POST)
+    @ResponseBody
+    public String getFilteredPatientTimelines(@RequestBody(required = true) GraphFilter filter) throws Exception {
+        return validateCsvService.getFilteredtPatientTimeLines("realpsc", filter);
+    }
+
+    @RequestMapping(value = { "analysis/selecIdByfilter/{condition}" })
+    @ResponseBody
+    public List<String> selecIdByfilter(@PathVariable String condition) throws Exception {
+        return PatientService.selecIdByfilter(condition);
+    }
+
+    @RequestMapping("analysis/getAllPatientMedInfo")
+    @ResponseBody
+    public Map<String, Object> getAllMedInfo(Model model) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", patientMedInfoService.getAllMedInfo("realpsc"));
+        return map;
+    }
+
+    @RequestMapping("analysis/getPatientMedInfoById/{id}")
+    @ResponseBody
+    public Map<String, Object> getMedInfoById(Model model, @PathVariable String id) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", patientMedInfoService.getMedInfoById("realpsc", id));
+        return map;
+    }
+
+    @RequestMapping(value = { "analysis/eegChart" }, method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> geteegChart(@RequestBody(required = true) EEGChart eegChart) {
+        Map<String, Object> map = new HashMap<>();
+        ArrayList<List<Object>> rows = analysisService.getEEGChartData(eegChart);
+        map.put("data", rows);
+        return map;
+    }
+
+    @RequestMapping("analysis/getAllMedicine")
+    @ResponseBody
+    public Map<String, Object> getAllMedicine(Model model) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", analysisService.selectAllMedicine());
+        return map;
+    }
+
+    @RequestMapping(value = { "analysis/medInfo/{id}", "analysis/medInfo" }, method = RequestMethod.GET)
+    @ResponseBody
+    public ModelAndView medInfoPage(@PathVariable Optional<String> id, ModelAndView modelAndView) {
+        modelAndView.addObject("nav", "analysis");
+        modelAndView.addObject("subnav", "chart");
+        modelAndView.setViewName("analysis/medInfo");
+        if (id.isPresent()) {
+            modelAndView.addObject("patientId", id.get());
+        } else {
+            modelAndView.addObject("patientId", "Not Found");
+        }
+        modelAndView.addObject("measures", columnService.selectAllMeasures());
+        return modelAndView;
+    }
+
     @RequestMapping("analysis/create")
     public Model createPage(Model model) {
+        return analysisGenerateModel(model);
+    }
+
+    @RequestMapping("analysis/medical")
+    public Model medical(Model model) {
         return analysisGenerateModel(model);
     }
 
@@ -117,11 +232,38 @@ public class AnalysisController {
         return modelAndView;
     }
 
+    @RequestMapping(value = { "analysis/medicaledit/{id}", "analysis/medicaledit" }, method = RequestMethod.GET)
+    public ModelAndView medicaledit(@PathVariable Optional<Integer> id, ModelAndView modelAndView) {
+        modelAndView.addObject("nav", "analysis");
+        modelAndView.addObject("subnav", "medicalbuilder");
+        modelAndView.setViewName("analysis/medicaledit");
+        if (id.isPresent()) {
+            modelAndView.addObject("medicaledit", true);
+            MedicalDownsample downsample = analysisService.selectmedicalByPrimaryKey(id.get());
+            MedicalDownsampleEditResponse downsampleEditResponse = new MedicalDownsampleEditResponse(downsample);
+            modelAndView.addObject("medicalquery", downsampleEditResponse);
+        } else {
+            modelAndView.addObject("medicaledit", false);
+            List<MedicalDownsample> downsamples = analysisService.selectmedicalAll();
+            modelAndView.addObject("medicalDownsamples", downsamples);
+        }
+        modelAndView.addObject("measures", columnService.selectAllMeasures());
+        return modelAndView;
+    }
+
     @RequestMapping(value = "analysis/query", method = RequestMethod.GET)
     @ResponseBody
     public RestfulResponse allQuery(Model model) {
         RestfulResponse response = new RestfulResponse(1, "success");
         response.setData(analysisService.selectAll());
+        return response;
+    }
+
+    @RequestMapping(value = "analysis/medicalquery", method = RequestMethod.GET)
+    @ResponseBody
+    public RestfulResponse allmedicalQuery(Model model) {
+        RestfulResponse response = new RestfulResponse(1, "success");
+        response.setData(analysisService.selectmedicalAll());
         return response;
     }
 
@@ -133,6 +275,22 @@ public class AnalysisController {
             downsample.setPeriod(1);
         }
         if (analysisService.insertDownsample(downsample) == 1) {
+            response = new RestfulResponse(1, "success");
+            response.setData(downsample);
+        } else {
+            response = new RestfulResponse(0, "insert failed");
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "analysis/medicalquery", method = RequestMethod.POST)
+    @ResponseBody
+    public RestfulResponse medicalInsert(@RequestBody(required = true) MedicalDownsample downsample) throws Exception {
+        RestfulResponse response;
+        if (downsample.getPeriod() == 0) {
+            downsample.setPeriod(1);
+        }
+        if (analysisService.insertMedicalDownsample(downsample) == 1) {
             response = new RestfulResponse(1, "success");
             response.setData(downsample);
         } else {
@@ -154,6 +312,23 @@ public class AnalysisController {
             map.put("res", new RestfulResponse(0, "update failed"));
         }
         map.put("data", analysisService.selectByPrimaryKey(downsample.getId()));
+        return map;
+    }
+
+    @PutMapping(value = "analysis/medicalquery")
+    @ResponseBody
+    public Map<String, Object> medicalUpdate(@RequestBody(required = true) MedicalDownsample medicalDownsample)
+            throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        if (medicalDownsample.getPeriod() == 0) {
+            medicalDownsample.setPeriod(1);
+        }
+        if (analysisService.updatemedicalByPrimaryKey(medicalDownsample) == 1) {
+            map.put("res", new RestfulResponse(1, "success"));
+        } else {
+            map.put("res", new RestfulResponse(0, "update faild"));
+        }
+        map.put("data", analysisService.selectmedicalByPrimaryKey(medicalDownsample.getId()));
         return map;
     }
 
@@ -180,6 +355,16 @@ public class AnalysisController {
         return map;
     }
 
+    @RequestMapping(value = "analysis/medicalgroup/{queryId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> allmedicalQueryGroup(@PathVariable Integer queryId, Model model) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", analysisService.selectAllmedicalAggregationGroupByQueryId(queryId));
+        RestfulResponse response = new RestfulResponse(1, "success");
+        map.put("res", response);
+        return map;
+    }
+
     @RequestMapping(value = "analysis/group/group/{groupId}", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> aQueryGroup(@PathVariable Integer groupId, Model model) {
@@ -190,11 +375,34 @@ public class AnalysisController {
         return map;
     }
 
+    @RequestMapping(value = "analysis/medicalgroup/medicalgroup/{groupId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> amedicalQueryGroup(@PathVariable Integer groupId, Model model) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", analysisService.selectmedicalAggregationGroupById(groupId));
+        RestfulResponse response = new RestfulResponse(1, "success");
+        map.put("res", response);
+        return map;
+    }
+
     @RequestMapping(value = "analysis/group", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> insertQueryGroup(@RequestBody(required = true) DownsampleGroup group) throws Exception {
         Map<String, Object> map = new HashMap<>();
         if (analysisService.insertAggregationGroup(group)) {
+            map.put("res", new RestfulResponse(1, "success"));
+        } else {
+            map.put("res", new RestfulResponse(0, "failed"));
+        }
+        return map;
+    }
+
+    @RequestMapping(value = "analysis/medicalgroup", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> insertmedicalQueryGroup(@RequestBody(required = true) MedicalDownsampleGroup group)
+            throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        if (analysisService.insertmedicalAggregationGroup(group)) {
             map.put("res", new RestfulResponse(1, "success"));
         } else {
             map.put("res", new RestfulResponse(0, "failed"));
@@ -214,11 +422,36 @@ public class AnalysisController {
         return map;
     }
 
+    @RequestMapping(value = "analysis/medicalgroup", method = RequestMethod.PUT)
+    @ResponseBody
+    public Map<String, Object> updatemedicalQueryGroup(@RequestBody(required = true) MedicalDownsampleGroup group)
+            throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        if (analysisService.updatemedicalAggregationGroup(group) == 1) {
+            map.put("res", new RestfulResponse(1, "success"));
+        } else {
+            map.put("res", new RestfulResponse(0, "update failed"));
+        }
+        return map;
+    }
+
     @RequestMapping(value = "analysis/group", method = RequestMethod.DELETE)
     @ResponseBody
     public Map<String, Object> deleteQueryGroup(@RequestBody(required = true) Integer groupId) throws Exception {
         Map<String, Object> map = new HashMap<>();
         if (analysisService.deleteGroupByPrimaryKey(groupId) == 1) {
+            map.put("res", new RestfulResponse(1, "success"));
+        } else {
+            map.put("res", new RestfulResponse(0, "delete failed"));
+        }
+        return map;
+    }
+
+    @RequestMapping(value = "analysis/medicalgroup", method = RequestMethod.DELETE)
+    @ResponseBody
+    public Map<String, Object> deletemedicalQueryGroup(@RequestBody(required = true) Integer groupId) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        if (analysisService.deletemedicalGroupByPrimaryKey(groupId) == 1) {
             map.put("res", new RestfulResponse(1, "success"));
         } else {
             map.put("res", new RestfulResponse(0, "delete failed"));
@@ -262,9 +495,29 @@ public class AnalysisController {
         return response;
     }
 
+    @PostMapping("api/medicalexport/medicalexport")
+    @ResponseBody
+    public RestfulResponse exportmedicalQuery(@RequestBody(required = true) ExportWithBLOBs job, RestfulResponse response)
+            throws JsonProcessingException {
+        if (exportService.completeMedicalJobAndInsert(job) == 1) {
+            if (analysisService.addOneExportJob(job.getId())) {
+                response.setCode(1);
+                response.setMsg("Successfully added job.");
+            } else {
+                response.setCode(2);
+                response.setMsg("Failed to add job into queue.");
+            }
+        } else {
+            response.setCode(0);
+            response.setMsg("Database error!");
+        }
+        return response;
+    }
+
     @DeleteMapping("api/export/export/{id}")
     @ResponseBody
-    public RestfulResponse deleteExportQuery(@PathVariable(value = "id", required = true) Integer jobId, RestfulResponse response) {
+    public RestfulResponse deleteExportQuery(@PathVariable(value = "id", required = true) Integer jobId,
+            RestfulResponse response) {
         if (exportService.deleteExportJobById(jobId) == 1) {
             response.setCode(1);
             response.setMsg("Successfully deleted job.");
@@ -277,7 +530,8 @@ public class AnalysisController {
 
     @DeleteMapping("api/export/stop/{id}")
     @ResponseBody
-    public RestfulResponse stopExportQuery(@PathVariable(value = "id", required = true) Integer jobId, RestfulResponse response) {
+    public RestfulResponse stopExportQuery(@PathVariable(value = "id", required = true) Integer jobId,
+            RestfulResponse response) {
         int res = analysisService.removeOneExportJob(jobId);
         if (res == 1) {
             response.setCode(1);

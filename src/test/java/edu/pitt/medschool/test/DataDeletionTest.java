@@ -20,12 +20,13 @@ public class DataDeletionTest {
             "PUH-2012-005", "PUH-2012-082", "PUH-2012-082", "PUH-2012-157", "PUH-2012-211", "PUH-2013-116", "PUH-2013-198",
             "PUH-2014-038", "PUH-2014-271", "PUH-2014-271", "PUH-2015-208", "PUH-2015-278", "PUH-2016-147", "PUH-2017-071",
             "PUH-2017-199", "PUH-2017-199", "PUH-2018-008" };
-    static String[] completeDelete2 = new String[] { "PUH-2015-198" };
+    // static String[] completeDelete2 = new String[] { "PUH-2015-198" };
+    static String[] completeDelete2 = new String[] { "PUH-2017-123" };
 
     // private static final Logger logger = LoggerFactory.getLogger(DataDeletionTest.class);
 
     public static void checkPatientFiles(String pid) {
-        boolean longQuery = false;
+        boolean longQuery = true;
 
         String queryString = String.format("SELECT \"I123_1\" FROM \"%s\" GROUP BY * LIMIT 1;", pid, pid);
         if (longQuery) {
