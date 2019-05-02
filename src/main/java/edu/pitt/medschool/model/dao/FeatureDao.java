@@ -78,4 +78,17 @@ public class FeatureDao {
     public List<ColumnVO> selectColumnVOsAsymmetry(String electrode) {
         return featureMapper.selectColumnVOsAsymmetry(electrode);
     }
+
+    public List<String> selectAllColumnCodes() {
+        FeatureExample example = new FeatureExample();
+        example.createCriteria().andSidNotEqualTo("I270");
+        List<Feature> features = featureMapper.selectByExample(example);
+        List<String> cols = new ArrayList<>();
+        for (Feature f : features) {
+            for (int i = 1; i <= f.getSidCount(); i++) {
+                cols.add(f.getSid() + '_' + i);
+            }
+        }
+        return cols;
+    }
 }
