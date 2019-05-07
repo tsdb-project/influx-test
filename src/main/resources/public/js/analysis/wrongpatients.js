@@ -6,7 +6,7 @@ $(document).ready(function () {
     $.fn.dataTable.moment('M/D/YYYY, h:mm:ss a');
     var table = $('#queryTable').DataTable({
         ajax: {
-            "url": "analysis/getWrongPatients"
+            "url": "/analysis/getWrongPatients"
         },
         data: queries.data,
         columnDefs: [{

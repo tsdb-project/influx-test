@@ -202,6 +202,7 @@ public class ValidateCsvService {
                 if(ar.get(i)[1]>ar.get(i+1)[0]){
                     wrongpatient.setIsoverlap(true);
                 }
+                // problem
                 if(ar.get(i)[1] != ar.get(i+1)[0]){
                     wrongpatient.setIsabscent(true);
                 }

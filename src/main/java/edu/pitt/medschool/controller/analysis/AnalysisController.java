@@ -143,7 +143,7 @@ public class AnalysisController {
     @ResponseBody
     public  Model wrongPatinetsPage(Model model){
         model.addAttribute("nav","analysis");
-        model.addAttribute("subnav","detect wrong data");
+        model.addAttribute("subnav","wrongpatients");
         return model;
     }
 
@@ -153,8 +153,8 @@ public class AnalysisController {
         return new Gson().toJson(validateCsvService.getPatientTimeLines("realpsc"));
     }
 
-    //problem
-    @RequestMapping(value = {"analysis/analysis/getWrongPatients"},method = RequestMethod.GET)
+
+    @RequestMapping(value = {"analysis/getWrongPatients"},method = RequestMethod.GET)
     @ResponseBody
     public RestfulResponse getWrongPatients(Model model){
         ArrayList<Wrongpatients> wrongPatients = new ArrayList<>();
