@@ -17,6 +17,8 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletResponse;
 
+
+import edu.pitt.medschool.model.Wrongpatients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,10 +139,30 @@ public class AnalysisController {
         return model;
     }
 
+    @RequestMapping("analysis/wrongpatients")
+    @ResponseBody
+    public  Model wrongPatinetsPage(Model model){
+        model.addAttribute("nav","analysis");
+        model.addAttribute("subnav","detect wrong data");
+        return model;
+    }
+
     @RequestMapping("analysis/getPatientTimelines")
     @ResponseBody
     public String getPatientTimelines(Model model) {
         return new Gson().toJson(validateCsvService.getPatientTimeLines("realpsc"));
+    }
+
+    //problem
+    @RequestMapping(value = {"analysis/analysis/getWrongPatients"},method = RequestMethod.GET)
+    @ResponseBody
+    public RestfulResponse getWrongPatients(Model model){
+        ArrayList<Wrongpatients> wrongPatients = new ArrayList<>();
+        RestfulResponse response = new RestfulResponse(1,"success");
+        wrongPatients = validateCsvService.getWrongPatients(validateCsvService.getPatientTimeLines("realpsc"));
+        logger.info("length",wrongPatients.size());
+        response.setData(wrongPatients);
+        return response;
     }
 
     @RequestMapping(value = { "analysis/getPatientTimelines" }, method = RequestMethod.POST)

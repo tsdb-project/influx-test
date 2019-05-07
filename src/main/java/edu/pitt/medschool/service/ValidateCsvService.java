@@ -1,7 +1,9 @@
 package edu.pitt.medschool.service;
 
+import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.model.PatientTimeLine;
+import edu.pitt.medschool.model.Wrongpatients;
 import edu.pitt.medschool.model.dao.CsvFileDao;
 import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.GraphFilter;
@@ -16,11 +18,10 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ValidateCsvService {
@@ -137,5 +138,96 @@ public class ValidateCsvService {
     public String getFilteredtPatientTimeLines(String machine, GraphFilter filter) throws Exception{
         throw new NumberFormatException();
     }
- 
+
+    static class TimelineCompare implements Comparator<long[]>{
+        @Override
+        public int compare(long[] o1, long[] o2) {
+            if(o1[0]>o2[0]){
+                return 1;
+            } else if(o1[0]<o2[0]){
+                return -1;
+            }else {
+                if (o1[1]>o2[1]){
+                    return 1;
+                }else {
+                    return -1;
+                }
+            }
+        }
+    }
+
+    public ArrayList<Wrongpatients> getWrongPatients(ArrayList<PatientTimeLine> patientTimeLines){
+        ArrayList<Wrongpatients> wrongpatients = new ArrayList<>();
+        HashMap<String,HashMap<String,List<long []>>> timelines = new HashMap<>();
+        // create hashmap for patients
+        for(PatientTimeLine p:patientTimeLines){
+            if(timelines.containsKey(p.getPid()) && timelines.get(p.getPid()).containsKey(p.getFiletype())){
+                HashMap<String, List<long []>> innermap = timelines.get(p.getPid());
+                List<long[]> timeline = innermap.get(p.getFiletype());
+                long [] ts = {p.getRelativeStartTime(),p.getRelativeEndTime()};
+                timeline.add(ts);
+                innermap.put(p.getFiletype(),timeline);
+                timelines.put(p.getPid(),innermap);
+
+            }else if(timelines.containsKey(p.getPid()) && !timelines.get(p.getPid()).containsKey(p.getFiletype())){
+                List<long[]> tmplist = new ArrayList<>();
+                HashMap<String,List<long []>> innermap = timelines.get(p.getPid());
+                long [] ts = {p.getRelativeStartTime(),p.getRelativeEndTime()};
+                tmplist.add(ts);
+                innermap.put(p.getFiletype(),tmplist);
+                timelines.put(p.getPid(),innermap);
+
+            }else{
+                List<long []> tmplist = new ArrayList<>();
+                HashMap<String,List<long []>> innermap = new HashMap<>();
+                long [] ts = {p.getRelativeStartTime(),p.getRelativeEndTime()};
+                tmplist.add(ts);
+                innermap.put(p.getFiletype(),tmplist);
+                timelines.put(p.getPid(),innermap);
+            }
+
+        }
+
+        System.out.println(timelines.size());
+        // detect wrong patients
+        for (HashMap.Entry<String,HashMap<String,List<long []>>> patinet: timelines.entrySet()){
+            //System.out.println(patinet.getKey());
+            Wrongpatients wrongpatient = new Wrongpatients();
+            wrongpatient.setPid(patinet.getKey());
+            List<long []> ar = patinet.getValue().get("ar");
+            List<long []> noar = patinet.getValue().get("noar");
+            ar.sort(new TimelineCompare());
+            noar.sort(new TimelineCompare());
+            for(int i=0;i<ar.size()-1;i++){
+                if(ar.get(i)[1]>ar.get(i+1)[0]){
+                    wrongpatient.setIsoverlap(true);
+                }
+                if(ar.get(i)[1] != ar.get(i+1)[0]){
+                    wrongpatient.setIsabscent(true);
+                }
+            }
+            for(int i=0;i<noar.size()-1;i++){
+                if(noar.get(i)[1] > noar.get(i+1)[0]){
+                    wrongpatient.setIsoverlap(true);
+                }
+                if(noar.get(i)[1] < noar.get(i+1)[0]){
+                    wrongpatient.setIsabscent(true);
+                }
+            }
+            if(ar.size()!=noar.size()){
+                wrongpatient.setNotsame(true);
+            }else {
+                for (int i=0;i<ar.size();i++) {
+                    if (ar.get(i)[0] == noar.get(i)[0] && ar.get(i)[1] == noar.get(i)[1]) {
+                        continue;
+                    } else {
+                        wrongpatient.setNotsame(true);
+                    }
+                }
+            }
+            wrongpatients.add(wrongpatient);
+        }
+        return wrongpatients;
+    }
+
 }
