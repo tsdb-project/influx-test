@@ -203,7 +203,7 @@ public class ValidateCsvService {
                     wrongpatient.setIsoverlap(true);
                 }
                 // problem
-                if(ar.get(i)[1] != ar.get(i+1)[0]){
+                if(ar.get(i)[1] < ar.get(i+1)[0]){
                     wrongpatient.setIsabscent(true);
                 }
             }
@@ -226,7 +226,11 @@ public class ValidateCsvService {
                     }
                 }
             }
-            wrongpatients.add(wrongpatient);
+
+            if(wrongpatient.isIsabscent() || wrongpatient.isIsoverlap() || wrongpatient.isNotsame()){
+                wrongpatients.add(wrongpatient);
+            }
+
         }
         return wrongpatients;
     }
