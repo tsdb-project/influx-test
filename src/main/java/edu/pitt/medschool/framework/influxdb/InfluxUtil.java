@@ -1,17 +1,22 @@
 package edu.pitt.medschool.framework.influxdb;
 
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
-import okhttp3.OkHttpClient;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.config.InfluxappConfig;
+import okhttp3.OkHttpClient;
 
 /**
  * Utilities for InfluxDB Java Client
@@ -20,15 +25,18 @@ import java.util.concurrent.TimeUnit;
  */
 public class InfluxUtil {
 
+    private static Logger logger = LoggerFactory.getLogger(InfluxUtil.class);
+
     /**
-     * Method for lazy man, just query the 'data' database and get the result
-     * Just use fast method for general queries
+     * Method for lazy man, just query the 'data' database and get the result Just use fast method for general queries
      */
     public static ResultTable[] justQueryData(InfluxDB i, boolean fastMethod, String query) {
         String dbName = DBConfiguration.Data.DBNAME;
         QueryResult qr = i.query(new Query(query, dbName));
-        if (fastMethod) return queryResultToTable(qr).toArray(new ResultTable[0]);
-        else return queryResultToKV(qr).toArray(new ResultTable[0]);
+        if (fastMethod)
+            return queryResultToTable(qr).toArray(new ResultTable[0]);
+        else
+            return queryResultToKV(qr).toArray(new ResultTable[0]);
     }
 
     /**
@@ -37,12 +45,15 @@ public class InfluxUtil {
     public static List<FastResultTable> queryResultToTable(QueryResult results) {
         List<FastResultTable> res = new LinkedList<>();
 
-        if (results.hasError()) return res;
-        if (results.getResults().isEmpty()) return res;
+        if (results.hasError())
+            return res;
+        if (results.getResults().isEmpty())
+            return res;
 
         // Most queries should have one result,
         for (QueryResult.Result qr : results.getResults()) {
-            if (qr.getSeries() == null) continue;
+            if (qr.getSeries() == null)
+                continue;
             for (QueryResult.Series sr : qr.getSeries()) {
                 res.add(new FastResultTable(sr));
             }
@@ -57,18 +68,46 @@ public class InfluxUtil {
     public static List<DictionaryResultTable> queryResultToKV(QueryResult results) {
         List<DictionaryResultTable> res = new LinkedList<>();
 
-        if (results.hasError()) return res;
-        if (results.getResults().isEmpty()) return res;
+        if (results.hasError())
+            return res;
+        if (results.getResults().isEmpty())
+            return res;
 
         // but we have to handle multi-results queries anyway
         for (QueryResult.Result qr : results.getResults()) {
-            if (qr.getSeries() == null) continue;
+            if (qr.getSeries() == null)
+                continue;
             for (QueryResult.Series sr : qr.getSeries()) {
                 res.add(new DictionaryResultTable(sr));
             }
         }
 
         return res;
+    }
+
+    public static boolean deleteDataByTagValues(String patient, Map<String, String> tags) throws Exception {
+        String dbName = DBConfiguration.Data.DBNAME;
+        String queryTemplate = "DELETE FROM \"%s\" %s";
+        StringBuffer whereClause = new StringBuffer("WHERE ");
+
+        boolean usingWhereClause = false;
+        for (String tag : tags.keySet()) {
+            whereClause.append("\"").append(tag).append("\"");
+            whereClause.append(" = ").append("'").append(tags.get(tag)).append("' ");
+            usingWhereClause = true;
+        }
+        String query = String.format(queryTemplate, patient, usingWhereClause ? whereClause : whereClause);
+        logger.debug(query);
+        InfluxDB influxDB = generateIdbClient(false);
+        try {
+            QueryResult result = influxDB.query(new Query(query, dbName));
+            logger.debug(result.toString());
+        } catch (Exception e) {
+            logger.error("FAILED TO DELETE FROM INFLUX!");
+            logger.error(e.toString());
+            throw e;
+        }
+        return true;
     }
 
     /**
@@ -83,7 +122,8 @@ public class InfluxUtil {
         QueryResult qr = i.query(q);
         List<QueryResult.Series> s = qr.getResults().get(0).getSeries();
         i.close();
-        if (s == null) return new ArrayList<>(0);
+        if (s == null)
+            return new ArrayList<>(0);
 
         List<List<Object>> os = s.get(0).getValues();
         List<String> lists = new ArrayList<>(os.size());
@@ -118,7 +158,8 @@ public class InfluxUtil {
         InfluxDB i = generateIdbClient(true);
         QueryResult qr = i.query(q);
         i.close();
-        if (qr.getResults().get(0).getSeries() == null) return -1;
+        if (qr.getResults().get(0).getSeries() == null)
+            return -1;
         return (long) qr.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
     }
 
@@ -128,8 +169,8 @@ public class InfluxUtil {
      * @param needGzip Unless Idb not running with Brainflux, you should disable GZip
      */
     public static InfluxDB generateIdbClient(boolean needGzip) {
-        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME, InfluxappConfig.IFX_PASSWD,
-                new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS)
+        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME,
+                InfluxappConfig.IFX_PASSWD, new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS)
                         .readTimeout(1, TimeUnit.HOURS).writeTimeout(1, TimeUnit.HOURS));
         if (needGzip) {
             idb.enableGzip();
@@ -140,8 +181,11 @@ public class InfluxUtil {
     }
 
     public static void main(String[] args) {
-        List<String> s = getAllTables(DBConfiguration.Data.DBNAME);
-        System.out.println(s);
+        try {
+            deleteDataByTagValues("PUH", new HashMap<>());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
