@@ -22,14 +22,13 @@ $(document).ready(function () {
                 return booleanToStr(data.isoverlap);
             }
         },{
-            data:null,
-            render:function (data) {
-                return booleanToStr(data.isabscent);
-            }
+            data:'ar_miss'
+        },{
+            data:'noar_miss'
         },{
             data:null,
             render:function (data) {
-                return booleanToStr(data.notsame);
+                return booleanToStr(data.wrongname);
             }
         }],
         order: [[0, 'desc']],

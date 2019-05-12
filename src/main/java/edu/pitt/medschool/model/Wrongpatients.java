@@ -1,15 +1,16 @@
 package edu.pitt.medschool.model;
 
+import java.util.List;
+
 public class Wrongpatients {
     private String pid;
     private boolean isoverlap;
-    private boolean isabscent;
-    private boolean notsame;
-
+    private List<Integer> ar_miss;
+    private List<Integer> noar_miss;
+    private boolean wrongname;
     public Wrongpatients(){
-        this.isabscent = false;
         this.isoverlap = false;
-        this.notsame = false;
+        this.wrongname = false;
     }
     public String getPid() {
         return pid;
@@ -27,19 +28,27 @@ public class Wrongpatients {
         this.isoverlap = isoverlap;
     }
 
-    public boolean isIsabscent() {
-        return isabscent;
+    public boolean isWrongname() {
+        return wrongname;
     }
 
-    public void setIsabscent(boolean isabsenct) {
-        this.isabscent = isabsenct;
+    public void setWrongname(boolean wrongname) {
+        this.wrongname = wrongname;
     }
 
-    public boolean isNotsame() {
-        return notsame;
+    public List<Integer> getAr_miss() {
+        return ar_miss;
     }
 
-    public void setNotsame(boolean issame) {
-        this.notsame = issame;
+    public void setAr_miss(List<Integer> ar_miss) {
+        this.ar_miss = ar_miss;
+    }
+
+    public List<Integer> getNoar_miss() {
+        return noar_miss;
+    }
+
+    public void setNoar_miss(List<Integer> noar_miss) {
+        this.noar_miss = noar_miss;
     }
 }
