@@ -38,6 +38,15 @@ public class UseCaseController {
         return response;
     }
 
+    @GetMapping("api/use/case/cmu")
+    @ResponseBody
+    public RestfulResponse caseCMU() throws IOException {
+        RestfulResponse response = new RestfulResponse(1, "Finished");
+        String msg = useCaseService.useCaseCMU();
+        response.setData(msg);
+        return response;
+    }
+
     @GetMapping("api/performanceTest")
     @ResponseBody
     public RestfulResponse performanceTest() throws IOException {

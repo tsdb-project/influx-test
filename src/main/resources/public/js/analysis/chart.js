@@ -137,7 +137,7 @@ $(document).ready(function() {
 			}
 		}
 
-		if(whereCondition == "WHERE "){
+		if(whereCondition == "WHERE"){
 			return
 		}else{
 			$.ajax({
@@ -396,7 +396,7 @@ $(document).ready(function() {
 
 			// reset the data for timeLine chart
 			TimeLineChart.data(chartdata)
-
+			
 		}else{
 			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
 				'No patient satisfies your conditions.');

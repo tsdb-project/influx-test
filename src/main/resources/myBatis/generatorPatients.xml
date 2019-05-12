@@ -36,7 +36,7 @@
             <property name="enableSubPackages" value="true" />
         </javaClientGenerator>
 
-        <table tableName="patient"></table>
         <table tableName="csv_file"></table>
+        <table tableName="imported_file"></table>
     </context>
 </generatorConfiguration>

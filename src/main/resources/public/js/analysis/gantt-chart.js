@@ -305,7 +305,7 @@ d3.gantt = function(tasks) {
         function updateChart() {
             
             // What are the selected boundaries?
-            extent = d3.event.selection
+            extent = d3.event.selection;
             var updatedTimestamp = null;
             
             // If no selection, back to initial coordinate. Otherwise, update X axis domain
@@ -314,13 +314,13 @@ d3.gantt = function(tasks) {
                 x.domain([ 0,8])
             }else{
                 updatedTimestamp = x.invert(extent[1]);
-                x.domain([ x.invert(0), updatedTimestamp ])
+                x.domain([ x.invert(0), updatedTimestamp ]);
                 focus.select(".brush").call(brushX.move, null) // This remove the grey brush area as soon as the selection has been done
             }
             
             // Update axis and line position
             // console.log(xAxis);
-            xAxis.transition().duration(1000).call(d3.axisBottom(x).tickFormat(d3.timeFormat(tickFormat)))
+            xAxis.transition().duration(1000).call(d3.axisBottom(x).tickFormat(d3.timeFormat(tickFormat)));
             bar
             .transition()
             .duration(1000)
@@ -331,12 +331,12 @@ d3.gantt = function(tasks) {
                   // console.log(d.fname);
                   }
                   return x(d.relativeEndTime - d.relativeStartTime);
-                  })
+                  });
             
             // If user double click, reinitialize the chart
             svg.on("dblclick",function(){
-                   x.domain([ timeDomainStart, timeDomainEnd ])
-                   xAxis.transition().call(d3.axisBottom(x).tickFormat(d3.timeFormat(tickFormat)))
+                   x.domain([ timeDomainStart, timeDomainEnd ]);
+                   xAxis.transition().call(d3.axisBottom(x).tickFormat(d3.timeFormat(tickFormat)));
                    bar
                    .transition()
                    .attr("transform", rectTransform)
@@ -428,7 +428,7 @@ d3.gantt = function(tasks) {
                              //console.log(scale(val));
                              return scale(val);
                              }
-                             })()
+                             })();
             console.log("s1 " + s[1] + " s0 " +  s[0]);
             updatedS = Array(s[1] - s[0] + 1).fill().map((item, index) => s[0] + index);
             //console.log(updatedS);
@@ -457,7 +457,7 @@ d3.gantt = function(tasks) {
                 });
             }
             focus.selectAll("rect.databar")
-                .remove()
+                .remove();
             bar = focus.selectAll(".chart")
                 .data(filteredTasks, keyFunction)
                 .enter()
@@ -510,7 +510,7 @@ d3.gantt = function(tasks) {
         
         return gantt;
         
-    };
+    }
     
     //   gantt.redraw = function(tasks) {
     

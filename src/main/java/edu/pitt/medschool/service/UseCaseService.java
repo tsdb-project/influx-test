@@ -3,9 +3,9 @@ package edu.pitt.medschool.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -19,6 +19,7 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
+import org.influxdb.dto.QueryResult.Series;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.DownsampleDao;
 import edu.pitt.medschool.model.dao.DownsampleGroupDao;
+import edu.pitt.medschool.model.dao.FeatureDao;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.PatientDao;
 import okhttp3.OkHttpClient;
@@ -62,12 +64,12 @@ public class UseCaseService {
     DownsampleGroupDao downsampleGroupDao;
     @Autowired
     ColumnService columnService;
+    @Autowired
+    FeatureDao featureDao;
 
-    /*
-     * Be able to restrict the epochs for which data are exported (e.g. specify to export up to the first 36 hours of available
+    /* Be able to restrict the epochs for which data are exported (e.g. specify to export up to the first 36 hours of available
      * data, but truncate data thereafter). Be able to specify which columns are exported (e.g. I10_*, I10_2 only, all data,
-     * etc) Be able to export down sampled data (e.g. hourly mean, median, variance, etc)
-     */
+     * etc) Be able to export down sampled data (e.g. hourly mean, median, variance, etc) */
     @Autowired
     PatientDao patientDao;
     @Autowired
@@ -197,13 +199,133 @@ public class UseCaseService {
         }
     }
 
+    public String useCaseCMU() throws IOException {
+        boolean debug = false;
+
+        File dir = generateOutputDir("CMU");
+        if (dir == null)
+            return "Failed to create directory";
+
+        // Get Patient List by uuid
+        List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine(uuid);
+        patientIDs.clear();
+        patientIDs.add("PUH-2010-074");
+        idQueue = new LinkedBlockingQueue<>(patientIDs);
+
+        List<String> cols = featureDao.selectAllColumnCodes();
+        if (debug)
+            cols = cols.subList(0, 3);
+        String[] queryColumns = new String[cols.size()];
+        for (int i = 0; i < cols.size(); i++) {
+            queryColumns[i] = "mean(" + cols.get(i) + ")";
+        }
+        String queryColumnString = String.join(", ", queryColumns);
+
+        cols.add(0, "timestamp");
+        String[] colsArr = cols.toArray(new String[cols.size()]);
+
+        int paraCount = determineParaNumber();
+        ExecutorService scheduler = generateNewThreadPool(paraCount);
+        Runnable queryTask = () -> {
+            String patientId;
+            while ((patientId = idQueue.poll()) != null) {
+                try {
+                    logger.debug("<" + patientId + "> STARTED PROCESSING ");
+                    String template = "select %s from \"%s\" where arType = 'ar' and time >= '%s' + %ds and time <= '%s' + %ds group by time(1s) fill(null)";
+
+                    String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId
+                            + "\" where arType = 'ar' limit 1 offset 120";
+                    QueryResult recordResult = influxDB.query(new Query(firstRecordTimeQuery, dbName));
+                    String firstRecordTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0)
+                            .toString();
+
+                    CSVWriter writer = new CSVWriter(new FileWriter(dir.getAbsolutePath() + "/" + patientId + ".csv"));
+                    writer.writeNext(colsArr);
+
+                    int windowLength = 600;
+                    int windowCount = 7200 / windowLength;
+                    for (int hour : new int[] { 0, 34 * 3600 }) {
+                        for (int window = 0; window < windowCount; window++) {
+                            int timeShift = 1 + window * windowLength + hour;
+                            String queryString = String.format(template, queryColumnString, patientId, firstRecordTime,
+                                    timeShift, firstRecordTime, timeShift + windowLength - 1);
+
+                            Query query = new Query(queryString, dbName);
+                            QueryResult result = influxDB.query(query);
+
+                            if (result.getResults().get(0).getSeries() == null) {
+                                int counter = 0;
+                                Instant timestamp = Instant.parse(firstRecordTime).plusSeconds(timeShift);
+                                for (int seconds = 0; seconds < windowLength; seconds++) {
+                                    String[] row = new String[colsArr.length];
+                                    row[0] = timestamp.toString();
+                                    timestamp = timestamp.plusSeconds(1);
+                                    for (int i = 1; i < row.length; i++) {
+                                        row[i] = "N/A";
+                                    }
+                                    counter++;
+                                    if (counter % windowLength == 1) {
+                                        logger.debug("<" + patientId + "> BATCH " + (window + 1) + " DONE: " + row[0]);
+                                    }
+                                    writer.writeNext(row);
+                                }
+                            } else {
+                                Series resultSeries = result.getResults().get(0).getSeries().get(0);
+                                List<List<Object>> res = resultSeries.getValues();
+
+                                int counter = 0;
+                                for (List<Object> resultRow : res) {
+                                    String[] row = new String[resultRow.size()];
+                                    for (int i = 0; i < row.length; i++) {
+                                        if (resultRow.get(i) != null) {
+                                            row[i] = resultRow.get(i).toString();
+                                        } else {
+                                            row[i] = "N/A";
+                                        }
+                                    }
+                                    counter++;
+                                    if (counter % windowLength == 1) {
+                                        logger.debug("<" + patientId + "> BATCH " + (window + 1) + " DONE: " + row[0]);
+                                    }
+                                    writer.writeNext(row);
+                                }
+                            }
+
+                        }
+                    }
+
+                    writer.close();
+                    logger.debug("<" + patientId + "> FINISHED PROCESSING ");
+                } catch (Exception e) {
+                    logger.error(patientId + " : " + Util.stackTraceErrorToString(e));
+                    idQueue.offer(patientId);
+                }
+            }
+        };
+
+        for (int i = 0; i < paraCount; ++i) {
+            scheduler.submit(queryTask);
+        }
+        scheduler.shutdown();
+        try {
+            scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+            return "Success!";
+        } catch (InterruptedException e) {
+            logger.error(Util.stackTraceErrorToString(e));
+            return "Failed with:" + Util.stackTraceErrorToString(e);
+        }
+    }
+
     /**
      * Generate an object for output directory class
      */
     private File generateOutputDir(String purpose) {
-        String rfc3339 = "_(" + LocalDateTime.now().toString() + ")";
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        String rfc3339 = "(" + sdf.format(timestamp) + ")";
         // Workaround for Windows name restriction
-        String path = DIRECTORY + purpose + rfc3339.replace(':', '.');
+        String path = DIRECTORY + purpose + rfc3339;
         File outputDir = new File(path);
         boolean dirCreationSuccess = true;
 

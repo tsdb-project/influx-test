@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.service.ValidateCsvService;
-import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,6 +28,8 @@ import edu.pitt.medschool.model.dto.ImportProgress;
 import edu.pitt.medschool.service.ImportCsvService;
 import edu.pitt.medschool.service.ImportProgressService;
 import edu.pitt.medschool.service.PatientService;
+import edu.pitt.medschool.service.RawDataService;
+import edu.pitt.medschool.service.ValidateCsvService;
 
 /**
  * @author Isolachine
@@ -43,6 +45,8 @@ public class DataController {
     PatientService patientService;
     @Autowired
     ValidateCsvService validateCsvService;
+    @Autowired
+    RawDataService rawDataService;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -66,6 +70,16 @@ public class DataController {
         model.addObject("nav", "data");
         model.addObject("subnav", "patients");
         model.addObject("columns", patientService.getColumnInfo());
+        return model;
+    }
+
+    @RequestMapping("data/patient/{id}")
+    @ResponseBody
+    public ModelAndView patientFiles(ModelAndView model, @PathVariable(value = "id", required = true) String patientId) {
+        model.setViewName("data/patient");
+        model.addObject("nav", "data");
+        model.addObject("subnav", "patients");
+        model.addObject("patientId", patientId);
         return model;
     }
 
@@ -128,14 +142,16 @@ public class DataController {
     // new part for data validation
     @RequestMapping(value = "api/data/validate")
     @ResponseBody
-    public Map<String, Object> dataValidate(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model) throws Exception{
+    public Map<String, Object> dataValidate(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model)
+            throws Exception {
         Map<String, Object> map = new HashMap<>();
 
         for (int i = 0; i < dir.getFiles().size(); i++) {
             CsvFile csvFile = validateCsvService.analyzeCsv(dir.getFiles().get(i));
             validateCsvService.insertCsvFile(csvFile);
         }
-        System.out.println("***********************************************Analyze finished*****************************************");
+        System.out.println(
+                "***********************************************Analyze finished*****************************************");
         return map;
     }
 
@@ -146,9 +162,26 @@ public class DataController {
         return response;
     }
 
+    @GetMapping(value = "/apis/patient/{id}")
+    @ResponseBody
+    public RestfulResponse patientCsvFiles(@PathVariable(value = "id", required = true) String patientId) {
+        RestfulResponse response = new RestfulResponse(1, "success");
+        response.setData(rawDataService.selectpatientFilesByPatientId(patientId));
+        return response;
+    }
+
+    @DeleteMapping(value = "/apis/file")
+    @ResponseBody
+    public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) CsvFile file) throws Exception {
+        RestfulResponse response = new RestfulResponse(1, "success");
+        response.setData(rawDataService.deletePatientDataByFile(file));
+        return response;
+    }
+
     @RequestMapping(value = "api/data/progress")
     @ResponseBody
-    public Map<String, Object> importProgress(@RequestParam(value = "file", required = false, defaultValue = "") String file, Model model) {
+    public Map<String, Object> importProgress(@RequestParam(value = "file", required = false, defaultValue = "") String file,
+            Model model) {
         Map<String, Object> map = new HashMap<>();
 
         String uuid = importCsvService.GetUUID();
