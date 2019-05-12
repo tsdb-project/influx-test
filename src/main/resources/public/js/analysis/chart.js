@@ -110,7 +110,7 @@ $(document).ready(function() {
 			}
 		}
 
-		if(whereCondition == "WHERE "){
+		if(whereCondition == "WHERE"){
 			return
 		}else{
 			$.ajax({
@@ -219,7 +219,7 @@ $(document).ready(function() {
 
 		tasks.sort(function(a, b) {
 			return new Date(a.arrestTime) - new Date(b.arrestTime);
-		})
+		});
 		var minDate = tasks[0].arrestTime;
 		tasks.sort(function(a, b) {
 			return a.relativeEndTime - b.relativeEndTime;
@@ -267,7 +267,7 @@ $(document).ready(function() {
 	var taskNames = tasks.map(a => a.pid + '#' + a.arrestTime + '#' + a.filetype);
 	var patientFile = tasks.map(a => a.fname);
 	console.log(tasks);
-	
+
 	/*tasks.sort(function(a, b) {
 	    return a.relativeEndTime - b.relativeEndTime;
 	});

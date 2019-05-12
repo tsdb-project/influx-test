@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.regex.Pattern;
 
+import edu.pitt.medschool.config.DBConfiguration;
 import org.apache.poi.ss.usermodel.DataConsolidateFunction;
 
 import edu.pitt.medschool.model.PatientTimeLine;
@@ -70,10 +71,10 @@ public class TimeLine {
 		// TODO Auto-generated method stub
 		PatientTimeLine patientTimeLine = new PatientTimeLine();
 		String filename = this.getFilename();
-        Timestamp arrestTime = this.getArresttime();
-        if (arrestTime == null){
-           arrestTime = this.getArrestdate();
-       }
+        Timestamp arrestTime = this.getArrestdate();
+        if (this.getArresttime() != null) {
+			arrestTime = this.getArresttime();
+		}
         long relativeStartTime = (this.getStart_time().getTime() - arrestTime.getTime())/1000;
         long relativeEndTime = (this.getEnd_time().getTime() - arrestTime.getTime())/1000;
         int len = this.getLen();
