@@ -130,7 +130,7 @@ public class ValidateCsvService {
         }
     }
 
-    public ArrayList<Wrongpatients> getWrongPatients(ArrayList<PatientTimeLine> patientTimeLines){
+    public ArrayList<Wrongpatients> getWrongPatients(List<PatientTimeLine> patientTimeLines){
         ArrayList<Wrongpatients> wrongpatients = new ArrayList<>();
         HashMap<String,HashMap<String,List<Integer>>> documents = new HashMap<>();
         HashMap<String,HashMap<String,List<long []>>> timelines = new HashMap<>();
@@ -160,6 +160,8 @@ public class ValidateCsvService {
                 innermap.put(p.getFiletype(),tmplist);
                 timelines.put(p.getPid(),innermap);
             }
+
+            // create hashmap for document number
             if(documents.containsKey(p.getPid()) && documents.get(p.getPid()).containsKey(p.getFiletype())){
                 HashMap<String, List<Integer>> innermap = documents.get(p.getPid());
                 List<Integer> documentNo = innermap.get(p.getFiletype());
@@ -191,21 +193,32 @@ public class ValidateCsvService {
             wrongpatient.setPid(patinet.getKey());
             List<long []> ar = patinet.getValue().get("ar");
             List<long []> noar = patinet.getValue().get("noar");
-            ar.sort(new TimelineCompare());
-            noar.sort(new TimelineCompare());
-            for(int i=0;i<ar.size()-1;i++){
-                if(ar.get(i)[1]>ar.get(i+1)[0]){
-                    wrongpatient.setIsoverlap(true);
+            //System.out.println(noar.size());
+            if(ar != null){
+                ar.sort(new TimelineCompare());
+                for(int i=0;i<ar.size()-1;i++){
+                    if(ar.get(i)[1]>ar.get(i+1)[0]){
+                        wrongpatient.setIsoverlap(true);
+                    }
                 }
             }
-            for(int i=0;i<noar.size()-1;i++){
-                if(noar.get(i)[1] > noar.get(i+1)[0]){
-                    wrongpatient.setIsoverlap(true);
+            if(noar != null){
+                for(int i=0;i<noar.size()-1;i++){
+                    if(noar.get(i)[1] > noar.get(i+1)[0]){
+                        wrongpatient.setIsoverlap(true);
+                    }
                 }
             }
 
+
             List<Integer> ar_num = documents.get(patinet.getKey()).get("ar");
             List<Integer> noar_num = documents.get(patinet.getKey()).get("noar");
+            if(ar_num == null){
+                ar_num = new ArrayList<>();
+            }
+            if(noar_num == null){
+                noar_num = new ArrayList<>();
+            }
             Collections.sort(ar_num);
             Collections.sort(noar_num);
             List<Integer> miss_ar = new ArrayList<>();

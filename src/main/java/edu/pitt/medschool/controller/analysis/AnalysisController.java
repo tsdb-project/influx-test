@@ -157,7 +157,7 @@ public class AnalysisController {
     @RequestMapping(value = {"analysis/getWrongPatients"},method = RequestMethod.GET)
     @ResponseBody
     public RestfulResponse getWrongPatients(Model model){
-        ArrayList<Wrongpatients> wrongPatients = new ArrayList<>();
+        List<Wrongpatients> wrongPatients = new ArrayList<>();
         RestfulResponse response = new RestfulResponse(1,"success");
         wrongPatients = validateCsvService.getWrongPatients(validateCsvService.getPatientTimeLines("realpsc"));
         logger.info("length",wrongPatients.size());
