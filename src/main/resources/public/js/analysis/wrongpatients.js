@@ -62,7 +62,7 @@ $(document).ready(function () {
             if(response[i].wrongname){
                 str+="T;";
             }else {
-                str+="";
+                str+=";";
             }
             str+="\n";
         }
