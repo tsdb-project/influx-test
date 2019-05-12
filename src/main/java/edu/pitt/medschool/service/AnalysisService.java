@@ -85,7 +85,6 @@ public class AnalysisService {
     private final ExportDao exportDao;
     private final ColumnService columnService;
     private final MedicationDao medicationDao;
-    private final PatientDao patientDao;
     private final InfluxSwitcherService iss;
     private final ImportedFileDao importedFileDao;
     private final ScheduledFuture jobCheckerThread; // Thread for running managed jobs
@@ -114,11 +113,10 @@ public class AnalysisService {
         this.iss = iss;
         this.importedFileDao = importedFileDao;
         this.medicationDao = medicationDao;
-        this.patientDao = patientDao;
         // Check the job queue every 20 seconds and have a initial delay of 10s
         this.jobCheckerThread = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             Thread.currentThread().setName("JobCheckerThread");
-            ExportWithBLOBs target = null, previous = null;
+            ExportWithBLOBs target = null;
             while ((target = this.jobQueue.poll()) != null) {
                 logger.info("Start to process job #<{}>", target.getId());
                 if (!target.getMedical()) {
@@ -128,7 +126,6 @@ public class AnalysisService {
                     logger.info("***********************Medication********************");
                     mainMedicalExportProcess(target);
                 }
-                previous = target;
                 logger.info("Finished one job #<{}>", target.getId());
             }
         }, 10, 20, TimeUnit.SECONDS);
@@ -361,7 +358,6 @@ public class AnalysisService {
      * Export the result of medical query
      * 
      */
-    @SuppressWarnings("null")
     private void mainMedicalExportProcess(ExportWithBLOBs job) {
         int jobId = job.getId();
         int queryId = job.getQueryId();
@@ -643,7 +639,6 @@ public class AnalysisService {
     private void jobClosingHandler(boolean idbError, boolean isPscNeeded, ExportWithBLOBs job, File outputDir, ExportOutput eo,
             int validPatientNumber) {
         // We will leave the local Idb running after the job
-        boolean shouldStopRemote = this.queueHasNextPscJob().isPresent();
         if (isPscNeeded && !this.iss.stopRemoteInflux()) {
             idbError = true;
         }
@@ -667,7 +662,6 @@ public class AnalysisService {
     private void medicaljobClosingHandler(boolean idbError, boolean isPscNeeded, ExportWithBLOBs job, File outputDir,
             ExportMedicalOutput eo, int validPatientNumber) {
         // We will leave the local Idb running after the job
-        boolean shouldStopRemote = this.queueHasNextPscJob().isPresent();
         if (isPscNeeded && !this.iss.stopRemoteInflux()) {
             idbError = true;
         }
@@ -690,6 +684,7 @@ public class AnalysisService {
      *
      * @return Return the Optional job
      */
+    @SuppressWarnings("unused")
     private Optional<ExportWithBLOBs> queueHasNextPscJob() {
         return this.jobQueue.parallelStream().findAny().filter(job -> job.getDbType().equals("psc"));
     }

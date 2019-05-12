@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Brain Flux</title>
+<!-- Vendor styles -->
+<link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.css">
+<link rel="stylesheet" href="/vendors/bower_components/select2/dist/css/select2.min.css">
+<link rel="stylesheet" href="/vendors/flatpickr/flatpickr.min.css" />
+<link rel="stylesheet" href="/vendors/bower_components/dropzone/dist/dropzone.css">
+<link rel="stylesheet" href="/vendors/bower_components/nouislider/distribute/nouislider.min.css">
+<link rel="stylesheet" href="/vendors/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
+<link rel="stylesheet" href="/vendors/bower_components/trumbowyg/dist/ui/trumbowyg.min.css">
+<link rel="icon" type="image/ico" href="/img/favicon.ico">
+
+<!-- App styles -->
+<link rel="stylesheet" href="/css/app.min.css">
+</head>
+
+<body data-ma-theme="blue">
+    <main class="main">
+    <div th:insert="fragments/page-loader :: div"></div>
+    <div th:insert="fragments/header :: header"></div>
+    <div th:insert="fragments/sidebar :: aside"></div>
+
+    <section class="content">
+        <div class="content__inner">
+            <!-- PUT THE MAIN CONTENT HERE -->
+            <header class="content__title">
+                <h1>
+                    Patient - 
+                    <b>
+                        <span th:text=${patientId}></span>
+                    </b>
+                </h1>
+                <div class="actions">
+                    <a class="actions__item zmdi zmdi-refresh" id="refreshButton"></a>
+                </div>
+            </header>
+
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">CSV files</h3>
+                    <div class="table-responsive">
+                        <table id="csv-file-table" class="table table-bordered">
+                            <thead class="thead-default">
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Row Count</th>
+                                    <th>Density</th>
+                                    <th>Operations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:insert="fragments/footer :: footer"></div>
+    </section>
+    </main>
+
+    <div th:insert="fragments/ie-warning :: div"></div>
+
+    <!-- Javascript -->
+    <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    var patientId = /*[[${patientId}]]*/null;
+                    /*]]>*/
+                </script>
+    <!-- Vendors -->
+    <script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="/vendors/bower_components/tether/dist/js/tether.min.js"></script>
+    <script src="/vendors/bower_components/popper.js/dist/umd/popper.min.js"></script>
+    <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+
+    <script src="/vendors/bower_components/jquery-mask-plugin/dist/jquery.mask.min.js"></script>
+    <script src="/vendors/bower_components/select2/dist/js/select2.full.min.js"></script>
+    <script src="/vendors/bower_components/dropzone/dist/min/dropzone.min.js"></script>
+    <script src="/vendors/flatpickr/flatpickr.min.js"></script>
+    <script src="/vendors/bower_components/nouislider/distribute/nouislider.min.js"></script>
+    <script src="/vendors/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
+    <script src="/vendors/bower_components/trumbowyg/dist/trumbowyg.min.js"></script>
+
+    <script src="/vendors/bower_components/remarkable-bootstrap-notify/dist/bootstrap-notify.min.js"></script>
+
+    <!-- Vendors: Data tables -->
+    <script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.19/dataRender/datetime.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="/vendors/bower_components/jszip/dist/jszip.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net/js/moment.min.js"></script>
+    <script src="/vendors/bower_components/datatables.net/js/datetime-moment.js"></script>
+
+    <!-- App functions and actions -->
+    <script src="/js/navigation.js"></script>
+    <script src="/js/app.min.js"></script>
+    <script src="/js/data/patient.js"></script>
+</body>
+</html>

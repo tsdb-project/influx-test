@@ -28,5 +28,7 @@ public class PatientService {
         return patientDao.getColumnInfo();
     }
 
-    public List<String> selecIdByfilter(String condition) { return patientDao.selecIdByfilter(condition); }
+    public List<String> selecIdByfilter(String condition) {
+        return patientDao.selecIdByfilter(condition);
+    }
 }

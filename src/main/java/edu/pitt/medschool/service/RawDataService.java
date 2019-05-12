@@ -1,26 +1,41 @@
 package edu.pitt.medschool.service;
 
+import java.text.ParseException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.influxdb.InfluxDB;
+import org.influxdb.dto.Query;
+import org.influxdb.dto.QueryResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.model.TSData.RawData;
-import org.influxdb.InfluxDB;
-import org.influxdb.dto.Query;
-import org.influxdb.dto.QueryResult;
-import org.springframework.stereotype.Service;
-
-import java.text.ParseException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import edu.pitt.medschool.model.dao.CsvFileDao;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dto.CsvFile;
 
 /**
  * @author Isolachine
  */
 @Service
 public class RawDataService {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Autowired
+    CsvFileDao csvFileDao;
+    @Autowired
+    ImportedFileDao importedFileDao;
 
     private final String dbDataName = DBConfiguration.Data.DBNAME;
 
@@ -55,7 +70,8 @@ public class RawDataService {
         if (!result.hasError() && !result.getResults().get(0).hasError()) {
             for (List<Object> res : result.getResults().get(0).getSeries().get(0).getValues()) {
                 RawData aRow = new RawData();
-                aRow.setTime(Instant.ofEpochMilli(TimeUtil.dateTimeFormatToTimestamp(res.get(0).toString(), "yyyy-MM-dd'T'HH:mm:ss'Z'", null)));
+                aRow.setTime(Instant.ofEpochMilli(
+                        TimeUtil.dateTimeFormatToTimestamp(res.get(0).toString(), "yyyy-MM-dd'T'HH:mm:ss'Z'", null)));
                 aRow.setColumnNames(columnNames);
                 List<Double> values = new ArrayList<>();
                 for (int i = 1; i < res.size(); i++) {
@@ -100,4 +116,28 @@ public class RawDataService {
             System.out.println(" :  " + news.get(i).getValues().get(0));
         }
     }
+
+    public List<CsvFile> selectpatientFilesByPatientId(String patientId) {
+        return csvFileDao.selectByPatientId(patientId);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public int deletePatientDataByFile(CsvFile file) throws Exception {
+        Map<String, String> tags = new HashMap<>();
+        tags.put("fileName", file.getFilename().replace(".csv", ""));
+        boolean deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
+        int deleteResult = 0;
+        if (deleteInfluxDataResult) {
+            deleteResult = importedFileDao.deletePatientDataByFile(file) * csvFileDao.deletePatientDataByFile(file);
+        }
+        try {
+            if (deleteResult == 0) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            logger.debug("DELETE DATA FAILED!");
+        }
+        return deleteResult;
+    }
+
 }
