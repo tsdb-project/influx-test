@@ -8,8 +8,7 @@ d3.gantt = function(tasks) {
     var margin = {top : 20, right : 40, bottom : 20, left : 200},
     margin2 = {top: 20, right: 1050, bottom: 20, left: 150};
     
-    var dataStartDate, dataEndDate, offset;
-    var fileName = new Array();
+    var dataStartDate, dataEndDate, offset;    var fileName = new Array();
     
     if(tasks == undefined || tasks.length <= 0){
         dataStartDate = new Date();
@@ -59,7 +58,6 @@ d3.gantt = function(tasks) {
     
    	// custom invert function
     y2.invertCust = (function(){
-                     console.log("in invertCust");
                      var domain = y2.domain();
                      var range = y2.range();
                      //console.log("d: " + domain + " r: " + range);
@@ -447,16 +445,14 @@ d3.gantt = function(tasks) {
              console.log("ybw: " + y.bandwidth());
              return y.bandwidth();
              })*/
-            console.log("373");
+
             xAxis.transition().duration(1000).call(d3.axisBottom(x).tickFormat(d3.timeFormat(tickFormat)))
             yAxis.transition().duration(1000).call(yAxisConfig);
-            console.log("375");
             
             var filteredTasks = tasks.splice(tasks.length);
             if (tasks.length != y.domain().length){
                 filteredTasks = tasks.filter(function(value, index, arr){
                     var str = value.pid + "#" + value.arrestTime + "#" + value.filetype;
-                    console.log(str);
                     return (y.domain().indexOf(str) > -1);
                 });
             }
@@ -500,30 +496,16 @@ d3.gantt = function(tasks) {
                     .duration(500)
                     .style("opacity", 0);
                     });
-            
-            
-            //focus.select(".area").attr("d", area);
-            //focus.select(".y").call(yAxis);
-            console.log(yAxis);
-            
-            //xAxis.transition().duration(1000).call(d3.axisBottom(x))
-            console.log("418");
-            /*svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
-             .scale(height / (s[1] - s[0]))
-             .translate(0, -s[0]));*/
-            console.log("422");
+
             
         }
         
         
         function zoomed() {
-            console.log("426");
+
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brushY") return; // ignore zoom-by-brush
             var t = d3.event.transform;
-            //y.domain(t.rescaleY(y2).domain());
-            //focus.select(".area").attr("d", area);
-            //focus.select(".y").call(yAxis);
-            //context.select(".brushY").call(brushY.move, y.range().map(t.invertCust, t));
+
         }
         
         return gantt;
