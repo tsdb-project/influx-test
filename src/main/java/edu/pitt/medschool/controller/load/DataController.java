@@ -162,11 +162,11 @@ public class DataController {
         return response;
     }
 
-    @GetMapping(value = "/apis/patient/{id}")
+    @GetMapping(value = "/apis/patient/files")
     @ResponseBody
-    public RestfulResponse patientCsvFiles(@PathVariable(value = "id", required = true) String patientId) {
+    public RestfulResponse patientCsvFiles(@RequestParam(name = "pid", required = false, defaultValue = "") String patientId) {
         RestfulResponse response = new RestfulResponse(1, "success");
-        response.setData(rawDataService.selectpatientFilesByPatientId(patientId));
+        response.setData(rawDataService.selectPatientFilesByPatientId(patientId));
         return response;
     }
 

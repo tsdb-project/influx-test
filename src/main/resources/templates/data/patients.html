@@ -37,6 +37,9 @@
                 </div>
             </header>
 
+
+            <div id="patientId" style="display: none"></div>
+
             <div class="card">
                 <div class="card-body">
                     <h3 class="card-title">Patients in Database</h3>
@@ -84,6 +87,7 @@
                                     <th>ID</th>
                                     <th>Age</th>
                                     <th>Gender</th>
+                                    <th>Manage</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -95,7 +99,33 @@
                 </div>
             </div>
 
-            <div class="card" id="progressCard">
+            <div class="card" style="display: none" id="csv-file-card">
+                <div class="card-body">
+                    <h3 class="card-title" id="card-patient-id"></h3>
+                    <div class="table-responsive">
+                        <table id="csv-file-table" class="table table-bordered">
+                            <thead class="thead-default">
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Row Count</th>
+                                    <th>Density</th>
+                                    <th>Counterpart</th>
+                                    <th>File Gap</th>
+                                    <th>Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="progressCard" style="display: none">
                 <div class="card-body">
                     <h1 class="card-title">Data Overview of PUH-XXXX-XXX</h1>
                     <div class="chart-container" style="position: relative; height: auto; width: 100%">
@@ -142,6 +172,7 @@
 
     <!-- Vendors: Data tables -->
     <script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.19/dataRender/datetime.js"></script>
     <script src="/vendors/bower_components/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
     <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.print.min.js"></script>
     <script src="/vendors/bower_components/jszip/dist/jszip.min.js"></script>

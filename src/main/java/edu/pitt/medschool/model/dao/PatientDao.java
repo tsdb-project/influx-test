@@ -122,4 +122,8 @@ public class PatientDao {
         return patientMapper.getColumnInfo();
     }
 
+    public Patient selectByPatientId(String patientId) {
+        return patientMapper.selectByPrimaryKey(patientId);
+    }
+
 }

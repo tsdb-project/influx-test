@@ -48,6 +48,24 @@ public class CsvFileSqlProvider {
         if (record.getFilename() != null) {
             sql.VALUES("filename", "#{filename,jdbcType=VARCHAR}");
         }
+        if (record.getStartTime() != null) {
+            sql.VALUES("start_time", "#{startTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getEndTime() != null) {
+            sql.VALUES("end_time", "#{endTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getLength() != null) {
+            sql.VALUES("length", "#{length,jdbcType=INTEGER}");
+        }
+        if (record.getDensity() != null) {
+            sql.VALUES("density", "#{density,jdbcType=DOUBLE}");
+        }
+        if (record.getMachine() != null) {
+            sql.VALUES("machine", "#{machine,jdbcType=VARCHAR}");
+        }
+        if (record.getAr() != null) {
+            sql.VALUES("ar", "#{ar,jdbcType=BIT}");
+        }
         if (record.getPath() != null) {
             sql.VALUES("path", "#{path,jdbcType=VARCHAR}");
         }
@@ -59,21 +77,6 @@ public class CsvFileSqlProvider {
         }
         if (record.getHeaderTime() != null) {
             sql.VALUES("header_time", "#{headerTime,jdbcType=TIMESTAMP}");
-        }
-        if (record.getStartTime() != null) {
-            sql.VALUES("start_time", "#{startTime,jdbcType=TIMESTAMP}");
-        }
-        if (record.getEndTime() != null) {
-            sql.VALUES("end_time", "#{endTime,jdbcType=TIMESTAMP}");
-        }
-        if (record.getLength() != null) {
-            sql.VALUES("length", "#{length,jdbcType=INTEGER}");
-        }
-        if (record.getMachine() != null) {
-            sql.VALUES("machine", "#{machine,jdbcType=VARCHAR}");
-        }
-        if (record.getDensity() != null) {
-            sql.VALUES("density", "#{density,jdbcType=DOUBLE}");
         }
         if (record.getDeleted() != null) {
             sql.VALUES("deleted", "#{deleted,jdbcType=BIT}");
@@ -97,15 +100,16 @@ public class CsvFileSqlProvider {
         }
         sql.SELECT("pid");
         sql.SELECT("filename");
+        sql.SELECT("start_time");
+        sql.SELECT("end_time");
+        sql.SELECT("length");
+        sql.SELECT("density");
+        sql.SELECT("machine");
+        sql.SELECT("ar");
         sql.SELECT("path");
         sql.SELECT("size");
         sql.SELECT("uuid");
         sql.SELECT("header_time");
-        sql.SELECT("start_time");
-        sql.SELECT("end_time");
-        sql.SELECT("length");
-        sql.SELECT("machine");
-        sql.SELECT("density");
         sql.SELECT("deleted");
         sql.SELECT("delete_time");
         sql.FROM("csv_file");
@@ -134,6 +138,24 @@ public class CsvFileSqlProvider {
         if (record.getFilename() != null) {
             sql.SET("filename = #{record.filename,jdbcType=VARCHAR}");
         }
+        if (record.getStartTime() != null) {
+            sql.SET("start_time = #{record.startTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getEndTime() != null) {
+            sql.SET("end_time = #{record.endTime,jdbcType=TIMESTAMP}");
+        }
+        if (record.getLength() != null) {
+            sql.SET("length = #{record.length,jdbcType=INTEGER}");
+        }
+        if (record.getDensity() != null) {
+            sql.SET("density = #{record.density,jdbcType=DOUBLE}");
+        }
+        if (record.getMachine() != null) {
+            sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
+        }
+        if (record.getAr() != null) {
+            sql.SET("ar = #{record.ar,jdbcType=BIT}");
+        }
         if (record.getPath() != null) {
             sql.SET("path = #{record.path,jdbcType=VARCHAR}");
         }
@@ -145,21 +167,6 @@ public class CsvFileSqlProvider {
         }
         if (record.getHeaderTime() != null) {
             sql.SET("header_time = #{record.headerTime,jdbcType=TIMESTAMP}");
-        }
-        if (record.getStartTime() != null) {
-            sql.SET("start_time = #{record.startTime,jdbcType=TIMESTAMP}");
-        }
-        if (record.getEndTime() != null) {
-            sql.SET("end_time = #{record.endTime,jdbcType=TIMESTAMP}");
-        }
-        if (record.getLength() != null) {
-            sql.SET("length = #{record.length,jdbcType=INTEGER}");
-        }
-        if (record.getMachine() != null) {
-            sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
-        }
-        if (record.getDensity() != null) {
-            sql.SET("density = #{record.density,jdbcType=DOUBLE}");
         }
         if (record.getDeleted() != null) {
             sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
@@ -181,69 +188,20 @@ public class CsvFileSqlProvider {
         sql.SET("id = #{record.id,jdbcType=INTEGER}");
         sql.SET("pid = #{record.pid,jdbcType=VARCHAR}");
         sql.SET("filename = #{record.filename,jdbcType=VARCHAR}");
+        sql.SET("start_time = #{record.startTime,jdbcType=TIMESTAMP}");
+        sql.SET("end_time = #{record.endTime,jdbcType=TIMESTAMP}");
+        sql.SET("length = #{record.length,jdbcType=INTEGER}");
+        sql.SET("density = #{record.density,jdbcType=DOUBLE}");
+        sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
+        sql.SET("ar = #{record.ar,jdbcType=BIT}");
         sql.SET("path = #{record.path,jdbcType=VARCHAR}");
         sql.SET("size = #{record.size,jdbcType=INTEGER}");
         sql.SET("uuid = #{record.uuid,jdbcType=CHAR}");
         sql.SET("header_time = #{record.headerTime,jdbcType=TIMESTAMP}");
-        sql.SET("start_time = #{record.startTime,jdbcType=TIMESTAMP}");
-        sql.SET("end_time = #{record.endTime,jdbcType=TIMESTAMP}");
-        sql.SET("length = #{record.length,jdbcType=INTEGER}");
-        sql.SET("machine = #{record.machine,jdbcType=VARCHAR}");
-        sql.SET("density = #{record.density,jdbcType=DOUBLE}");
         sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
         sql.SET("delete_time = #{record.deleteTime,jdbcType=TIMESTAMP}");
         CsvFileExample example = (CsvFileExample) parameter.get("example");
         applyWhere(sql, example, true);
-        return sql.toString();
-    }
-
-    /**
-     * This method was generated by MyBatis Generator. This method corresponds to the database table csv_file
-     * @mbg.generated
-     */
-    public String updateByPrimaryKeySelective(CsvFile record) {
-        SQL sql = new SQL();
-        sql.UPDATE("csv_file");
-        if (record.getPid() != null) {
-            sql.SET("pid = #{pid,jdbcType=VARCHAR}");
-        }
-        if (record.getFilename() != null) {
-            sql.SET("filename = #{filename,jdbcType=VARCHAR}");
-        }
-        if (record.getPath() != null) {
-            sql.SET("path = #{path,jdbcType=VARCHAR}");
-        }
-        if (record.getSize() != null) {
-            sql.SET("size = #{size,jdbcType=INTEGER}");
-        }
-        if (record.getUuid() != null) {
-            sql.SET("uuid = #{uuid,jdbcType=CHAR}");
-        }
-        if (record.getHeaderTime() != null) {
-            sql.SET("header_time = #{headerTime,jdbcType=TIMESTAMP}");
-        }
-        if (record.getStartTime() != null) {
-            sql.SET("start_time = #{startTime,jdbcType=TIMESTAMP}");
-        }
-        if (record.getEndTime() != null) {
-            sql.SET("end_time = #{endTime,jdbcType=TIMESTAMP}");
-        }
-        if (record.getLength() != null) {
-            sql.SET("length = #{length,jdbcType=INTEGER}");
-        }
-        if (record.getMachine() != null) {
-            sql.SET("machine = #{machine,jdbcType=VARCHAR}");
-        }
-        if (record.getDensity() != null) {
-            sql.SET("density = #{density,jdbcType=DOUBLE}");
-        }
-        if (record.getDeleted() != null) {
-            sql.SET("deleted = #{deleted,jdbcType=BIT}");
-        }
-        if (record.getDeleteTime() != null) {
-            sql.SET("delete_time = #{deleteTime,jdbcType=TIMESTAMP}");
-        }
-        sql.WHERE("id = #{id,jdbcType=INTEGER}");
         return sql.toString();
     }
 

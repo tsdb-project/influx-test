@@ -1,12 +1,17 @@
 package edu.pitt.medschool.service;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
@@ -17,13 +22,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.controller.load.vo.CsvFileVO;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.model.TSData.RawData;
 import edu.pitt.medschool.model.dao.CsvFileDao;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.CsvFile;
+import edu.pitt.medschool.model.dto.Patient;
 
 /**
  * @author Isolachine
@@ -36,6 +44,8 @@ public class RawDataService {
     CsvFileDao csvFileDao;
     @Autowired
     ImportedFileDao importedFileDao;
+    @Autowired
+    PatientDao patientDao;
 
     private final String dbDataName = DBConfiguration.Data.DBNAME;
 
@@ -117,8 +127,85 @@ public class RawDataService {
         }
     }
 
-    public List<CsvFile> selectpatientFilesByPatientId(String patientId) {
-        return csvFileDao.selectByPatientId(patientId);
+    public List<CsvFileVO> selectPatientFilesByPatientId(String patientId) {
+        List<CsvFile> list = csvFileDao.selectByPatientId(patientId);
+
+        List<CsvFileVO> ar = new ArrayList<>();
+        List<CsvFileVO> noar = new ArrayList<>();
+
+        for (CsvFile csvFile : list) {
+            if (csvFile.getAr()) {
+                ar.add(new CsvFileVO(csvFile));
+            } else {
+                noar.add(new CsvFileVO(csvFile));
+            }
+        }
+
+        // Has a valid counterpart?
+        // Also deals with multiple counterparts!
+        for (CsvFileVO arVO : ar) {
+            for (CsvFileVO noarVO : noar) {
+                CsvFile arFile = arVO.getCsvFile();
+                CsvFile noarFile = noarVO.getCsvFile();
+                if (arFile.getStartTime().isEqual(noarFile.getStartTime()) && arFile.getEndTime().isEqual(noarFile.getEndTime())
+                        && arFile.getLength().equals(noarFile.getLength())) {
+                    arVO.getCounterpart().add(noarFile);
+                    noarVO.getCounterpart().add(arFile);
+                }
+            }
+        }
+
+        Comparator<CsvFileVO> comparator = new Comparator<CsvFileVO>() {
+            @Override
+            public int compare(CsvFileVO o1, CsvFileVO o2) {
+                int start = o1.getCsvFile().getStartTime().compareTo(o2.getCsvFile().getStartTime());
+                if (start == 0) {
+                    return o1.getCsvFile().getEndTime().compareTo(o2.getCsvFile().getEndTime());
+                } else {
+                    return start;
+                }
+            }
+        };
+
+        Collections.sort(ar, comparator);
+        Collections.sort(noar, comparator);
+
+        Patient patientMeta = patientDao.selectByPatientId(patientId);
+        Date arrestTime = patientMeta.getArresttime() == null ? patientMeta.getArrestdate() : patientMeta.getArresttime();
+
+        for (int i = 0; i < ar.size(); i++) {
+            Duration gap;
+            if (i == 0) {
+                if (arrestTime == null) {
+                    continue;
+                }
+                gap = Duration.between(arrestTime.toInstant(), ar.get(i).getCsvFile().getStartTime());
+            }
+            gap = Duration.between(ar.get(i - 1).getCsvFile().getEndTime(), ar.get(i).getCsvFile().getStartTime());
+            if (gap.isNegative()) {
+                ar.get(i).setGap("-" + DurationFormatUtils.formatDuration(-gap.toMillis(), "HH:mm:ss", true));
+            } else {
+                ar.get(i).setGap(DurationFormatUtils.formatDuration(gap.toMillis(), "HH:mm:ss", true));
+            }
+        }
+
+        for (int i = 0; i < noar.size(); i++) {
+            Duration gap;
+            if (i == 0) {
+                if (arrestTime == null) {
+                    continue;
+                }
+                gap = Duration.between(arrestTime.toInstant(), noar.get(i).getCsvFile().getStartTime());
+            }
+            gap = Duration.between(noar.get(i - 1).getCsvFile().getEndTime(), noar.get(i).getCsvFile().getStartTime());
+            if (gap.isNegative()) {
+                noar.get(i).setGap("-" + DurationFormatUtils.formatDuration(-gap.toMillis(), "HH:mm:ss", true));
+            } else {
+                noar.get(i).setGap(DurationFormatUtils.formatDuration(gap.toMillis(), "HH:mm:ss", true));
+            }
+        }
+        ar.addAll(noar);
+        return ar;
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -364,6 +364,376 @@ public class CsvFileExample {
             return (Criteria) this;
         }
 
+        public Criteria andStartTimeIsNull() {
+            addCriterion("start_time is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartTimeIsNotNull() {
+            addCriterion("start_time is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartTimeEqualTo(LocalDateTime value) {
+            addCriterion("start_time =", value, "startTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartTimeNotEqualTo(LocalDateTime value) {
+            addCriterion("start_time <>", value, "startTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartTimeGreaterThan(LocalDateTime value) {
+            addCriterion("start_time >", value, "startTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartTimeGreaterThanOrEqualTo(LocalDateTime value) {
+            addCriterion("start_time >=", value, "startTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartTimeLessThan(LocalDateTime value) {
+            addCriterion("start_time <", value, "startTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartTimeLessThanOrEqualTo(LocalDateTime value) {
+            addCriterion("start_time <=", value, "startTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartTimeIn(List<LocalDateTime> values) {
+            addCriterion("start_time in", values, "startTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartTimeNotIn(List<LocalDateTime> values) {
+            addCriterion("start_time not in", values, "startTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartTimeBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("start_time between", value1, value2, "startTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("start_time not between", value1, value2, "startTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeIsNull() {
+            addCriterion("end_time is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeIsNotNull() {
+            addCriterion("end_time is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeEqualTo(LocalDateTime value) {
+            addCriterion("end_time =", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeNotEqualTo(LocalDateTime value) {
+            addCriterion("end_time <>", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeGreaterThan(LocalDateTime value) {
+            addCriterion("end_time >", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeGreaterThanOrEqualTo(LocalDateTime value) {
+            addCriterion("end_time >=", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeLessThan(LocalDateTime value) {
+            addCriterion("end_time <", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeLessThanOrEqualTo(LocalDateTime value) {
+            addCriterion("end_time <=", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeIn(List<LocalDateTime> values) {
+            addCriterion("end_time in", values, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeNotIn(List<LocalDateTime> values) {
+            addCriterion("end_time not in", values, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("end_time between", value1, value2, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("end_time not between", value1, value2, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthIsNull() {
+            addCriterion("length is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthIsNotNull() {
+            addCriterion("length is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthEqualTo(Integer value) {
+            addCriterion("length =", value, "length");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthNotEqualTo(Integer value) {
+            addCriterion("length <>", value, "length");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthGreaterThan(Integer value) {
+            addCriterion("length >", value, "length");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthGreaterThanOrEqualTo(Integer value) {
+            addCriterion("length >=", value, "length");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthLessThan(Integer value) {
+            addCriterion("length <", value, "length");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthLessThanOrEqualTo(Integer value) {
+            addCriterion("length <=", value, "length");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthIn(List<Integer> values) {
+            addCriterion("length in", values, "length");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthNotIn(List<Integer> values) {
+            addCriterion("length not in", values, "length");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthBetween(Integer value1, Integer value2) {
+            addCriterion("length between", value1, value2, "length");
+            return (Criteria) this;
+        }
+
+        public Criteria andLengthNotBetween(Integer value1, Integer value2) {
+            addCriterion("length not between", value1, value2, "length");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityIsNull() {
+            addCriterion("density is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityIsNotNull() {
+            addCriterion("density is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityEqualTo(Double value) {
+            addCriterion("density =", value, "density");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityNotEqualTo(Double value) {
+            addCriterion("density <>", value, "density");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityGreaterThan(Double value) {
+            addCriterion("density >", value, "density");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityGreaterThanOrEqualTo(Double value) {
+            addCriterion("density >=", value, "density");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityLessThan(Double value) {
+            addCriterion("density <", value, "density");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityLessThanOrEqualTo(Double value) {
+            addCriterion("density <=", value, "density");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityIn(List<Double> values) {
+            addCriterion("density in", values, "density");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityNotIn(List<Double> values) {
+            addCriterion("density not in", values, "density");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityBetween(Double value1, Double value2) {
+            addCriterion("density between", value1, value2, "density");
+            return (Criteria) this;
+        }
+
+        public Criteria andDensityNotBetween(Double value1, Double value2) {
+            addCriterion("density not between", value1, value2, "density");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineIsNull() {
+            addCriterion("machine is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineIsNotNull() {
+            addCriterion("machine is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineEqualTo(String value) {
+            addCriterion("machine =", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineNotEqualTo(String value) {
+            addCriterion("machine <>", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineGreaterThan(String value) {
+            addCriterion("machine >", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineGreaterThanOrEqualTo(String value) {
+            addCriterion("machine >=", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineLessThan(String value) {
+            addCriterion("machine <", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineLessThanOrEqualTo(String value) {
+            addCriterion("machine <=", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineLike(String value) {
+            addCriterion("machine like", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineNotLike(String value) {
+            addCriterion("machine not like", value, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineIn(List<String> values) {
+            addCriterion("machine in", values, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineNotIn(List<String> values) {
+            addCriterion("machine not in", values, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineBetween(String value1, String value2) {
+            addCriterion("machine between", value1, value2, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andMachineNotBetween(String value1, String value2) {
+            addCriterion("machine not between", value1, value2, "machine");
+            return (Criteria) this;
+        }
+
+        public Criteria andArIsNull() {
+            addCriterion("ar is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andArIsNotNull() {
+            addCriterion("ar is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andArEqualTo(Boolean value) {
+            addCriterion("ar =", value, "ar");
+            return (Criteria) this;
+        }
+
+        public Criteria andArNotEqualTo(Boolean value) {
+            addCriterion("ar <>", value, "ar");
+            return (Criteria) this;
+        }
+
+        public Criteria andArGreaterThan(Boolean value) {
+            addCriterion("ar >", value, "ar");
+            return (Criteria) this;
+        }
+
+        public Criteria andArGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("ar >=", value, "ar");
+            return (Criteria) this;
+        }
+
+        public Criteria andArLessThan(Boolean value) {
+            addCriterion("ar <", value, "ar");
+            return (Criteria) this;
+        }
+
+        public Criteria andArLessThanOrEqualTo(Boolean value) {
+            addCriterion("ar <=", value, "ar");
+            return (Criteria) this;
+        }
+
+        public Criteria andArIn(List<Boolean> values) {
+            addCriterion("ar in", values, "ar");
+            return (Criteria) this;
+        }
+
+        public Criteria andArNotIn(List<Boolean> values) {
+            addCriterion("ar not in", values, "ar");
+            return (Criteria) this;
+        }
+
+        public Criteria andArBetween(Boolean value1, Boolean value2) {
+            addCriterion("ar between", value1, value2, "ar");
+            return (Criteria) this;
+        }
+
+        public Criteria andArNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("ar not between", value1, value2, "ar");
+            return (Criteria) this;
+        }
+
         public Criteria andPathIsNull() {
             addCriterion("path is null");
             return (Criteria) this;
@@ -624,316 +994,6 @@ public class CsvFileExample {
             return (Criteria) this;
         }
 
-        public Criteria andStartTimeIsNull() {
-            addCriterion("start_time is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andStartTimeIsNotNull() {
-            addCriterion("start_time is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andStartTimeEqualTo(LocalDateTime value) {
-            addCriterion("start_time =", value, "startTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andStartTimeNotEqualTo(LocalDateTime value) {
-            addCriterion("start_time <>", value, "startTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andStartTimeGreaterThan(LocalDateTime value) {
-            addCriterion("start_time >", value, "startTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andStartTimeGreaterThanOrEqualTo(LocalDateTime value) {
-            addCriterion("start_time >=", value, "startTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andStartTimeLessThan(LocalDateTime value) {
-            addCriterion("start_time <", value, "startTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andStartTimeLessThanOrEqualTo(LocalDateTime value) {
-            addCriterion("start_time <=", value, "startTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andStartTimeIn(List<LocalDateTime> values) {
-            addCriterion("start_time in", values, "startTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andStartTimeNotIn(List<LocalDateTime> values) {
-            addCriterion("start_time not in", values, "startTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andStartTimeBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("start_time between", value1, value2, "startTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andStartTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("start_time not between", value1, value2, "startTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeIsNull() {
-            addCriterion("end_time is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeIsNotNull() {
-            addCriterion("end_time is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeEqualTo(LocalDateTime value) {
-            addCriterion("end_time =", value, "endTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeNotEqualTo(LocalDateTime value) {
-            addCriterion("end_time <>", value, "endTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeGreaterThan(LocalDateTime value) {
-            addCriterion("end_time >", value, "endTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeGreaterThanOrEqualTo(LocalDateTime value) {
-            addCriterion("end_time >=", value, "endTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeLessThan(LocalDateTime value) {
-            addCriterion("end_time <", value, "endTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeLessThanOrEqualTo(LocalDateTime value) {
-            addCriterion("end_time <=", value, "endTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeIn(List<LocalDateTime> values) {
-            addCriterion("end_time in", values, "endTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeNotIn(List<LocalDateTime> values) {
-            addCriterion("end_time not in", values, "endTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("end_time between", value1, value2, "endTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andEndTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("end_time not between", value1, value2, "endTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthIsNull() {
-            addCriterion("length is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthIsNotNull() {
-            addCriterion("length is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthEqualTo(Integer value) {
-            addCriterion("length =", value, "length");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthNotEqualTo(Integer value) {
-            addCriterion("length <>", value, "length");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthGreaterThan(Integer value) {
-            addCriterion("length >", value, "length");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthGreaterThanOrEqualTo(Integer value) {
-            addCriterion("length >=", value, "length");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthLessThan(Integer value) {
-            addCriterion("length <", value, "length");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthLessThanOrEqualTo(Integer value) {
-            addCriterion("length <=", value, "length");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthIn(List<Integer> values) {
-            addCriterion("length in", values, "length");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthNotIn(List<Integer> values) {
-            addCriterion("length not in", values, "length");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthBetween(Integer value1, Integer value2) {
-            addCriterion("length between", value1, value2, "length");
-            return (Criteria) this;
-        }
-
-        public Criteria andLengthNotBetween(Integer value1, Integer value2) {
-            addCriterion("length not between", value1, value2, "length");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineIsNull() {
-            addCriterion("machine is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineIsNotNull() {
-            addCriterion("machine is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineEqualTo(String value) {
-            addCriterion("machine =", value, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineNotEqualTo(String value) {
-            addCriterion("machine <>", value, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineGreaterThan(String value) {
-            addCriterion("machine >", value, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineGreaterThanOrEqualTo(String value) {
-            addCriterion("machine >=", value, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineLessThan(String value) {
-            addCriterion("machine <", value, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineLessThanOrEqualTo(String value) {
-            addCriterion("machine <=", value, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineLike(String value) {
-            addCriterion("machine like", value, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineNotLike(String value) {
-            addCriterion("machine not like", value, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineIn(List<String> values) {
-            addCriterion("machine in", values, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineNotIn(List<String> values) {
-            addCriterion("machine not in", values, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineBetween(String value1, String value2) {
-            addCriterion("machine between", value1, value2, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineNotBetween(String value1, String value2) {
-            addCriterion("machine not between", value1, value2, "machine");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityIsNull() {
-            addCriterion("density is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityIsNotNull() {
-            addCriterion("density is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityEqualTo(Double value) {
-            addCriterion("density =", value, "density");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityNotEqualTo(Double value) {
-            addCriterion("density <>", value, "density");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityGreaterThan(Double value) {
-            addCriterion("density >", value, "density");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityGreaterThanOrEqualTo(Double value) {
-            addCriterion("density >=", value, "density");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityLessThan(Double value) {
-            addCriterion("density <", value, "density");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityLessThanOrEqualTo(Double value) {
-            addCriterion("density <=", value, "density");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityIn(List<Double> values) {
-            addCriterion("density in", values, "density");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityNotIn(List<Double> values) {
-            addCriterion("density not in", values, "density");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityBetween(Double value1, Double value2) {
-            addCriterion("density between", value1, value2, "density");
-            return (Criteria) this;
-        }
-
-        public Criteria andDensityNotBetween(Double value1, Double value2) {
-            addCriterion("density not between", value1, value2, "density");
-            return (Criteria) this;
-        }
-
         public Criteria andDeletedIsNull() {
             addCriterion("deleted is null");
             return (Criteria) this;
@@ -1064,6 +1124,11 @@ public class CsvFileExample {
             return (Criteria) this;
         }
 
+        public Criteria andMachineLikeInsensitive(String value) {
+            addCriterion("upper(machine) like", value.toUpperCase(), "machine");
+            return (Criteria) this;
+        }
+
         public Criteria andPathLikeInsensitive(String value) {
             addCriterion("upper(path) like", value.toUpperCase(), "path");
             return (Criteria) this;
@@ -1071,11 +1136,6 @@ public class CsvFileExample {
 
         public Criteria andUuidLikeInsensitive(String value) {
             addCriterion("upper(uuid) like", value.toUpperCase(), "uuid");
-            return (Criteria) this;
-        }
-
-        public Criteria andMachineLikeInsensitive(String value) {
-            addCriterion("upper(machine) like", value.toUpperCase(), "machine");
             return (Criteria) this;
         }
     }
