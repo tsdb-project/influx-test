@@ -36,6 +36,8 @@
             <property name="enableSubPackages" value="true" />
         </javaClientGenerator>
 
-        <table tableName="patient" catalog="upmc"></table>
+        <table tableName="patient" catalog="upmc">
+            <property name="ignoreQualifiersAtRuntime" value="true" />
+        </table>
     </context>
 </generatorConfiguration>

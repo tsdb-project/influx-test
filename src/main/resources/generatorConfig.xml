@@ -14,6 +14,7 @@
         </commentGenerator>
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver" connectionURL="${mysql.url}" userId="${mysql.user}"
             password="${mysql.password}">
+            <property name="nullCatalogMeansCurrent" value="true" />
         </jdbcConnection>
 
         <javaModelGenerator targetPackage="${package.dto}" targetProject="${project}">
