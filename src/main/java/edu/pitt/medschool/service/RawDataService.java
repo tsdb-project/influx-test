@@ -3,10 +3,12 @@ package edu.pitt.medschool.service;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -171,7 +173,16 @@ public class RawDataService {
         Collections.sort(noar, comparator);
 
         Patient patientMeta = patientDao.selectByPatientId(patientId);
-        Date arrestTime = patientMeta.getArresttime() == null ? patientMeta.getArrestdate() : patientMeta.getArresttime();
+
+        LocalDateTime arrestTime;
+        if (patientMeta.getArrestdate() == null) {
+            arrestTime = null;
+        } else {
+            arrestTime = patientMeta.getArresttime() == null ? patientMeta.getArrestdate().atStartOfDay()
+                    : patientMeta.getArresttime();
+            ZoneId zoneId = ZoneId.of("America/New_York");
+            arrestTime = arrestTime.atZone(zoneId).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+        }
 
         for (int i = 0; i < ar.size(); i++) {
             Duration gap;
@@ -179,9 +190,10 @@ public class RawDataService {
                 if (arrestTime == null) {
                     continue;
                 }
-                gap = Duration.between(arrestTime.toInstant(), ar.get(i).getCsvFile().getStartTime());
+                gap = Duration.between(arrestTime, ar.get(i).getCsvFile().getStartTime());
+            } else {
+                gap = Duration.between(ar.get(i - 1).getCsvFile().getEndTime(), ar.get(i).getCsvFile().getStartTime());
             }
-            gap = Duration.between(ar.get(i - 1).getCsvFile().getEndTime(), ar.get(i).getCsvFile().getStartTime());
             if (gap.isNegative()) {
                 ar.get(i).setGap("-" + DurationFormatUtils.formatDuration(-gap.toMillis(), "HH:mm:ss", true));
             } else {
@@ -195,9 +207,10 @@ public class RawDataService {
                 if (arrestTime == null) {
                     continue;
                 }
-                gap = Duration.between(arrestTime.toInstant(), noar.get(i).getCsvFile().getStartTime());
+                gap = Duration.between(arrestTime, noar.get(i).getCsvFile().getStartTime());
+            } else {
+                gap = Duration.between(noar.get(i - 1).getCsvFile().getEndTime(), noar.get(i).getCsvFile().getStartTime());
             }
-            gap = Duration.between(noar.get(i - 1).getCsvFile().getEndTime(), noar.get(i).getCsvFile().getStartTime());
             if (gap.isNegative()) {
                 noar.get(i).setGap("-" + DurationFormatUtils.formatDuration(-gap.toMillis(), "HH:mm:ss", true));
             } else {

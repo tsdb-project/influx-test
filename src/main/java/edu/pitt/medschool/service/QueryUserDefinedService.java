@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.model.QueryResultBean;
@@ -47,7 +45,8 @@ public class QueryUserDefinedService {
      * @param customAr   List for corresponding Ar/NoAr (Null for not customizing, 0: Only Ar, 1: Only NoAr, 2: Both)
      * @return Return a list of patients
      */
-    public List<QueryResultBean> TypeAQuery(String colX, double thrVal, int thrSec, List<String> customPids, List<Integer> customAr) {
+    public List<QueryResultBean> TypeAQuery(String colX, double thrVal, int thrSec, List<String> customPids,
+            List<Integer> customAr) {
         String queryDesc = "Find all patients where values in column X exceed value Y in at least Z consecutive records in the first 8 hours of available data.";
         List<QueryResultBean> finalRes = new ArrayList<>();
         String template = "SELECT * FROM (SELECT COUNT(%s) AS c FROM \"%s\" WHERE %s > %f AND \"arType\"='%s' GROUP BY TIME(%ds)) WHERE c = %d";
@@ -85,7 +84,8 @@ public class QueryUserDefinedService {
      * @param customAr List for corresponding Ar/NoAr (Null for not customizing, 0: Only Ar, 1: Only NoAr, 2: Both)
      * @return Return a list of patients
      */
-    public List<QueryResultBean> TypeBQuery(String colA, String colB, double valDiff, int hEp, List<String> customPids, List<Integer> customAr) {
+    public List<QueryResultBean> TypeBQuery(String colA, String colB, double valDiff, int hEp, List<String> customPids,
+            List<Integer> customAr) {
         String queryDesc = "Find all patients where the hourly mean values in column X and column Y differ by at least Z% for at least Q hourly epochs.";
         List<QueryResultBean> finalRes = new ArrayList<>();
         String template = "SELECT * FROM (SELECT COUNT(diff) AS c FROM ("

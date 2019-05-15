@@ -1,13 +1,13 @@
 package edu.pitt.medschool.model;
 
-import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.influxdb.InfluxUtil;
-import edu.pitt.medschool.model.dao.AnalysisUtil;
+import java.util.List;
+
 import org.influxdb.InfluxDB;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.List;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.model.dao.AnalysisUtil;
 
 public class AnalysisTest {
 
