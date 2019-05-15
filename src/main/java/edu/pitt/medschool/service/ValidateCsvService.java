@@ -10,6 +10,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
+import edu.pitt.medschool.config.DBConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import edu.pitt.medschool.framework.util.TimeUtil;
@@ -197,12 +198,13 @@ public class ValidateCsvService {
             if(ar != null){
                 ar.sort(new TimelineCompare());
                 for(int i=0;i<ar.size()-1;i++){
-                    if(ar.get(i)[1]>ar.get(i+1)[0]){
+                    if(ar.get(i)[1] > ar.get(i+1)[0]){
                         wrongpatient.setIsoverlap(true);
                     }
                 }
             }
             if(noar != null){
+                noar.sort(new TimelineCompare());
                 for(int i=0;i<noar.size()-1;i++){
                     if(noar.get(i)[1] > noar.get(i+1)[0]){
                         wrongpatient.setIsoverlap(true);
