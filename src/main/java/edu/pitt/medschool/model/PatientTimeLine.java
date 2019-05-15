@@ -3,6 +3,7 @@ package edu.pitt.medschool.model;
 import edu.pitt.medschool.config.DBConfiguration;
 
 import java.util.Date;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PatientTimeLine {
@@ -77,21 +78,15 @@ public class PatientTimeLine {
 
     public Integer getDocumentNo(){
         String doc = this.filename;
-        int i = 0;
-        while (i<doc.length() && doc.charAt(i) !='a' && doc.charAt(i) !='n'){
-            i++;
-        }
-        int j =i-1;
-        while (j>0 && Character.isDigit(doc.charAt(j))){
-            j--;
-        }
-        
-        if(Pattern.matches("[0-9]*",doc.substring(j+1,i)) && j!=i-1) {
-            //System.out.println(Integer.parseInt(doc.substring(j+1, i)));
-            return Integer.parseInt(doc.substring(j+1, i));
-        }else {
+        Pattern pattern = Pattern.compile("([ -_][0]*[1-9]+[0]*(noar|ar).csv)");
+        Matcher matcher = pattern.matcher(doc);
+        if(matcher.find()){
+            Pattern pattern1 = Pattern.compile("(\\d+)");
+            Matcher matcher1 = pattern1.matcher(matcher.group(1));
+            matcher1.find();
+            return Integer.parseInt(matcher1.group(1));
+        }else{
             return -1;
         }
     }
-
 }
