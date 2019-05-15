@@ -60,6 +60,32 @@ $(document).ready(function() {
 	// filtered Patient list
 	var filteredPatient = [];
 
+	// get list of worry patients
+	var worryPatients = new Set();
+	var querydata = [];
+	$.ajax({
+		type: "GET",
+		url: "/analysis/getWrongPatients",
+		async: false,
+		success : function(text)
+		{
+			querydata = text.data;
+			for(r in text.data){
+				worryPatients.add(text.data[r].pid);
+			}
+		}
+	});
+
+	// check file suffix
+	function checkSuffix(filename,filetype) {
+		if (filetype == 'ar'){
+			var regex = RegExp('[-_][0-9]*[1-9]+[0-9]*ar.csv','g');
+		}else{
+			var regex = RegExp('[-_][0-9]*[1-9]+[0-9]*noar.csv','g');
+		}
+		return regex.test(filename);
+	}
+
 	// fetching column names and description for filter dropdown
 	function fetch_columns_data() {
 		$.ajax({ 
@@ -82,8 +108,8 @@ $(document).ready(function() {
 
 	// set different colors to different type of files
 	var myColorScale = d3.scaleOrdinal()
-		.domain(["ar", "noar"])
-		.range(["#3182bd", "#e6550d"]);
+		.domain(["ar", "noar","problematic","wrong file name"])
+		.range(["#aec7e8", "#ffbb78", "#d62728","#9467bd"]);
 
 	// Graph setting
 	TimeLineChart
@@ -218,6 +244,19 @@ $(document).ready(function() {
 				continue;
 			}
 
+			// find out if the patient is problematic / mislabeled or not
+			var fileType;
+			if(worryPatients.has(response[r].pid)){
+				fileType = "problematic";
+			}else{
+				fileType = response[r].filetype;
+			}
+
+			if (! checkSuffix(response[r].filename,response[r].filetype)){
+				fileType = "wrong file name";
+			}
+
+
 			// store all the information in nested Hash table
 			if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
 				// left label
@@ -235,7 +274,7 @@ $(document).ready(function() {
 								response[r].relativeStartTime,
 								response[r].relativeEndTime
 							],
-							val: response[r].filetype,
+							val: fileType,
 							labelVal:tooltip
 						}
 					);
@@ -246,7 +285,7 @@ $(document).ready(function() {
 							response[r].relativeStartTime,
 							response[r].relativeEndTime
 						],
-						val: response[r].filetype,
+						val:  fileType,
 						labelVal:tooltip
 					}
 					])
@@ -259,7 +298,7 @@ $(document).ready(function() {
 						response[r].relativeStartTime,
 						response[r].relativeEndTime
 					],
-					val: response[r].filetype,
+					val: fileType,
 					labelVal:tooltip
 				}
 				]);
@@ -317,6 +356,19 @@ $(document).ready(function() {
 				continue;
 			}
 
+			// find out if the patient is problematic / mislabeled or not
+			var fileType;
+			if(worryPatients.has(response[r].pid)){
+				fileType = "problematic";
+			}else{
+				fileType = response[r].filetype;
+			}
+
+			if (! checkSuffix(response[r].filename,response[r].filetype)){
+				console.log(response[r].filename);
+				fileType = "wrong file name";
+			}
+
 			// store all the information in nested Hash table
 			if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
 				// left label
@@ -328,13 +380,14 @@ $(document).ready(function() {
 
 				if( year.has(labelname) ){
 					var patient = year.get(labelname);
+
 					patient.push(
 						{
 							timeRange: [
 								response[r].relativeStartTime,
 								response[r].relativeEndTime
 							],
-							val: response[r].filetype,
+							val: fileType,
 							labelVal:tooltip
 						}
 					);
@@ -345,7 +398,7 @@ $(document).ready(function() {
 							response[r].relativeStartTime,
 							response[r].relativeEndTime
 						],
-						val: response[r].filetype,
+						val: fileType,
 						labelVal:tooltip
 					}
 					])
@@ -358,7 +411,7 @@ $(document).ready(function() {
 						response[r].relativeStartTime,
 						response[r].relativeEndTime
 					],
-					val: response[r].filetype,
+					val:  fileType,
 					labelVal:tooltip
 				}
 				]);
@@ -384,7 +437,7 @@ $(document).ready(function() {
 					}
 
 					bardata.push({
-						'label': label,
+						'label':label,
 						'data' : val
 					})
 				});
@@ -418,6 +471,18 @@ $(document).ready(function() {
 					continue;
 				}
 
+				// find out if the patient is problematic / mislabeled or not
+				var fileType;
+				if(worryPatients.has(response[r].pid)){
+					fileType = "problematic";
+				}else{
+					fileType = response[r].filetype;
+				}
+
+				if (! checkSuffix(response[r].filename,response[r].filetype)){
+					fileType = "wrong file name";
+				}
+
 				// store all the information in nested Hash table
 				if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
 					// left label
@@ -435,7 +500,7 @@ $(document).ready(function() {
 									response[r].relativeStartTime,
 									response[r].relativeEndTime
 								],
-								val: response[r].filetype,
+								val: fileType,
 								labelVal:tooltip
 							}
 						);
@@ -446,7 +511,7 @@ $(document).ready(function() {
 								response[r].relativeStartTime,
 								response[r].relativeEndTime
 							],
-							val: response[r].filetype,
+							val: fileType,
 							labelVal:tooltip
 						}
 						])
@@ -459,7 +524,7 @@ $(document).ready(function() {
 							response[r].relativeStartTime,
 							response[r].relativeEndTime
 						],
-						val: response[r].filetype,
+						val: fileType,
 						labelVal:tooltip
 					}
 					]);
@@ -499,4 +564,49 @@ $(document).ready(function() {
 		});
 		
 	};
+
+
+	/*
+		draw the table for the problematic patients
+	 */
+	$.fn.dataTable.moment('M/D/YYYY, h:mm:ss a');
+	var table = $('#queryTable').DataTable({
+		data: querydata,
+		columnDefs: [{
+			"targets": [0],
+			"visible": true,
+			"searchable": true
+		}],
+		columns: [{
+			data: 'pid'
+		}, {
+			data:null,
+			render:function (data){
+				return booleanToStr(data.isoverlap);
+			}
+		},{
+			data:'ar_miss'
+		},{
+			data:'noar_miss'
+		},{
+			data:null,
+			render:function (data) {
+				return booleanToStr(data.wrongname);
+			}
+		}],
+		order: [[0, 'desc']],
+	});
+
+	function booleanToStr(flag){
+		return flag ? 'T':' ';
+	}
+
+	$('#queryTable tbody').on('mouseover', 'tr', function () {
+		$(this).attr("style", "background-color:#ffffdd");
+	});
+
+	$('#queryTable tbody').on('mouseout', 'tr', function () {
+		$(this).removeAttr('style');
+	});
+
 });

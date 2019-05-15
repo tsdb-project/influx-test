@@ -20,7 +20,6 @@
 <link rel="stylesheet" href="/css/app.min.css">
 
 
-<!--script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script-->
     <script type="text/javascript" src="https://d3js.org/d3.v4.js"></script>
     <script src="//unpkg.com/timelines-chart"></script>
     <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
@@ -88,7 +87,23 @@
                         </form>
                     </div>
                     <div id="Timelinegraph-container"></div>
-                    <!--<div id="chart-container"></div>-->
+                    <div class="table-responsive">
+                        <table id="queryTable" class="table table-bordered">
+                            <thead class="thead-default">
+                            <tr>
+                                <th>PID</th>
+                                <th>overlap</th>
+                                <th>missing ar</th>
+                                <th>missing noar</th>
+                                <th>wrong file name</th>
+                            </tr>
+                            </thead>
+                            <tbody style="cursor: pointer">
+                            <tr>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             <div th:insert="fragments/footer :: footer"></div>

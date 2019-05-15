@@ -160,7 +160,6 @@ public class AnalysisController {
         List<Wrongpatients> wrongPatients = new ArrayList<>();
         RestfulResponse response = new RestfulResponse(1,"success");
         wrongPatients = validateCsvService.getWrongPatients(validateCsvService.getPatientTimeLines("realpsc"));
-        logger.info("length",wrongPatients.size());
         response.setData(wrongPatients);
         return response;
     }

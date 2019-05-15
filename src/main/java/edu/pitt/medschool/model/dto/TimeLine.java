@@ -83,7 +83,7 @@ public class TimeLine {
        patientTimeLine.setArrestTime(arrestTime);
        patientTimeLine.setPid(pid);
        patientTimeLine.setFilename(filename);
-       if (Pattern.matches(".*noar.*",filename)) patientTimeLine.setFiletype("noar");
+       if (Pattern.matches("(?i).*noar.*",filename)) patientTimeLine.setFiletype("noar");
        else patientTimeLine.setFiletype("ar");
        patientTimeLine.setRelativeStartTime(relativeStartTime);
        patientTimeLine.setRelativeEndTime(relativeEndTime);

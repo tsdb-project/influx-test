@@ -85,7 +85,6 @@ public class PatientTimeLine {
         while (j>0 && Character.isDigit(doc.charAt(j))){
             j--;
         }
-        System.out.println(doc.substring(j+1,i));
         if(Pattern.matches("[0-9]*",doc.substring(j+1,i)) && j!=i-1) {
             //System.out.println(Integer.parseInt(doc.substring(j+1, i)));
             return Integer.parseInt(doc.substring(j+1, i));
