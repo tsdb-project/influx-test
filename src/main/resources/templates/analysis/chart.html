@@ -19,95 +19,12 @@
 <!-- App styles -->
 <link rel="stylesheet" href="/css/app.min.css">
 
-<!--TEMP-->
-<style>
-    .chart {
-        font-family: Arial, sans-serif;
-        font-size: 12px;
-    }
-     
-    .axis path,.axis line {
-        fill: none;
-        stroke: #000;
-        shape-rendering: crispEdges;
-    }
-     
-    .bar {
-        fill: #33b5e5;
-    }
-     
-    .bar-failed {
-        fill: #33b5e5;
-        opacity: 0.5;
-    }
-     
-    .bar-running {
-        fill: #669900;
-    }
-     
-    .bar-succeeded {
-        fill: #33b5e5;
-    }
-     
-    .bar-killed {
-        fill: #32c787;
-        opacity: 0.5;
-    }
-     
-    #forkme_banner {
-        display: block;
-        position: absolute;
-        top: 0;
-        right: 10px;
-        z-index: 10;
-        padding: 10px 50px 10px 10px;
-        color: #fff;
-        background:
-            url('http://dk8996.github.io/Gantt-Chart/images/blacktocat.png')
-            #0090ff no-repeat 95% 50%;
-        font-weight: 700;
-        box-shadow: 0 0 10px rgba(0, 0, 0, .5);
-        border-bottom-left-radius: 2px;
-        border-bottom-right-radius: 2px;
-        text-decoration: none;
-    }
 
-    /*#chart-container {
-        width: 100%;
-        height: 110000px;
-    }*/
+    <script type="text/javascript" src="https://d3js.org/d3.v4.js"></script>
+    <script src="//unpkg.com/timelines-chart"></script>
+    <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
 
-    #chart-container {
-        width: 100%;
-        height: 3800px;
-    }
-
-    div.tooltip {   
-        position: absolute;         
-        text-align: center;         
-        width: 177px;                    
-        height: 47px;                   
-        padding: 2px;               
-        font: 12px sans-serif;      
-        background: lightsteelblue; 
-        border: 0px;        
-        border-radius: 8px;         
-        pointer-events: none;           
-    }
-
-    .zoom {
-      cursor: move;
-      fill: none;
-      pointer-events: all;
-    }
-</style>
-
-<!--script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script-->
-<script type="text/javascript" src="https://d3js.org/d3.v4.js"></script>
-<script type="text/javascript" src="/js/analysis/gantt-chart.js"></script>
-<script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
-
-<!-- App styles -->
+    <!-- App styles -->
 <link rel="stylesheet" href="/css/app.min.css">
 
 </head>
@@ -136,6 +53,9 @@
                                 </div>
                                 <div class="col-sm-2 col-md-2">
                                     <button type="button" class="btn btn-success btn-sm btn-block" id="queryFilter">Go</button>
+                                </div>
+                                <div class="col-sm-2 col-md-2">
+                                    <button type="button" class="btn btn-success btn-sm btn-block" id="overview">Overview of all patients</button>
                                 </div>
                             </div>
                             <div class="row">
@@ -166,7 +86,23 @@
                             </div>
                         </form>
                     </div>
-                    <div id="chart-container">
+                    <div id="Timelinegraph-container"></div>
+                    <div class="table-responsive">
+                        <table id="queryTable" class="table table-bordered">
+                            <thead class="thead-default">
+                            <tr>
+                                <th>PID</th>
+                                <th>overlap</th>
+                                <th>missing ar</th>
+                                <th>missing noar</th>
+                                <th>wrong file name</th>
+                            </tr>
+                            </thead>
+                            <tbody style="cursor: pointer">
+                            <tr>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

@@ -28,9 +28,7 @@ public class Wrongpatients {
         this.isoverlap = isoverlap;
     }
 
-    public boolean isWrongname() {
-        return wrongname;
-    }
+    public boolean isWrongname() { return wrongname; }
 
     public void setWrongname(boolean wrongname) {
         this.wrongname = wrongname;

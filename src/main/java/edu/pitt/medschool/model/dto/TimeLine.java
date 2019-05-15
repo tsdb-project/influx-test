@@ -92,20 +92,17 @@ public class TimeLine {
         int len = this.getLen();
         String uuid = this.getUuid();
         String pid = this.getPid();
-        patientTimeLine.setArrestTime(arrestTime);
-        patientTimeLine.setPid(pid);
-        patientTimeLine.setFilename(filename);
-        if (Pattern.matches(".*noar.*", filename))
-            patientTimeLine.setFiletype("noar");
-        else
-            patientTimeLine.setFiletype("ar");
-        patientTimeLine.setRelativeStartTime(relativeStartTime);
-        patientTimeLine.setRelativeEndTime(relativeEndTime);
-        patientTimeLine.setLength(len);
-        patientTimeLine.setFilename(filename);
-        patientTimeLine.setArrestTime(arrestTime);
-        patientTimeLine.setUuid(uuid);
-        return patientTimeLine;
-    }
-
+       patientTimeLine.setArrestTime(arrestTime);
+       patientTimeLine.setPid(pid);
+       patientTimeLine.setFilename(filename);
+       if (Pattern.matches("(?i).*noar.*",filename)) patientTimeLine.setFiletype("noar");
+       else patientTimeLine.setFiletype("ar");
+       patientTimeLine.setRelativeStartTime(relativeStartTime);
+       patientTimeLine.setRelativeEndTime(relativeEndTime);
+       patientTimeLine.setLength(len);
+       patientTimeLine.setFilename(filename);
+       patientTimeLine.setArrestTime(arrestTime);
+       patientTimeLine.setUuid(uuid);
+		return patientTimeLine;
+	}
 }

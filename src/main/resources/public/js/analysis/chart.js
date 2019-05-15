@@ -60,19 +60,31 @@ $(document).ready(function() {
 	// filtered Patient list
 	var filteredPatient = [];
 
-	// Initial load of data
-	// function load_page_data() {
-	// 	$.ajax({
-	// 		type: "GET",
-	// 		url: "/analysis/getPatientTimelines",
-	// 		async: false,
-	// 		success : function(text)
-	// 		{
-	// 			response = JSON.parse(text);
-	// 			draw_graph(response);
-	// 		}
-	// 	});
-	// }
+	// get list of worry patients
+	var worryPatients = new Set();
+	var querydata = [];
+	$.ajax({
+		type: "GET",
+		url: "/analysis/getWrongPatients",
+		async: false,
+		success : function(text)
+		{
+			querydata = text.data;
+			for(r in text.data){
+				worryPatients.add(text.data[r].pid);
+			}
+		}
+	});
+
+	// check file suffix
+	function checkSuffix(filename,filetype) {
+		if (filetype == 'ar'){
+			var regex = RegExp('[-_][0-9]*[1-9]+[0-9]*ar.csv','g');
+		}else{
+			var regex = RegExp('[-_][0-9]*[1-9]+[0-9]*noar.csv','g');
+		}
+		return regex.test(filename);
+	}
 
 	// fetching column names and description for filter dropdown
 	function fetch_columns_data() {
@@ -87,6 +99,47 @@ $(document).ready(function() {
 		});
 	}
 
+	/*
+	*  initialize the graph
+	* */
+
+	// placeholder for drawing graph
+	var TimeLineChart = TimelinesChart();
+
+	// set different colors to different type of files
+	var myColorScale = d3.scaleOrdinal()
+		.domain(["ar", "noar","problematic","wrong file name"])
+		.range(["#aec7e8", "#ffbb78", "#d62728","#9467bd"]);
+
+	// Graph setting
+	TimeLineChart
+		.width(document.getElementById("Timelinegraph-container").clientWidth  )
+		.maxHeight(720)
+		.maxLineHeight(16)
+		.xTickFormat(function (n){ return +n })
+		.timeFormat('%Q')
+		.zColorScale(myColorScale)
+		.onSegmentClick(function (s) {
+			window.location.href = '/analysis/medInfo/PUH-' + s.label.split('#')[0];
+		})
+		.onLabelClick(function (s1,s2) {
+			if(!(s2 === undefined)){
+				window.location.href = '/analysis/medInfo/PUH-' + s1.split('#')[0];
+			}else{
+				//get current data in the graph
+				var currentdata = TimeLineChart.data();
+
+				// get the patients in the specific year
+				var yearData = [];
+				for (i in currentdata){
+					if (currentdata[i].group == s1){
+						yearData.push(currentdata[i])
+					}
+				}
+				TimeLineChart.data(yearData);
+			}
+		})
+		(document.getElementById('Timelinegraph-container'));
 	draw_graph();
 	fetch_columns_data();
 
@@ -173,127 +226,387 @@ $(document).ready(function() {
         $(this).parent('div').parent('div').remove();
     });
 
+    // query button
     $("#queryFilter").click(function() {
     	filtered_data();
     });
 
-	function draw_graph() {
-
-		var tasks = [];
+    // overview button
+	$("#overview").click(function() {
+		filteredPatient = [];
+		var data = new Map();
 
 		for (r in response)
 		{
-			if(filteredPatient.length != 0 && filteredPatient.indexOf(response[r].pid) == -1){continue;}
-
-			if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 45000){
+			// too many patients problem
+			// if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 ){
+			if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 1296000){
 				continue;
 			}
-			//response[r].arrestTime = Date.parse(response[r].arrestTime).toString("yyyy-MM-dd HH:mm:ss");
-			response[r].status = response[r].filetype === "ar" ? "KILLED" : "FAILED";
-			response[r].fname = response[r].filename;
-			tasks.push(response[r]);
+
+			// find out if the patient is problematic / mislabeled or not
+			var fileType;
+			if(worryPatients.has(response[r].pid)){
+				fileType = "problematic";
+			}else{
+				fileType = response[r].filetype;
+			}
+
+			if (! checkSuffix(response[r].filename,response[r].filetype)){
+				fileType = "wrong file name";
+			}
+
+
+			// store all the information in nested Hash table
+			if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
+				// left label
+				var year = 	data.get(response[r].pid.split('-')[1]);
+				// right label
+				var labelname = response[r].pid.split('-',3)[1]+'-' + response[r].pid.split('-',3)[2]+ '#' + response[r].filetype;
+				// tooltip
+				var tooltip = response[r].filename + '<br>'+ 'arrest Time:' + '<br>' + response[r].arrestTime + '<br>' + 'relative Time (hours):';
+
+				if( year.has(labelname) ){
+					var patient = year.get(labelname);
+					patient.push(
+						{
+							timeRange: [
+								response[r].relativeStartTime,
+								response[r].relativeEndTime
+							],
+							val: fileType,
+							labelVal:tooltip
+						}
+					);
+					year.set(labelname,patient)
+				}else{
+					year.set(labelname,[{
+						timeRange: [
+							response[r].relativeStartTime,
+							response[r].relativeEndTime
+						],
+						val:  fileType,
+						labelVal:tooltip
+					}
+					])
+				}
+			}else{
+				var firstbar = new Map();
+				var labelname = response[r].pid.split('-',3)[1]+'-' + response[r].pid.split('-',3)[2]+ '#' + response[r].filetype;
+				firstbar.set(labelname,[{
+					timeRange: [
+						response[r].relativeStartTime,
+						response[r].relativeEndTime
+					],
+					val: fileType,
+					labelVal:tooltip
+				}
+				]);
+				data.set(response[r].filename.split('.')[0].split('-')[1], firstbar)
+			}
 		}
 
-		var taskStatus = {
-			"SUCCEEDED" : "bar",
-			"FAILED" : "bar-failed",
-			"RUNNING" : "bar-running",
-			"KILLED" : "bar-killed"
-		};
+		// see if there are files Satisfy filter condition and relative end time constrain
+		if(data.size != 0) {
 
-		//var taskNames = tasks.map(a => a.filename + '#' + a.arrestTime);
-		//var taskNames = tasks.map(a => a.arrestTime);
-		//var taskNames = tasks.map(a => a.uuid + '#' + a.arrestTime + '#' + a.filetype);
-		var taskNames = tasks.map(a => a.pid + '#' + a.arrestTime + '#' + a.filetype);
-		var patientFile = tasks.map(a => a.fname);
+			var chartdata = [];
 
-		/*tasks.sort(function(a, b) {
-            return a.relativeEndTime - b.relativeEndTime;
-        });
-        var maxDate = tasks[tasks.length - 1].endDate;
+			// convert nested hash into data needed for graph
+			data.forEach(function (patientList, year) {
+				var bardata = [];
+				patientList.forEach(function (val, label) {
 
-        tasks.sort(function(a, b) {
-            return a.startDate - b.startDate;
-        });
-        var minDate = tasks[0].startDate;*/
+					for (i in val) {
+						// Divide by 3600 means relative time represent in hours
+						// Divide by 60 means relative time represent in minutes
+						val[i].timeRange[0] = Math.round(val[i].timeRange[0] / 3600);
+						val[i].timeRange[1] = Math.round(val[i].timeRange[1] / 3600);
+					}
 
-		tasks.sort(function(a, b) {
-			return new Date(a.arrestTime) - new Date(b.arrestTime);
+					bardata.push({
+						'label': label,
+						'data': val
+					})
+				});
+				chartdata.push({
+					'group': year,
+					'data': bardata
+				});
+			});
+		}
+		TimeLineChart.data(chartdata)
+	});
+
+
+	/*
+	*  assign data to the graph
+	* */
+	function draw_graph() {
+
+		var data = new Map();
+
+		for (r in response)
+		{
+			// filter
+			if(filteredPatient.length != 0 && filteredPatient.indexOf(response[r].pid) == -1){continue;}
+
+			// too many patients problem
+			// if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 ){
+			if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 1296000){
+				continue;
+			}
+
+			// find out if the patient is problematic / mislabeled or not
+			var fileType;
+			if(worryPatients.has(response[r].pid)){
+				fileType = "problematic";
+			}else{
+				fileType = response[r].filetype;
+			}
+
+			if (! checkSuffix(response[r].filename,response[r].filetype)){
+				console.log(response[r].filename);
+				fileType = "wrong file name";
+			}
+
+			// store all the information in nested Hash table
+			if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
+				// left label
+				var year = 	data.get(response[r].pid.split('-')[1]);
+				// right label
+				var labelname = response[r].pid.split('-',3)[1]+'-' + response[r].pid.split('-',3)[2]+ '#' + response[r].filetype;
+				// tooltip
+				var tooltip = response[r].filename + '<br>'+ 'arrest Time:' + '<br>' + response[r].arrestTime + '<br>' + 'relative Time (hours):';
+
+				if( year.has(labelname) ){
+					var patient = year.get(labelname);
+
+					patient.push(
+						{
+							timeRange: [
+								response[r].relativeStartTime,
+								response[r].relativeEndTime
+							],
+							val: fileType,
+							labelVal:tooltip
+						}
+					);
+					year.set(labelname,patient)
+				}else{
+					year.set(labelname,[{
+						timeRange: [
+							response[r].relativeStartTime,
+							response[r].relativeEndTime
+						],
+						val: fileType,
+						labelVal:tooltip
+					}
+					])
+				}
+			}else{
+				var firstbar = new Map();
+				var labelname = response[r].pid.split('-',3)[1]+'-' + response[r].pid.split('-',3)[2]+ '#' + response[r].filetype;
+				firstbar.set(labelname,[{
+					timeRange: [
+						response[r].relativeStartTime,
+						response[r].relativeEndTime
+					],
+					val:  fileType,
+					labelVal:tooltip
+				}
+				]);
+				data.set(response[r].filename.split('.')[0].split('-')[1], firstbar)
+			}
+		}
+
+		// see if there are files Satisfy filter condition and relative end time constrain
+		if(data.size != 0){
+
+			var chartdata = [];
+
+			// convert nested hash into data needed for graph
+			data.forEach(function (patientList,year) {
+				var bardata = [];
+				patientList.forEach(function (val,label) {
+
+					for (i in val){
+						// Divide by 3600 means relative time represent in hours
+						// Divide by 60 means relative time represent in minutes
+						val[i].timeRange[0] = Math.round(val[i].timeRange[0] / 3600);
+						val[i].timeRange[1] = Math.round( val[i].timeRange[1] / 3600);
+					}
+
+					bardata.push({
+						'label':label,
+						'data' : val
+					})
+				});
+				chartdata.push({
+					'group': year,
+					'data' : bardata
+				});
+			});
+
+			// reset the data for timeLine chart
+			TimeLineChart.data(chartdata)
+			
+		}else{
+			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+				'No patient satisfies your conditions.');
+		}
+
+		// rewrite the function of reset button
+		// right now it return to the filtered list
+		$(".reset-zoom-btn").click(function() {
+			var data = new Map();
+
+			for (r in response)
+			{
+				// filter
+				if(filteredPatient.length != 0 && filteredPatient.indexOf(response[r].pid) == -1){continue;}
+
+				// too many patients problem
+				// if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 ){
+				if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 1296000){
+					continue;
+				}
+
+				// find out if the patient is problematic / mislabeled or not
+				var fileType;
+				if(worryPatients.has(response[r].pid)){
+					fileType = "problematic";
+				}else{
+					fileType = response[r].filetype;
+				}
+
+				if (! checkSuffix(response[r].filename,response[r].filetype)){
+					fileType = "wrong file name";
+				}
+
+				// store all the information in nested Hash table
+				if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
+					// left label
+					var year = 	data.get(response[r].pid.split('-')[1]);
+					// right label
+					var labelname = response[r].pid.split('-',3)[1]+'-' + response[r].pid.split('-',3)[2]+ '#' + response[r].filetype;
+					// tooltip
+					var tooltip = response[r].filename + '<br>'+ 'arrest Time:' + '<br>' + response[r].arrestTime + '<br>' + 'relative Time (hours):';
+
+					if( year.has(labelname) ){
+						var patient = year.get(labelname);
+						patient.push(
+							{
+								timeRange: [
+									response[r].relativeStartTime,
+									response[r].relativeEndTime
+								],
+								val: fileType,
+								labelVal:tooltip
+							}
+						);
+						year.set(labelname,patient)
+					}else{
+						year.set(labelname,[{
+							timeRange: [
+								response[r].relativeStartTime,
+								response[r].relativeEndTime
+							],
+							val: fileType,
+							labelVal:tooltip
+						}
+						])
+					}
+				}else{
+					var firstbar = new Map();
+					var labelname = response[r].pid.split('-',3)[1]+'-' + response[r].pid.split('-',3)[2]+ '#' + response[r].filetype;
+					firstbar.set(labelname,[{
+						timeRange: [
+							response[r].relativeStartTime,
+							response[r].relativeEndTime
+						],
+						val: fileType,
+						labelVal:tooltip
+					}
+					]);
+					data.set(response[r].filename.split('.')[0].split('-')[1], firstbar)
+				}
+			}
+
+			// see if there are files Satisfy filter condition and relative end time constrain
+			if(data.size != 0) {
+
+				var chartdata = [];
+
+				// convert nested hash into data needed for graph
+				data.forEach(function (patientList, year) {
+					var bardata = [];
+					patientList.forEach(function (val, label) {
+
+						for (i in val) {
+							// Divide by 3600 means relative time represent in hours
+							// Divide by 60 means relative time represent in minutes
+							val[i].timeRange[0] = Math.round(val[i].timeRange[0]/ 3600);
+							val[i].timeRange[1] = Math.round(val[i].timeRange[1] / 3600);
+						}
+
+						bardata.push({
+							'label': label,
+							'data': val
+						})
+					});
+					chartdata.push({
+						'group': year,
+						'data': bardata
+					});
+				});
+			}
+			TimeLineChart.data(chartdata)
 		});
-		var minDate = tasks[0].arrestTime;
-		tasks.sort(function(a, b) {
-			return a.relativeEndTime - b.relativeEndTime;
-		});
-		var maxDate = tasks[tasks.length - 1].relativeEndTime;
-
-		var format = "%j";
-
-		var gantt = d3.gantt(tasks).taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format);
-		gantt(tasks);
-
+		
 	};
-});
 
 
- function draw_graph() {
+	/*
+		draw the table for the problematic patients
+	 */
+	$.fn.dataTable.moment('M/D/YYYY, h:mm:ss a');
+	var table = $('#queryTable').DataTable({
+		data: querydata,
+		columnDefs: [{
+			"targets": [0],
+			"visible": true,
+			"searchable": true
+		}],
+		columns: [{
+			data: 'pid'
+		}, {
+			data:null,
+			render:function (data){
+				return booleanToStr(data.isoverlap);
+			}
+		},{
+			data:'ar_miss'
+		},{
+			data:'noar_miss'
+		},{
+			data:null,
+			render:function (data) {
+				return booleanToStr(data.wrongname);
+			}
+		}],
+		order: [[0, 'desc']],
+	});
 
-	var tasks = [];
-
-	for (r in response)
-	{
-		if(filteredPatient.length != 0 && filteredPatient.indexOf(response[r].pid) == -1){continue;}
-
-		//if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 4000000){
-		if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 40000){
-			continue;
-		}
-		//response[r].arrestTime = Date.parse(response[r].arrestTime).toString("yyyy-MM-dd HH:mm:ss");
-		response[r].status = response[r].filetype === "ar" ? "KILLED" : "FAILED";
-		response[r].fname = response[r].filename;
-		tasks.push(response[r]);
+	function booleanToStr(flag){
+		return flag ? 'T':' ';
 	}
 
-
-	var taskStatus = {
-	    "SUCCEEDED" : "bar",
-	    "FAILED" : "bar-failed",
-	    "RUNNING" : "bar-running",
-	    "KILLED" : "bar-killed"
-	};
-
-	//var taskNames = tasks.map(a => a.filename + '#' + a.arrestTime);
-	//var taskNames = tasks.map(a => a.arrestTime);
-	//var taskNames = tasks.map(a => a.uuid + '#' + a.arrestTime + '#' + a.filetype);
-	var taskNames = tasks.map(a => a.pid + '#' + a.arrestTime + '#' + a.filetype);
-	var patientFile = tasks.map(a => a.fname);
-	console.log(tasks);
-
-	/*tasks.sort(function(a, b) {
-	    return a.relativeEndTime - b.relativeEndTime;
+	$('#queryTable tbody').on('mouseover', 'tr', function () {
+		$(this).attr("style", "background-color:#ffffdd");
 	});
-	var maxDate = tasks[tasks.length - 1].endDate;
 
-	tasks.sort(function(a, b) {
-	    return a.startDate - b.startDate;
+	$('#queryTable tbody').on('mouseout', 'tr', function () {
+		$(this).removeAttr('style');
 	});
-	var minDate = tasks[0].startDate;*/
 
-	tasks.sort(function(a, b) {
-		return new Date(a.arrestTime) - new Date(b.arrestTime);
-	})
-	var minDate = tasks[0].arrestTime;
-	tasks.sort(function(a, b) {
-	    return a.relativeEndTime - b.relativeEndTime;
-	});
-	var maxDate = tasks[tasks.length - 1].relativeEndTime;
-
-	console.log("mindate: " + minDate);
-	console.log("maxdate: " + maxDate);
-
-	var format = "%j";
-
-	//var gantt = d3.gantt(tasks).taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format);
-	var gantt = d3.gantt(tasks).taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format);
-	gantt(tasks);
-
-};
+});

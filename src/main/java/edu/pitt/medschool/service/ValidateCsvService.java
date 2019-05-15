@@ -186,7 +186,6 @@ public class ValidateCsvService {
             }
         }
 
-        System.out.println(timelines.size());
         // detect wrong patients
         for (HashMap.Entry<String,HashMap<String,List<long []>>> patinet: timelines.entrySet()){
             //System.out.println(patinet.getKey());
