@@ -1,9 +1,8 @@
 package edu.pitt.medschool.model.dto;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 public class MedicationExample {
     /**
