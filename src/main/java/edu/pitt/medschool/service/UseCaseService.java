@@ -56,7 +56,7 @@ public class UseCaseService {
     private double loadFactor;
 
     private final static String dbName = DBConfiguration.Data.DBNAME;
-    private final static String DIRECTORY = "/tsdb/output/";
+    private final static String DIRECTORY = "/Volumes/INFLUX_RAID/output/";
 
     @Autowired
     DownsampleDao downsampleDao;
@@ -208,13 +208,15 @@ public class UseCaseService {
 
         // Get Patient List by uuid
         List<String> patientIDs = importedFileDao.selectAllImportedPidOnMachine(uuid);
-        patientIDs.clear();
-        patientIDs.add("PUH-2010-074");
+        if (debug) {
+//        	patientIDs.clear();
+//        	patientIDs.add("PUH-2010-074");
+        }
         idQueue = new LinkedBlockingQueue<>(patientIDs);
 
         List<String> cols = featureDao.selectAllColumnCodes();
         if (debug)
-            cols = cols.subList(0, 3);
+            cols = cols.subList(0, 1);
         String[] queryColumns = new String[cols.size()];
         for (int i = 0; i < cols.size(); i++) {
             queryColumns[i] = "mean(" + cols.get(i) + ")";
@@ -298,7 +300,7 @@ public class UseCaseService {
                     logger.debug("<" + patientId + "> FINISHED PROCESSING ");
                 } catch (Exception e) {
                     logger.error(patientId + " : " + Util.stackTraceErrorToString(e));
-                    idQueue.offer(patientId);
+//                    idQueue.offer(patientId);
                 }
             }
         };
