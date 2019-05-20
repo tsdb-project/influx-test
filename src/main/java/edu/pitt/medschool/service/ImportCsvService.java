@@ -6,10 +6,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -21,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang3.StringUtils;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.BatchPoints;
@@ -32,14 +35,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.opencsv.CSVReader;
+
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.util.FileLockUtil;
 import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dao.FeatureDao;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.InfluxClusterDao;
+import edu.pitt.medschool.model.dto.Feature;
 import edu.pitt.medschool.model.dto.ImportedFile;
 
 /**
@@ -49,6 +56,9 @@ import edu.pitt.medschool.model.dto.ImportedFile;
 public class ImportCsvService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private static final int NORMAL_CSV_COLUMN_COUNT = 6039;
+    private static final List<Integer> CSV_COLUMN_NAME_DUPLICATE_INDICES = Arrays.asList(166, 188, 190);
 
     @Value("${machine}")
     private String taskUUID;
@@ -72,10 +82,13 @@ public class ImportCsvService {
     private final Set<Path> processingSet = new HashSet<>();
 
     @Autowired
-    private ImportedFileDao ifd;
+    private ImportedFileDao importedFileDao;
 
     @Autowired
-    private ImportProgressService ips;
+    private ImportProgressService importProgressService;
+
+    @Autowired
+    private FeatureDao featureDao;
 
     @Autowired
     InfluxClusterDao influxClusterDao;
@@ -92,8 +105,42 @@ public class ImportCsvService {
         return this.batchId;
     }
 
-    public void _test() throws InterruptedException {
-        String[] testFiles = Util.getAllCsvFileInDirectory("/home/tonyz-remote/Desktop/E/je_test_data/");
+    public static void main(String[] args) throws IOException {
+        String[] testFiles = Util.getAllCsvFileInDirectory("/tsdb/ar");
+        String f = "UAB-236_02c_ ar_File A.csv";
+        String influxFilename = f.substring(0, StringUtils.lastIndexOfIgnoreCase(f, "ar") + 2);
+        System.out.println(influxFilename);
+        for (String filename : testFiles) {
+            Path file = Paths.get(filename);
+            BufferedReader reader = Files.newBufferedReader(file);
+            CSVReader csvReader = new CSVReader(reader);
+            if (!filename.equals("/tsdb/ar/PUH-2011-108_09ar.csv")) {
+                // continue;
+            }
+
+            reader.readLine();
+
+            // Next 6 lines no use expect time date
+            for (int i = 0; i < 5; i++) {
+                reader.readLine();
+            }
+
+            /* Line 7 is the column text names. This segment of code is added on 5/20/2019, due to the reason that we discovered
+             * that the split files of the files that went OOM in the Persyst export process were actually split in a vertical
+             * fashion, not as we have been expecting in a long time. */
+            String[] col = csvReader.readNext();
+            if (col.length != NORMAL_CSV_COLUMN_COUNT) {
+
+            } else {
+                System.out.println("OKAY");
+            }
+
+            csvReader.close();
+        }
+    }
+
+    public void _test() throws InterruptedException, IOException {
+        String[] testFiles = Util.getAllCsvFileInDirectory("/tsdb/ar");
 
         AddArrayFiles(testFiles);
 
@@ -180,7 +227,7 @@ public class ImportCsvService {
     private String[] checkerFromFilename(String filename, long filesize) {
         String[] res = new String[3];
         // Has been uploaded successfully according to the log?
-        boolean hasImported = ifd.checkHasImported(taskUUID, filename, filesize);
+        boolean hasImported = importedFileDao.checkHasImported(taskUUID, filename, filesize);
         if (!hasImported) {
             // Never updated
             res[2] = "0";
@@ -224,6 +271,7 @@ public class ImportCsvService {
 
         try {
             BufferedReader reader = Files.newBufferedReader(file);
+            CSVReader csvReader = new CSVReader(reader);
 
             // First line contains some curcial info
             String firstLine = reader.readLine();
@@ -234,7 +282,7 @@ public class ImportCsvService {
             // Next 6 lines no use expect time date
             long headerSize = 0;
             StringBuilder testDate = new StringBuilder();
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < 5; i++) {
                 String tmp = reader.readLine();
                 headerSize += tmp.length();
                 if (i == 3 || i == 4) {
@@ -242,7 +290,7 @@ public class ImportCsvService {
                 }
             }
 
-            // Test date in the headers is in PGH Time
+            // Test date in the headers is in EASTERN Time
             Date testStartTime = TimeUtil.dateTimeFormatToDate(testDate.toString(), "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
             long testStartTimeEpoch = testStartTime.getTime();
 
@@ -265,22 +313,67 @@ public class ImportCsvService {
             currentProcessed += headerSize;
             totalProcessedSize.addAndGet(headerSize);
 
+            /* Line 7 is the column text names. This segment of code is added on 5/20/2019, due to the reason that we discovered
+             * that the split files of the files that went OOM in the Persyst export process were actually split in a vertical
+             * fashion, not as we have been expecting in a long time. */
+            String[] colText = csvReader.readNext();
+            int addition = 0;
+            if (colText.length != NORMAL_CSV_COLUMN_COUNT) {
+                int startCol = 0;
+                Feature feature = null;
+                for (int i = 0; i < colText.length; i++) {
+                    String col = colText[i];
+                    if (!col.equals("")) {
+                        feature = featureDao.selectByColumnText(col);
+                        if (feature != null && CSV_COLUMN_NAME_DUPLICATE_INDICES.contains(feature.getCsvId())) {
+                            if (!colText[i + 1].equals(colText[i])) {
+                                feature.setCsvId(feature.getCsvId() - 1);
+                            }
+                        }
+                        startCol = i;
+                        break;
+                    }
+                }
+
+                if (feature == null) {
+                    csvReader.close();
+                    throw new RuntimeException("Can't locate the column");
+                } else {
+                    if (startCol == 2) {
+                        addition = feature.getCsvId() - 1;
+                    } else {
+                        addition = feature.getCsvId() - 2;
+                    }
+                }
+            }
+
             // 8th Line is column header line
             String eiL = reader.readLine();
             String[] columnNames = eiL.split(",");
-            int columnCount = columnNames.length, bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount,
-                    batchCount = 0;
+            int columnCount = columnNames.length;
+            int bulkInsertMax = InfluxappConfig.PERFORMANCE_INDEX / columnCount;
+            int batchCount = 0;
 
             // More integrity checking
             if (!columnNames[0].equalsIgnoreCase("clockdatetime")) {
+                csvReader.close();
                 throw new RuntimeException("Wrong first column!");
+            }
+
+            if (addition != 0) {
+                for (int i = 2; i < columnNames.length; i++) {
+                    Integer sid = Integer.parseInt(StringUtils.substringBetween(columnNames[i], "I", "_")) + addition;
+                    columnNames[i] = "I" + sid + "_" + StringUtils.substringAfter(columnNames[i], "_");
+                }
             }
 
             currentProcessed += eiL.length();
             totalProcessedSize.addAndGet(eiL.length());
 
+            String influxFilename = filename.substring(0, StringUtils.lastIndexOfIgnoreCase(filename, "ar") + 2);
+
             BatchPoints records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type)
-                    .tag("fileName", filename.substring(0, filename.length() - 4)).build();
+                    .tag("fileName", influxFilename).build();
 
             long previousMeasurementEpoch = testStartTimeEpoch - 1000;
             String aLine;
@@ -314,7 +407,7 @@ public class ImportCsvService {
 
                 // To avoid some problematic files where measurement date is not reliable
                 if (!TimeUtil.dateIsSameDay(measurementDate, testStartTime)) {
-                    logger.warn(String.format("Measurement accross day on line %d!", totalLines + 8));
+                    // logger.warn(String.format("Measurement accross day on line %d!", totalLines + 8));
                 }
 
                 // Overlap?
@@ -358,7 +451,7 @@ public class ImportCsvService {
 
                     // Reset batch point
                     records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type)
-                            .tag("fileName", filename.substring(0, filename.length() - 4)).build();
+                            .tag("fileName", influxFilename).build();
                     batchCount = 0;
                     logImportingFile(file.toString(), aFileSize, currentProcessed, totalLines);
 
@@ -371,6 +464,7 @@ public class ImportCsvService {
 
             // Write the last batch
             idb.write(records);
+            csvReader.close();
             reader.close();
 
         } catch (Exception e) {
@@ -430,7 +524,7 @@ public class ImportCsvService {
                 iff.setIsar(fileInfo[1].equals("ar"));
                 iff.setFilelines(((Long) impStr[2]).intValue());
                 iff.setUuid(taskUUID);
-                ifd.insert(iff);
+                importedFileDao.insert(iff);
             } catch (Exception e) {
                 logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileFullPath,
                         Util.stackTraceErrorToString(e)));
@@ -478,26 +572,27 @@ public class ImportCsvService {
     }
 
     private void logQueuedFile(String fn, long thisFileSize) {
-        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, 0, totalProcessedSize.get(),
+        importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, 0, totalProcessedSize.get(),
                 ImportProgressService.FileProgressStatus.STATUS_QUEUED, null);
     }
 
     private void logSuccessFiles(String fn, long thisFileSize, long thisFileProcessedSize) {
-        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(),
-                ImportProgressService.FileProgressStatus.STATUS_FINISHED, null);
+        importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize,
+                totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FINISHED, null);
     }
 
     private void logImportingFile(String fn, long thisFileSize, long thisFileProcessedSize, long currentLine) {
-        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(),
-                ImportProgressService.FileProgressStatus.STATUS_INPROGRESS, String.valueOf(currentLine));
+        importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize,
+                totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_INPROGRESS,
+                String.valueOf(currentLine));
     }
 
     private void logFailureFiles(String fn, String reason, long thisFileSize, long thisFileProcessedSize, boolean isSoftError) {
         if (!isSoftError) {
             totalAllSize.addAndGet(thisFileProcessedSize - thisFileSize);
         }
-        ips.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize, totalProcessedSize.get(),
-                ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
+        importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize,
+                totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
     }
 
     private void transferFailedFiles(Path path) {
