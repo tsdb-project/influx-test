@@ -84,6 +84,9 @@ public class CsvFileSqlProvider {
         if (record.getDeleteTime() != null) {
             sql.VALUES("delete_time", "#{deleteTime,jdbcType=TIMESTAMP}");
         }
+        if (record.getConflictResolved() != null) {
+            sql.VALUES("conflict_resolved", "#{conflictResolved,jdbcType=BIT}");
+        }
         return sql.toString();
     }
 
@@ -112,6 +115,7 @@ public class CsvFileSqlProvider {
         sql.SELECT("header_time");
         sql.SELECT("deleted");
         sql.SELECT("delete_time");
+        sql.SELECT("conflict_resolved");
         sql.FROM("csv_file");
         applyWhere(sql, example, false);
         if (example != null && example.getOrderByClause() != null) {
@@ -174,6 +178,9 @@ public class CsvFileSqlProvider {
         if (record.getDeleteTime() != null) {
             sql.SET("delete_time = #{record.deleteTime,jdbcType=TIMESTAMP}");
         }
+        if (record.getConflictResolved() != null) {
+            sql.SET("conflict_resolved = #{record.conflictResolved,jdbcType=BIT}");
+        }
         applyWhere(sql, example, true);
         return sql.toString();
     }
@@ -200,6 +207,7 @@ public class CsvFileSqlProvider {
         sql.SET("header_time = #{record.headerTime,jdbcType=TIMESTAMP}");
         sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
         sql.SET("delete_time = #{record.deleteTime,jdbcType=TIMESTAMP}");
+        sql.SET("conflict_resolved = #{record.conflictResolved,jdbcType=BIT}");
         CsvFileExample example = (CsvFileExample) parameter.get("example");
         applyWhere(sql, example, true);
         return sql.toString();

@@ -40,14 +40,14 @@ public interface CsvFileMapper {
      * @mbg.generated
      */
     @Insert({ "insert into csv_file (id, pid, ", "filename, start_time, ", "end_time, length, ", "density, machine, ",
-            "ar, path, size, ", "uuid, header_time, ", "deleted, delete_time)",
+            "ar, path, size, ", "uuid, header_time, ", "deleted, delete_time,conflict_resolved)",
             "values (#{id,jdbcType=INTEGER}, #{pid,jdbcType=VARCHAR}, ",
             "#{filename,jdbcType=VARCHAR}, #{startTime,jdbcType=TIMESTAMP}, ",
             "#{endTime,jdbcType=TIMESTAMP}, #{length,jdbcType=INTEGER}, ",
             "#{density,jdbcType=DOUBLE}, #{machine,jdbcType=VARCHAR}, ",
             "#{ar,jdbcType=BIT}, #{path,jdbcType=VARCHAR}, #{size,jdbcType=INTEGER}, ",
             "#{uuid,jdbcType=CHAR}, #{headerTime,jdbcType=TIMESTAMP}, ",
-            "#{deleted,jdbcType=BIT}, #{deleteTime,jdbcType=TIMESTAMP})" })
+            "#{deleted,jdbcType=BIT}, #{deleteTime,jdbcType=TIMESTAMP},#{conflict_resolved,jdbcType=BIT})" })
     int insert(CsvFile record);
 
     /**
@@ -76,7 +76,8 @@ public interface CsvFileMapper {
             @Result(column = "uuid", property = "uuid", jdbcType = JdbcType.CHAR),
             @Result(column = "header_time", property = "headerTime", jdbcType = JdbcType.TIMESTAMP),
             @Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
-            @Result(column = "delete_time", property = "deleteTime", jdbcType = JdbcType.TIMESTAMP) })
+            @Result(column = "delete_time", property = "deleteTime", jdbcType = JdbcType.TIMESTAMP),
+            @Result(column = "conflict_resolved", property = "conflictResolved", jdbcType = JdbcType.BIT) })
     List<CsvFile> selectByExampleWithRowbounds(CsvFileExample example, RowBounds rowBounds);
 
     /**
@@ -98,7 +99,8 @@ public interface CsvFileMapper {
             @Result(column = "uuid", property = "uuid", jdbcType = JdbcType.CHAR),
             @Result(column = "header_time", property = "headerTime", jdbcType = JdbcType.TIMESTAMP),
             @Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
-            @Result(column = "delete_time", property = "deleteTime", jdbcType = JdbcType.TIMESTAMP) })
+            @Result(column = "delete_time", property = "deleteTime", jdbcType = JdbcType.TIMESTAMP),
+            @Result(column = "conflict_resolved", property = "conflictResolved", jdbcType = JdbcType.BIT) })
     List<CsvFile> selectByExample(CsvFileExample example);
 
     /**

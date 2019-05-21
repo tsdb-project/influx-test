@@ -222,6 +222,28 @@ public class RawDataService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public int resolveAllFilesByPid(String pid) throws Exception {
+        int resolveResult = 0;
+        try {
+            resolveResult = csvFileDao.resolveAllFilesByPid(pid);
+        }catch (Exception e){
+            logger.debug("RESOLVE DATA FAILED!");
+        }
+        return resolveResult;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public int resolveFileByFile(CsvFile file) throws Exception {
+        int resolveResult = 0;
+        try {
+            resolveResult = csvFileDao.resolveFileByFile(file);
+        }catch (Exception e){
+            logger.debug("RESOLVE DATA FAILED!");
+        }
+        return resolveResult;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public int deletePatientDataByFile(CsvFile file) throws Exception {
         Map<String, String> tags = new HashMap<>();
         tags.put("fileName", file.getFilename().replace(".csv", ""));

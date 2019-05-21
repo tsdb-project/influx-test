@@ -1137,6 +1137,11 @@ public class CsvFileExample {
             addCriterion("upper(uuid) like", value.toUpperCase(), "uuid");
             return (Criteria) this;
         }
+
+        public Criteria andconflitResolvedEqualTo(Boolean value) {
+            addCriterion("conflict_resolved =", value, "conflictResolved");
+            return (Criteria) this;
+        }
     }
 
     /**

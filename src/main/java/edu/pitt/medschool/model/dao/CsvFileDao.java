@@ -46,9 +46,60 @@ public class CsvFileDao {
         CsvFileExample example = new CsvFileExample();
         Criteria criteria = example.createCriteria();
         criteria.andPidEqualTo(patientId);
-        criteria.andMachineEqualTo(machineId);
+//        criteria.andMachineEqualTo(machineId);
+        criteria.andMachineEqualTo("realpsc");
         criteria.andDeletedEqualTo(false);
         return csvFileMapper.selectByExample(example);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public int resolveFileByFile(CsvFile file) throws Exception {
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria csvFileCriteria = csvFileExample.createCriteria();
+        csvFileCriteria.andPidEqualTo(file.getPid());
+        csvFileCriteria.andFilenameEqualTo(file.getFilename());
+//        csvFileCriteria.andMachineEqualTo(machineId);
+        csvFileCriteria.andUuidEqualTo(file.getUuid());
+        csvFileCriteria.andDeletedEqualTo(false);
+
+        CsvFile csvFile = new CsvFile();
+        if(file.getConflictResolved()){
+            csvFile.setConflictResolved(false);
+        }else {
+            csvFile.setConflictResolved(true);
+        }
+
+        int resolveResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
+        try {
+            if (resolveResult == 0) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            logger.error("No CSV file record available!");
+            throw e;
+        }
+        return resolveResult;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public int resolveAllFilesByPid(String pid) throws Exception {
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria csvFileCriteria = csvFileExample.createCriteria();
+        csvFileCriteria.andPidEqualTo(pid);
+        csvFileCriteria.andDeletedEqualTo(false);
+
+        CsvFile csvFile = new CsvFile();
+        csvFile.setConflictResolved(true);
+        int resolveResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
+        try {
+            if (resolveResult == 0) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            logger.error("No CSV file record available!");
+            throw e;
+        }
+        return resolveResult;
     }
 
     @Transactional(rollbackFor = Exception.class)
