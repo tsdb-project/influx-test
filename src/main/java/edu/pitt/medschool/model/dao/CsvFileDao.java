@@ -77,4 +77,8 @@ public class CsvFileDao {
         return deleteResult;
     }
 
+    public int getTotal(){
+        return csvFileMapper.getTotal();
+    }
+
 }

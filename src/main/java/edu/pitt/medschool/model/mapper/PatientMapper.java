@@ -1252,4 +1252,7 @@ public interface PatientMapper {
         @Result(column = "Extra", property = "extra", jdbcType = JdbcType.VARCHAR) })
     List<MysqlColumnBean> getColumnInfo();
 
+
+    @Select({"select count(*) from patient"})
+    int getTotal();
 }

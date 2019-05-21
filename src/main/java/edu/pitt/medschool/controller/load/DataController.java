@@ -6,7 +6,8 @@ package edu.pitt.medschool.controller.load;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import edu.pitt.medschool.model.dto.PatientWithBLOBs;
+import edu.pitt.medschool.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,11 +26,6 @@ import edu.pitt.medschool.framework.util.FileBean;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.ImportProgress;
-import edu.pitt.medschool.service.ImportCsvService;
-import edu.pitt.medschool.service.ImportProgressService;
-import edu.pitt.medschool.service.PatientService;
-import edu.pitt.medschool.service.RawDataService;
-import edu.pitt.medschool.service.ValidateCsvService;
 
 /**
  * @author Isolachine
@@ -47,6 +43,8 @@ public class DataController {
     ValidateCsvService validateCsvService;
     @Autowired
     RawDataService rawDataService;
+    @Autowired
+    MilestoneService milestoneService;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -127,14 +125,18 @@ public class DataController {
     @ResponseBody
     public Map<String, Object> importDir(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model) {
         Map<String, Object> map = new HashMap<>();
+        if(milestoneService.checklock()){
+            map.put("msg","fail");
+        }else {
+            map.put("msg","success");
+            String[] allAR = new String[dir.getFiles().size()];
 
-        String[] allAR = new String[dir.getFiles().size()];
+            for (int i = 0; i < allAR.length; i++) {
+                allAR[i] = dir.getFiles().get(i);
+            }
 
-        for (int i = 0; i < allAR.length; i++) {
-            allAR[i] = dir.getFiles().get(i);
+            importCsvService.AddArrayFiles(allAR);
         }
-
-        importCsvService.AddArrayFiles(allAR);
 
         return map;
     }
@@ -145,13 +147,40 @@ public class DataController {
     public Map<String, Object> dataValidate(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model)
             throws Exception {
         Map<String, Object> map = new HashMap<>();
-
-        for (int i = 0; i < dir.getFiles().size(); i++) {
-            CsvFile csvFile = validateCsvService.analyzeCsv(dir.getFiles().get(i));
-            validateCsvService.insertCsvFile(csvFile);
+        if(milestoneService.checklock()){
+            map.put("msg","fail");
+        }else {
+            map.put("msg","success");
+            for (int i = 0; i < dir.getFiles().size(); i++) {
+                CsvFile csvFile = validateCsvService.analyzeCsv(dir.getFiles().get(i));
+                validateCsvService.insertCsvFile(csvFile);
+            }
+            System.out.println(
+                    "***********************************************Analyze finished*****************************************");
         }
-        System.out.println(
-                "***********************************************Analyze finished*****************************************");
+
+        return map;
+    }
+
+    // import patients
+    @RequestMapping(value = "api/data/importPatients")
+    @ResponseBody
+    public Map<String,Object> ImportPatinets(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model)
+        throws Exception{
+        Map<String,Object> map = new HashMap<>();
+        int count = 0;
+        if(milestoneService.checklock()){
+            map.put("msg","fail");
+        }else {
+            map.put("msg","success");
+            for (int i = 0; i<dir.getFiles().size();i++){
+                List<PatientWithBLOBs> patients = patientService.getPatientsFromCsv(dir.getFiles().get(i));
+                count+=patientService.insertPatients(patients);
+            }
+            System.out.println("**********************************Import finished**********************************");
+            map.put("num",count);
+        }
+
         return map;
     }
 

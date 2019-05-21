@@ -120,4 +120,6 @@ public interface CsvFileMapper {
             "patient p where c.pid = p.id and c.machine= '${machine}' and p.arrestdate is not null" })
     List<TimeLine> getPatientTimeLines(@Param("machine") String machine);
 
+    @Select({"select count(*) from csv_file"})
+    int getTotal();
 }
