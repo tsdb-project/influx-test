@@ -1,6 +1,5 @@
 package edu.pitt.medschool.model.dto;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 public class MedicalDownsample {

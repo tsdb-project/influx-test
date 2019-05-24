@@ -1,7 +1,5 @@
 package edu.pitt.medschool.model;
 
-import edu.pitt.medschool.config.DBConfiguration;
-
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

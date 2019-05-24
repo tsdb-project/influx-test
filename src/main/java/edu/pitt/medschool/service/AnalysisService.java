@@ -87,7 +87,7 @@ public class AnalysisService {
     private final MedicationDao medicationDao;
     private final InfluxSwitcherService iss;
     private final ImportedFileDao importedFileDao;
-    private final ScheduledFuture jobCheckerThread; // Thread for running managed jobs
+    private final ScheduledFuture<?> jobCheckerThread; // Thread for running managed jobs
 
     /**
      * Queue for managing jobs

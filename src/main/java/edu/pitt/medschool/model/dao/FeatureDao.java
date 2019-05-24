@@ -91,4 +91,14 @@ public class FeatureDao {
         }
         return cols;
     }
+
+    public Feature selectByColumnText(String columnText) {
+        FeatureExample example = new FeatureExample();
+        example.createCriteria().andCsvNameEqualTo(columnText);
+        List<Feature> features = featureMapper.selectByExample(example);
+        if (features.isEmpty()) {
+            return null;
+        }
+        return features.get(0);
+    }
 }

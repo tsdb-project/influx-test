@@ -40,7 +40,8 @@ public class ImportedFileDao {
      */
     public boolean checkHasImported(String uuid, String filename, long size) {
         ImportedFileExample ife = new ImportedFileExample();
-        ife.createCriteria().andUuidEqualTo(uuid).andFilenameLikeInsensitive(filename).andFilesizeEqualTo(size);
+        ife.createCriteria().andUuidEqualTo(uuid).andFilenameLikeInsensitive(filename).andFilesizeEqualTo(size)
+                .andDeletedEqualTo(false);
         return importedFileMapper.selectByExample(ife).size() > 0;
     }
 
