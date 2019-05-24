@@ -669,8 +669,7 @@ $(document).ready(function() {
 				},
 				{
 					data : "gap"
-				},
-				{
+				},{
 					data : null,
 					render : function(data, type, row, meta) {
 						if(data.problematic == true){
@@ -683,10 +682,15 @@ $(document).ready(function() {
 							return "No Problem"
 						}
 					}
-				},
-				{
-					data : null,
-					render : function(data, type, row, meta) {
+				}, {
+					data: null,
+					render: function (data, type, row, meta) {
+						return "<button id=\"comment_file_button\" class=\"btn btn-info btn-sm\" data-row=\"" + meta.row
+						+ "\" data-toggle=\"modal\" data-target=\"#comment-modal\" >NOTE</button>";
+					}
+				}, {
+					data: null,
+					render: function (data, type, row, meta) {
 
 						if(data.csvFile.conflictResolved){
 							var resolveBtn = "<button id=\"cancel_resolved_button\" class=\"btn btn-danger btn-sm\" data-row=\"" + meta.row
@@ -852,6 +856,13 @@ $(document).ready(function() {
 			}
 		});
 	};
+
+	// under construction: button for comment
+	fileTable.on('click', '#comment_file_button', function(event) {
+		var row = event.target.dataset.row;
+		var csvFile = files[row].csvFile;
+		$("#comment-file").html(csvFile.filename);
+	});
 
 	fileTable.on('click', '#resolve_file_button', function(event) {
 		var row = event.target.dataset.row;
@@ -1051,7 +1062,6 @@ $(document).ready(function() {
 			}
 		});
 	});
-
 
 
 	/*

@@ -108,6 +108,7 @@
                                         <th>Counterpart</th>
                                         <th>File Gap</th>
                                         <th>File State</th>
+                                        <th>comment</th>
                                         <th>Manage</th>
                                     </tr>
                                     </thead>
@@ -231,6 +232,35 @@
                         </div>
                     </div>
 
+                    <div class="modal fade" id="comment-modal" tabindex="-1">
+                        <div class="modal-dialog modal-md">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title pull-left">
+                                        comment for file
+                                        <strong>
+                                            <span id="comment-file"></span>
+                                        </strong>
+                                    </h5>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row justify-content-md-center">
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="comment-fleid">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-danger" id="delete-comment-button">Delete</button>
+                                    <button type="button" class="btn btn-success" id="save-button">SAVE</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <div class="modal fade" id="resolve-all-file-modal" tabindex="-1">
                         <div class="modal-dialog modal-lg">
@@ -333,8 +363,8 @@
     <!-- TimeLine graph setting -->
     <script src="/js/analysis/TimeLineGraph.js"></script>
 
-    <!-- file table setting -->
-    <script src="/js/analysis/TimeLineGraph.js"></script>
+    <!-- font awesome -->
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
 
 </body>
 </html>
