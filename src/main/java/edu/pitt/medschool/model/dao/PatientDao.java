@@ -126,4 +126,19 @@ public class PatientDao {
         return patientMapper.selectByPrimaryKey(patientId);
     }
 
+    public int insertPatinet(PatientWithBLOBs p){
+        try{
+            patientMapper.insert(p);
+            return 1;
+        }catch (Exception e){
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public Long getTotal(){
+        PatientExample example = new PatientExample();
+        PatientExample.Criteria criteria = example.createCriteria();
+        return patientMapper.countByExample(example);
+    }
 }

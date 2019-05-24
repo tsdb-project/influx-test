@@ -66,13 +66,6 @@ $(document).ready(function () {
             }
             str+="\n";
         }
-        // for (var i = 0; i < $trs.length; i++) {
-        //     var $tds = $trs.eq(i).find("td,th");
-        //     for (var j = 0; j < $tds.length; j++) {
-        //         str += $tds.eq(j).text() + ",";
-        //     }
-        //     str += "\n";
-        // }
 
         var aaaa = "data:text/csv;charset=utf-8,\ufeff" + str;
         var link = document.createElement("a");
