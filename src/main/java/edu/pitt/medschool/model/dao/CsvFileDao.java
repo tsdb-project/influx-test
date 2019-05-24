@@ -77,8 +77,10 @@ public class CsvFileDao {
         return deleteResult;
     }
 
-    public int getTotal(){
-        return csvFileMapper.getTotal();
+    public Long getTotal(){
+        CsvFileExample example = new CsvFileExample();
+        CsvFileExample.Criteria criteria = example.createCriteria();
+        return csvFileMapper.countByExample(example);
     }
 
 }

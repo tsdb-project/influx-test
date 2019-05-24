@@ -25,16 +25,16 @@ public class MilestoneService {
     public int unlock(LocalDateTime date){
         Milestone milestone = new Milestone();
         milestone.setDate(date);
-        milestone.setNumcsv(9380);
-        milestone.setNumpatients(2648);
+        milestone.setNumcsv(csvFileDao.getTotal());
+        milestone.setNumpatients(patientDao.getTotal());
         milestone.setType((byte)0);
         return milestoneDao.insert(milestone);
     }
     public int publish(LocalDateTime date){
         Milestone milestone = new Milestone();
         milestone.setDate(date);
-        milestone.setNumcsv(9380);
-        milestone.setNumpatients(2648);
+        milestone.setNumcsv(csvFileDao.getTotal());
+        milestone.setNumpatients(patientDao.getTotal());
         milestone.setType((byte)1);
         return milestoneDao.insert(milestone);
     }

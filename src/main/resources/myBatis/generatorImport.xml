@@ -39,6 +39,5 @@
         <table tableName="import_progress"></table>
         <table tableName="imported_file"></table>
         <table tableName="import_log"></table>
-        <table tableName="milestone"></table>
     </context>
 </generatorConfiguration>

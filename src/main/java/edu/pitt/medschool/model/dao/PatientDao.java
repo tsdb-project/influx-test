@@ -136,7 +136,9 @@ public class PatientDao {
         }
     }
 
-    public int getTotal(){
-        return patientMapper.getTotal();
+    public Long getTotal(){
+        PatientExample example = new PatientExample();
+        PatientExample.Criteria criteria = example.createCriteria();
+        return patientMapper.countByExample(example);
     }
 }
