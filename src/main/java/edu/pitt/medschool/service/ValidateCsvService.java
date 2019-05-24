@@ -84,7 +84,7 @@ public class ValidateCsvService {
 
             ZoneId zoneId = ZoneId.of("America/New_York");
 
-            validateBean.setSize((int) file.length());
+            validateBean.setSize(file.length());
             validateBean.setPath(dir);
             validateBean.setFilename(file.getName());
             validateBean.setLength(count);

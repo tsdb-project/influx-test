@@ -126,6 +126,9 @@ $(document)
                             'contentType' : "application/json",
                             'dataType' : 'json',
                             'success' : function(data) {
+                                if(data.msg=="fail"){
+                                    window.alert("database has been locked, please unlock it before change");
+                                }
                             },
                             'error' : function() {
                             }
@@ -136,16 +139,16 @@ $(document)
                     // new for validate csv
                     $("#analyzeButton").click(function() {
                         $("#analyzeButton").attr('disabled', '');
-                        
+
                         var data = {
                             'files' : []
                         };
                         $.each($('.file-checkbox:checked'), function() {
                             data['files'].push($(this).val());
                         });
-                        
+
                         var files = data;
-                        
+
                         $.ajax({
                             'url' : "/api/data/validate",
                             'type' : 'post',
@@ -153,11 +156,49 @@ $(document)
                             'contentType' : "application/json",
                             'dataType' : 'json',
                             'success' : function(data) {
-                                window.alert("analyze finished");
+                                if(data.msg=="fail"){
+                                    window.alert("database has been locked, please unlock it before change");
+                                }else {
+                                    window.alert("analyze finished");
+                                }
+
                             },
                             'error' : function() {
                             }
                         });
-                        
+
+                    });
+
+                    // new for import patients
+                    $("#importPatients").click(function() {
+                        $("#importPatients").attr('disabled', '');
+
+                        var data = {
+                            'files' : []
+                        };
+                        $.each($('.file-checkbox:checked'), function() {
+                            data['files'].push($(this).val());
+                        });
+
+                        var files = data;
+
+                        $.ajax({
+                            'url' : "/api/data/importPatients",
+                            'type' : 'post',
+                            'data' : JSON.stringify(files),
+                            'contentType' : "application/json",
+                            'dataType' : 'json',
+                            'success' : function(data) {
+                                if(data.msg=="fail"){
+                                    window.alert("database has been locked, please unlock it before change");
+                                }else{
+                                    window.alert("Successfully imported "+data.num+" patients");
+                                }
+
+                            },
+                            'error' : function() {
+                            }
+                        });
+
                     });
                 });
