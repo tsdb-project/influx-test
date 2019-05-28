@@ -31,18 +31,22 @@
     <div class="content__inner">
       <!-- PUT THE MAIN CONTENT HERE -->
       <header class="content__title">
-        <h1>Milestones</h1>
+        <h1>Version Control</h1>
       </header>
       <div class="card">
         <div class="card-body">
+          <h3 class="card-title">Unconfirmed changes</h3>
           <div class="table-responsive">
             <table id="queryTable" class="table table-bordered">
               <thead class="thead-default">
               <tr>
-                <th>id</th>
-                <th>published date</th>
-                <th>Number of Patients</th>
-                <th>Number of CSV files</th>
+                <th>Id</th>
+                <th>Pid</th>
+                <th>file name</th>
+                <th>start time</th>
+                <th>end time</th>
+                <th>action</th>
+                <th>operations</th>
               </tr>
               </thead>
               <tbody style="cursor: pointer">
@@ -51,45 +55,49 @@
               </tbody>
             </table>
           </div>
-          <div class="row" style="margin-bottom: 10px;">
-            <div class="col-sm-2 col-md-2">
-              <button class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#unlock-modal">Unlock</button>
-              <button class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#publish-modal">publish</button>
-            </div>
-          </div>
+          <!--<div class="row" style="margin-bottom: 10px;">-->
+            <!--<div class="col-sm-2 col-md-2">-->
+              <!--<button class="btn btn-primary btn-sm btn-block" id="addFilter">cancel selected changes</button>-->
+            <!--</div>-->
+            <!--<div class="col-sm-2 col-md-2">-->
+              <!--<button type="button" class="btn btn-success btn-sm btn-block" id="queryFilter">confirm selected changes</button>-->
+            <!--</div>-->
+          <!--</div>-->
         </div>
       </div>
-      <div class="modal fade" id="publish-modal" tabindex="-1" data-backdrop="static">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title pull-left">Please input your password</h5>
-          </div>
-          <div class="modal-body">
-            <div class="row">
-              <div class="col-sm-12 col-md-12">
-                <input type="password" id="password">
-              </div>
-              <div class="col-sm-12 col-md-12" style="height: 15px"></div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" data-dismiss="modal" id="publish">Publish</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-      <div class="modal fade" id="unlock-modal" tabindex="-1" data-backdrop="static">
+      <div class="modal fade" id="confirm-alert-modal" tabindex="-1">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title pull-left">Please input your password</h5>
+              <h5 class="modal-title pull-left">Double check</h5>
             </div>
-            <div class="modal-body">
+            <div class="modal-body">Are you sure to confirm this change? This operation is irrevocable
               <div class="row">
                 <div class="col-sm-12 col-md-12">
+                  <label>please input your password</label>
+                  <input type="password" id="password">
+                </div>
+                <div class="col-sm-12 col-md-12" style="height: 15px"></div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-danger" data-dismiss="modal" id="ConfirmButton">Yes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="cancel-alert-modal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title pull-left">Double check</h5>
+            </div>
+            <div class="modal-body">Are you sure to cancel this change? This operation is irrevocable
+              <div class="row">
+                <div class="col-sm-12 col-md-12">
+                  <label>please input your password</label>
                   <input type="password" id="password2">
                 </div>
                 <div class="col-sm-12 col-md-12" style="height: 15px"></div>
@@ -97,14 +105,53 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-              <button type="button" class="btn btn-primary" data-dismiss="modal" id="unlock">Unlock</button>
+              <button type="button" class="btn btn-danger" data-dismiss="modal" id="CancelButton">Yes</button>
             </div>
           </div>
         </div>
       </div>
-    </div>
-      <div th:insert="fragments/footer :: footer"></div>
 
+      <div class="modal fade" id="confirm-complete-modal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title pull-left">Complete</h5>
+            </div>
+            <div class="modal-body">Successfully confirmed this change.</div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-link" data-dismiss="modal">OK</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="cancel-complete-modal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title pull-left">Complete</h5>
+            </div>
+            <div class="modal-body">Successfully canceled this.</div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-link" data-dismiss="modal">OK</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="wrong-password-modal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title pull-left">Error</h5>
+            </div>
+            <div class="modal-body">Wrong password, please try again.</div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-link" data-dismiss="modal">OK</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div th:insert="fragments/footer :: footer"></div>
+    </div>
   </section>
 </main>
 
@@ -139,6 +186,6 @@
 <!-- App functions and actions -->
 <script src="/js/navigation.js"></script>
 <script src="/js/app.min.js"></script>
-<script src="/js/milestone/milestone.js"></script>
+<script src="/js/versionControl/versionControl.js"></script>
 </body>
 </html>
