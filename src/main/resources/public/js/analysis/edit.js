@@ -81,7 +81,7 @@ $(document).ready(function() {
                 return "<th><button class=\"btn btn-primary btn-sm\" data-toggle=\"modal\" data-target=\"#edit-group-modal\" data-id=\"" +
                     data + "\"><i class=\"zmdi zmdi-edit\"></i> Edit</button> " +
                     "<button class=\"btn btn-danger btn-sm\" data-toggle=\"modal\" data-target=\"#delete-group-modal\" data-id=\"" +
-                    data + "\"><i class=\"zmdi zmdi-close\"></i> Delete</a></th>";
+                    data + "\"><i class=\"zmdi zmdi-close\"></i>Delete</a></th>";
             }
         }]
     });
@@ -416,7 +416,9 @@ $(document).ready(function() {
     });
 
     $("#deleteGroupButton").click(function() {
+
         var id = $(this).attr('data-id');
+        console.log(id);
         $.ajax({
             'url': "/analysis/group",
             'type': 'delete',

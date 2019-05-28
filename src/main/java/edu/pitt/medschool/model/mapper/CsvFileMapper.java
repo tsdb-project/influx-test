@@ -57,7 +57,7 @@ public interface CsvFileMapper {
 			"#{ar,jdbcType=BIT}, #{path,jdbcType=VARCHAR}, #{size,jdbcType=BIGINT}, ",
 			"#{uuid,jdbcType=CHAR}, #{headerTime,jdbcType=TIMESTAMP}, ",
 			"#{deleted,jdbcType=BIT}, #{deleteTime,jdbcType=TIMESTAMP}, ",
-			"#{conflictResolved,jdbcType=BIT}, #{status,jdbcType=BIT}, ", "#{comment,jdbcType=VARCHAR})" })
+			"#{conflictResolved,jdbcType=BIT}, #{status,jdbcType=INTEGER}, ", "#{comment,jdbcType=VARCHAR})" })
 	int insert(CsvFile record);
 
 	/**
@@ -88,7 +88,7 @@ public interface CsvFileMapper {
 			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
 			@Result(column = "delete_time", property = "deleteTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "conflict_resolved", property = "conflictResolved", jdbcType = JdbcType.BIT),
-			@Result(column = "status", property = "status", jdbcType = JdbcType.BIT),
+			@Result(column = "status", property = "status", jdbcType = JdbcType.INTEGER),
 			@Result(column = "comment", property = "comment", jdbcType = JdbcType.VARCHAR) })
 	List<CsvFile> selectByExampleWithRowbounds(CsvFileExample example, RowBounds rowBounds);
 
@@ -113,7 +113,7 @@ public interface CsvFileMapper {
 			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
 			@Result(column = "delete_time", property = "deleteTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "conflict_resolved", property = "conflictResolved", jdbcType = JdbcType.BIT),
-			@Result(column = "status", property = "status", jdbcType = JdbcType.BIT),
+			@Result(column = "status", property = "status", jdbcType = JdbcType.INTEGER),
 			@Result(column = "comment", property = "comment", jdbcType = JdbcType.VARCHAR) })
 	List<CsvFile> selectByExample(CsvFileExample example);
 
@@ -140,7 +140,7 @@ public interface CsvFileMapper {
 			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
 			@Result(column = "delete_time", property = "deleteTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "conflict_resolved", property = "conflictResolved", jdbcType = JdbcType.BIT),
-			@Result(column = "status", property = "status", jdbcType = JdbcType.BIT),
+			@Result(column = "status", property = "status", jdbcType = JdbcType.INTEGER),
 			@Result(column = "comment", property = "comment", jdbcType = JdbcType.VARCHAR) })
 	CsvFile selectByPrimaryKey(Integer id);
 
@@ -176,7 +176,7 @@ public interface CsvFileMapper {
 			"size = #{size,jdbcType=BIGINT},", "uuid = #{uuid,jdbcType=CHAR},",
 			"header_time = #{headerTime,jdbcType=TIMESTAMP},", "deleted = #{deleted,jdbcType=BIT},",
 			"delete_time = #{deleteTime,jdbcType=TIMESTAMP},", "conflict_resolved = #{conflictResolved,jdbcType=BIT},",
-			"status = #{status,jdbcType=BIT},", "comment = #{comment,jdbcType=VARCHAR}",
+			"status = #{status,jdbcType=INTEGER},", "comment = #{comment,jdbcType=VARCHAR}",
 			"where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(CsvFile record);
 
@@ -184,4 +184,9 @@ public interface CsvFileMapper {
             "p.arrestdate as arrestdate,c.length as len, p.arresttime as arresttime, c.uuid as uuid from csv_file c , ",
             "patient p where c.pid = p.id and c.machine= '${machine}' and p.arrestdate is not null" })
     List<TimeLine> getPatientTimeLines(@Param("machine") String machine);
+
+	@Select({"select c.id as id, c.pid as pid, c.filename as filename, c.start_time as start_time, c.end_time as end_time," +
+			"c.status as status from csv_file c where c.status =1 or c.status = 2"})
+	List<CsvFile> getAllChanges();
+
 }

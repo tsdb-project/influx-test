@@ -88,7 +88,7 @@ public class CsvFileSqlProvider {
 			sql.VALUES("conflict_resolved", "#{conflictResolved,jdbcType=BIT}");
 		}
 		if (record.getStatus() != null) {
-			sql.VALUES("status", "#{status,jdbcType=BIT}");
+			sql.VALUES("status", "#{status,jdbcType=INTEGER}");
 		}
 		if (record.getComment() != null) {
 			sql.VALUES("comment", "#{comment,jdbcType=VARCHAR}");
@@ -190,7 +190,7 @@ public class CsvFileSqlProvider {
 			sql.SET("conflict_resolved = #{record.conflictResolved,jdbcType=BIT}");
 		}
 		if (record.getStatus() != null) {
-			sql.SET("status = #{record.status,jdbcType=BIT}");
+			sql.SET("status = #{record.status,jdbcType=INTEGER}");
 		}
 		if (record.getComment() != null) {
 			sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
@@ -222,7 +222,7 @@ public class CsvFileSqlProvider {
 		sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
 		sql.SET("delete_time = #{record.deleteTime,jdbcType=TIMESTAMP}");
 		sql.SET("conflict_resolved = #{record.conflictResolved,jdbcType=BIT}");
-		sql.SET("status = #{record.status,jdbcType=BIT}");
+		sql.SET("status = #{record.status,jdbcType=INTEGER}");
 		sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
 		CsvFileExample example = (CsvFileExample) parameter.get("example");
 		applyWhere(sql, example, true);
@@ -282,7 +282,7 @@ public class CsvFileSqlProvider {
 			sql.SET("conflict_resolved = #{conflictResolved,jdbcType=BIT}");
 		}
 		if (record.getStatus() != null) {
-			sql.SET("status = #{status,jdbcType=BIT}");
+			sql.SET("status = #{status,jdbcType=INTEGER}");
 		}
 		if (record.getComment() != null) {
 			sql.SET("comment = #{comment,jdbcType=VARCHAR}");
