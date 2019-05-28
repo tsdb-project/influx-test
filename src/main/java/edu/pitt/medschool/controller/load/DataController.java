@@ -193,9 +193,9 @@ public class DataController {
     }
 
 
-    @GetMapping(value = "/apis/patient/resolveAllFiles")
+    @RequestMapping(value = "/apis/patient/resolveAllFiles")
     @ResponseBody
-    public RestfulResponse ResolveAllFile(@RequestParam(name = "pid", required = false, defaultValue = "") String patientId) throws Exception{
+    public RestfulResponse resolveAllFile(@RequestParam(name = "pid", required = false, defaultValue = "") String patientId) throws Exception{
         RestfulResponse response = new RestfulResponse(1, "success");
         response.setData(rawDataService.resolveAllFilesByPid(patientId));
         return response;
@@ -203,11 +203,28 @@ public class DataController {
 
     @PostMapping(value = "/apis/patient/resolveFiles")
     @ResponseBody
-    public RestfulResponse ResolveFile(@RequestBody(required = true) CsvFile file) throws Exception{
+    public RestfulResponse resolveFile(@RequestBody(required = true) CsvFile file) throws Exception{
         RestfulResponse response = new RestfulResponse(1, "success");
         response.setData(rawDataService.resolveFileByFile(file));
         return response;
     }
+
+    @PostMapping(value = "/apis/patient/changeComment")
+    @ResponseBody
+    public RestfulResponse changeComment(@RequestBody(required = true) CsvFile file) throws Exception{
+        RestfulResponse response = new RestfulResponse(1, "success");
+        response.setData(rawDataService.changeComment(file));
+        return response;
+    }
+
+    @RequestMapping(value = "/apis/patient/getDeletedFiles")
+    @ResponseBody
+    public RestfulResponse getDeletedFiles(@RequestParam(name = "pid", required = true) String pid) throws Exception{
+        RestfulResponse response = new RestfulResponse(1, "success");
+        response.setData(rawDataService.getDeletedFilesByPid(pid));
+        return response;
+    }
+
 
     @DeleteMapping(value = "/apis/file")
     @ResponseBody

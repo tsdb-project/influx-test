@@ -222,6 +222,17 @@ public class RawDataService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public List<String> getDeletedFilesByPid(String pid) throws Exception {
+        List<String> resolveResult = new ArrayList<>();
+        try {
+            resolveResult = csvFileDao.selectDeletedFilesByPatientId(pid);
+        }catch (Exception e){
+            logger.debug("RETREVING DELETED FILES FAILED!");
+        }
+        return resolveResult;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public int resolveAllFilesByPid(String pid) throws Exception {
         int resolveResult = 0;
         try {
@@ -244,10 +255,26 @@ public class RawDataService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public int changeComment(CsvFile file) throws Exception {
+        int changeCommentResult = 0;
+        try {
+            changeCommentResult = csvFileDao.changeComment(file);
+        }catch (Exception e){
+            logger.debug("CHANGE COMMENT FAILED!");
+        }
+        return changeCommentResult;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public int deletePatientDataByFile(CsvFile file) throws Exception {
         Map<String, String> tags = new HashMap<>();
         tags.put("fileName", file.getFilename().replace(".csv", ""));
-        boolean deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
+
+//        only delete inflexfiles when published
+        boolean deleteInfluxDataResult = true;
+//        boolean deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
+
+
         int deleteResult = 0;
         if (deleteInfluxDataResult) {
             deleteResult = importedFileDao.deletePatientDataByFile(file) * csvFileDao.deletePatientDataByFile(file);

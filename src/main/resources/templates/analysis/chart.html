@@ -107,7 +107,7 @@
                                         <th>Density</th>
                                         <th>Counterpart</th>
                                         <th>File Gap</th>
-                                        <th>File State</th>
+                                        <th>File Status</th>
                                         <th>comment</th>
                                         <th>Manage</th>
                                     </tr>
@@ -217,7 +217,7 @@
                                         <div class="col-sm-4">
                                             <div class="form-group">
                                                 <label>Type in the patient's ID to confirm</label>
-                                                <input type="text" class="form-control" placeholder="eg: PUH-XXXX-XXX" id="pid-confirm">
+                                                <input type="text" class="form-control" placeholder="eg: PUH-XXXX-XXX" id="delete-pid-confirm">
                                                 <i class="form-group__bar"></i>
                                             </div>
                                             <i class="form-group__bar"></i>
@@ -226,7 +226,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                                    <button type="button" class="btn btn-danger" id="delete-button">DELETE</button>
+                                    <button type="button" class="btn btn-danger" id="delete-file-button">DELETE</button>
                                 </div>
                             </div>
                         </div>
@@ -247,15 +247,26 @@
                                     <div class="row justify-content-md-center">
                                         <div class="col-sm-8">
                                             <div class="form-group">
-                                                <input type="text" class="form-control" id="comment-fleid">
+                                                <label>Please type in the new comment</label>
+                                                <input type="text" class="form-control" id="comment-fleid" >
+                                                <i class="form-group__bar"></i>
                                             </div>
+                                            <i class="form-group__bar"></i>
+                                        </div>
+                                        <div class="col-sm-8" id="comment_change_confirm_group">
+                                            <div class="form-group">
+                                                <label>Type in the patient's ID to confirm</label>
+                                                <input type="text" class="form-control" placeholder="eg: PUH-XXXX-XXX" id="comment_change_confirm">
+                                                <i class="form-group__bar"></i>
+                                            </div>
+                                            <i class="form-group__bar"></i>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-link" id="cancel-comment-button" data-dismiss="modal">Cancel</button>
                                     <button type="button" class="btn btn-danger" id="delete-comment-button">Delete</button>
-                                    <button type="button" class="btn btn-success" id="save-button">SAVE</button>
+                                    <button type="button" class="btn btn-success" id="save-comment-button" >SAVE</button>
                                 </div>
                             </div>
                         </div>
@@ -292,23 +303,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table id="queryTable" class="table table-bordered">
-                            <thead class="thead-default">
-                            <tr>
-                                <th>PID</th>
-                                <th>overlap</th>
-                                <th>missing ar</th>
-                                <th>missing noar</th>
-                                <th>wrong file name</th>
-                            </tr>
-                            </thead>
-                            <tbody style="cursor: pointer">
-                            <tr>
-                            </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
@@ -348,6 +342,7 @@
 
     <!-- Vendors: Data tables -->
     <script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.19/dataRender/datetime.js"></script>
     <script src="/vendors/bower_components/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
     <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.print.min.js"></script>
     <script src="/vendors/bower_components/jszip/dist/jszip.min.js"></script>
@@ -361,10 +356,8 @@
     <script src="/js/analysis/chart.js"></script>
 
     <!-- TimeLine graph setting -->
-    <script src="/js/analysis/TimeLineGraph.js"></script>
-
-    <!-- font awesome -->
-    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
+    <!--<script src="/js/analysis/TimeLineGraph.js"></script>-->
+    <script src="/js/analysis/TimeLineGraph.min.js"></script>
 
 </body>
 </html>

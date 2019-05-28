@@ -1,5 +1,21 @@
 $(document).ready(function() {
 
+	// Test get deleted files by patient id
+	// $.ajax({
+	// 	type: "GET",
+	// 	url: "/apis/patient/getDeletedFiles" ,
+	// 	async: false,
+	// 	'data' : {
+	// 		pid : "PUH-2010-061"
+	// 	},
+	// 	'contentType' : "application/json",
+	// 	'dataType' : 'json',
+	// 	success : function(fileList)
+	// 	{
+	// 		console.log(fileList);
+	// 	}
+	// });
+
 	//notify function
 	function notify(from, align, icon, type, animIn, animOut, msg) {
 		$.notify({
@@ -106,8 +122,6 @@ $(document).ready(function() {
 	var myColorScale = d3.scaleOrdinal()
 		.domain(["ar", "noar","problematic"])
 		.range(["#aec7e8", "#98df8a", "#d62728"]);
-		// .domain(["ar", "noar","problematic","wrong file name"])
-		// .range(["#aec7e8", "#98df8a", "#d62728","#9467bd"]);
 
 	// Graph setting
 	TimeLineChart
@@ -139,7 +153,9 @@ $(document).ready(function() {
 							filteredFileData.push(fileData[k])
 						}
 					}
-					if(filteredFileData.length != 0){patientsData.set(currentdata[i].data[j].label, filteredFileData)}
+					if(filteredFileData.length != 0){
+						patientsData.set(currentdata[i].data[j].label, filteredFileData)
+					}
 				}
 			}
 
@@ -162,6 +178,7 @@ $(document).ready(function() {
 			});
 
 			TimeLineChart.data(chartdata);
+
 		})
 		.onLabelClick(function (s1,s2) {
 			if(!(s2 === undefined)){
@@ -175,7 +192,7 @@ $(document).ready(function() {
 				var yearData = [];
 				for (i in currentdata){
 					if (currentdata[i].group == s1){
-						yearData.push(currentdata[i])
+						yearData.push(currentdata[i]);
 					}
 				}
 				TimeLineChart.data(yearData);
@@ -216,12 +233,15 @@ $(document).ready(function() {
 			return
 		}else{
 			$.ajax({
-				type: "GET",
-				url: "/analysis/selecIdByfilter/" + whereCondition.slice(0,-4),
-				async: false,
-				success : function(text)
+				'type': "GET",
+				'url': "/analysis/selecIdByfilter/" + whereCondition.slice(0,-4),
+				'async': false,
+				'success' : function(text)
 				{
 					filteredPatient = text;
+				},'error': function () {
+					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+						'Fetching required patients failed.');
 				}
 			});
 		}
@@ -300,11 +320,6 @@ $(document).ready(function() {
 			}else{
 				fileType = response[r].filetype;
 			}
-
-			// if (! checkSuffix(response[r].filename,response[r].filetype)){
-			// 	fileType = "wrong file name";
-			// }
-
 
 			// store all the information in nested Hash table
 			if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
@@ -387,7 +402,7 @@ $(document).ready(function() {
 				});
 			});
 		}
-		TimeLineChart.data(chartdata)
+		TimeLineChart.data(chartdata);
 	});
 
 
@@ -416,10 +431,6 @@ $(document).ready(function() {
 			}else{
 				fileType = response[r].filetype;
 			}
-
-			// if (! checkSuffix(response[r].filename,response[r].filetype)){
-			// 	fileType = "wrong file name";
-			// }
 
 			// store all the information in nested Hash table
 			if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
@@ -503,7 +514,7 @@ $(document).ready(function() {
 			});
 
 			// reset the data for timeLine chart
-			TimeLineChart.data(chartdata)
+			TimeLineChart.data(chartdata);
 			
 		}else{
 			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
@@ -533,10 +544,6 @@ $(document).ready(function() {
 				}else{
 					fileType = response[r].filetype;
 				}
-
-				// if (! checkSuffix(response[r].filename,response[r].filetype)){
-				// 	fileType = "wrong file name";
-				// }
 
 				// store all the information in nested Hash table
 				if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
@@ -618,7 +625,7 @@ $(document).ready(function() {
 					});
 				});
 			}
-			TimeLineChart.data(chartdata)
+			TimeLineChart.data(chartdata);
 		});
 		
 	};
@@ -627,6 +634,7 @@ $(document).ready(function() {
 		table for detailed patients' files
 	 */
 	var files = [];
+
 	var fileTable = $("#csv-file-table").DataTable(
 		{
 			data : files,
@@ -685,8 +693,15 @@ $(document).ready(function() {
 				}, {
 					data: null,
 					render: function (data, type, row, meta) {
-						return "<button id=\"comment_file_button\" class=\"btn btn-info btn-sm\" data-row=\"" + meta.row
-						+ "\" data-toggle=\"modal\" data-target=\"#comment-modal\" >NOTE</button>";
+						var comment;
+						if(data.csvFile.comment == null){
+							comment = "no comment"
+						}else{
+							comment = data.csvFile.comment;
+						}
+
+						return "<p id=\"comment_content\">" + comment + "</p><button id=\"comment_file_button\" class=\"btn btn-info btn-sm\" data-row=\"" + meta.row
+						+ "\" data-toggle=\"modal\" data-target=\"#comment-modal\" >CHANGE</button>";
 					}
 				}, {
 					data: null,
@@ -721,19 +736,18 @@ $(document).ready(function() {
 							$(td).css('background-color', color)
 						}
 					}
+				}, {
+					targets : [
+						1, 2
+					],
+					render : $.fn.dataTable.render.moment("YYYY-MM-DDTHH:mm:ss", "MM/DD/YYYY HH:mm:ss")
 				},
-				// }, {
-				// 	targets : [
-				// 		1, 2
-				// 	],
-				// 	render : $.fn.dataTable.moment("YYYY-MM-DDTHH:mm:ss", "MM/DD/YYYY HH:mm:ss")
-				// },
 				{
 					targets : 4,
 					createdCell : function(td, cellData, rowData, row, col) {
 						if (cellData > 1 || cellData < 0.8) {
-							var alpha = 1 - cellData > 0 ? 1 - cellData : 1
-							var color = 'rgba(255, 107, 104, ' + alpha + ')'
+							var alpha = 1 - cellData > 0 ? 1 - cellData : 1;
+							var color = 'rgba(255, 107, 104, ' + alpha + ')';
 							$(td).css('background-color', color)
 						}
 					}
@@ -741,7 +755,7 @@ $(document).ready(function() {
 					targets : 5,
 					createdCell : function(td, cellData, rowData, row, col) {
 						if (cellData.counterpart.length != 1) {
-							var color = 'rgba(255, 107, 104, 0.5)'
+							var color = 'rgba(255, 107, 104, 0.5)';
 							$(td).css('background-color', color)
 						}
 					}
@@ -749,7 +763,7 @@ $(document).ready(function() {
 					targets : 6,
 					createdCell : function(td, cellData, rowData, row, col) {
 						if (cellData.startsWith("-") || parseInt(cellData) > 4) {
-							var color = 'rgba(255, 107, 104, 0.5)'
+							var color = 'rgba(255, 107, 104, 0.5)';
 							$(td).css('background-color', color)
 						}
 					}
@@ -857,16 +871,139 @@ $(document).ready(function() {
 		});
 	};
 
+	// current event file
+	var csvFile;
+
 	// under construction: button for comment
 	fileTable.on('click', '#comment_file_button', function(event) {
 		var row = event.target.dataset.row;
-		var csvFile = files[row].csvFile;
+		csvFile = files[row].csvFile;
+
 		$("#comment-file").html(csvFile.filename);
+
+		if(csvFile.comment != null){
+			$("#comment-fleid").val(csvFile.comment);
+		}else{
+			$("#comment-fleid").val("");
+		}
+
+	});
+
+	$("#delete-comment-button").click(function () {
+		if ($("#comment_change_confirm").val() == csvFile.pid) {
+			csvFile.comment = null;
+			$.ajax({
+				'url': "/apis/patient/changeComment",
+				'type': 'POST',
+				'data': JSON.stringify(csvFile),
+				'async': false,
+				'contentType': "application/json",
+				'dataType': 'json',
+				'success': function (data) {
+					$('#comment-modal').modal('hide');
+					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "comment deleted.");
+
+					$.ajax({
+						"url" : "/apis/patient/files",
+						"type" : "GET",
+						'data' : {
+							pid : csvFile.pid
+						},
+						'contentType' : "application/json",
+						'dataType' : 'json',
+						'success' : function(data) {
+							files = data.data;
+							fileTable.clear();
+							//check problematic files
+							for(f in files){
+								if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
+									files[f].problematic = true;
+								}
+								else{
+									files[f].problematic = false;
+								}
+							}
+							fileTable.rows.add(files);
+							fileTable.draw();
+							$("#csv-file-card").show();
+						},
+						'error' : function() {
+						}
+					});
+					$("#comment_change_confirm").val("");
+
+				},
+				'error': function () {
+					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "comment delete failed");
+				}
+			});
+
+		}else{
+			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
+		}
+	});
+
+	$("#save-comment-button").click(function () {
+		if ($("#comment_change_confirm").val() == csvFile.pid) {
+			if ($("#comment-fleid").val() == "") {
+				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "There is no comment added!");
+			} else {
+				csvFile.comment = $("#comment-fleid").val();
+				$.ajax({
+					'url': "/apis/patient/changeComment",
+					'type': 'POST',
+					'data': JSON.stringify(csvFile),
+					'contentType': "application/json",
+					'async': false,
+					'dataType': 'json',
+					'success': function (data) {
+						$('#comment-modal').modal('hide');
+						notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "comment saved.");
+
+						$.ajax({
+							"url" : "/apis/patient/files",
+							"type" : "GET",
+							'data' : {
+								pid : csvFile.pid
+							},
+							'contentType' : "application/json",
+							'dataType' : 'json',
+							'success' : function(data) {
+								files = data.data;
+								fileTable.clear();
+								//check problematic files
+								for(f in files){
+									if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
+										files[f].problematic = true;
+									}
+									else{
+										files[f].problematic = false;
+									}
+								}
+								fileTable.rows.add(files);
+								fileTable.draw();
+								$("#csv-file-card").show();
+							},
+							'error' : function() {
+							}
+						});
+
+						$("#comment_change_confirm").val("");
+
+					},
+					'error': function () {
+						notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "comment save failed");
+					}
+				})
+			}
+		}else{
+			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
+		}
 	});
 
 	fileTable.on('click', '#resolve_file_button', function(event) {
 		var row = event.target.dataset.row;
-		var csvFile = files[row].csvFile;
+		csvFile = files[row].csvFile;
 		$("#resolve-file").html(csvFile.filename);
 
 		var fileInfoHtml = "";
@@ -880,58 +1017,61 @@ $(document).ready(function() {
 
 		$("#resolve-file-info").html(fileInfoHtml);
 
-		$("#resolve-button").click(function() {
-			if ($("#resolve-file-pid-confirm").val() == csvFile.pid) {
-				$.ajax({
-					'url' : "/apis/patient/resolveFiles",
-					'type' : 'POST',
-					'async': false,
-					'data' : JSON.stringify(csvFile),
-					'contentType' : "application/json",
-					'dataType' : 'json',
-					'success' : function(data) {
-						$('#resolve-file-modal').modal('hide');
-						notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "marking Finished.");
-						$.ajax({
-							"url" : "/apis/patient/files",
-							"type" : "GET",
-							'data' : {
-								pid : csvFile.pid
-							},
-							'contentType' : "application/json",
-							'dataType' : 'json',
-							'success' : function(data) {
-								files = data.data;
-								fileTable.clear();
-								//check problematic files
-								for(f in files){
-									if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
-										files[f].problematic = true;
-									}
-									else{
-										files[f].problematic = false;
-									}
+	});
+
+	$("#resolve-button").click(function() {
+		if ($("#resolve-file-pid-confirm").val() == csvFile.pid) {
+			$.ajax({
+				'url' : "/apis/patient/resolveFiles",
+				'type' : 'POST',
+				'async': false,
+				'data' : JSON.stringify(csvFile),
+				'contentType' : "application/json",
+				'dataType' : 'json',
+				'success' : function(data) {
+					$('#resolve-file-modal').modal('hide');
+					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "marking Finished.");
+					$.ajax({
+						"url" : "/apis/patient/files",
+						"type" : "GET",
+						'data' : {
+							pid : csvFile.pid
+						},
+						'contentType' : "application/json",
+						'dataType' : 'json',
+						'success' : function(data) {
+							files = data.data;
+							fileTable.clear();
+							//check problematic files
+							for(f in files){
+								if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
+									files[f].problematic = true;
 								}
-								fileTable.rows.add(files);
-								fileTable.draw();
-								$("#csv-file-card").show();
-							},
-							'error' : function() {
+								else{
+									files[f].problematic = false;
+								}
 							}
-						});
-					},
-					'error' : function() {
-					}
-				});
-			} else {
-				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
-			}
-		});
+							fileTable.rows.add(files);
+							fileTable.draw();
+							$("#csv-file-card").show();
+						},
+						'error' : function() {
+						}
+					});
+				},
+				'error' : function() {
+				}
+			});
+			$("#resolve-file-pid-confirm").val("");
+
+		} else {
+			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
+		}
 	});
 
 	fileTable.on('click', '#cancel_resolved_button', function(event) {
 		var row = event.target.dataset.row;
-		var csvFile = files[row].csvFile;
+		csvFile = files[row].csvFile;
 		$("#cancel-resolved-file").html(csvFile.filename);
 
 		var fileInfoHtml = "";
@@ -945,59 +1085,62 @@ $(document).ready(function() {
 
 		$("#cancel-resolved-file-info").html(fileInfoHtml);
 
-		$("#cancel-resolved-button").click(function() {
-			if ($("#cancel-resolved-pid-confirm").val() == csvFile.pid) {
-				$.ajax({
-					'url' : "/apis/patient/resolveFiles",
-					'type' : 'POST',
-					'async': false,
-					'data' : JSON.stringify(csvFile),
-					'contentType' : "application/json",
-					'dataType' : 'json',
-					'success' : function(data) {
-						$('#cancel-resolved-modal').modal('hide');
-						notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "marking cancelled.");
-						$.ajax({
-							"url" : "/apis/patient/files",
-							"type" : "GET",
-							'data' : {
-								pid : csvFile.pid
-							},
-							'contentType' : "application/json",
-							'dataType' : 'json',
-							'success' : function(data) {
-								files = data.data;
-								fileTable.clear();
-								//check problematic files
-								for(f in files){
-									if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
-										files[f].problematic = true;
-									}
-									else{
-										files[f].problematic = false;
-									}
+	});
+
+	$("#cancel-resolved-button").click(function() {
+		if ($("#cancel-resolved-pid-confirm").val() == csvFile.pid) {
+			$.ajax({
+				'url' : "/apis/patient/resolveFiles",
+				'type' : 'POST',
+				'async': false,
+				'data' : JSON.stringify(csvFile),
+				'contentType' : "application/json",
+				'dataType' : 'json',
+				'success' : function(data) {
+					$('#cancel-resolved-modal').modal('hide');
+					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "marking cancelled.");
+					$.ajax({
+						"url" : "/apis/patient/files",
+						"type" : "GET",
+						'data' : {
+							pid : csvFile.pid
+						},
+						'contentType' : "application/json",
+						'dataType' : 'json',
+						'success' : function(data) {
+							files = data.data;
+							fileTable.clear();
+							//check problematic files
+							for(f in files){
+								if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
+									files[f].problematic = true;
 								}
-								fileTable.rows.add(files);
-								fileTable.draw();
-								$("#csv-file-card").show();
-							},
-							'error' : function() {
+								else{
+									files[f].problematic = false;
+								}
 							}
-						});
-					},
-					'error' : function() {
-					}
-				});
-			} else {
-				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
-			}
-		});
+							fileTable.rows.add(files);
+							fileTable.draw();
+							$("#csv-file-card").show();
+						},
+						'error' : function() {
+						}
+					});
+				},
+				'error' : function() {
+				}
+			});
+
+			$("#cancel-resolved-pid-confirm").val("");
+		} else {
+			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
+		}
 	});
 
 
 	fileTable.on('click', '#delete_file_button', function(event) {
 		var row = event.target.dataset.row;
-		var csvFile = files[row].csvFile;
+		csvFile = files[row].csvFile;
 		$("#delete-file").html(csvFile.filename);
 
 		var fileInfoHtml = "";
@@ -1011,100 +1154,58 @@ $(document).ready(function() {
 
 		$("#file-info").html(fileInfoHtml);
 
-		$("#delete-button").click(function() {
-			if ($("#pid-confirm").val() == csvFile.pid) {
-				notify("top", "center", null, "warning", "animated fadeIn", "animated fadeOut", "Deleting data...");
-				$.ajax({
-					'url' : "/apis/file",
-					'type' : 'DELETE',
-					'data' : JSON.stringify(csvFile),
-					'contentType' : "application/json",
-					'dataType' : 'json',
-					'success' : function(data) {
-						$('#delete-file-modal').modal('hide');
-						notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion complete.");
-						console.log(data);
-						$.ajax({
-							"url" : "/apis/patient/files",
-							"type" : "GET",
-							'data' : {
-								pid : csvFile.pid
-							},
-							'contentType' : "application/json",
-							'dataType' : 'json',
-							'success' : function(data) {
-								files = data.data;
-								fileTable.clear();
-								for(f in files){
-									if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
-										files[f].problematic = true;
-									}
-									else{
-										files[f].problematic = false;
-									}
+	});
+
+	$("#delete-file-button").click(function() {
+		if ($("#delete-pid-confirm").val() == csvFile.pid) {
+			$.ajax({
+				'url' : "/apis/file",
+				'type' : 'DELETE',
+				'data' : JSON.stringify(csvFile),
+				'contentType' : "application/json",
+				'dataType' : 'json',
+				'success' : function(data) {
+					$('#delete-file-modal').modal('hide');
+					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion complete.");
+					console.log(data);
+					$.ajax({
+						"url" : "/apis/patient/files",
+						"type" : "GET",
+						'data' : {
+							pid : csvFile.pid
+						},
+						'contentType' : "application/json",
+						'dataType' : 'json',
+						'success' : function(data) {
+							files = data.data;
+							fileTable.clear();
+							for(f in files){
+								if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
+									files[f].problematic = true;
 								}
-								fileTable.rows.add(files);
-								fileTable.draw();
-								$("#csv-file-card").show();
-								$('html, body').animate({
-									scrollTop : ($("#csv-file-table").offset().top)
-								}, 500);
-							},
-							'error' : function() {
+								else{
+									files[f].problematic = false;
+								}
 							}
-						});
-					},
-					'error' : function() {
-					}
-				});
-			} else {
-				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
-			}
-		});
-	});
+							fileTable.rows.add(files);
+							fileTable.draw();
+							$("#csv-file-card").show();
+							$('html, body').animate({
+								scrollTop : ($("#csv-file-table").offset().top)
+							}, 500);
+						},
+						'error' : function() {
+						}
+					});
+				},
+				'error' : function() {
+				}
+			});
 
-
-	/*
-		draw the table for the problematic patients
-	 */
-	$.fn.dataTable.moment('M/D/YYYY, h:mm:ss a');
-	var table = $('#queryTable').DataTable({
-		data: querydata,
-		columnDefs: [{
-			"targets": [0],
-			"visible": true,
-			"searchable": true
-		}],
-		columns: [{
-			data: 'pid'
-		}, {
-			data:null,
-			render:function (data){
-				return booleanToStr(data.isoverlap);
-			}
-		},{
-			data:'ar_miss'
-		},{
-			data:'noar_miss'
-		},{
-			data:null,
-			render:function (data) {
-				return booleanToStr(data.wrongname);
-			}
-		}],
-		order: [[0, 'desc']],
-	});
-
-	function booleanToStr(flag){
-		return flag ? 'T':' ';
-	}
-
-	$('#queryTable tbody').on('mouseover', 'tr', function () {
-		$(this).attr("style", "background-color:#ffffdd");
-	});
-
-	$('#queryTable tbody').on('mouseout', 'tr', function () {
-		$(this).removeAttr('style');
+			$("#delete-pid-confirm").val("");
+		} else {
+			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
+		}
 	});
 
 	$('#ParientEEG').click(function() {
