@@ -36,6 +36,8 @@ public class DataController {
     ValidateCsvService validateCsvService;
     @Autowired
     RawDataService rawDataService;
+    @Autowired
+    VersionControlService versionControlService;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -215,8 +217,14 @@ public class DataController {
     @DeleteMapping(value = "/apis/file")
     @ResponseBody
     public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) CsvFile file) throws Exception {
-        RestfulResponse response = new RestfulResponse(1, "success");
-        response.setData(rawDataService.deletePatientDataByFile(file));
+        file.setStatus(1);
+        int deleteResult = versionControlService.setLog(file,0) * rawDataService.deletePatientDataByFile(file);
+        RestfulResponse response;
+        if( deleteResult == 0 ){
+            response = new RestfulResponse(1, "success");
+        }else{
+            response = new RestfulResponse(0, "delete failed");
+        }
         return response;
     }
 

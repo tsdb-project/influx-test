@@ -184,7 +184,7 @@ public interface CsvFileMapper {
             "p.arrestdate as arrestdate,c.length as len, p.arresttime as arresttime, c.uuid as uuid from csv_file c , ",
             "patient p where c.pid = p.id and c.machine= '${machine}' and c.status <> 1 and p.arrestdate is not null" })
     List<TimeLine> getPatientTimeLines(@Param("machine") String machine);
-	
+
 	@Select({ "select filename from csv_file where pid = '${patientId}' and status = 1" })
 	@Results({ @Result(column = "filename", property = "filename", jdbcType = JdbcType.VARCHAR) })
 	List<String> selectDeletedFilesByPatientId(@Param("patientId") String patientId);

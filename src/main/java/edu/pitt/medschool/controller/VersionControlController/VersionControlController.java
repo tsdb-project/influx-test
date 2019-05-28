@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,8 +19,11 @@ public class VersionControlController {
     @Autowired
     VersionControlService versionControlService;
     @RequestMapping("versionControl")
-    public String toVersionControl(){
-        return "versionControl/versionControl";
+    public ModelAndView toVersionControl(ModelAndView modelAndView){
+        modelAndView.addObject("nav", "versionControl");
+        modelAndView.addObject("subnav", "");
+        modelAndView.setViewName("versionControl/versionControl");
+        return modelAndView;
     }
 
     @RequestMapping("versionControl/getdata")

@@ -4,9 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.pitt.medschool.model.dto.CsvLog;
-import edu.pitt.medschool.model.mapper.CsvLogMapper;
-import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,19 +51,13 @@ public class CsvFileDao {
         criteria.andPidEqualTo(patientId);
 //        set constrain on machine ID
 //        criteria.andMachineEqualTo(machineId);
-        criteria.andMachineEqualTo("realpsc");
-        criteria.andDeletedEqualTo(false);
+//        criteria.andMachineEqualTo("realpsc");
+//        criteria.andDeletedEqualTo(false);
 
 //        using the different datawarehouse structure
-//        criteria.andStatusNotEqualTo(1);
-
+        criteria.andStatusNotEqualTo(1);
 
         return csvFileMapper.selectByExample(example);
-    }
-
-//    method for select delected files
-    public List<String> selectDeletedFilesByPatientId(String patientId) {
-        return csvFileMapper.selectDeletedFilesByPatientId(patientId);
     }
 
 
@@ -100,7 +91,7 @@ public class CsvFileDao {
         csvFileCriteria.andFilenameEqualTo(file.getFilename());
 //        csvFileCriteria.andMachineEqualTo(machineId);
         csvFileCriteria.andUuidEqualTo(file.getUuid());
-        csvFileCriteria.andDeletedEqualTo(false);
+//        csvFileCriteria.andDeletedEqualTo(false);
 
 
         CsvFile csvFile = new CsvFile();
@@ -129,10 +120,10 @@ public class CsvFileDao {
         CsvFileExample csvFileExample = new CsvFileExample();
         Criteria csvFileCriteria = csvFileExample.createCriteria();
         csvFileCriteria.andPidEqualTo(pid);
-        csvFileCriteria.andDeletedEqualTo(false);
+//        csvFileCriteria.andDeletedEqualTo(false);
 
 //        using the different datawarehouse structure
-//        csvFileCriteria.andStatusNotEqualTo(1);
+        csvFileCriteria.andStatusNotEqualTo(1);
 
         CsvFile csvFile = new CsvFile();
         csvFile.setConflictResolved(true);
@@ -157,28 +148,18 @@ public class CsvFileDao {
         Criteria csvFileCriteria = csvFileExample.createCriteria();
         csvFileCriteria.andPidEqualTo(file.getPid());
         csvFileCriteria.andFilenameEqualTo(file.getFilename());
-        csvFileCriteria.andMachineEqualTo(machineId);
+//        csvFileCriteria.andMachineEqualTo(machineId);
         csvFileCriteria.andUuidEqualTo(file.getUuid());
-        csvFileCriteria.andDeletedEqualTo(false);
+//        csvFileCriteria.andDeletedEqualTo(false);
 
         CsvFile csvFile = new CsvFile();
-        csvFile.setDeleted(true);
-//      csvFile.setStatus(1);
+//        csvFile.setDeleted(true);
+      csvFile.setStatus(1);
 //      csvFile.setUpdateTime(LocalDateTime.now());
         csvFile.setDeleteTime(LocalDateTime.now());
 
-//        save to csv_log
-//        CsvLog csvLog = new CsvLog();
-//        csvLog.setStatus(1);
-//        csvLog.setStatus(0);
-//        csvLog.setFilename(file.getFilename());
-//        csvLog.setStatTime(file.getStartTime());
-//        csvLog.setEndTime(file.getEndTime());
-//        csvLog.setTimestamp(LocalDateTime.now());
-
         int deleteResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
         try {
-//            int deleteResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample)* csvLogMapper.insertSelective(csvLog);
             if (deleteResult == 0) {
                 throw new Exception();
             }
@@ -187,6 +168,11 @@ public class CsvFileDao {
             throw e;
         }
         return deleteResult;
+    }
+
+    //    method for select delected files
+    public List<String> selectDeletedFilesByPatientId(String patientId) {
+        return csvFileMapper.selectDeletedFilesByPatientId(patientId);
     }
 
     public List<CsvFile> getAllchanges(){

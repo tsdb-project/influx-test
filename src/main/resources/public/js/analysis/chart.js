@@ -1167,7 +1167,6 @@ $(document).ready(function() {
 				'success' : function(data) {
 					$('#delete-file-modal').modal('hide');
 					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion complete.");
-					console.log(data);
 					$.ajax({
 						"url" : "/apis/patient/files",
 						"type" : "GET",
@@ -1199,6 +1198,7 @@ $(document).ready(function() {
 					});
 				},
 				'error' : function() {
+					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "delete failed!");
 				}
 			});
 
