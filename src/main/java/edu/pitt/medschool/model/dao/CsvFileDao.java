@@ -189,10 +189,19 @@ public class CsvFileDao {
         return deleteResult;
     }
 
-    public Long getTotal(){
-        CsvFileExample example = new CsvFileExample();
-        CsvFileExample.Criteria criteria = example.createCriteria();
-        return csvFileMapper.countByExample(example);
+    public List<CsvFile> getAllchanges(){
+        return csvFileMapper.getAllChanges();
     }
 
+    public CsvFile getElementByID(Integer id){
+        return csvFileMapper.selectByPrimaryKey(id);
+    }
+
+    public int updateStatus(CsvFile csvFile){
+        return csvFileMapper.updateByPrimaryKey(csvFile);
+    }
+
+    public int deleteRecord(Integer id){
+        return csvFileMapper.deleteByPrimaryKey(id);
+    }
 }

@@ -36,8 +36,6 @@ public class DataController {
     ValidateCsvService validateCsvService;
     @Autowired
     RawDataService rawDataService;
-    @Autowired
-    MilestoneService milestoneService;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -118,9 +116,6 @@ public class DataController {
     @ResponseBody
     public Map<String, Object> importDir(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model) {
         Map<String, Object> map = new HashMap<>();
-        if(milestoneService.checklock()){
-            map.put("msg","fail");
-        }else {
             map.put("msg","success");
             String[] allAR = new String[dir.getFiles().size()];
 
@@ -129,7 +124,6 @@ public class DataController {
             }
 
             importCsvService.AddArrayFiles(allAR);
-        }
 
         return map;
     }
@@ -140,9 +134,6 @@ public class DataController {
     public Map<String, Object> dataValidate(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model)
             throws Exception {
         Map<String, Object> map = new HashMap<>();
-        if(milestoneService.checklock()){
-            map.put("msg","fail");
-        }else {
             map.put("msg","success");
             for (int i = 0; i < dir.getFiles().size(); i++) {
                 CsvFile csvFile = validateCsvService.analyzeCsv(dir.getFiles().get(i));
@@ -150,7 +141,6 @@ public class DataController {
             }
             System.out.println(
                     "***********************************************Analyze finished*****************************************");
-        }
 
         return map;
     }
@@ -162,9 +152,6 @@ public class DataController {
         throws Exception{
         Map<String,Object> map = new HashMap<>();
         int count = 0;
-        if(milestoneService.checklock()){
-            map.put("msg","fail");
-        }else {
             map.put("msg","success");
             for (int i = 0; i<dir.getFiles().size();i++){
                 List<PatientWithBLOBs> patients = patientService.getPatientsFromCsv(dir.getFiles().get(i));
@@ -172,7 +159,6 @@ public class DataController {
             }
             System.out.println("**********************************Import finished**********************************");
             map.put("num",count);
-        }
 
         return map;
     }
