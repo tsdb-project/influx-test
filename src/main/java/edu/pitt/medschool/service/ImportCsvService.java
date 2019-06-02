@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import edu.pitt.medschool.model.dto.CsvFile;
 import org.apache.commons.lang3.StringUtils;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
@@ -86,6 +87,9 @@ public class ImportCsvService {
 
     @Autowired
     private ImportProgressService importProgressService;
+
+    @Autowired
+    private ValidateCsvService validateCsvService;
 
     @Autowired
     private FeatureDao featureDao;
@@ -525,6 +529,9 @@ public class ImportCsvService {
                 iff.setFilelines(((Long) impStr[2]).intValue());
                 iff.setUuid(taskUUID);
                 importedFileDao.insert(iff);
+                // add data to csv_file table
+//                CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath);
+//                validateCsvService.insertCsvFile(csvFile);
             } catch (Exception e) {
                 logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileFullPath,
                         Util.stackTraceErrorToString(e)));
@@ -535,6 +542,7 @@ public class ImportCsvService {
             logSuccessFiles(fileFullPath, thisFileSize, thisFileSize);
             FileLockUtil.release(fileFullPath);
             importFailCounter.remove(fileFullPath);
+
         } else {
             // Import fail
             long procedSize = (long) impStr[1];

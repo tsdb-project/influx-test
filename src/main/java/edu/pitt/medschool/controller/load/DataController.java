@@ -159,6 +159,7 @@ public class DataController {
             for (int i = 0; i<dir.getFiles().size();i++){
                 List<PatientWithBLOBs> patients = patientService.getPatientsFromCsv(dir.getFiles().get(i));
                 count+=patientService.insertPatients(patients);
+
             }
             System.out.println("**********************************Import finished**********************************");
             map.put("num",count);
