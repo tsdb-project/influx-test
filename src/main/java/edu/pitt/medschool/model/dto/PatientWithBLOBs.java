@@ -3294,6 +3294,8 @@ public class PatientWithBLOBs extends Patient {
 						: this.getCaBiomarkerId().equals(other.getCaBiomarkerId()))
 				&& (this.getCoreDatasetComplete() == null ? other.getCoreDatasetComplete() == null
 						: this.getCoreDatasetComplete().equals(other.getCoreDatasetComplete()))
+				&& (this.getComment() == null ? other.getComment() == null
+						: this.getComment().equals(other.getComment()))
 				&& (this.getReferringHospital() == null ? other.getReferringHospital() == null
 						: this.getReferringHospital().equals(other.getReferringHospital()))
 				&& (this.getReferringPhysician() == null ? other.getReferringPhysician() == null
@@ -3588,6 +3590,7 @@ public class PatientWithBLOBs extends Patient {
 		result = prime * result + ((getStudyEnrollmentsA() == null) ? 0 : getStudyEnrollmentsA().hashCode());
 		result = prime * result + ((getCaBiomarkerId() == null) ? 0 : getCaBiomarkerId().hashCode());
 		result = prime * result + ((getCoreDatasetComplete() == null) ? 0 : getCoreDatasetComplete().hashCode());
+		result = prime * result + ((getComment() == null) ? 0 : getComment().hashCode());
 		result = prime * result + ((getReferringHospital() == null) ? 0 : getReferringHospital().hashCode());
 		result = prime * result + ((getReferringPhysician() == null) ? 0 : getReferringPhysician().hashCode());
 		result = prime * result + ((getReferringfollowup() == null) ? 0 : getReferringfollowup().hashCode());

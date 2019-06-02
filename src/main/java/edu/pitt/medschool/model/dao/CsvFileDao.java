@@ -176,7 +176,10 @@ public class CsvFileDao {
     }
 
     public List<CsvFile> getAllchanges(){
-        return csvFileMapper.getAllChanges();
+        CsvFileExample example = new CsvFileExample();
+        Criteria criteria = example.createCriteria();
+        criteria.andStatusGreaterThanOrEqualTo(1);
+        return csvFileMapper.selectByExample(example);
     }
 
     public CsvFile getElementByID(Integer id){

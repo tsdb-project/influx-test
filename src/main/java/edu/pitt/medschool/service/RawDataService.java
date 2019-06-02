@@ -272,7 +272,7 @@ public class RawDataService {
 
 //        only delete inflexfiles when published
         boolean deleteInfluxDataResult = true;
-//        boolean deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
+        deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
 
 
         int deleteResult = 0;

@@ -37,7 +37,7 @@ $(document).ready(
                             + '<button type="button" aria-hidden="true" data-notify="dismiss" class="alert--notify__close">Close</button>' + '</div>'
                 });
             }
-            ;
+
             
             var table = $('#patientTable').DataTable({
                 ajax : {
@@ -78,7 +78,7 @@ $(document).ready(
                 ],
             });
             
-            var files = []
+            var files = [];
             var fileTable = $("#csv-file-table").DataTable(
                     {
                         data : files,
@@ -145,8 +145,8 @@ $(document).ready(
                                     targets : 4,
                                     createdCell : function(td, cellData, rowData, row, col) {
                                         if (cellData > 1 || cellData < 0.8) {
-                                            var alpha = 1 - cellData > 0 ? 1 - cellData : 1
-                                            var color = 'rgba(255, 107, 104, ' + alpha + ')'
+                                            var alpha = 1 - cellData > 0 ? 1 - cellData : 1;
+                                            var color = 'rgba(255, 107, 104, ' + alpha + ')';
                                             $(td).css('background-color', color)
                                         }
                                     }
@@ -154,7 +154,7 @@ $(document).ready(
                                     targets : 5,
                                     createdCell : function(td, cellData, rowData, row, col) {
                                         if (cellData.counterpart.length != 1) {
-                                            var color = 'rgba(255, 107, 104, 0.5)'
+                                            var color = 'rgba(255, 107, 104, 0.5)';
                                             $(td).css('background-color', color)
                                         }
                                     }
@@ -162,7 +162,7 @@ $(document).ready(
                                     targets : 6,
                                     createdCell : function(td, cellData, rowData, row, col) {
                                         if (cellData.startsWith("-") || parseInt(cellData) > 4) {
-                                            var color = 'rgba(255, 107, 104, 0.5)'
+                                            var color = 'rgba(255, 107, 104, 0.5)';
                                             $(td).css('background-color', color)
                                         }
                                     }
@@ -173,7 +173,7 @@ $(document).ready(
             
             table.on('click', 'button', function(event) {
                 $("#card-patient-id").val(event.target.dataset.id);
-                $("#card-patient-id").html(event.target.dataset.id)
+                $("#card-patient-id").html(event.target.dataset.id);
                 $.ajax({
                     "url" : "/apis/patient/files",
                     "type" : "GET",
@@ -183,7 +183,7 @@ $(document).ready(
                     'contentType' : "application/json",
                     'dataType' : 'json',
                     'success' : function(data) {
-                        files = data.data
+                        files = data.data;
                         fileTable.clear();
                         fileTable.rows.add(files);
                         fileTable.draw();

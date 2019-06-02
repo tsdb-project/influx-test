@@ -60,6 +60,9 @@ public class CsvLogSqlProvider {
 		if (record.getEndTime() != null) {
 			sql.VALUES("end_time", "#{endTime,jdbcType=TIMESTAMP}");
 		}
+		if (record.getComment() != null) {
+			sql.VALUES("comment", "#{comment,jdbcType=VARCHAR}");
+		}
 		return sql.toString();
 	}
 
@@ -80,6 +83,7 @@ public class CsvLogSqlProvider {
 		sql.SELECT("filename");
 		sql.SELECT("stat_time");
 		sql.SELECT("end_time");
+		sql.SELECT("comment");
 		sql.FROM("csv_log");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -118,6 +122,9 @@ public class CsvLogSqlProvider {
 		if (record.getEndTime() != null) {
 			sql.SET("end_time = #{record.endTime,jdbcType=TIMESTAMP}");
 		}
+		if (record.getComment() != null) {
+			sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
+		}
 		applyWhere(sql, example, true);
 		return sql.toString();
 	}
@@ -136,6 +143,7 @@ public class CsvLogSqlProvider {
 		sql.SET("filename = #{record.filename,jdbcType=VARCHAR}");
 		sql.SET("stat_time = #{record.statTime,jdbcType=TIMESTAMP}");
 		sql.SET("end_time = #{record.endTime,jdbcType=TIMESTAMP}");
+		sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
 		CsvLogExample example = (CsvLogExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -165,6 +173,9 @@ public class CsvLogSqlProvider {
 		}
 		if (record.getEndTime() != null) {
 			sql.SET("end_time = #{endTime,jdbcType=TIMESTAMP}");
+		}
+		if (record.getComment() != null) {
+			sql.SET("comment = #{comment,jdbcType=VARCHAR}");
 		}
 		sql.WHERE("id = #{id,jdbcType=INTEGER}");
 		return sql.toString();

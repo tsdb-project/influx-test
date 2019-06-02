@@ -126,9 +126,6 @@ $(document)
                             'contentType' : "application/json",
                             'dataType' : 'json',
                             'success' : function(data) {
-                                if(data.msg=="fail"){
-                                    window.alert("database has been locked, please unlock it before change");
-                                }
                             },
                             'error' : function() {
                             }
@@ -156,12 +153,7 @@ $(document)
                             'contentType' : "application/json",
                             'dataType' : 'json',
                             'success' : function(data) {
-                                if(data.msg=="fail"){
-                                    window.alert("database has been locked, please unlock it before change");
-                                }else {
                                     window.alert("analyze finished");
-                                }
-
                             },
                             'error' : function() {
                             }

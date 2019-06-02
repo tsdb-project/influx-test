@@ -34,56 +34,41 @@ public class VersionControlController {
         return response;
     }
 
-    @RequestMapping(value = "versionControl/cancel", method = RequestMethod.POST)
+    @RequestMapping(value = "versionControl/cancelDelete", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> cancelChange(@RequestBody(required = true) Integer id) throws Exception {
         Map<String, Object> map = new HashMap<>();
         CsvFile csvFile = versionControlService.getElementByID(id);
         if(versionControlService.setLog(csvFile,2)!=1){
             map.put("res", new RestfulResponse(0, "cancel failed"));
-        };
-        if(csvFile.getStatus()==1){
+        }else{
             csvFile.setStatus(0);
             if (versionControlService.updateStatus(csvFile) == 1) {
                 map.put("res", new RestfulResponse(1, "success"));
             } else {
                 map.put("res", new RestfulResponse(0, "cancel failed"));
             }
-        }else{
-            if (versionControlService.deleteRecord(id) == 1) {
-                map.put("res", new RestfulResponse(1, "success"));
-            } else {
-                map.put("res", new RestfulResponse(0, "cancel failed"));
-            }
         }
-
-
         return map;
     }
 
-    @RequestMapping(value = "versionControl/confirm",method = RequestMethod.POST)
+    @RequestMapping(value = "versionControl/confirmImport",method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> confirmChange(@RequestBody(required = true) Integer id) throws Exception {
+    public Map<String, Object> confirmChange(@RequestBody(required = true) CsvFile file) throws Exception {
         Map<String, Object> map = new HashMap<>();
-        CsvFile csvFile = versionControlService.getElementByID(id);
+        CsvFile csvFile = file;
         if(versionControlService.setLog(csvFile,1)!=1){
             map.put("res", new RestfulResponse(0, "confirm failed"));
-        };
-        if(csvFile.getStatus()==1){
-            if (versionControlService.deleteRecord(id) == 1) {
-                map.put("res", new RestfulResponse(1, "success"));
-            } else {
-                map.put("res", new RestfulResponse(0, "confirm failed"));
-            }
-        }else{
+            return map;
+        }else {
             csvFile.setStatus(0);
             if (versionControlService.updateStatus(csvFile) == 1) {
                 map.put("res", new RestfulResponse(1, "success"));
             } else {
                 map.put("res", new RestfulResponse(0, "confirm failed"));
             }
-        }
 
+        }
         return map;
     }
 }
