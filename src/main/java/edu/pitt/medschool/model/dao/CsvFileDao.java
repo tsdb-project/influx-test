@@ -144,21 +144,22 @@ public class CsvFileDao {
 
     @Transactional(rollbackFor = Exception.class)
     public int deletePatientDataByFile(CsvFile file) throws Exception {
-        CsvFileExample csvFileExample = new CsvFileExample();
-        Criteria csvFileCriteria = csvFileExample.createCriteria();
-        csvFileCriteria.andPidEqualTo(file.getPid());
-        csvFileCriteria.andFilenameEqualTo(file.getFilename());
-//        csvFileCriteria.andMachineEqualTo(machineId);
-        csvFileCriteria.andUuidEqualTo(file.getUuid());
-//        csvFileCriteria.andDeletedEqualTo(false);
-
-        CsvFile csvFile = new CsvFile();
-//        csvFile.setDeleted(true);
-      csvFile.setStatus(1);
-//      csvFile.setUpdateTime(LocalDateTime.now());
-        csvFile.setDeleteTime(LocalDateTime.now());
-
-        int deleteResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
+//        CsvFileExample csvFileExample = new CsvFileExample();
+//        Criteria csvFileCriteria = csvFileExample.createCriteria();
+//        csvFileCriteria.andPidEqualTo(file.getPid());
+//        csvFileCriteria.andFilenameEqualTo(file.getFilename());
+////        csvFileCriteria.andMachineEqualTo(machineId);
+//        csvFileCriteria.andUuidEqualTo(file.getUuid());
+////        csvFileCriteria.andDeletedEqualTo(false);
+//
+//        CsvFile csvFile = new CsvFile();
+////        csvFile.setDeleted(true);
+//      csvFile.setStatus(1);
+////      csvFile.setUpdateTime(LocalDateTime.now());
+//        csvFile.setDeleteTime(LocalDateTime.now());
+//
+////        int deleteResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
+        int deleteResult = csvFileMapper.deleteByPrimaryKey(file.getId());
         try {
             if (deleteResult == 0) {
                 throw new Exception();
