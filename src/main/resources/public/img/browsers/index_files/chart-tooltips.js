@@ -2,7 +2,7 @@
 
 $(document).ready(function() {
 
-    // Tooltips for Flot Charts
+    // Tooltips for flot Charts
     if ($('.flot-chart')[0]) {
         $('.flot-chart').bind('plothover', function (event, pos, item) {
             if (item) {
