@@ -234,7 +234,7 @@ public class DataController {
         }
         return response;
     }
-    @RequestMapping(value = "/apis/pseudoDeleteFile")
+    @PostMapping(value = "/apis/pseudoDeleteFile")
     @ResponseBody
     public RestfulResponse pseudoDeleteFile(@RequestBody(required = true) CsvFile file) throws Exception {
         file.setStatus(1);
