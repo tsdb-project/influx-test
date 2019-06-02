@@ -1,5 +1,5 @@
 /*
- * Flot plugin to order bars side by side.
+ * flot plugin to order bars side by side.
  *
  * Released under the MIT license by Benjamin BUFFET, 20-Sep-2010.
  * Modifications made by Steven Hall <github.com/emmerich>, 01-May-2013.
