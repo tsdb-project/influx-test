@@ -102,155 +102,156 @@ $(document).ready(function () {
         }
     }
 
+    var csvFile =[];
     fileTable.on('click','button',function (event) {
         var row = event.target.dataset.row;
         var csvFile = files[row];
         console.log(row);
         console.log(csvFile.status);
-        $("#ConfirmButton").click(function(){
-            if($("#password").val()!='admi'){
-                notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "wrong password");
-                return
-            }
-            //confirm delete
-            if(csvFile.status==1){
-                $.ajax({
-                    'url' : "/apis/file",
-                    'type' : 'DELETE',
-                    'data' : JSON.stringify(csvFile),
-                    'contentType' : "application/json",
-                    'dataType' : 'json',
-                    'success' : function(data) {
-                        notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion confirmed.");
-                        console.log(data);
-                        $.ajax({
-                            "url" : "/versionControl/getdata",
-                            "type" : "GET",
-                            'contentType' : "application/json",
-                            'dataType' : 'json',
-                            'success' : function(data) {
-                                files = data.data;
-                                fileTable.clear();
-                                fileTable.rows.add(files);
-                                fileTable.draw();
-                            },
-                            'error' : function() {
-                            }
-                        });
-                    },
-                    'error': function () {
-                        notify("top", "center", null, "failed", "animated fadeIn", "animated fadeOut", "Import confirmed failed.");
-                    }
-                });
-            }
-            // confirm import data
-            if(csvFile.status==2){
-                $.ajax({
-                    'url' : "/versionControl/confirmImport",
-                    'type' : 'POST',
-                    'data' : JSON.stringify(csvFile),
-                    'contentType' : "application/json",
-                    'dataType' : 'json',
-                    'success' : function(data) {
-                        notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Import confirmed.");
-                        console.log(data);
-                        $.ajax({
-                            "url" : "/versionControl/getdata",
-                            "type" : "GET",
-                            'contentType' : "application/json",
-                            'dataType' : 'json',
-                            'success' : function(data) {
-                                files = data.data;
-                                fileTable.clear();
-                                fileTable.rows.add(files);
-                                fileTable.draw();
-                                $("#csv-file-card").show();
-                                $('html, body').animate({
-                                    scrollTop : ($("#csv-file-table").offset().top)
-                                }, 500);
-                            },
-                            'error' : function() {
-                            }
-                        });
-                    },
-                    'error': function () {
-                        notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Import confirmed failed.");
-                    }
-                });
-            }
+    });
 
-        });
-
-        $("#CancelButton").click(function(){
-            if($("#password2").val()!='admi'){
-                notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "wrong password");
-                return
-            }
-            // cancel delete
-            if(csvFile.status==1){
-                $.ajax({
-                        'url': "/versionControl/cancelDelete",
-                        'type': 'post',
-                        'data': JSON.stringify(csvFile.id),
-                        'contentType': "application/json",
-                        'dataType': 'json',
-                        'success': function(data) {
-                            notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion canceled.");
-                            console.log(data);
-                            $.ajax({
-                                "url" : "/versionControl/getdata",
-                                "type" : "GET",
-                                'contentType' : "application/json",
-                                'dataType' : 'json',
-                                'success' : function(data) {
-                                    files = data.data;
-                                    fileTable.clear();
-                                    fileTable.rows.add(files);
-                                    fileTable.draw();
-                                },
-                                'error' : function() {
-                                }
-                            });
+    $("#ConfirmButton").click(function(){
+        if($("#password").val()!='admi'){
+            notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "wrong password");
+            return
+        }
+        //confirm delete
+        if(csvFile.status==1){
+            $.ajax({
+                'url' : "/apis/file",
+                'type' : 'DELETE',
+                'data' : JSON.stringify(csvFile),
+                'contentType' : "application/json",
+                'dataType' : 'json',
+                'success' : function(data) {
+                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion confirmed.");
+                    console.log(data);
+                    $.ajax({
+                        "url" : "/versionControl/getdata",
+                        "type" : "GET",
+                        'contentType' : "application/json",
+                        'dataType' : 'json',
+                        'success' : function(data) {
+                            files = data.data;
+                            fileTable.clear();
+                            fileTable.rows.add(files);
+                            fileTable.draw();
                         },
-                        'error': function() {
-                            notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Deletion canceled failed.");
+                        'error' : function() {
                         }
                     });
-            }
-            // cancel import
-            if(csvFile.status==2){
-                $.ajax({
-                    'url' : "/apis/file",
-                    'type' : 'DELETE',
-                    'data' : JSON.stringify(csvFile),
-                    'contentType' : "application/json",
-                    'dataType' : 'json',
-                    'success' : function(data) {
-                        notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Import canceled.");
-                        console.log(data);
-                        $.ajax({
-                            "url" : "/versionControl/getdata",
-                            "type" : "GET",
-                            'contentType' : "application/json",
-                            'dataType' : 'json',
-                            'success' : function(data) {
-                                files = data.data;
-                                fileTable.clear();
-                                fileTable.rows.add(files);
-                                fileTable.draw();
-                            },
-                            'error' : function() {
-                            }
-                        });
-                    },
-                    'error': function () {
-                        notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Import canceled failed.");
-                    }
-                });
-            }
+                },
+                'error': function () {
+                    notify("top", "center", null, "failed", "animated fadeIn", "animated fadeOut", "Import confirmed failed.");
+                }
+            });
+        }
+        // confirm import data
+        if(csvFile.status==2){
+            $.ajax({
+                'url' : "/versionControl/confirmImport",
+                'type' : 'POST',
+                'data' : JSON.stringify(csvFile),
+                'contentType' : "application/json",
+                'dataType' : 'json',
+                'success' : function(data) {
+                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Import confirmed.");
+                    console.log(data);
+                    $.ajax({
+                        "url" : "/versionControl/getdata",
+                        "type" : "GET",
+                        'contentType' : "application/json",
+                        'dataType' : 'json',
+                        'success' : function(data) {
+                            files = data.data;
+                            fileTable.clear();
+                            fileTable.rows.add(files);
+                            fileTable.draw();
+                            $("#csv-file-card").show();
+                            $('html, body').animate({
+                                scrollTop : ($("#csv-file-table").offset().top)
+                            }, 500);
+                        },
+                        'error' : function() {
+                        }
+                    });
+                },
+                'error': function () {
+                    notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Import confirmed failed.");
+                }
+            });
+        }
 
+    });
 
-        });
+    $("#CancelButton").click(function(){
+        if($("#password2").val()!='admi'){
+            notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "wrong password");
+            return
+        }
+        // cancel delete
+        if(csvFile.status==1){
+            $.ajax({
+                'url': "/versionControl/cancelDelete",
+                'type': 'post',
+                'data': JSON.stringify(csvFile.id),
+                'contentType': "application/json",
+                'dataType': 'json',
+                'success': function(data) {
+                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion canceled.");
+                    console.log(data);
+                    $.ajax({
+                        "url" : "/versionControl/getdata",
+                        "type" : "GET",
+                        'contentType' : "application/json",
+                        'dataType' : 'json',
+                        'success' : function(data) {
+                            files = data.data;
+                            fileTable.clear();
+                            fileTable.rows.add(files);
+                            fileTable.draw();
+                        },
+                        'error' : function() {
+                        }
+                    });
+                },
+                'error': function() {
+                    notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Deletion canceled failed.");
+                }
+            });
+        }
+        // cancel import
+        if(csvFile.status==2){
+            $.ajax({
+                'url' : "/apis/file",
+                'type' : 'DELETE',
+                'data' : JSON.stringify(csvFile),
+                'contentType' : "application/json",
+                'dataType' : 'json',
+                'success' : function(data) {
+                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Import canceled.");
+                    console.log(data);
+                    $.ajax({
+                        "url" : "/versionControl/getdata",
+                        "type" : "GET",
+                        'contentType' : "application/json",
+                        'dataType' : 'json',
+                        'success' : function(data) {
+                            files = data.data;
+                            fileTable.clear();
+                            fileTable.rows.add(files);
+                            fileTable.draw();
+                        },
+                        'error' : function() {
+                        }
+                    });
+                },
+                'error': function () {
+                    notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Import canceled failed.");
+                }
+            });
+        }
+
 
     });
 
