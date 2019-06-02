@@ -189,7 +189,7 @@ public interface CsvFileMapper {
 	@Results({ @Result(column = "filename", property = "filename", jdbcType = JdbcType.VARCHAR) })
 	List<String> selectDeletedFilesByPatientId(@Param("patientId") String patientId);
 
-	@Select({"select c.id as id, c.pid as pid, c.filename as filename, c.start_time as start_time, c.end_time as end_time," +
-			"c.status as status from csv_file c where c.status =1 or c.status = 2"})
-	List<CsvFile> getAllChanges();
+//	@Select({"select c.id as id, c.pid as pid, c.filename as filename, c.start_time as startTime, c.end_time as endTime," +
+//			"c.status as status, c.comment as comment from csv_file c where c.status =1 or c.status = 2"})
+//	List<CsvFile> getAllChanges();
 }

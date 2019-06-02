@@ -131,6 +131,7 @@ public class DataController {
     }
 
     // new part for data validation
+    // do not use, add to import function
     @RequestMapping(value = "api/data/validate")
     @ResponseBody
     public Map<String, Object> dataValidate(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model)
@@ -217,8 +218,12 @@ public class DataController {
     @DeleteMapping(value = "/apis/file")
     @ResponseBody
     public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) CsvFile file) throws Exception {
-        file.setStatus(1);
-        int deleteResult = versionControlService.setLog(file,0) * rawDataService.deletePatientDataByFile(file);
+        int deleteResult=-1;
+        if(file.getStatus()==1){
+            deleteResult = versionControlService.setLog(file,1) * rawDataService.deletePatientDataByFile(file);
+        }else {
+            deleteResult = versionControlService.setLog(file,2) * rawDataService.deletePatientDataByFile(file);
+        }
         RestfulResponse response;
         if( deleteResult == 0 ){
             response = new RestfulResponse(1, "success");

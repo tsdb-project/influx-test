@@ -32,9 +32,6 @@ public class VersionControlService {
         return csvFileDao.updateStatus(csvFile);
     }
 
-    public int deleteRecord(Integer id){
-        return csvFileDao.deleteRecord(id);
-    }
 
     public int setLog(CsvFile csvFile, Integer status){
         CsvLog csvLog = new CsvLog();
@@ -46,6 +43,7 @@ public class VersionControlService {
         csvLog.setFilename(csvFile.getFilename());
         csvLog.setStatTime(csvFile.getStartTime());
         csvLog.setTimestamp(americaDateTime);
+        csvFile.setComment(csvFile.getComment());
         return csvLogDao.addLog(csvLog);
     }
 }

@@ -257,6 +257,9 @@ public class PatientSqlProvider {
 		if (record.getCoreDatasetComplete() != null) {
 			sql.VALUES("core_dataset_complete", "#{coreDatasetComplete,jdbcType=INTEGER}");
 		}
+		if (record.getComment() != null) {
+			sql.VALUES("comment", "#{comment,jdbcType=VARCHAR}");
+		}
 		if (record.getReferringHospital() != null) {
 			sql.VALUES("referring_hospital", "#{referringHospital,jdbcType=LONGVARCHAR}");
 		}
@@ -753,6 +756,7 @@ public class PatientSqlProvider {
 		sql.SELECT("study_enrollments____a");
 		sql.SELECT("ca_biomarker_id");
 		sql.SELECT("core_dataset_complete");
+		sql.SELECT("comment");
 		sql.SELECT("referring_hospital");
 		sql.SELECT("referring_physician");
 		sql.SELECT("referringfollowup");
@@ -980,6 +984,7 @@ public class PatientSqlProvider {
 		sql.SELECT("study_enrollments____a");
 		sql.SELECT("ca_biomarker_id");
 		sql.SELECT("core_dataset_complete");
+		sql.SELECT("comment");
 		sql.FROM("patient");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -1212,6 +1217,9 @@ public class PatientSqlProvider {
 		}
 		if (record.getCoreDatasetComplete() != null) {
 			sql.SET("core_dataset_complete = #{record.coreDatasetComplete,jdbcType=INTEGER}");
+		}
+		if (record.getComment() != null) {
+			sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
 		}
 		if (record.getReferringHospital() != null) {
 			sql.SET("referring_hospital = #{record.referringHospital,jdbcType=LONGVARCHAR}");
@@ -1707,6 +1715,7 @@ public class PatientSqlProvider {
 		sql.SET("study_enrollments____a = #{record.studyEnrollmentsA,jdbcType=INTEGER}");
 		sql.SET("ca_biomarker_id = #{record.caBiomarkerId,jdbcType=INTEGER}");
 		sql.SET("core_dataset_complete = #{record.coreDatasetComplete,jdbcType=INTEGER}");
+		sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
 		sql.SET("referring_hospital = #{record.referringHospital,jdbcType=LONGVARCHAR}");
 		sql.SET("referring_physician = #{record.referringPhysician,jdbcType=LONGVARCHAR}");
 		sql.SET("referringfollowup = #{record.referringfollowup,jdbcType=LONGVARCHAR}");
@@ -1928,6 +1937,7 @@ public class PatientSqlProvider {
 		sql.SET("study_enrollments____a = #{record.studyEnrollmentsA,jdbcType=INTEGER}");
 		sql.SET("ca_biomarker_id = #{record.caBiomarkerId,jdbcType=INTEGER}");
 		sql.SET("core_dataset_complete = #{record.coreDatasetComplete,jdbcType=INTEGER}");
+		sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
 		PatientExample example = (PatientExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -2152,6 +2162,9 @@ public class PatientSqlProvider {
 		}
 		if (record.getCoreDatasetComplete() != null) {
 			sql.SET("core_dataset_complete = #{coreDatasetComplete,jdbcType=INTEGER}");
+		}
+		if (record.getComment() != null) {
+			sql.SET("comment = #{comment,jdbcType=VARCHAR}");
 		}
 		if (record.getReferringHospital() != null) {
 			sql.SET("referring_hospital = #{referringHospital,jdbcType=LONGVARCHAR}");
