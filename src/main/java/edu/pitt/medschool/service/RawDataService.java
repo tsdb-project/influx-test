@@ -289,4 +289,15 @@ public class RawDataService {
         return deleteResult;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public int pseudoDeleteFile(CsvFile file) throws Exception {
+        int deleteResult = 0;
+        try {
+            deleteResult = csvFileDao.pseudoDeleteFile(file);
+        } catch (Exception e) {
+            logger.debug("DELETE DATA FAILED!");
+        }
+        return deleteResult;
+    }
+
 }

@@ -233,6 +233,19 @@ public class DataController {
         }
         return response;
     }
+    @RequestMapping(value = "/apis/pseudoDeleteFile")
+    @ResponseBody
+    public RestfulResponse pseudoDeleteFile(@RequestBody(required = true) CsvFile file) throws Exception {
+        file.setStatus(1);
+        int deleteResult = versionControlService.setLog(file,0) * rawDataService.pseudoDeleteFile(file);
+        RestfulResponse response;
+        if( deleteResult == 0 ){
+            response = new RestfulResponse(1, "success");
+        }else{
+            response = new RestfulResponse(0, "delete failed");
+        }
+        return response;
+    }
 
     @RequestMapping(value = "api/data/progress")
     @ResponseBody

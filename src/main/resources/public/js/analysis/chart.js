@@ -1169,8 +1169,8 @@ $(document).ready(function() {
 
 	$("#delete-file-button").click(function () {
 		$.ajax({
-			'url': "/apis/file",
-			'type': 'DELETE',
+			'url': "/apis/pseudoDeleteFile",
+			'type': 'GET',
 			'data': JSON.stringify(csvFile),
 			'contentType': "application/json",
 			'dataType': 'json',

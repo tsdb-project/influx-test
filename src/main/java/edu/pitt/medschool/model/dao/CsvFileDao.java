@@ -91,7 +91,6 @@ public class CsvFileDao {
         csvFileCriteria.andFilenameEqualTo(file.getFilename());
 //        csvFileCriteria.andMachineEqualTo(machineId);
         csvFileCriteria.andUuidEqualTo(file.getUuid());
-//        csvFileCriteria.andDeletedEqualTo(false);
 
 
         CsvFile csvFile = new CsvFile();
@@ -120,14 +119,12 @@ public class CsvFileDao {
         CsvFileExample csvFileExample = new CsvFileExample();
         Criteria csvFileCriteria = csvFileExample.createCriteria();
         csvFileCriteria.andPidEqualTo(pid);
-//        csvFileCriteria.andDeletedEqualTo(false);
 
-//        using the different datawarehouse structure
+//        using the different data warehouse structure
         csvFileCriteria.andStatusNotEqualTo(1);
 
         CsvFile csvFile = new CsvFile();
         csvFile.setConflictResolved(true);
-
 //        csvFile.setUpdateTime(LocalDateTime.now());
 
         int resolveResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
@@ -150,13 +147,34 @@ public class CsvFileDao {
         csvFileCriteria.andFilenameEqualTo(file.getFilename());
 //        csvFileCriteria.andMachineEqualTo(machineId);
         csvFileCriteria.andUuidEqualTo(file.getUuid());
-//        csvFileCriteria.andDeletedEqualTo(false);
 
         CsvFile csvFile = new CsvFile();
-//        csvFile.setDeleted(true);
-      csvFile.setStatus(1);
+        csvFile.setStatus(1);
+
+        int deleteResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
+        try {
+            if (deleteResult == 0) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            logger.error("No CSV file record available!");
+            throw e;
+        }
+        return deleteResult;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public int pseudoDeleteFile(CsvFile file) throws Exception {
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria csvFileCriteria = csvFileExample.createCriteria();
+        csvFileCriteria.andPidEqualTo(file.getPid());
+        csvFileCriteria.andFilenameEqualTo(file.getFilename());
+//        csvFileCriteria.andMachineEqualTo(machineId);
+        csvFileCriteria.andUuidEqualTo(file.getUuid());
+
+        CsvFile csvFile = new CsvFile();
+        csvFile.setStatus(1);
 //      csvFile.setUpdateTime(LocalDateTime.now());
-        csvFile.setDeleteTime(LocalDateTime.now());
 
         int deleteResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
         try {
