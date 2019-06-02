@@ -1170,7 +1170,7 @@ $(document).ready(function() {
 	$("#delete-file-button").click(function () {
 		$.ajax({
 			'url': "/apis/pseudoDeleteFile",
-			'type': 'GET',
+			'type': 'POST',
 			'data': JSON.stringify(csvFile),
 			'contentType': "application/json",
 			'dataType': 'json',
@@ -1215,7 +1215,7 @@ $(document).ready(function() {
 				notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion complete.");
 			},
 			'error': function () {
-				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "delete failed!");
+				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Delete failed!");
 			}
 		});
 	});
