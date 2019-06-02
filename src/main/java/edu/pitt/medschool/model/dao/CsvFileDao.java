@@ -141,17 +141,18 @@ public class CsvFileDao {
 
     @Transactional(rollbackFor = Exception.class)
     public int deletePatientDataByFile(CsvFile file) throws Exception {
-        CsvFileExample csvFileExample = new CsvFileExample();
-        Criteria csvFileCriteria = csvFileExample.createCriteria();
-        csvFileCriteria.andPidEqualTo(file.getPid());
-        csvFileCriteria.andFilenameEqualTo(file.getFilename());
-//        csvFileCriteria.andMachineEqualTo(machineId);
-        csvFileCriteria.andUuidEqualTo(file.getUuid());
-
-        CsvFile csvFile = new CsvFile();
-        csvFile.setStatus(1);
-
-        int deleteResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
+//        CsvFileExample csvFileExample = new CsvFileExample();
+//        Criteria csvFileCriteria = csvFileExample.createCriteria();
+//        csvFileCriteria.andPidEqualTo(file.getPid());
+//        csvFileCriteria.andFilenameEqualTo(file.getFilename());
+////        csvFileCriteria.andMachineEqualTo(machineId);
+//        csvFileCriteria.andUuidEqualTo(file.getUuid());
+//
+//        CsvFile csvFile = new CsvFile();
+//        csvFile.setStatus(1);
+//
+//        int deleteResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
+        int deleteResult = csvFileMapper.deleteByPrimaryKey(file.getId());
         try {
             if (deleteResult == 0) {
                 throw new Exception();

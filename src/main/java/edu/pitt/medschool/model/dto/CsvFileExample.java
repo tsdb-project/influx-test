@@ -993,123 +993,63 @@ public class CsvFileExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedIsNull() {
-			addCriterion("deleted is null");
+		public Criteria andLastUpdateIsNull() {
+			addCriterion("last_update is null");
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedIsNotNull() {
-			addCriterion("deleted is not null");
+		public Criteria andLastUpdateIsNotNull() {
+			addCriterion("last_update is not null");
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedEqualTo(Boolean value) {
-			addCriterion("deleted =", value, "deleted");
+		public Criteria andLastUpdateEqualTo(LocalDateTime value) {
+			addCriterion("last_update =", value, "lastUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedNotEqualTo(Boolean value) {
-			addCriterion("deleted <>", value, "deleted");
+		public Criteria andLastUpdateNotEqualTo(LocalDateTime value) {
+			addCriterion("last_update <>", value, "lastUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedGreaterThan(Boolean value) {
-			addCriterion("deleted >", value, "deleted");
+		public Criteria andLastUpdateGreaterThan(LocalDateTime value) {
+			addCriterion("last_update >", value, "lastUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedGreaterThanOrEqualTo(Boolean value) {
-			addCriterion("deleted >=", value, "deleted");
+		public Criteria andLastUpdateGreaterThanOrEqualTo(LocalDateTime value) {
+			addCriterion("last_update >=", value, "lastUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedLessThan(Boolean value) {
-			addCriterion("deleted <", value, "deleted");
+		public Criteria andLastUpdateLessThan(LocalDateTime value) {
+			addCriterion("last_update <", value, "lastUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedLessThanOrEqualTo(Boolean value) {
-			addCriterion("deleted <=", value, "deleted");
+		public Criteria andLastUpdateLessThanOrEqualTo(LocalDateTime value) {
+			addCriterion("last_update <=", value, "lastUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedIn(List<Boolean> values) {
-			addCriterion("deleted in", values, "deleted");
+		public Criteria andLastUpdateIn(List<LocalDateTime> values) {
+			addCriterion("last_update in", values, "lastUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedNotIn(List<Boolean> values) {
-			addCriterion("deleted not in", values, "deleted");
+		public Criteria andLastUpdateNotIn(List<LocalDateTime> values) {
+			addCriterion("last_update not in", values, "lastUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedBetween(Boolean value1, Boolean value2) {
-			addCriterion("deleted between", value1, value2, "deleted");
+		public Criteria andLastUpdateBetween(LocalDateTime value1, LocalDateTime value2) {
+			addCriterion("last_update between", value1, value2, "lastUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andDeletedNotBetween(Boolean value1, Boolean value2) {
-			addCriterion("deleted not between", value1, value2, "deleted");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeIsNull() {
-			addCriterion("delete_time is null");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeIsNotNull() {
-			addCriterion("delete_time is not null");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeEqualTo(LocalDateTime value) {
-			addCriterion("delete_time =", value, "deleteTime");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeNotEqualTo(LocalDateTime value) {
-			addCriterion("delete_time <>", value, "deleteTime");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeGreaterThan(LocalDateTime value) {
-			addCriterion("delete_time >", value, "deleteTime");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeGreaterThanOrEqualTo(LocalDateTime value) {
-			addCriterion("delete_time >=", value, "deleteTime");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeLessThan(LocalDateTime value) {
-			addCriterion("delete_time <", value, "deleteTime");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeLessThanOrEqualTo(LocalDateTime value) {
-			addCriterion("delete_time <=", value, "deleteTime");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeIn(List<LocalDateTime> values) {
-			addCriterion("delete_time in", values, "deleteTime");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeNotIn(List<LocalDateTime> values) {
-			addCriterion("delete_time not in", values, "deleteTime");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeBetween(LocalDateTime value1, LocalDateTime value2) {
-			addCriterion("delete_time between", value1, value2, "deleteTime");
-			return (Criteria) this;
-		}
-
-		public Criteria andDeleteTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
-			addCriterion("delete_time not between", value1, value2, "deleteTime");
+		public Criteria andLastUpdateNotBetween(LocalDateTime value1, LocalDateTime value2) {
+			addCriterion("last_update not between", value1, value2, "lastUpdate");
 			return (Criteria) this;
 		}
 
