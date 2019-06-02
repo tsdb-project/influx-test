@@ -107,7 +107,7 @@ $(document).ready(function () {
 
     function getComment(data) {
         if(data===null){
-            return  ""
+            return  " "
         }else{
             return data
         }
