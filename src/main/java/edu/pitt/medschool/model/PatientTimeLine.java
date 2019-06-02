@@ -13,6 +13,8 @@ public class PatientTimeLine {
     private long relativeEndTime;
     private int length;
     private String uuid;
+    private boolean resolved;
+    private String comment;
 
     public String getPid() {
         return pid;
@@ -73,6 +75,14 @@ public class PatientTimeLine {
     public int getLength() { return length;}
 
     public void setLength(int length) { this.length = length; }
+
+    public boolean isResolved() { return resolved; }
+
+    public void setResolved(boolean resolved) { this.resolved = resolved; }
+
+    public String getComment() { return comment; }
+
+    public void setComment(String comment) { this.comment = comment; }
 
     public Integer getDocumentNo(){
         String doc = this.filename;

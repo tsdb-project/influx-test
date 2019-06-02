@@ -58,39 +58,46 @@ $(document).ready(function() {
 		});
 	};
 
+
+	// filtered Patient list
+	var filteredPatient = [];
     
     // Get Json data from csv_file table
-	var response = [];
+	var patientTimelines = [];
+
 	$.ajax({
 		type: "GET",
 		url: "/analysis/getPatientTimelines",
 		async: false,
 		success : function(text)
 		{
-			response = JSON.parse(text);
+			patientTimelines = JSON.parse(text);
 		}
 	});
 
-	var columns = [];
-
-	// filtered Patient list
-	var filteredPatient = [];
 
 	// get list of worry patients
 	var worryPatients = new Set();
-	var querydata = [];
 	$.ajax({
 		type: "GET",
 		url: "/analysis/getWrongPatients",
 		async: false,
 		success : function(text)
 		{
-			querydata = text.data;
 			for(r in text.data){
 				worryPatients.add(text.data[r].pid);
 			}
 		}
 	});
+
+
+	// placeholder for structuredData
+	var structuredData = [];
+
+	// placeholder patient comment
+	var patientComments = new Map();
+
+	var columns = [];
 
 	// check file suffix
 	function checkSuffix(filename) {
@@ -120,96 +127,151 @@ $(document).ready(function() {
 
 	// set different colors to different type of files
 	var myColorScale = d3.scaleOrdinal()
-		.domain(["ar", "noar","problematic"])
-		.range(["#aec7e8", "#98df8a", "#d62728"]);
+		.domain(["normal", "resolved","commented","problematic"])
+		.range(["#98df8a", "#2ca02c", "#1f77b4"," #d62728"]);
 
-	// Graph setting
-	TimeLineChart
-		.width(document.getElementById("Timelinegraph-container").clientWidth  )
-		.maxHeight(720)
-		.maxLineHeight(16)
-		.xTickFormat(function (n){ return +n })
-		.timeFormat('%Q')
-		.zColorScale(myColorScale)
-		.onSegmentClick(function (s) {
-			// window.location.href = '/analysis/medInfo/PUH-' + s.label.split('#')[0];
-			findPatientFiles('PUH-' + s.label.split('#')[0]);
-		})
-		.onLegendClick(function (s) {
-			$(".reset-zoom-btn").click();
-
-			//get current data in the graph
-			var currentdata = TimeLineChart.data();
-			var categoryData = new Map();
-
-			for (i in currentdata) {
-				categoryData.set(currentdata[i].group, new Map());
-				for (j in currentdata[i].data) {
-					var patientsData = categoryData.get(currentdata[i].group);
-					var fileData = currentdata[i].data[j].data;
-					var filteredFileData = [];
-					for (k in fileData) {
-						if (fileData[k].val == s) {
-							filteredFileData.push(fileData[k])
+	function getDataSubset(currentCategory,currentYear){
+		var currenrData = [];
+		for (i in structuredData) {
+			var currentYearData = [];
+			if (structuredData[i].group == currentYear || currentYear == "ALL"){
+				for (j in structuredData[i].data) {
+					var filesData = [];
+					var currentPatientFiles = structuredData[i].data[j].data;
+					for(k in currentPatientFiles){
+						if(currentPatientFiles[k].val == currentCategory || currentCategory == "ALL"){
+							filesData.push(currentPatientFiles[k])
 						}
 					}
-					if(filteredFileData.length != 0){
-						patientsData.set(currentdata[i].data[j].label, filteredFileData)
+					if(filesData.length != 0){
+						currentYearData.push({
+							'label': structuredData[i].data[j].label,
+							'data' : filesData
+						});
 					}
 				}
 			}
-
-			var chartdata = [];
-
-			// convert nested hash into data needed for graph
-			categoryData.forEach(function (patientList, year) {
-				var bardata = [];
-				patientList.forEach(function (val, label) {
-
-					bardata.push({
-						'label': label,
-						'data': val
-					})
+			if(currentYearData.length != 0){
+				currenrData.push({
+					'group': structuredData[i].group,
+					'data' :currentYearData
 				});
-				chartdata.push({
-					'group': year,
-					'data': bardata
-				});
-			});
-
-			TimeLineChart.data(chartdata);
-
-		})
-		.onLabelClick(function (s1,s2) {
-			if(!(s2 === undefined)){
-				// window.location.href = '/analysis/medInfo/PUH-' + s1.split('#')[0];
-				findPatientFiles('PUH-' + s1.split('#')[0]);
-			}else{
-				//get current data in the graph
-				var currentdata = TimeLineChart.data();
-
-				// get the patients in the specific year
-				var yearData = [];
-				for (i in currentdata){
-					if (currentdata[i].group == s1){
-						yearData.push(currentdata[i]);
+			}
+		}
+		return currenrData;
+	}
+	
+	// update file status in the graph
+	function updateFileInGraph( year , pidLabel, updatedFile,action) {
+		for (i in structuredData) {
+			if(structuredData[i].group == year){
+				for (j in structuredData[i].data) {
+					if(structuredData[i].data[j].label == pidLabel){
+						for( k in structuredData[i].data[j].data){
+							if(structuredData[i].data[j].data[k].filename == updatedFile){
+								if(action == 'deleted'){
+									structuredData[i].data[j].data.splice(k,1);
+								}else{
+									structuredData[i].data[j].data[k].val = action;
+								}
+								break
+							}
+						}
+						if(structuredData[i].data[j].data.length == 0){
+							structuredData[i].data.splice(j,1);
+						}
+						break
 					}
 				}
-				TimeLineChart.data(yearData);
 			}
-		})
-		(document.getElementById('Timelinegraph-container'));
+			break
+		}
+		TimeLineChart.data(getDataSubset(currentCategory,currentYear));
+	}
 
-	draw_graph();
+
+	// describe current range of the data
+	var currentCategory = "ALL";
+	var currentYear = "ALL";
+
+	// Graph setting
+	function graph_setting(){
+
+		$('#Timelinegraph-container').empty();
+
+		TimeLineChart
+			.width(document.getElementById("Timelinegraph-container").clientWidth  )
+			.maxHeight(720)
+			.maxLineHeight(16)
+			.xTickFormat(function (n){ return +n })
+			.timeFormat('%Q')
+			.zColorScale(myColorScale)
+			.onSegmentClick(function (s) {findPatientFiles('PUH-' + s.label.split('#')[0]);})
+			.onLegendClick(function (s) {
+
+				if(currentCategory == s){
+					currentCategory = "ALL";
+					graph_setting();
+					TimeLineChart.data(getDataSubset(currentCategory,currentYear));
+				}else{
+					currentCategory = s;
+					var tempData = getDataSubset(currentCategory,currentYear);
+					if(tempData.length == 0){
+						notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+							'No patient currently in that category!');
+					}else{
+						graph_setting();
+						TimeLineChart.data(tempData);
+					}
+				}
+			})
+			.onLabelClick(function (s1,s2) {
+
+				if(!(s2 === undefined)){
+					findPatientFiles('PUH-' + s1.split('#')[0]);
+				} else {
+					graph_setting();
+					currentYear = currentYear == "ALL" ? s1 : "ALL";
+					TimeLineChart.data(getDataSubset(currentCategory,currentYear));
+				}
+			})
+			(document.getElementById('Timelinegraph-container'));
+
+		resetBTNSetting();
+	}
+
+	graph_setting();
+	structuredData  = getStructuredData(patientTimelines);
+	TimeLineChart.data(structuredData);
+
 
     /*
-    *  end of drawing the graph
-    * */
-
-
+    **  end of drawing the graph
+    */
 	fetch_columns_data();
 
-    // fetching filtered data
+
+	/*
+	**  get patient comment function
+ 	*/
+
+	// function: get patient comment from sql
+	// $.ajax({
+	// 	type: "GET",
+	// 	url: "/analysis/getPatientsComments",
+	// 	async: false,
+	// 	success : function(text)
+	// 	{
+	// 		for(r in text.data){
+	// 			patientComments.set(text.data[r].pid,text.data[r].comment);
+	// 		}
+	// 	}
+	// });
+
+
+    /*
+    **  fetching filtered data function
+     */
 	function filtered_data() {
 		filteredPatient = [];
 
@@ -250,7 +312,8 @@ $(document).ready(function() {
 			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
 				'No patient satisfies your conditions.');
 		}else{
-			draw_graph();
+			structuredData = getStructuredData(patientTimelines);
+			TimeLineChart.data(structuredData);
 		}
 
 	}
@@ -303,113 +366,17 @@ $(document).ready(function() {
     // overview button
 	$("#overview").click(function() {
 		filteredPatient = [];
-		var data = new Map();
-
-		for (r in response)
-		{
-			// too many patients problem
-			// if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 ){
-			if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 1296000){
-				continue;
-			}
-
-			// find out if the patient is problematic / mislabeled or not
-			var fileType;
-			if(worryPatients.has(response[r].pid)){
-				fileType = "problematic";
-			}else{
-				fileType = response[r].filetype;
-			}
-
-			// store all the information in nested Hash table
-			if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
-				// left label
-				var year = 	data.get(response[r].pid.split('-')[1]);
-				// right label
-				var labelname = response[r].pid.split('-',3)[1]+'-' + response[r].pid.split('-',3)[2]+ '#' + response[r].filetype;
-
-				// get time for this patient/file
-				var arrestTime = new Date(response[r].arrestTime);
-				var startTime = new Date(arrestTime.getTime() + response[r].relativeStartTime*1000);
-				var endTime = new Date(arrestTime.getTime() + response[r].relativeEndTime*1000);
-
-				// tooltip
-				var tooltip = response[r].filename + '<br>'+ 'arrest Time:' + '<br>' + arrestTime.toLocaleString() + '<br>' +
-					'Start Time:'+ '<br>' + startTime.toLocaleString() + '<br>' +
-					'End Time:'+ '<br>' + endTime.toLocaleString();
-
-				if( year.has(labelname) ){
-					var patient = year.get(labelname);
-					patient.push(
-						{
-							timeRange: [
-								Math.round(response[r].relativeStartTime / 3600),
-								Math.round(response[r].relativeEndTime / 3600)
-							],
-							val: fileType,
-							filename:response[r].filename,
-							labelVal:tooltip
-						}
-					);
-					year.set(labelname,patient)
-				}else{
-					year.set(labelname,[{
-						timeRange: [
-							Math.round(response[r].relativeStartTime / 3600),
-							Math.round(response[r].relativeEndTime / 3600)
-						],
-						val:  fileType,
-						filename:response[r].filename,
-						labelVal:tooltip
-					}
-					])
-				}
-			}else{
-				var firstbar = new Map();
-				var labelname = response[r].pid.split('-',3)[1]+'-' + response[r].pid.split('-',3)[2]+ '#' + response[r].filetype;
-				firstbar.set(labelname,[{
-					timeRange: [
-						Math.round(response[r].relativeStartTime / 3600),
-						Math.round(response[r].relativeEndTime / 3600)
-					],
-					val: fileType,
-					filename:response[r].filename,
-					labelVal:tooltip
-				}
-				]);
-				data.set(response[r].filename.split('.')[0].split('-')[1], firstbar)
-			}
-		}
-
-		// see if there are files Satisfy filter condition and relative end time constrain
-		if(data.size != 0) {
-
-			var chartdata = [];
-
-			// convert nested hash into data needed for graph
-			data.forEach(function (patientList, year) {
-				var bardata = [];
-				patientList.forEach(function (val, label) {
-
-					bardata.push({
-						'label': label,
-						'data': val
-					})
-				});
-				chartdata.push({
-					'group': year,
-					'data': bardata
-				});
-			});
-		}
-		TimeLineChart.data(chartdata);
+		currentYear = "ALL";
+		currentCategory  = "ALL";
+		structuredData = getStructuredData(patientTimelines);
+		TimeLineChart.data(structuredData);
 	});
 
 
 	/*
-	*  assign data to the graph
+	*  assign data for the graph
 	* */
-	function draw_graph() {
+	function getStructuredData(response) {
 
 		var data = new Map();
 
@@ -425,12 +392,12 @@ $(document).ready(function() {
 			}
 
 			// find out if the patient is problematic / mislabeled or not
-			var fileType;
-			if(worryPatients.has(response[r].pid)){
-				fileType = "problematic";
-			}else{
-				fileType = response[r].filetype;
-			}
+			// also ignore those resolved files
+			var fileType = "normal";
+			if(worryPatients.has(response[r].pid)  && response[r].resolved == false){fileType = "problematic"};
+			if(response[r].comment != null || patientComments.has(response[r].pid) ){fileType = "commented"};
+			if(response[r].resolved == true){fileType = "resolved"};
+
 
 			// store all the information in nested Hash table
 			if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
@@ -479,12 +446,24 @@ $(document).ready(function() {
 			}else{
 				var firstbar = new Map();
 				var labelname = response[r].pid.split('-',3)[1]+'-' + response[r].pid.split('-',3)[2]+ '#' + response[r].filetype;
+
+				// get time for this patient/file
+				var arrestTime = new Date(response[r].arrestTime);
+				var startTime = new Date(arrestTime.getTime() + response[r].relativeStartTime*1000);
+				var endTime = new Date(arrestTime.getTime() + response[r].relativeEndTime*1000);
+
+				// tooltip
+				var tooltip = response[r].filename + '<br>'+ 'arrest Time:' + '<br>' + arrestTime.toLocaleString() + '<br>' +
+					'Start Time:'+ '<br>' + startTime.toLocaleString() + '<br>' +
+					'End Time:'+ '<br>' + endTime.toLocaleString();
+
 				firstbar.set(labelname,[{
 					timeRange: [
 						Math.round(response[r].relativeStartTime / 3600),
 						Math.round(response[r].relativeEndTime / 3600)
 					],
 					val:  fileType,
+					filename:response[r].filename,
 					labelVal:tooltip
 				}
 				]);
@@ -512,123 +491,24 @@ $(document).ready(function() {
 					'data' : bardata
 				});
 			});
+			return chartdata;
 
-			// reset the data for timeLine chart
-			TimeLineChart.data(chartdata);
-			
 		}else{
 			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
 				'No patient satisfies your conditions.');
 		}
+	}
 
-		// rewrite the function of reset button
-		// right now it return to the filtered list
+
+	// rewrite the function of reset button
+	// right now it return to the filtered list
+	function resetBTNSetting(){
 		$(".reset-zoom-btn").click(function() {
-			var data = new Map();
-
-			for (r in response)
-			{
-				// filter
-				if(filteredPatient.length != 0 && filteredPatient.indexOf(response[r].pid) == -1){continue;}
-
-				// too many patients problem
-				// if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 ){
-				if(response[r].relativeStartTime < 0 || response[r].relativeEndTime < 0 || response[r].relativeStartTime > 1296000){
-					continue;
-				}
-
-				// find out if the patient is problematic / mislabeled or not
-				var fileType;
-				if(worryPatients.has(response[r].pid)){
-					fileType = "problematic";
-				}else{
-					fileType = response[r].filetype;
-				}
-
-				// store all the information in nested Hash table
-				if ( data.has(response[r].filename.split('.')[0].split('-')[1]) ){
-					// left label
-					var year = 	data.get(response[r].pid.split('-')[1]);
-					// right label
-					var labelname = response[r].pid.split('-',3)[1]+'-' + response[r].pid.split('-',3)[2]+ '#' + response[r].filetype;
-
-					// get time for this patient/file
-					var arrestTime = new Date(response[r].arrestTime);
-					var startTime = new Date(arrestTime.getTime() + response[r].relativeStartTime*1000);
-					var endTime = new Date(arrestTime.getTime() + response[r].relativeEndTime*1000);
-
-					// tooltip
-					var tooltip = response[r].filename + '<br>'+ 'arrest Time:' + '<br>' + arrestTime.toLocaleString() + '<br>' +
-						'Start Time:'+ '<br>' + startTime.toLocaleString() + '<br>' +
-						'End Time:'+ '<br>' + endTime.toLocaleString();
-
-					if( year.has(labelname) ){
-						var patient = year.get(labelname);
-						patient.push(
-							{
-								timeRange: [
-									Math.round(response[r].relativeStartTime / 3600),
-									Math.round(response[r].relativeEndTime / 3600)
-								],
-								val: fileType,
-								filename:response[r].filename,
-								labelVal:tooltip
-							}
-						);
-						year.set(labelname,patient)
-					}else{
-						year.set(labelname,[{
-							timeRange: [
-								Math.round(response[r].relativeStartTime / 3600),
-								Math.round(response[r].relativeEndTime / 3600)
-							],
-							val: fileType,
-							filename:response[r].filename,
-							labelVal:tooltip
-						}
-						])
-					}
-				}else{
-					var firstbar = new Map();
-					var labelname = response[r].pid.split('-',3)[1]+'-' + response[r].pid.split('-',3)[2]+ '#' + response[r].filetype;
-					firstbar.set(labelname,[{
-						timeRange: [
-							Math.round(response[r].relativeStartTime / 3600),
-							Math.round(response[r].relativeEndTime / 3600)
-						],
-						val: fileType,
-						labelVal:tooltip
-					}
-					]);
-					data.set(response[r].filename.split('.')[0].split('-')[1], firstbar)
-				}
-			}
-
-			// see if there are files Satisfy filter condition and relative end time constrain
-			if(data.size != 0) {
-
-				var chartdata = [];
-
-				// convert nested hash into data needed for graph
-				data.forEach(function (patientList, year) {
-					var bardata = [];
-					patientList.forEach(function (val, label) {
-
-						bardata.push({
-							'label': label,
-							'data': val
-						})
-					});
-					chartdata.push({
-						'group': year,
-						'data': bardata
-					});
-				});
-			}
-			TimeLineChart.data(chartdata);
+			currentCategory = "ALL";
+			currentYear = "ALL";
+			TimeLineChart.data(getDataSubset(currentCategory,currentYear));
 		});
-		
-	};
+	}
 
 	/*
 		table for detailed patients' files
@@ -785,65 +665,180 @@ $(document).ready(function() {
 		});
 
 
-	$('#resolve-all-button').on("click",function () {
-		if($("#resolve-all-pid-confirm").val() == $("#resolve-all-pid").val()) {
-			$.ajax({
-				type: "GET",
-				url: "/apis/patient/resolveAllFiles" ,
-				async: false,
-				'data' : {
-					pid : $("#card-patient-id").val()
-				},
-				'contentType' : "application/json",
-				'dataType' : 'json',
-				success : function()
-				{
-					$('#resolve-all-file-modal').modal('hide');
-					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", " marking Finished");
-					$.ajax({
-						"url" : "/apis/patient/files",
-						"type" : "GET",
-						'data' : {
-							pid : $("#card-patient-id").val()
-						},
-						'contentType' : "application/json",
-						'dataType' : 'json',
-						'success' : function(data) {
-							files = data.data;
-							fileTable.clear();
-							//check problematic files
-							for(f in files){
-								if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
-									files[f].problematic = true;
-								}
-								else{
-									files[f].problematic = false;
-								}
-							}
-							fileTable.rows.add(files);
-							fileTable.draw();
-							$("#csv-file-card").show();
-						},
-						'error' : function() {
-						}
-					});
-				}
-			});
-		}else {
-			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
+
+	// patient comment save function
+	$('#save-patient-comment-button').on("click", function () {
+		if ($("#patient-comment-fleid").val() == "") {
+			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "There is no comment added!");
+		}else{
+			$('#patient-comment-modal').modal('hide');
+
+			var currentPid = $("#comment-patient").html();
+			var currentComment = $("#patient-comment-fleid").val();
+			patientComments.set(currentPid,currentComment);
+
+			$("#patientComment").html(": " + currentComment);
+
+			for (f in files) {
+				var fileType = files[f].csvFile.ar? 'ar' : 'noar';
+				var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
+				var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
+				updateFileInGraph(year,labelname,files[f].csvFile.filename,"commented");
+			}
+
+			notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", " patient comment saved");
+
+			// $.ajax({
+			// 	type: "GET",
+			// 	url: "/apis/patient/changePatientComment",
+			// 	async: false,
+			// 	'data': {
+			// 		pid: currentPid,
+			// 		comment: currentComment
+			// 	},
+			// 	'contentType': "application/json",
+			// 	'dataType': 'json',
+			// 	'success': function () {
+			// 		$("#patientComment").val(currentComment);
+			//
+			// 		for (f in files) {
+			// 			var fileType = files[f].csvFile.ar? 'ar' : 'noar';
+			// 			var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
+			// 			var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
+			// 			updateFileInGraph(year,labelname,files[f].csvFile.filename,"comment");
+			// 		}
+			// 	},
+			// 	'error': function () {
+			// 		notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient comment save failed!");
+			// 	}
+			// })
 		}
-	})
+	});
+
+	// patient comment delete function
+	$('#delete-patient-comment-button').on("click", function () {
+		if (! patientComments.has($("#comment-patient").html())) {
+			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "There is no comment for this patient!");
+		}else{
+			$('#patient-comment-modal').modal('hide');
+
+			var currentPid = $("#comment-patient").html();
+			patientComments.delete(currentPid);
+
+			$("#patientComment").empty();
+			$("#patient-comment-fleid").val("");
+
+			for (f in files) {
+
+				var action = "normal";
+				if(worryPatients.has(currentPid)  && files[f].csvFile.conflictResolved == false){action = "problematic"};
+				if(patientComments.has(currentPid)){action = "commented"};
+				if(files[f].csvFile.conflictResolved == true){action = "resolved"};
+
+
+				var fileType = files[f].csvFile.ar? 'ar' : 'noar';
+				var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
+				var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
+				updateFileInGraph(year,labelname,files[f].csvFile.filename,action);
+			}
+
+			notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", " patient comment saved");
+
+			// $.ajax({
+			// 	type: "GET",
+			// 	url: "/apis/patient/deletePatientComment",
+			// 	async: false,
+			// 	'data': {
+			// 		pid: currentPid
+			// 	},
+			// 	'contentType': "application/json",
+			// 	'dataType': 'json',
+			// 	'success': function () {
+			// 		$("#patientComment").val(currentComment);
+			//
+			// 		for (f in files) {
+			// 			var fileType = files[f].csvFile.ar? 'ar' : 'noar';
+			// 			var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
+			// 			var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
+			// 			updateFileInGraph(year,labelname,files[f].csvFile.filename,"comment");
+			// 		}
+			// 	},
+			// 	'error': function () {
+			// 		notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient comment save failed!");
+			// 	}
+			// })
+		}
+	});
+
+
+	$('#resolve-all-button').on("click", function () {
+		$.ajax({
+			'type': "GET",
+			'url': "/apis/patient/resolveAllFiles",
+			'async': false,
+			'data': {
+				pid: $("#resolve-all-pid").val()
+			},
+			'contentType': "application/json",
+			'dataType': 'json',
+			'success': function () {
+				$('#resolve-all-file-modal').modal('hide');
+
+				$.ajax({
+					"url": "/apis/patient/files",
+					"type": "GET",
+					'data': {
+						pid: $("#resolve-all-pid").val()
+					},
+					'contentType': "application/json",
+					'dataType': 'json',
+					'success': function (data) {
+						files = data.data;
+						fileTable.clear();
+						//check problematic files
+						for (f in files) {
+
+							var fileType = files[f].csvFile.ar? 'ar' : 'noar';
+							var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
+							var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
+							updateFileInGraph(year,labelname,files[f].csvFile.filename,"resolved");
+
+							if (!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8) {
+								files[f].problematic = true;
+							} else {
+								files[f].problematic = false;
+							}
+						}
+						fileTable.rows.add(files);
+						fileTable.draw();
+						$("#csv-file-card").show();
+					},
+					'error': function () {
+					}
+				});
+				notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", " Marking finished");
+			},
+			'error': function () {
+				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Marking failed!");
+			}
+		});
+	});
 
 	 function findPatientFiles (pid) {
-		$("#card-patient-id").val(pid);
-		$("#card-patient-id").html(pid);
-		$("#resolve-all-pid").val(pid);
+		$("#card-patient-id").html(pid + '<strong id="patientComment"></strong>');
+		$("#comment-patient").html(pid);
 		$("#resolve-all-pid").html(pid);
+
+		if(patientComments.has(pid)){
+			$("#patientComment").html(": " + patientComments.get(pid));
+			$("#patient-comment-fleid").val(patientComments.get(pid));
+		}
+
 		$.ajax({
 			"url" : "/apis/patient/files",
 			"type" : "GET",
 			'data' : {
-				pid : $("#card-patient-id").val()
+				pid : pid
 			},
 			'contentType' : "application/json",
 			'dataType' : 'json',
@@ -874,7 +869,7 @@ $(document).ready(function() {
 	// current event file
 	var csvFile;
 
-	// under construction: button for comment
+	// button for file comment
 	fileTable.on('click', '#comment_file_button', function(event) {
 		var row = event.target.dataset.row;
 		csvFile = files[row].csvFile;
@@ -890,7 +885,9 @@ $(document).ready(function() {
 	});
 
 	$("#delete-comment-button").click(function () {
-		if ($("#comment_change_confirm").val() == csvFile.pid) {
+		if(csvFile.comment == null){
+			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "This file doesn't have comment!");
+		}else{
 			csvFile.comment = null;
 			$.ajax({
 				'url': "/apis/patient/changeComment",
@@ -901,25 +898,34 @@ $(document).ready(function() {
 				'dataType': 'json',
 				'success': function (data) {
 					$('#comment-modal').modal('hide');
-					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "comment deleted.");
+
+					var action = "normal";
+					if(worryPatients.has(csvFile.pid)  && csvFile.conflictResolved == false){action = "problematic"};
+					if(patientComments.has(response[r].pid)){action = "commented"};
+					if(csvFile.conflictResolved == true){action = "resolved"};
+
+
+					var fileType = csvFile.ar? 'ar' : 'noar';
+					var year = csvFile.filename.split('.')[0].split('-')[1];
+					var labelname = csvFile.pid.split('-',3)[1]+'-' + csvFile.pid.split('-',3)[2]+ '#' + fileType;
+					updateFileInGraph(year,labelname,csvFile.filename,action);
 
 					$.ajax({
-						"url" : "/apis/patient/files",
-						"type" : "GET",
-						'data' : {
-							pid : csvFile.pid
+						"url": "/apis/patient/files",
+						"type": "GET",
+						'data': {
+							pid: csvFile.pid
 						},
-						'contentType' : "application/json",
-						'dataType' : 'json',
-						'success' : function(data) {
+						'contentType': "application/json",
+						'dataType': 'json',
+						'success': function (data) {
 							files = data.data;
 							fileTable.clear();
 							//check problematic files
-							for(f in files){
-								if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
+							for (f in files) {
+								if (!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8) {
 									files[f].problematic = true;
-								}
-								else{
+								} else {
 									files[f].problematic = false;
 								}
 							}
@@ -927,77 +933,74 @@ $(document).ready(function() {
 							fileTable.draw();
 							$("#csv-file-card").show();
 						},
-						'error' : function() {
+						'error': function () {
 						}
 					});
-					$("#comment_change_confirm").val("");
 
+					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Comment deleted.");
 				},
 				'error': function () {
-					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "comment delete failed");
+					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Comment delete failed");
 				}
 			});
-
-		}else{
-			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
 		}
 	});
 
 	$("#save-comment-button").click(function () {
-		if ($("#comment_change_confirm").val() == csvFile.pid) {
-			if ($("#comment-fleid").val() == "") {
-				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "There is no comment added!");
-			} else {
-				csvFile.comment = $("#comment-fleid").val();
-				$.ajax({
-					'url': "/apis/patient/changeComment",
-					'type': 'POST',
-					'data': JSON.stringify(csvFile),
-					'contentType': "application/json",
-					'async': false,
-					'dataType': 'json',
-					'success': function (data) {
-						$('#comment-modal').modal('hide');
-						notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "comment saved.");
+		if ($("#comment-fleid").val() == "") {
+			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "There is no comment added!");
+		} else {
+			var preCommented = csvFile.comment == null? false : true;
+			csvFile.comment = $("#comment-fleid").val();
+			$.ajax({
+				'url': "/apis/patient/changeComment",
+				'type': 'POST',
+				'data': JSON.stringify(csvFile),
+				'contentType': "application/json",
+				'async': false,
+				'dataType': 'json',
+				'success': function (data) {
+					$('#comment-modal').modal('hide');
+					$.ajax({
+						"url": "/apis/patient/files",
+						"type": "GET",
+						'data': {
+							pid: csvFile.pid
+						},
+						'contentType': "application/json",
+						'dataType': 'json',
+						'success': function (data) {
 
-						$.ajax({
-							"url" : "/apis/patient/files",
-							"type" : "GET",
-							'data' : {
-								pid : csvFile.pid
-							},
-							'contentType' : "application/json",
-							'dataType' : 'json',
-							'success' : function(data) {
-								files = data.data;
-								fileTable.clear();
-								//check problematic files
-								for(f in files){
-									if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
-										files[f].problematic = true;
-									}
-									else{
-										files[f].problematic = false;
-									}
-								}
-								fileTable.rows.add(files);
-								fileTable.draw();
-								$("#csv-file-card").show();
-							},
-							'error' : function() {
+							if(! preCommented){
+								var fileType = csvFile.ar? 'ar' : 'noar';
+								var year = csvFile.filename.split('.')[0].split('-')[1];
+								var labelname = csvFile.pid.split('-',3)[1]+'-' + csvFile.pid.split('-',3)[2]+ '#' + fileType;
+								updateFileInGraph(year,labelname,csvFile.filename,"commented");
 							}
-						});
 
-						$("#comment_change_confirm").val("");
-
-					},
-					'error': function () {
-						notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "comment save failed");
-					}
-				})
-			}
-		}else{
-			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
+							files = data.data;
+							fileTable.clear();
+							//check problematic files
+							for (f in files) {
+								if (!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8) {
+									files[f].problematic = true;
+								} else {
+									files[f].problematic = false;
+								}
+							}
+							fileTable.rows.add(files);
+							fileTable.draw();
+							$("#csv-file-card").show();
+						},
+						'error': function () {
+						}
+					});
+					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Comment saved.");
+				},
+				'error': function () {
+					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Comment save failed");
+				}
+			})
 		}
 	});
 
@@ -1019,54 +1022,55 @@ $(document).ready(function() {
 
 	});
 
-	$("#resolve-button").click(function() {
-		if ($("#resolve-file-pid-confirm").val() == csvFile.pid) {
-			$.ajax({
-				'url' : "/apis/patient/resolveFiles",
-				'type' : 'POST',
-				'async': false,
-				'data' : JSON.stringify(csvFile),
-				'contentType' : "application/json",
-				'dataType' : 'json',
-				'success' : function(data) {
-					$('#resolve-file-modal').modal('hide');
-					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "marking Finished.");
-					$.ajax({
-						"url" : "/apis/patient/files",
-						"type" : "GET",
-						'data' : {
-							pid : csvFile.pid
-						},
-						'contentType' : "application/json",
-						'dataType' : 'json',
-						'success' : function(data) {
-							files = data.data;
-							fileTable.clear();
-							//check problematic files
-							for(f in files){
-								if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
-									files[f].problematic = true;
-								}
-								else{
-									files[f].problematic = false;
-								}
-							}
-							fileTable.rows.add(files);
-							fileTable.draw();
-							$("#csv-file-card").show();
-						},
-						'error' : function() {
-						}
-					});
-				},
-				'error' : function() {
-				}
-			});
-			$("#resolve-file-pid-confirm").val("");
+	$("#resolve-button").click(function () {
+		$.ajax({
+			'url': "/apis/patient/resolveFiles",
+			'type': 'POST',
+			'async': false,
+			'data': JSON.stringify(csvFile),
+			'contentType': "application/json",
+			'dataType': 'json',
+			'success': function (data) {
+				$('#resolve-file-modal').modal('hide');
 
-		} else {
-			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
-		}
+				$.ajax({
+					"url": "/apis/patient/files",
+					"type": "GET",
+					'data': {
+						pid: csvFile.pid
+					},
+					'contentType': "application/json",
+					'dataType': 'json',
+					'success': function (data) {
+
+						var fileType = csvFile.ar? 'ar' : 'noar';
+						var year = csvFile.filename.split('.')[0].split('-')[1];
+						var labelname = csvFile.pid.split('-',3)[1]+'-' + csvFile.pid.split('-',3)[2]+ '#' + fileType;
+						updateFileInGraph(year,labelname,csvFile.filename,"resolved");
+
+						files = data.data;
+						fileTable.clear();
+						//check problematic files
+						for (f in files) {
+							if (!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8) {
+								files[f].problematic = true;
+							} else {
+								files[f].problematic = false;
+							}
+						}
+						fileTable.rows.add(files);
+						fileTable.draw();
+						$("#csv-file-card").show();
+					},
+					'error': function () {
+					}
+				});
+				notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Marking finished.");
+			},
+			'error': function () {
+				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Marking failed!");
+			}
+		});
 	});
 
 	fileTable.on('click', '#cancel_resolved_button', function(event) {
@@ -1087,54 +1091,61 @@ $(document).ready(function() {
 
 	});
 
-	$("#cancel-resolved-button").click(function() {
-		if ($("#cancel-resolved-pid-confirm").val() == csvFile.pid) {
-			$.ajax({
-				'url' : "/apis/patient/resolveFiles",
-				'type' : 'POST',
-				'async': false,
-				'data' : JSON.stringify(csvFile),
-				'contentType' : "application/json",
-				'dataType' : 'json',
-				'success' : function(data) {
-					$('#cancel-resolved-modal').modal('hide');
-					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "marking cancelled.");
-					$.ajax({
-						"url" : "/apis/patient/files",
-						"type" : "GET",
-						'data' : {
-							pid : csvFile.pid
-						},
-						'contentType' : "application/json",
-						'dataType' : 'json',
-						'success' : function(data) {
-							files = data.data;
-							fileTable.clear();
-							//check problematic files
-							for(f in files){
-								if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
-									files[f].problematic = true;
-								}
-								else{
-									files[f].problematic = false;
-								}
-							}
-							fileTable.rows.add(files);
-							fileTable.draw();
-							$("#csv-file-card").show();
-						},
-						'error' : function() {
-						}
-					});
-				},
-				'error' : function() {
-				}
-			});
+	$("#cancel-resolved-button").click(function () {
+		$.ajax({
+			'url': "/apis/patient/resolveFiles",
+			'type': 'POST',
+			'async': false,
+			'data': JSON.stringify(csvFile),
+			'contentType': "application/json",
+			'dataType': 'json',
+			'success': function (data) {
+				$('#cancel-resolved-modal').modal('hide');
 
-			$("#cancel-resolved-pid-confirm").val("");
-		} else {
-			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
-		}
+				$.ajax({
+					"url": "/apis/patient/files",
+					"type": "GET",
+					'data': {
+						pid: csvFile.pid
+					},
+					'contentType': "application/json",
+					'dataType': 'json',
+					'success': function (data) {
+
+						var action = "normal";
+						if(worryPatients.has(csvFile.pid)){action = "problematic"};
+						if(response[r].comment != null || patientComments.has(response[r].pid) ){action = "commented"};
+
+
+						var fileType = csvFile.ar? 'ar' : 'noar';
+						var year = csvFile.filename.split('.')[0].split('-')[1];
+						var labelname = csvFile.pid.split('-',3)[1]+'-' + csvFile.pid.split('-',3)[2]+ '#' + fileType;
+						updateFileInGraph(year,labelname,csvFile.filename,action);
+
+
+						files = data.data;
+						fileTable.clear();
+						//check problematic files
+						for (f in files) {
+							if (!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8) {
+								files[f].problematic = true;
+							} else {
+								files[f].problematic = false;
+							}
+						}
+						fileTable.rows.add(files);
+						fileTable.draw();
+						$("#csv-file-card").show();
+					},
+					'error': function () {
+					}
+				});
+				notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Marking cancelled.");
+			},
+			'error': function () {
+				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Marking cancel failed!");
+			}
+		});
 	});
 
 
@@ -1156,60 +1167,61 @@ $(document).ready(function() {
 
 	});
 
-	$("#delete-file-button").click(function() {
-		if ($("#delete-pid-confirm").val() == csvFile.pid) {
-			$.ajax({
-				'url' : "/apis/file",
-				'type' : 'DELETE',
-				'data' : JSON.stringify(csvFile),
-				'contentType' : "application/json",
-				'dataType' : 'json',
-				'success' : function(data) {
-					$('#delete-file-modal').modal('hide');
-					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion complete.");
-					$.ajax({
-						"url" : "/apis/patient/files",
-						"type" : "GET",
-						'data' : {
-							pid : csvFile.pid
-						},
-						'contentType' : "application/json",
-						'dataType' : 'json',
-						'success' : function(data) {
-							files = data.data;
-							fileTable.clear();
-							for(f in files){
-								if(!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8){
-									files[f].problematic = true;
-								}
-								else{
-									files[f].problematic = false;
-								}
-							}
-							fileTable.rows.add(files);
-							fileTable.draw();
-							$("#csv-file-card").show();
-							$('html, body').animate({
-								scrollTop : ($("#csv-file-table").offset().top)
-							}, 500);
-						},
-						'error' : function() {
-						}
-					});
-				},
-				'error' : function() {
-					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "delete failed!");
-				}
-			});
+	$("#delete-file-button").click(function () {
+		$.ajax({
+			'url': "/apis/file",
+			'type': 'DELETE',
+			'data': JSON.stringify(csvFile),
+			'contentType': "application/json",
+			'dataType': 'json',
+			'success': function (data) {
+				$('#delete-file-modal').modal('hide');
 
-			$("#delete-pid-confirm").val("");
-		} else {
-			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient ID validation failed!");
-		}
+				$.ajax({
+					"url": "/apis/patient/files",
+					"type": "GET",
+					'data': {
+						pid: csvFile.pid
+					},
+					'contentType': "application/json",
+					'dataType': 'json',
+					'success': function (data) {
+
+						var fileType = csvFile.ar? 'ar' : 'noar';
+						var year = csvFile.filename.split('.')[0].split('-')[1];
+						var labelname = csvFile.pid.split('-',3)[1]+'-' + csvFile.pid.split('-',3)[2]+ '#' + fileType;
+						updateFileInGraph(year,labelname,csvFile.filename,"deleted");
+
+
+						files = data.data;
+						fileTable.clear();
+						for (f in files) {
+							if (!checkSuffix(files[f].csvFile.filename) || files[f].counterpart.length != 1 || files[f].gap.startsWith("-") || parseInt(files[f].gap) > 4 || files[f].csvFile.density < 0.8) {
+								files[f].problematic = true;
+							} else {
+								files[f].problematic = false;
+							}
+						}
+						fileTable.rows.add(files);
+						fileTable.draw();
+						$("#csv-file-card").show();
+						$('html, body').animate({
+							scrollTop: ($("#csv-file-table").offset().top)
+						}, 500);
+					},
+					'error': function () {
+					}
+				});
+				notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion complete.");
+			},
+			'error': function () {
+				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "delete failed!");
+			}
+		});
 	});
 
 	$('#ParientEEG').click(function() {
-		window.location.href = '/analysis/medInfo/' + $("#card-patient-id").val();
+		window.location.href = '/analysis/medInfo/' + $("#resolve-all-pid").html();
 	});
 
 });

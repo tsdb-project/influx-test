@@ -14,6 +14,14 @@ public class TimeLine {
     private int len;
     private java.sql.Timestamp arresttime;
     private String uuid;
+    private boolean resolved;
+    private String comment;
+
+    public String getPid() {
+        return pid;
+    }
+
+    public void setPid(String pid) { this.pid = pid; }
 
     public String getFilename() {
         return filename;
@@ -71,13 +79,13 @@ public class TimeLine {
         this.uuid = uuid;
     }
 
-    public String getPid() {
-        return pid;
-    }
+    public boolean isResolved() { return resolved; }
 
-    public void setPid(String pid) {
-        this.pid = pid;
-    }
+    public void setResolved(boolean resolved) { this.resolved = resolved; }
+
+    public String getComment() { return comment; }
+
+    public void setComment(String comment) { this.comment = comment; }
 
     public PatientTimeLine toPatientTimeLine() {
         // TODO Auto-generated method stub
@@ -92,6 +100,8 @@ public class TimeLine {
         int len = this.getLen();
         String uuid = this.getUuid();
         String pid = this.getPid();
+        Boolean resolved = this.isResolved();
+        String comment = this.getComment();
        patientTimeLine.setArrestTime(arrestTime);
        patientTimeLine.setPid(pid);
        patientTimeLine.setFilename(filename);
@@ -103,6 +113,8 @@ public class TimeLine {
        patientTimeLine.setFilename(filename);
        patientTimeLine.setArrestTime(arrestTime);
        patientTimeLine.setUuid(uuid);
+       patientTimeLine.setResolved(resolved);
+       patientTimeLine.setComment(comment);
 		return patientTimeLine;
 	}
 }
