@@ -80,7 +80,10 @@ $(document).ready(function () {
                 return getStatus(data.status);
             }
         },{
-            data:'comment'
+            data:null,
+            render:function (data) {
+                return getComment(data.comment);
+            }
         },{
             data :null,
             render : function(data,type,row,meta) {
@@ -99,6 +102,14 @@ $(document).ready(function () {
         }
         if(data==2){
             return "Import"
+        }
+    }
+
+    function getComment(data) {
+        if(data===null){
+            return  ""
+        }else{
+            return data
         }
     }
 
