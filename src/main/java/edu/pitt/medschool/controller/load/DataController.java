@@ -222,6 +222,7 @@ public class DataController {
         int deleteResult=-1;
         if(file.getStatus()==1){
             deleteResult = versionControlService.setLog(file,1) * rawDataService.deletePatientDataByFile(file);
+
         }else {
             deleteResult = versionControlService.setLog(file,2) * rawDataService.deletePatientDataByFile(file);
         }

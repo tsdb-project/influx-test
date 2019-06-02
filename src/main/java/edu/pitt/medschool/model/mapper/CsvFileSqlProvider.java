@@ -78,11 +78,8 @@ public class CsvFileSqlProvider {
 		if (record.getHeaderTime() != null) {
 			sql.VALUES("header_time", "#{headerTime,jdbcType=TIMESTAMP}");
 		}
-		if (record.getDeleted() != null) {
-			sql.VALUES("deleted", "#{deleted,jdbcType=BIT}");
-		}
-		if (record.getDeleteTime() != null) {
-			sql.VALUES("delete_time", "#{deleteTime,jdbcType=TIMESTAMP}");
+		if (record.getLastUpdate() != null) {
+			sql.VALUES("last_update", "#{lastUpdate,jdbcType=TIMESTAMP}");
 		}
 		if (record.getConflictResolved() != null) {
 			sql.VALUES("conflict_resolved", "#{conflictResolved,jdbcType=BIT}");
@@ -119,8 +116,7 @@ public class CsvFileSqlProvider {
 		sql.SELECT("size");
 		sql.SELECT("uuid");
 		sql.SELECT("header_time");
-		sql.SELECT("deleted");
-		sql.SELECT("delete_time");
+		sql.SELECT("last_update");
 		sql.SELECT("conflict_resolved");
 		sql.SELECT("status");
 		sql.SELECT("comment");
@@ -180,11 +176,8 @@ public class CsvFileSqlProvider {
 		if (record.getHeaderTime() != null) {
 			sql.SET("header_time = #{record.headerTime,jdbcType=TIMESTAMP}");
 		}
-		if (record.getDeleted() != null) {
-			sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
-		}
-		if (record.getDeleteTime() != null) {
-			sql.SET("delete_time = #{record.deleteTime,jdbcType=TIMESTAMP}");
+		if (record.getLastUpdate() != null) {
+			sql.SET("last_update = #{record.lastUpdate,jdbcType=TIMESTAMP}");
 		}
 		if (record.getConflictResolved() != null) {
 			sql.SET("conflict_resolved = #{record.conflictResolved,jdbcType=BIT}");
@@ -219,8 +212,7 @@ public class CsvFileSqlProvider {
 		sql.SET("size = #{record.size,jdbcType=BIGINT}");
 		sql.SET("uuid = #{record.uuid,jdbcType=CHAR}");
 		sql.SET("header_time = #{record.headerTime,jdbcType=TIMESTAMP}");
-		sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
-		sql.SET("delete_time = #{record.deleteTime,jdbcType=TIMESTAMP}");
+		sql.SET("last_update = #{record.lastUpdate,jdbcType=TIMESTAMP}");
 		sql.SET("conflict_resolved = #{record.conflictResolved,jdbcType=BIT}");
 		sql.SET("status = #{record.status,jdbcType=INTEGER}");
 		sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
@@ -272,11 +264,8 @@ public class CsvFileSqlProvider {
 		if (record.getHeaderTime() != null) {
 			sql.SET("header_time = #{headerTime,jdbcType=TIMESTAMP}");
 		}
-		if (record.getDeleted() != null) {
-			sql.SET("deleted = #{deleted,jdbcType=BIT}");
-		}
-		if (record.getDeleteTime() != null) {
-			sql.SET("delete_time = #{deleteTime,jdbcType=TIMESTAMP}");
+		if (record.getLastUpdate() != null) {
+			sql.SET("last_update = #{lastUpdate,jdbcType=TIMESTAMP}");
 		}
 		if (record.getConflictResolved() != null) {
 			sql.SET("conflict_resolved = #{conflictResolved,jdbcType=BIT}");
