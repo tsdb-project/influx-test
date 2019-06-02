@@ -235,7 +235,7 @@ $(document).ready(
                                     'contentType' : "application/json",
                                     'dataType' : 'json',
                                     'success' : function(data) {
-                                        files = data.data
+                                        files = data.data;
                                         fileTable.clear();
                                         fileTable.rows.add(files);
                                         fileTable.draw();
