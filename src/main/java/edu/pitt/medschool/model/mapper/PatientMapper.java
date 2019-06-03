@@ -1265,7 +1265,4 @@ public interface PatientMapper {
         @Result(column = "Default", property = "isDefault", jdbcType = JdbcType.VARCHAR),
         @Result(column = "Extra", property = "extra", jdbcType = JdbcType.VARCHAR) })
     List<MysqlColumnBean> getColumnInfo();
-
-    @Update({"update patient","set comment = NULL","where id = '${pid}'"})
-	int deletePatientComment(@Param("pid") String pid);
 }

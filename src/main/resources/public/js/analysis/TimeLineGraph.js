@@ -7386,6 +7386,7 @@
     function attrInterpolate(name, i) {
         return function(t) {
             if(isNaN(i(t)) && this.attributes[0].value == 'series-segment'){
+                // console.log(this);
                 this.setAttribute('hidden', true);
             }else{
                 this.setAttribute(name, i(t));
