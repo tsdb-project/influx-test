@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import edu.pitt.medschool.model.WrongPatientsNum;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -266,33 +265,5 @@ public class ValidateCsvService {
 
         }
         return wrongpatients;
-    }
-
-    public WrongPatientsNum getWrongPatientsNum(List<PatientTimeLine> patientTimeLines){
-        WrongPatientsNum wrongPatientsNum = new WrongPatientsNum();
-        ArrayList<Wrongpatients> wrongpatients = getWrongPatients(patientTimeLines);
-        Integer overlap = 0;
-        Integer missAr=0;
-        Integer missNoar = 0;
-        Integer wrongName = 0;
-        for(Wrongpatients w:wrongpatients){
-            if(w.isWrongname()){
-                wrongName++;
-            }
-            if(!w.getNoar_miss().isEmpty()){
-                missNoar++;
-            }
-            if(!w.getAr_miss().isEmpty()){
-                missAr++;
-            }
-            if(w.isIsoverlap()){
-                overlap++;
-            }
-        }
-        wrongPatientsNum.setMissAr(missAr);
-        wrongPatientsNum.setMissNoar(missNoar);
-        wrongPatientsNum.setOverlap(overlap);
-        wrongPatientsNum.setWrongName(wrongName);
-        return wrongPatientsNum;
     }
 }

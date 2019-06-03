@@ -34,23 +34,6 @@ $(document).ready(function () {
         order: [[0, 'desc']],
     });
 
-    var total =[];
-    $.ajax({
-        "url" : "/analysis/getWrongPatientsNum",
-        "type" : "GET",
-        'contentType' : "application/json",
-        'dataType' : 'json',
-        'success' : function(data) {
-            total = data.data;
-            document.getElementById("overlap").innerText=total.overlap;
-            document.getElementById("missAr").innerText=total.missAr;
-            document.getElementById("missNoar").innerText=total.missNoar;
-            document.getElementById("wrongName").innerText=total.wrongName;
-        },
-        'error' : function() {
-        }
-    });
-
     function booleanToStr(flag){
         return flag ? 'T':' ';
     }

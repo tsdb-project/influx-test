@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 import javax.servlet.http.HttpServletResponse;
 
 
-import edu.pitt.medschool.model.WrongPatientsNum;
 import edu.pitt.medschool.model.Wrongpatients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,16 +161,6 @@ public class AnalysisController {
         RestfulResponse response = new RestfulResponse(1,"success");
         wrongPatients = validateCsvService.getWrongPatients(validateCsvService.getPatientTimeLines("realpsc"));
         response.setData(wrongPatients);
-        return response;
-    }
-
-    @RequestMapping(value = {"analysis/getWrongPatientsNum"},method = RequestMethod.GET)
-    @ResponseBody
-    public RestfulResponse getWrongPatientsNum(Model model){
-        WrongPatientsNum wrongPatientsNum = new WrongPatientsNum();
-        RestfulResponse response = new RestfulResponse(1,"success");
-        wrongPatientsNum = validateCsvService.getWrongPatientsNum(validateCsvService.getPatientTimeLines("realpsc"));
-        response.setData(wrongPatientsNum);
         return response;
     }
 
