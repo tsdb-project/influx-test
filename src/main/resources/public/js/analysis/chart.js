@@ -1,21 +1,5 @@
 $(document).ready(function() {
 
-	// Test get deleted files by patient id
-	// $.ajax({
-	// 	type: "GET",
-	// 	url: "/apis/patient/getDeletedFiles" ,
-	// 	async: false,
-	// 	'data' : {
-	// 		pid : "PUH-2010-061"
-	// 	},
-	// 	'contentType' : "application/json",
-	// 	'dataType' : 'json',
-	// 	success : function(fileList)
-	// 	{
-	// 		console.log(fileList);
-	// 	}
-	// });
-
 	//notify function
 	function notify(from, align, icon, type, animIn, animOut, msg) {
 		$.notify({
@@ -94,8 +78,22 @@ $(document).ready(function() {
 	// placeholder for structuredData
 	var structuredData = [];
 
+	/*
+	**  get patient comment function
+ 	*/
 	// placeholder patient comment
 	var patientComments = new Map();
+	$.ajax({
+		type: "GET",
+		url: "/apis/patient/getAllPatientsComments",
+		async: false,
+		success : function(text)
+		{
+			for(r in text.data){
+				patientComments.set(text.data[r].id,text.data[r].comment);
+			}
+		}
+	});
 
 	var columns = [];
 
@@ -251,24 +249,6 @@ $(document).ready(function() {
 	fetch_columns_data();
 
 
-	/*
-	**  get patient comment function
- 	*/
-
-	// function: get patient comment from sql
-	// $.ajax({
-	// 	type: "GET",
-	// 	url: "/analysis/getPatientsComments",
-	// 	async: false,
-	// 	success : function(text)
-	// 	{
-	// 		for(r in text.data){
-	// 			patientComments.set(text.data[r].pid,text.data[r].comment);
-	// 		}
-	// 	}
-	// });
-
-
     /*
     **  fetching filtered data function
      */
@@ -312,8 +292,11 @@ $(document).ready(function() {
 			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
 				'No patient satisfies your conditions.');
 		}else{
-			structuredData = getStructuredData(patientTimelines);
-			TimeLineChart.data(structuredData);
+			var temp = getStructuredData(patientTimelines);
+			if(temp){
+				structuredData = temp;
+				TimeLineChart.data(structuredData);
+			}
 		}
 
 	}
@@ -495,7 +478,7 @@ $(document).ready(function() {
 
 		}else{
 			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
-				'No patient satisfies your conditions.');
+				'There is no file in first two weeks for those patients.');
 		}
 	}
 
@@ -525,10 +508,10 @@ $(document).ready(function() {
 			responsive : !0,
 			columns : [
 				{
-					data : "csvFile.filename",
+					data : "csvFile.filename"
 				},
 				{
-					data : "csvFile.startTime",
+					data : "csvFile.startTime"
 				},
 				{
 					data : "csvFile.endTime"
@@ -575,7 +558,7 @@ $(document).ready(function() {
 					render: function (data, type, row, meta) {
 						var comment;
 						if(data.csvFile.comment == null){
-							comment = "no comment"
+							comment = ""
 						}else{
 							comment = data.csvFile.comment;
 						}
@@ -675,43 +658,36 @@ $(document).ready(function() {
 
 			var currentPid = $("#comment-patient").html();
 			var currentComment = $("#patient-comment-fleid").val();
-			patientComments.set(currentPid,currentComment);
 
-			$("#patientComment").html(": " + currentComment);
+			$.ajax({
+				type: "GET",
+				url: "/apis/patient/changePatientComment",
+				async: false,
+				'data': {
+					pid: currentPid,
+					comment: currentComment
+				},
+				'contentType': "application/json",
+				'dataType': 'json',
+				'success': function () {
 
-			for (f in files) {
-				var fileType = files[f].csvFile.ar? 'ar' : 'noar';
-				var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
-				var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
-				updateFileInGraph(year,labelname,files[f].csvFile.filename,"commented");
-			}
+					patientComments.set(currentPid,currentComment);
+					$("#patientComment").html(": " + currentComment);
 
-			notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", " patient comment saved");
+					for (f in files) {
+						var fileType = files[f].csvFile.ar? 'ar' : 'noar';
+						var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
+						var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
+						updateFileInGraph(year,labelname,files[f].csvFile.filename,"commented");
+					}
 
-			// $.ajax({
-			// 	type: "GET",
-			// 	url: "/apis/patient/changePatientComment",
-			// 	async: false,
-			// 	'data': {
-			// 		pid: currentPid,
-			// 		comment: currentComment
-			// 	},
-			// 	'contentType': "application/json",
-			// 	'dataType': 'json',
-			// 	'success': function () {
-			// 		$("#patientComment").val(currentComment);
-			//
-			// 		for (f in files) {
-			// 			var fileType = files[f].csvFile.ar? 'ar' : 'noar';
-			// 			var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
-			// 			var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
-			// 			updateFileInGraph(year,labelname,files[f].csvFile.filename,"comment");
-			// 		}
-			// 	},
-			// 	'error': function () {
-			// 		notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient comment save failed!");
-			// 	}
-			// })
+					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", " patient comment saved");
+
+				},
+				'error': function () {
+					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient comment save failed!");
+				}
+			})
 		}
 	});
 
@@ -723,50 +699,41 @@ $(document).ready(function() {
 			$('#patient-comment-modal').modal('hide');
 
 			var currentPid = $("#comment-patient").html();
-			patientComments.delete(currentPid);
 
-			$("#patientComment").empty();
-			$("#patient-comment-fleid").val("");
+			$.ajax({
+				type: "GET",
+				url: "/apis/patient/changePatientComment",
+				async: false,
+				'data': {
+					pid: currentPid
+				},
+				'contentType': "application/json",
+				'dataType': 'json',
+				'success': function () {
+					patientComments.delete(currentPid);
+					$("#patientComment").empty();
+					$("#patient-comment-fleid").val("");
 
-			for (f in files) {
+					for (f in files) {
 
-				var action = "normal";
-				if(worryPatients.has(currentPid)  && files[f].csvFile.conflictResolved == false){action = "problematic"};
-				if(patientComments.has(currentPid)){action = "commented"};
-				if(files[f].csvFile.conflictResolved == true){action = "resolved"};
+						var action = "normal";
+						if(worryPatients.has(currentPid)  && files[f].csvFile.conflictResolved == false){action = "problematic"};
+						if(files[f].csvFile.comment != null){action = "commented"};
+						if(files[f].csvFile.conflictResolved == true){action = "resolved"};
 
 
-				var fileType = files[f].csvFile.ar? 'ar' : 'noar';
-				var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
-				var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
-				updateFileInGraph(year,labelname,files[f].csvFile.filename,action);
-			}
+						var fileType = files[f].csvFile.ar? 'ar' : 'noar';
+						var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
+						var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
+						updateFileInGraph(year,labelname,files[f].csvFile.filename,action);
+					}
 
-			notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", " patient comment saved");
-
-			// $.ajax({
-			// 	type: "GET",
-			// 	url: "/apis/patient/deletePatientComment",
-			// 	async: false,
-			// 	'data': {
-			// 		pid: currentPid
-			// 	},
-			// 	'contentType': "application/json",
-			// 	'dataType': 'json',
-			// 	'success': function () {
-			// 		$("#patientComment").val(currentComment);
-			//
-			// 		for (f in files) {
-			// 			var fileType = files[f].csvFile.ar? 'ar' : 'noar';
-			// 			var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
-			// 			var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
-			// 			updateFileInGraph(year,labelname,files[f].csvFile.filename,"comment");
-			// 		}
-			// 	},
-			// 	'error': function () {
-			// 		notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient comment save failed!");
-			// 	}
-			// })
+					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", " patient comment saved");
+				},
+				'error': function () {
+					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient comment save failed!");
+				}
+			})
 		}
 	});
 
@@ -832,6 +799,8 @@ $(document).ready(function() {
 		if(patientComments.has(pid)){
 			$("#patientComment").html(": " + patientComments.get(pid));
 			$("#patient-comment-fleid").val(patientComments.get(pid));
+		}else {
+			$("#patient-comment-fleid").val("");
 		}
 
 		$.ajax({
@@ -901,7 +870,7 @@ $(document).ready(function() {
 
 					var action = "normal";
 					if(worryPatients.has(csvFile.pid)  && csvFile.conflictResolved == false){action = "problematic"};
-					if(patientComments.has(response[r].pid)){action = "commented"};
+					if(patientComments.has(csvFile.pid)){action = "commented"};
 					if(csvFile.conflictResolved == true){action = "resolved"};
 
 
@@ -1114,7 +1083,7 @@ $(document).ready(function() {
 
 						var action = "normal";
 						if(worryPatients.has(csvFile.pid)){action = "problematic"};
-						if(response[r].comment != null || patientComments.has(response[r].pid) ){action = "commented"};
+						if(csvFile.comment != null || patientComments.has(csvFile.pid) ){action = "commented"};
 
 
 						var fileType = csvFile.ar? 'ar' : 'noar';

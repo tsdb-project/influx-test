@@ -182,10 +182,25 @@ public class DataController {
         return response;
     }
 
+    @RequestMapping(value = "/apis/patient/getAllPatientsComments")
+    @ResponseBody
+    public RestfulResponse getAllPatientsComments() throws Exception{
+        RestfulResponse response = new RestfulResponse(1, "success");
+        response.setData(patientService.getAllPatientsComments());
+        return response;
+    }
+
+    @RequestMapping(value = "/apis/patient/changePatientComment")
+    @ResponseBody
+    public RestfulResponse changePatientComment(@RequestParam(name = "pid") String patientId,@RequestParam(name = "comment", required = false,defaultValue = "") String comment) throws Exception{
+        RestfulResponse response = new RestfulResponse(1, "success");
+        response.setData(patientService.changePatientComment(patientId,comment));
+        return response;
+    }
 
     @RequestMapping(value = "/apis/patient/resolveAllFiles")
     @ResponseBody
-    public RestfulResponse resolveAllFile(@RequestParam(name = "pid", required = false, defaultValue = "") String patientId) throws Exception{
+    public RestfulResponse resolveAllFile(@RequestParam(name = "pid", required = true) String patientId) throws Exception{
         RestfulResponse response = new RestfulResponse(1, "success");
         response.setData(rawDataService.resolveAllFilesByPid(patientId));
         return response;
@@ -234,6 +249,7 @@ public class DataController {
         }
         return response;
     }
+
     @PostMapping(value = "/apis/pseudoDeleteFile")
     @ResponseBody
     public RestfulResponse pseudoDeleteFile(@RequestBody(required = true) CsvFile file) throws Exception {
