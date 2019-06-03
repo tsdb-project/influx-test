@@ -530,8 +530,8 @@ public class ImportCsvService {
                 iff.setUuid(taskUUID);
                 importedFileDao.insert(iff);
                 // add data to csv_file table
-//                CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath);
-//                validateCsvService.insertCsvFile(csvFile);
+                CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath);
+                validateCsvService.insertCsvFile(csvFile);
             } catch (Exception e) {
                 logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileFullPath,
                         Util.stackTraceErrorToString(e)));
