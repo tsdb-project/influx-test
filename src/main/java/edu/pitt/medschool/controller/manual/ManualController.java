@@ -13,16 +13,8 @@ public class ManualController {
     @RequestMapping("manual")
     public ModelAndView index(ModelAndView modelAndView) {
         modelAndView.addObject("nav", "manual");
-        modelAndView.addObject("subnav", "manualIndex");
+        modelAndView.addObject("subnav", "");
         modelAndView.setViewName("manual/manual");
-        return modelAndView;
-    }
-
-    @RequestMapping("manual/EEGDataCodebook")
-    public ModelAndView EEGDataCodebook(ModelAndView modelAndView) {
-        modelAndView.addObject("nav", "manual");
-        modelAndView.addObject("subnav", "EEGDataCodebook");
-        modelAndView.setViewName("manual/EEGDataCodebook");
         return modelAndView;
     }
 }

@@ -33,25 +33,6 @@ public class PatientDao {
         return patientMapper.selecIdByfilter(condition);
     }
 
-    public List<Patient> getAllPatientsComments() {
-        PatientExample pe = new PatientExample();
-        pe.createCriteria().andCommentIsNotNull();
-        return patientMapper.selectByExample(pe);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public int changePatientComment(String pid, String comment) {
-        if(comment.equals("")){
-            return patientMapper.deletePatientComment(pid);
-        }else{
-            PatientExample pe = new PatientExample();
-            pe.createCriteria().andIdEqualTo(pid);
-            PatientWithBLOBs patient = new PatientWithBLOBs();
-            patient.setComment(comment);
-            return patientMapper.updateByExampleSelective(patient,pe);
-        }
-    }
-
     /**
      * @param gender F: Female; M: Male
      * @return List of PIDs
