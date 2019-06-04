@@ -270,7 +270,7 @@ public class RawDataService {
         Map<String, String> tags = new HashMap<>();
         tags.put("fileName", file.getFilename().replace(".csv", ""));
 
-//        only delete inflexfiles when published
+//        only delete influx files when published
         boolean deleteInfluxDataResult = true;
         deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
 
