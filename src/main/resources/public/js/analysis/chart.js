@@ -723,10 +723,10 @@ $(document).ready(function() {
 						var labelname = files[f].csvFile.pid.split('-',3)[1]+'-' + files[f].csvFile.pid.split('-',3)[2]+ '#' + fileType;
 						updateFileInGraph(year,labelname,files[f].csvFile.filename,action);
 					}
-					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", " patient comment saved");
+					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", " patient comment deleted");
 				},
 				'error': function () {
-					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient comment save failed!");
+					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient comment save deleted!");
 				}
 			})
 		}
@@ -739,7 +739,7 @@ $(document).ready(function() {
 			'url': "/apis/patient/resolveAllFiles",
 			'async': false,
 			'data': {
-				pid: $("#resolve-all-pid").val()
+				pid: $("#resolve-all-pid").html()
 			},
 			'contentType': "application/json",
 			'dataType': 'json',
@@ -750,7 +750,7 @@ $(document).ready(function() {
 					"url": "/apis/patient/files",
 					"type": "GET",
 					'data': {
-						pid: $("#resolve-all-pid").val()
+						pid: $("#resolve-all-pid").html()
 					},
 					'contentType': "application/json",
 					'dataType': 'json',

@@ -243,7 +243,7 @@ public class DataController {
             deleteResult = versionControlService.setLog(file,2) * rawDataService.deletePatientDataByFile(file);
         }
         RestfulResponse response;
-        if( deleteResult == 0 ){
+        if( deleteResult == 1 ){
             response = new RestfulResponse(1, "success");
         }else{
             response = new RestfulResponse(0, "delete failed");
@@ -257,7 +257,7 @@ public class DataController {
         file.setStatus(1);
         int deleteResult = versionControlService.setLog(file,0) * rawDataService.pseudoDeleteFile(file);
         RestfulResponse response;
-        if( deleteResult == 0 ){
+        if( deleteResult == 1 ){
             response = new RestfulResponse(1, "success");
         }else{
             response = new RestfulResponse(0, "delete failed");
