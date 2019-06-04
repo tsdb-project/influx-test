@@ -94,10 +94,10 @@ $(document).ready(function () {
     });
 
     function getStatus(data){
-        if(data==1){
+        if(data===1){
             return "Delete"
         }
-        if(data==2){
+        if(data===2){
             return "Import"
         }
     }
@@ -111,12 +111,12 @@ $(document).ready(function () {
     });
 
     $("#ConfirmButton").click(function(){
-        if($("#password").val()!='admi'){
+        if($("#password").val()!=='admi'){
             notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "wrong password");
             return
         }
         //confirm delete
-        if(csvFile.status==1){
+        if(csvFile.status===1){
             $.ajax({
                 'url' : "/apis/file",
                 'type' : 'DELETE',
@@ -147,7 +147,7 @@ $(document).ready(function () {
             });
         }
         // confirm import data
-        if(csvFile.status==2){
+        if(csvFile.status===2){
             $.ajax({
                 'url' : "/versionControl/confirmImport",
                 'type' : 'POST',
@@ -185,12 +185,12 @@ $(document).ready(function () {
     });
 
     $("#CancelButton").click(function(){
-        if($("#password2").val()!='admi'){
+        if($("#password2").val()!=='admi'){
             notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "wrong password");
             return
         }
         // cancel delete
-        if(csvFile.status==1){
+        if(csvFile.status===1){
             $.ajax({
                 'url': "/versionControl/cancelDelete",
                 'type': 'post',
@@ -221,7 +221,7 @@ $(document).ready(function () {
             });
         }
         // cancel import
-        if(csvFile.status==2){
+        if(csvFile.status===2){
             $.ajax({
                 'url' : "/apis/file",
                 'type' : 'DELETE',
