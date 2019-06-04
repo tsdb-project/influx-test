@@ -726,7 +726,7 @@ $(document).ready(function() {
 					notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", " patient comment deleted");
 				},
 				'error': function () {
-					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient comment save deleted!");
+					notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Patient comment delete failed!");
 				}
 			})
 		}
