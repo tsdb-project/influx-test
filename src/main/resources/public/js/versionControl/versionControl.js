@@ -105,7 +105,7 @@ $(document).ready(function () {
     var csvFile =[];
     fileTable.on('click','button',function (event) {
         var row = event.target.dataset.row;
-        var csvFile = files[row];
+        csvFile = files[row];
         console.log(row);
         console.log(csvFile.status);
     });
