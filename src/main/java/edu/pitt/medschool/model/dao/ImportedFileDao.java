@@ -1,6 +1,7 @@
 package edu.pitt.medschool.model.dao;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -75,8 +76,10 @@ public class ImportedFileDao {
         criteria.andDeletedEqualTo(false);
 
         ImportedFile importedFile = new ImportedFile();
+        ZoneId america = ZoneId.of("America/New_York");
+        LocalDateTime americaDateTime = LocalDateTime.now(america);
         importedFile.setDeleted(true);
-        importedFile.setDeleteTime(LocalDateTime.now());
+        importedFile.setDeleteTime(americaDateTime);
 
         int deleteResult = importedFileMapper.updateByExampleSelective(importedFile, importedFileExample);
         try {

@@ -131,7 +131,7 @@ public class DataController {
     }
 
     // new part for data validation
-    // do not use, add to import function
+    // has been added to import function, not be used
     @RequestMapping(value = "api/data/validate")
     @ResponseBody
     public Map<String, Object> dataValidate(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model)
@@ -159,7 +159,6 @@ public class DataController {
             for (int i = 0; i<dir.getFiles().size();i++){
                 List<PatientWithBLOBs> patients = patientService.getPatientsFromCsv(dir.getFiles().get(i));
                 count+=patientService.insertPatients(patients);
-
             }
             System.out.println("**********************************Import finished**********************************");
             map.put("num",count);
@@ -235,7 +234,7 @@ public class DataController {
     @DeleteMapping(value = "/apis/file")
     @ResponseBody
     public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) CsvFile file) throws Exception {
-        int deleteResult=-1;
+        int deleteResult;
         if(file.getStatus()==1){
             deleteResult = versionControlService.setLog(file,1) * rawDataService.deletePatientDataByFile(file);
 
