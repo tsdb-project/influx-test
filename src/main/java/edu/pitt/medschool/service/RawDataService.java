@@ -270,7 +270,8 @@ public class RawDataService {
         Map<String, String> tags = new HashMap<>();
         tags.put("fileName", file.getFilename().replace(".csv", ""));
 
-//      delete file from influx
+
+//      delete from influxDB
         boolean deleteInfluxDataResult = false;
         deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
 
