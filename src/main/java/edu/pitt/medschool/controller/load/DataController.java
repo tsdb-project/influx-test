@@ -235,17 +235,23 @@ public class DataController {
     @ResponseBody
     public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) CsvFile file) throws Exception {
         int deleteResult;
+        int log;
+        int second;
         if(file.getStatus()==1){
-            deleteResult = versionControlService.setLog(file,1) * rawDataService.deletePatientDataByFile(file);
+            log = versionControlService.setLog(file,1);
+            second = rawDataService.deletePatientDataByFile(file);
+            deleteResult = log*second;
 
         }else {
-            deleteResult = versionControlService.setLog(file,2) * rawDataService.deletePatientDataByFile(file);
+            log = versionControlService.setLog(file,2);
+            second = rawDataService.deletePatientDataByFile(file);
+            deleteResult = log*second;
         }
         RestfulResponse response;
         if( deleteResult == 1 ){
             response = new RestfulResponse(1, "success");
         }else{
-            response = new RestfulResponse(0, "delete failed");
+            response = new RestfulResponse(0,  log+"  "+second);
         }
         return response;
     }
