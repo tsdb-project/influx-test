@@ -122,7 +122,7 @@ public class ValidateCsvService {
             validateBean.setHeaderTime(LocalDateTime.ofInstant(strToDate(header_time).toInstant(), zoneId));
             validateBean.setMachine(machineId);
             Duration duration = Duration.between(start,end);
-            validateBean.setDensity(Double.longBitsToDouble(1000*count)/duration.toMillis());
+            validateBean.setDensity(Double.longBitsToDouble(1000*count)/(duration.toMillis()+1000));
         } catch (Exception e) {
             e.printStackTrace();
         }
