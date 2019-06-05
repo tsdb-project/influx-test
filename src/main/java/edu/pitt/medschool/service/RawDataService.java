@@ -272,7 +272,7 @@ public class RawDataService {
 
 //      delete from influxDB
         boolean deleteInfluxDataResult = true;
-//        deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
+        deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
 
 
         int deleteResult = 0;
