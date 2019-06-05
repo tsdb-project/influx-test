@@ -1243,6 +1243,66 @@ public class CsvFileExample {
 			return (Criteria) this;
 		}
 
+		public Criteria andWidthIsNull() {
+			addCriterion("width is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andWidthIsNotNull() {
+			addCriterion("width is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andWidthEqualTo(Integer value) {
+			addCriterion("width =", value, "width");
+			return (Criteria) this;
+		}
+
+		public Criteria andWidthNotEqualTo(Integer value) {
+			addCriterion("width <>", value, "width");
+			return (Criteria) this;
+		}
+
+		public Criteria andWidthGreaterThan(Integer value) {
+			addCriterion("width >", value, "width");
+			return (Criteria) this;
+		}
+
+		public Criteria andWidthGreaterThanOrEqualTo(Integer value) {
+			addCriterion("width >=", value, "width");
+			return (Criteria) this;
+		}
+
+		public Criteria andWidthLessThan(Integer value) {
+			addCriterion("width <", value, "width");
+			return (Criteria) this;
+		}
+
+		public Criteria andWidthLessThanOrEqualTo(Integer value) {
+			addCriterion("width <=", value, "width");
+			return (Criteria) this;
+		}
+
+		public Criteria andWidthIn(List<Integer> values) {
+			addCriterion("width in", values, "width");
+			return (Criteria) this;
+		}
+
+		public Criteria andWidthNotIn(List<Integer> values) {
+			addCriterion("width not in", values, "width");
+			return (Criteria) this;
+		}
+
+		public Criteria andWidthBetween(Integer value1, Integer value2) {
+			addCriterion("width between", value1, value2, "width");
+			return (Criteria) this;
+		}
+
+		public Criteria andWidthNotBetween(Integer value1, Integer value2) {
+			addCriterion("width not between", value1, value2, "width");
+			return (Criteria) this;
+		}
+
 		public Criteria andPidLikeInsensitive(String value) {
 			addCriterion("upper(pid) like", value.toUpperCase(), "pid");
 			return (Criteria) this;

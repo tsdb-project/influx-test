@@ -49,15 +49,15 @@ public interface CsvFileMapper {
 	 * @mbg.generated
 	 */
 	@Insert({ "insert into csv_file (id, pid, ", "filename, start_time, ", "end_time, length, ", "density, machine, ",
-			"ar, path, size, ", "uuid, header_time, ", "last_update, conflict_resolved, ", "status, comment)",
-			"values (#{id,jdbcType=INTEGER}, #{pid,jdbcType=VARCHAR}, ",
+			"ar, path, size, ", "uuid, header_time, ", "last_update, conflict_resolved, ", "status, comment, ",
+			"width)", "values (#{id,jdbcType=INTEGER}, #{pid,jdbcType=VARCHAR}, ",
 			"#{filename,jdbcType=VARCHAR}, #{startTime,jdbcType=TIMESTAMP}, ",
 			"#{endTime,jdbcType=TIMESTAMP}, #{length,jdbcType=INTEGER}, ",
 			"#{density,jdbcType=DOUBLE}, #{machine,jdbcType=VARCHAR}, ",
 			"#{ar,jdbcType=BIT}, #{path,jdbcType=VARCHAR}, #{size,jdbcType=BIGINT}, ",
 			"#{uuid,jdbcType=CHAR}, #{headerTime,jdbcType=TIMESTAMP}, ",
 			"#{lastUpdate,jdbcType=TIMESTAMP}, #{conflictResolved,jdbcType=BIT}, ",
-			"#{status,jdbcType=INTEGER}, #{comment,jdbcType=VARCHAR})" })
+			"#{status,jdbcType=INTEGER}, #{comment,jdbcType=VARCHAR}, ", "#{width,jdbcType=INTEGER})" })
 	int insert(CsvFile record);
 
 	/**
@@ -88,7 +88,8 @@ public interface CsvFileMapper {
 			@Result(column = "last_update", property = "lastUpdate", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "conflict_resolved", property = "conflictResolved", jdbcType = JdbcType.BIT),
 			@Result(column = "status", property = "status", jdbcType = JdbcType.INTEGER),
-			@Result(column = "comment", property = "comment", jdbcType = JdbcType.VARCHAR) })
+			@Result(column = "comment", property = "comment", jdbcType = JdbcType.VARCHAR),
+			@Result(column = "width", property = "width", jdbcType = JdbcType.INTEGER) })
 	List<CsvFile> selectByExampleWithRowbounds(CsvFileExample example, RowBounds rowBounds);
 
 	/**
@@ -112,7 +113,8 @@ public interface CsvFileMapper {
 			@Result(column = "last_update", property = "lastUpdate", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "conflict_resolved", property = "conflictResolved", jdbcType = JdbcType.BIT),
 			@Result(column = "status", property = "status", jdbcType = JdbcType.INTEGER),
-			@Result(column = "comment", property = "comment", jdbcType = JdbcType.VARCHAR) })
+			@Result(column = "comment", property = "comment", jdbcType = JdbcType.VARCHAR),
+			@Result(column = "width", property = "width", jdbcType = JdbcType.INTEGER) })
 	List<CsvFile> selectByExample(CsvFileExample example);
 
 	/**
@@ -120,7 +122,7 @@ public interface CsvFileMapper {
 	 * @mbg.generated
 	 */
 	@Select({ "select", "id, pid, filename, start_time, end_time, length, density, machine, ar, path, ",
-			"size, uuid, header_time, last_update, conflict_resolved, status, comment", "from csv_file",
+			"size, uuid, header_time, last_update, conflict_resolved, status, comment, width", "from csv_file",
 			"where id = #{id,jdbcType=INTEGER}" })
 	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
 			@Result(column = "pid", property = "pid", jdbcType = JdbcType.VARCHAR),
@@ -138,7 +140,8 @@ public interface CsvFileMapper {
 			@Result(column = "last_update", property = "lastUpdate", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "conflict_resolved", property = "conflictResolved", jdbcType = JdbcType.BIT),
 			@Result(column = "status", property = "status", jdbcType = JdbcType.INTEGER),
-			@Result(column = "comment", property = "comment", jdbcType = JdbcType.VARCHAR) })
+			@Result(column = "comment", property = "comment", jdbcType = JdbcType.VARCHAR),
+			@Result(column = "width", property = "width", jdbcType = JdbcType.INTEGER) })
 	CsvFile selectByPrimaryKey(Integer id);
 
 	/**
@@ -173,7 +176,8 @@ public interface CsvFileMapper {
 			"size = #{size,jdbcType=BIGINT},", "uuid = #{uuid,jdbcType=CHAR},",
 			"header_time = #{headerTime,jdbcType=TIMESTAMP},", "last_update = #{lastUpdate,jdbcType=TIMESTAMP},",
 			"conflict_resolved = #{conflictResolved,jdbcType=BIT},", "status = #{status,jdbcType=INTEGER},",
-			"comment = #{comment,jdbcType=VARCHAR}", "where id = #{id,jdbcType=INTEGER}" })
+			"comment = #{comment,jdbcType=VARCHAR},", "width = #{width,jdbcType=INTEGER}",
+			"where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(CsvFile record);
 
 	@Select({ "select c.pid as pid,c.filename as filename,c.start_time as start_time,c.end_time as end_time, ",

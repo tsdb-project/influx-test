@@ -90,6 +90,9 @@ public class CsvFileSqlProvider {
 		if (record.getComment() != null) {
 			sql.VALUES("comment", "#{comment,jdbcType=VARCHAR}");
 		}
+		if (record.getWidth() != null) {
+			sql.VALUES("width", "#{width,jdbcType=INTEGER}");
+		}
 		return sql.toString();
 	}
 
@@ -120,6 +123,7 @@ public class CsvFileSqlProvider {
 		sql.SELECT("conflict_resolved");
 		sql.SELECT("status");
 		sql.SELECT("comment");
+		sql.SELECT("width");
 		sql.FROM("csv_file");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -188,6 +192,9 @@ public class CsvFileSqlProvider {
 		if (record.getComment() != null) {
 			sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
 		}
+		if (record.getWidth() != null) {
+			sql.SET("width = #{record.width,jdbcType=INTEGER}");
+		}
 		applyWhere(sql, example, true);
 		return sql.toString();
 	}
@@ -216,6 +223,7 @@ public class CsvFileSqlProvider {
 		sql.SET("conflict_resolved = #{record.conflictResolved,jdbcType=BIT}");
 		sql.SET("status = #{record.status,jdbcType=INTEGER}");
 		sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
+		sql.SET("width = #{record.width,jdbcType=INTEGER}");
 		CsvFileExample example = (CsvFileExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -275,6 +283,9 @@ public class CsvFileSqlProvider {
 		}
 		if (record.getComment() != null) {
 			sql.SET("comment = #{comment,jdbcType=VARCHAR}");
+		}
+		if (record.getWidth() != null) {
+			sql.SET("width = #{width,jdbcType=INTEGER}");
 		}
 		sql.WHERE("id = #{id,jdbcType=INTEGER}");
 		return sql.toString();
