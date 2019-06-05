@@ -58,7 +58,7 @@ public class ValidateCsvService {
         return fLine.substring(fLine.length() - 40, fLine.length() - 4);
     }
 
-    public CsvFile analyzeCsv(String dir) {
+    public CsvFile analyzeCsv(String dir,String filename) {
         CsvFile validateBean = new CsvFile();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(dir));
@@ -69,7 +69,17 @@ public class ValidateCsvService {
             }
             String header_time = reader.readLine().split(",")[1];
             header_time = header_time + " " + reader.readLine().split(",")[1];
-            String pid = firstline.split("\\\\")[2];
+            String pid;
+            // PUH-20xx_xxx
+            // UAB-010_xx
+            // TBI-1001_xxx
+            if (filename.startsWith("PUH-")) {
+                pid = filename.substring(0, 12).trim().toUpperCase();
+            } else if (filename.startsWith("UAB")) {
+                pid = filename.substring(0, 7).trim().toUpperCase();
+            } else {
+                pid = filename.substring(0, 8).trim().toUpperCase();
+            }
             File file = new File(dir);
             int count = 1;
             for (int j = 0; j < 2; j++) {

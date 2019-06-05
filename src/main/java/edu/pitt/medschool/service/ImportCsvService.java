@@ -97,6 +97,9 @@ public class ImportCsvService {
     @Autowired
     InfluxClusterDao influxClusterDao;
 
+    @Autowired
+    VersionControlService versionControlService;
+
     public double GetLoadFactor() {
         return loadFactor;
     }
@@ -530,9 +533,11 @@ public class ImportCsvService {
                 iff.setUuid(taskUUID);
                 importedFileDao.insert(iff);
                 // add data to csv_file table
-                CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath);
+                CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath,fileName);
                 csvFile.setStatus(2);
                 validateCsvService.insertCsvFile(csvFile);
+                // add data to csv_log
+                versionControlService.setLog(csvFile,0);
             } catch (Exception e) {
                 logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileFullPath,
                         Util.stackTraceErrorToString(e)));

@@ -276,16 +276,12 @@ public class RawDataService {
 
 
         int deleteResult = 0;
-        int first = 0;
-        int second= 0;
         if (deleteInfluxDataResult) {
             System.out.println("delete from influx success");
             deleteResult =  importedFileDao.deletePatientDataByFile(file)*csvFileDao.deletePatientDataByFile(file);
         }
         try {
             if (deleteResult == 0) {
-                System.out.println(first);
-                System.out.println(second);
                 throw new Exception();
             }
         } catch (Exception e) {
