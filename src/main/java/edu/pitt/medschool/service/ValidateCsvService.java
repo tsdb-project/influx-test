@@ -121,7 +121,7 @@ public class ValidateCsvService {
             validateBean.setUuid(processFirstLineInCSV(firstline, validateBean.getPid()));
             validateBean.setHeaderTime(LocalDateTime.ofInstant(strToDate(header_time).toInstant(), zoneId));
             validateBean.setMachine(machineId);
-            validateBean.setDensity(Double.longBitsToDouble(count/(Duration.between(start,end).getSeconds())));
+            validateBean.setDensity((count*1.0)/(Duration.between(start,end).getSeconds()));
         } catch (Exception e) {
             e.printStackTrace();
         }
