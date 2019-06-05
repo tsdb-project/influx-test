@@ -130,24 +130,6 @@ public class DataController {
         return map;
     }
 
-    // new part for data validation
-    // has been added to import function, not be used
-    @RequestMapping(value = "api/data/validate")
-    @ResponseBody
-    public Map<String, Object> dataValidate(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model)
-            throws Exception {
-        Map<String, Object> map = new HashMap<>();
-            map.put("msg","success");
-            for (int i = 0; i < dir.getFiles().size(); i++) {
-                CsvFile csvFile = validateCsvService.analyzeCsv(dir.getFiles().get(i));
-                validateCsvService.insertCsvFile(csvFile);
-            }
-            System.out.println(
-                    "***********************************************Analyze finished*****************************************");
-
-        return map;
-    }
-
     // import patients
     @RequestMapping(value = "api/data/importPatients")
     @ResponseBody

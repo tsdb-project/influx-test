@@ -56,13 +56,12 @@ public class VersionControlController {
     @ResponseBody
     public Map<String, Object> confirmChange(@RequestBody(required = true) CsvFile file) throws Exception {
         Map<String, Object> map = new HashMap<>();
-        CsvFile csvFile = file;
-        if(versionControlService.setLog(csvFile,1)!=1){
+        if(versionControlService.setLog(file,1)!=1){
             map.put("res", new RestfulResponse(0, "confirm failed"));
             return map;
         }else {
-            csvFile.setStatus(0);
-            if (versionControlService.updateStatus(csvFile) == 1) {
+            file.setStatus(0);
+            if (versionControlService.updateStatus(file) == 1) {
                 map.put("res", new RestfulResponse(1, "success"));
             } else {
                 map.put("res", new RestfulResponse(0, "confirm failed"));
