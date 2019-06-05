@@ -237,21 +237,21 @@ public class DataController {
         int deleteResult;
         int log;
         int second;
+        System.out.println(file.getComment());
         if(file.getStatus()==1){
             log = versionControlService.setLog(file,1);
             second = rawDataService.deletePatientDataByFile(file);
             deleteResult = log*second;
-
         }else {
             log = versionControlService.setLog(file,2);
             second = rawDataService.deletePatientDataByFile(file);
             deleteResult = log*second;
         }
         RestfulResponse response;
-        if( deleteResult == 1 ){
+        if( deleteResult !=0 ){
             response = new RestfulResponse(1, "success");
         }else{
-            response = new RestfulResponse(0,  log+"  "+second);
+            response = new RestfulResponse(0,  "fail");
         }
         return response;
     }

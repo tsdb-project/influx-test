@@ -73,7 +73,6 @@ public class ImportedFileDao {
         criteria.andPidEqualTo(file.getPid());
         criteria.andFilenameEqualTo(file.getFilename());
         criteria.andUuidEqualTo(machineId);
-        criteria.andDeletedEqualTo(false);
 
         ImportedFile importedFile = new ImportedFile();
         ZoneId america = ZoneId.of("America/New_York");
@@ -81,16 +80,7 @@ public class ImportedFileDao {
         importedFile.setDeleted(true);
         importedFile.setDeleteTime(americaDateTime);
 
-        int deleteResult = importedFileMapper.updateByExampleSelective(importedFile, importedFileExample);
-        try {
-            if (deleteResult == 0) {
-                // throw new Exception();
-            }
-        } catch (Exception e) {
-            logger.error("No imported file record available!");
-            throw e;
-        }
-        return deleteResult;
+        return importedFileMapper.updateByExampleSelective(importedFile, importedFileExample);
     }
 
 }
