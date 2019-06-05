@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -70,15 +71,25 @@ public class ValidateCsvService {
             String header_time = reader.readLine().split(",")[1];
             header_time = header_time + " " + reader.readLine().split(",")[1];
             String pid;
+            String fn_laterpart;
             // PUH-20xx_xxx
             // UAB-010_xx
             // TBI-1001_xxx
             if (filename.startsWith("PUH-")) {
                 pid = filename.substring(0, 12).trim().toUpperCase();
+                fn_laterpart = filename.substring(12).toLowerCase();
             } else if (filename.startsWith("UAB")) {
                 pid = filename.substring(0, 7).trim().toUpperCase();
+                fn_laterpart = filename.substring(7).toLowerCase();
             } else {
                 pid = filename.substring(0, 8).trim().toUpperCase();
+                fn_laterpart = filename.substring(8).toLowerCase();
+            }
+            // Ar or NoAr
+            if (fn_laterpart.contains("noar")) {
+                validateBean.setAr(false);
+            } else if (fn_laterpart.contains("ar")) {
+                validateBean.setAr(true);
             }
             File file = new File(dir);
             int count = 1;
@@ -110,6 +121,8 @@ public class ValidateCsvService {
             validateBean.setUuid(processFirstLineInCSV(firstline, validateBean.getPid()));
             validateBean.setHeaderTime(LocalDateTime.ofInstant(strToDate(header_time).toInstant(), zoneId));
             validateBean.setMachine(machineId);
+            Duration duration = Duration.between(start,end);
+            validateBean.setDensity(Double.longBitsToDouble(1000*count)/duration.toMillis());
         } catch (Exception e) {
             e.printStackTrace();
         }
