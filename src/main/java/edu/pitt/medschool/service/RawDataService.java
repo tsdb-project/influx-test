@@ -272,8 +272,8 @@ public class RawDataService {
 
 
 //      delete from influxDB
-        boolean deleteInfluxDataResult = false;
-        deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
+        boolean deleteInfluxDataResult = true;
+//        deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
 
 
         int deleteResult = 0;
@@ -281,9 +281,7 @@ public class RawDataService {
         int second= 0;
         if (deleteInfluxDataResult) {
             System.out.println("delete from influx success");
-            first = importedFileDao.deletePatientDataByFile(file);
-            second = csvFileDao.deletePatientDataByFile(file);
-            deleteResult = first*second;
+            deleteResult =  importedFileDao.deletePatientDataByFile(file)*csvFileDao.deletePatientDataByFile(file);
         }
         try {
             if (deleteResult == 0) {

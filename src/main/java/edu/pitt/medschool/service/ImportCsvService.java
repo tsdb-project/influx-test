@@ -531,6 +531,7 @@ public class ImportCsvService {
                 importedFileDao.insert(iff);
                 // add data to csv_file table
                 CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath);
+                csvFile.setStatus(2);
                 validateCsvService.insertCsvFile(csvFile);
             } catch (Exception e) {
                 logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileFullPath,

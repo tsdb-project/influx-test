@@ -108,6 +108,7 @@ $(document).ready(function () {
         csvFile = files[row];
         console.log(row);
         console.log(csvFile.status);
+        console.log(csvFile.comment);
     });
 
     $("#ConfirmButton").click(function(){

@@ -43,7 +43,7 @@ public class VersionControlService {
         csvLog.setFilename(csvFile.getFilename());
         csvLog.setStatTime(csvFile.getStartTime());
         csvLog.setTimestamp(americaDateTime);
-        csvFile.setComment(csvFile.getComment());
+        csvLog.setComment(csvFile.getComment());
         return csvLogDao.addLog(csvLog);
     }
 }
