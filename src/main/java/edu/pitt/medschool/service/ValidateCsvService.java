@@ -293,10 +293,10 @@ public class ValidateCsvService {
     public WrongPatientsNum getWrongPatientsNum(List<PatientTimeLine> patientTimeLines){
         WrongPatientsNum wrongPatientsNum = new WrongPatientsNum();
         ArrayList<Wrongpatients> wrongpatients = getWrongPatients(patientTimeLines);
-        Integer overlap = 0;
-        Integer missAr=0;
-        Integer missNoar = 0;
-        Integer wrongName = 0;
+        int overlap = 0;
+        int missAr=0;
+        int missNoar = 0;
+        int wrongName = 0;
         for(Wrongpatients w:wrongpatients){
             if(w.isWrongname()){
                 wrongName++;
