@@ -89,12 +89,6 @@ public class PatientSqlProvider {
 		if (record.getEtiology() != null) {
 			sql.VALUES("etiology", "#{etiology,jdbcType=INTEGER}");
 		}
-		if (record.getPridScene() != null) {
-			sql.VALUES("prid_scene", "#{pridScene,jdbcType=INTEGER}");
-		}
-		if (record.getPridInterfacility() != null) {
-			sql.VALUES("prid_interfacility", "#{pridInterfacility,jdbcType=INTEGER}");
-		}
 		if (record.getPrehospitalRosc() != null) {
 			sql.VALUES("prehospital_rosc", "#{prehospitalRosc,jdbcType=INTEGER}");
 		}
@@ -260,6 +254,156 @@ public class PatientSqlProvider {
 		if (record.getComment() != null) {
 			sql.VALUES("comment", "#{comment,jdbcType=VARCHAR}");
 		}
+		if (record.getEdarrest() != null) {
+			sql.VALUES("edarrest", "#{edarrest,jdbcType=INTEGER}");
+		}
+		if (record.getRhythmEms() != null) {
+			sql.VALUES("rhythm_ems", "#{rhythmEms,jdbcType=INTEGER}");
+		}
+		if (record.getAed() != null) {
+			sql.VALUES("aed", "#{aed,jdbcType=INTEGER}");
+		}
+		if (record.getCprWithAls() != null) {
+			sql.VALUES("cpr_with_als", "#{cprWithAls,jdbcType=INTEGER}");
+		}
+		if (record.getBicarb() != null) {
+			sql.VALUES("bicarb", "#{bicarb,jdbcType=INTEGER}");
+		}
+		if (record.getAirway() != null) {
+			sql.VALUES("airway", "#{airway,jdbcType=INTEGER}");
+		}
+		if (record.getRearrests() != null) {
+			sql.VALUES("rearrests", "#{rearrests,jdbcType=INTEGER}");
+		}
+		if (record.getAdmitUnit() != null) {
+			sql.VALUES("admit_unit", "#{admitUnit,jdbcType=INTEGER}");
+		}
+		if (record.getAdmitFloor() != null) {
+			sql.VALUES("admit_floor", "#{admitFloor,jdbcType=INTEGER}");
+		}
+		if (record.getIcus1() != null) {
+			sql.VALUES("icus___1", "#{icus1,jdbcType=INTEGER}");
+		}
+		if (record.getIcus2() != null) {
+			sql.VALUES("icus___2", "#{icus2,jdbcType=INTEGER}");
+		}
+		if (record.getIcus3() != null) {
+			sql.VALUES("icus___3", "#{icus3,jdbcType=INTEGER}");
+		}
+		if (record.getIcus4() != null) {
+			sql.VALUES("icus___4", "#{icus4,jdbcType=INTEGER}");
+		}
+		if (record.getIcus5() != null) {
+			sql.VALUES("icus___5", "#{icus5,jdbcType=INTEGER}");
+		}
+		if (record.getIcus6() != null) {
+			sql.VALUES("icus___6", "#{icus6,jdbcType=INTEGER}");
+		}
+		if (record.getIcus7() != null) {
+			sql.VALUES("icus___7", "#{icus7,jdbcType=INTEGER}");
+		}
+		if (record.getIcus8() != null) {
+			sql.VALUES("icus___8", "#{icus8,jdbcType=INTEGER}");
+		}
+		if (record.getIcus9() != null) {
+			sql.VALUES("icus___9", "#{icus9,jdbcType=INTEGER}");
+		}
+		if (record.getIcuLos() != null) {
+			sql.VALUES("icu_los", "#{icuLos,jdbcType=INTEGER}");
+		}
+		if (record.getHospitalLos() != null) {
+			sql.VALUES("hospital_los", "#{hospitalLos,jdbcType=INTEGER}");
+		}
+		if (record.getReferredtocore() != null) {
+			sql.VALUES("referredtocore", "#{referredtocore,jdbcType=INTEGER}");
+		}
+		if (record.getOrgandonor() != null) {
+			sql.VALUES("organdonor", "#{organdonor,jdbcType=INTEGER}");
+		}
+		if (record.getNondonor() != null) {
+			sql.VALUES("nondonor", "#{nondonor,jdbcType=INTEGER}");
+		}
+		if (record.getDonortype() != null) {
+			sql.VALUES("donortype", "#{donortype,jdbcType=INTEGER}");
+		}
+		if (record.getProcured1() != null) {
+			sql.VALUES("procured___1", "#{procured1,jdbcType=INTEGER}");
+		}
+		if (record.getProcured2() != null) {
+			sql.VALUES("procured___2", "#{procured2,jdbcType=INTEGER}");
+		}
+		if (record.getProcured3() != null) {
+			sql.VALUES("procured___3", "#{procured3,jdbcType=INTEGER}");
+		}
+		if (record.getProcured4() != null) {
+			sql.VALUES("procured___4", "#{procured4,jdbcType=INTEGER}");
+		}
+		if (record.getProcured5() != null) {
+			sql.VALUES("procured___5", "#{procured5,jdbcType=INTEGER}");
+		}
+		if (record.getProcured6() != null) {
+			sql.VALUES("procured___6", "#{procured6,jdbcType=INTEGER}");
+		}
+		if (record.getProcured7() != null) {
+			sql.VALUES("procured___7", "#{procured7,jdbcType=INTEGER}");
+		}
+		if (record.getProcured8() != null) {
+			sql.VALUES("procured___8", "#{procured8,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted1() != null) {
+			sql.VALUES("transplanted___1", "#{transplanted1,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted2() != null) {
+			sql.VALUES("transplanted___2", "#{transplanted2,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted3() != null) {
+			sql.VALUES("transplanted___3", "#{transplanted3,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted4() != null) {
+			sql.VALUES("transplanted___4", "#{transplanted4,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted5() != null) {
+			sql.VALUES("transplanted___5", "#{transplanted5,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted6() != null) {
+			sql.VALUES("transplanted___6", "#{transplanted6,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted7() != null) {
+			sql.VALUES("transplanted___7", "#{transplanted7,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted8() != null) {
+			sql.VALUES("transplanted___8", "#{transplanted8,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments10() != null) {
+			sql.VALUES("study_enrollments___10", "#{studyEnrollments10,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments11() != null) {
+			sql.VALUES("study_enrollments___11", "#{studyEnrollments11,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments12() != null) {
+			sql.VALUES("study_enrollments___12", "#{studyEnrollments12,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments13() != null) {
+			sql.VALUES("study_enrollments___13", "#{studyEnrollments13,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments14() != null) {
+			sql.VALUES("study_enrollments___14", "#{studyEnrollments14,jdbcType=INTEGER}");
+		}
+		if (record.getReferralEkg() != null) {
+			sql.VALUES("referral_ekg", "#{referralEkg,jdbcType=INTEGER}");
+		}
+		if (record.getReferralPupils() != null) {
+			sql.VALUES("referral_pupils", "#{referralPupils,jdbcType=INTEGER}");
+		}
+		if (record.getReferralCroneals() != null) {
+			sql.VALUES("referral_croneals", "#{referralCroneals,jdbcType=INTEGER}");
+		}
+		if (record.getReferralMotor() != null) {
+			sql.VALUES("referral_motor", "#{referralMotor,jdbcType=INTEGER}");
+		}
+		if (record.getComplete() != null) {
+			sql.VALUES("complete", "#{complete,jdbcType=INTEGER}");
+		}
 		if (record.getReferringHospital() != null) {
 			sql.VALUES("referring_hospital", "#{referringHospital,jdbcType=LONGVARCHAR}");
 		}
@@ -272,6 +416,9 @@ public class PatientSqlProvider {
 		if (record.getEtiologyOtherunknown() != null) {
 			sql.VALUES("etiology_otherunknown", "#{etiologyOtherunknown,jdbcType=LONGVARCHAR}");
 		}
+		if (record.getPridScene() != null) {
+			sql.VALUES("prid_scene", "#{pridScene,jdbcType=LONGVARCHAR}");
+		}
 		if (record.getServiceScene() != null) {
 			sql.VALUES("service_scene", "#{serviceScene,jdbcType=LONGVARCHAR}");
 		}
@@ -280,6 +427,9 @@ public class PatientSqlProvider {
 		}
 		if (record.getSceneProvider() != null) {
 			sql.VALUES("scene_provider", "#{sceneProvider,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getPridInterfacility() != null) {
+			sql.VALUES("prid_interfacility", "#{pridInterfacility,jdbcType=LONGVARCHAR}");
 		}
 		if (record.getServiceInterfacility() != null) {
 			sql.VALUES("service_interfacility", "#{serviceInterfacility,jdbcType=LONGVARCHAR}");
@@ -671,6 +821,21 @@ public class PatientSqlProvider {
 		if (record.getAwakeId() != null) {
 			sql.VALUES("awake_id", "#{awakeId,jdbcType=LONGVARCHAR}");
 		}
+		if (record.getService2Scene() != null) {
+			sql.VALUES("service2_scene", "#{service2Scene,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getSceneProvider2() != null) {
+			sql.VALUES("scene_provider2", "#{sceneProvider2,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getPridScene2() != null) {
+			sql.VALUES("prid_scene2", "#{pridScene2,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getSceneChart2() != null) {
+			sql.VALUES("scene_chart2", "#{sceneChart2,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getLifelogic() != null) {
+			sql.VALUES("lifelogic", "#{lifelogic,jdbcType=LONGVARCHAR}");
+		}
 		return sql.toString();
 	}
 
@@ -700,8 +865,6 @@ public class PatientSqlProvider {
 		sql.SELECT("witnessed");
 		sql.SELECT("bystander_cpr");
 		sql.SELECT("etiology");
-		sql.SELECT("prid_scene");
-		sql.SELECT("prid_interfacility");
 		sql.SELECT("prehospital_rosc");
 		sql.SELECT("arrival");
 		sql.SELECT("ca_type");
@@ -757,13 +920,65 @@ public class PatientSqlProvider {
 		sql.SELECT("ca_biomarker_id");
 		sql.SELECT("core_dataset_complete");
 		sql.SELECT("comment");
+		sql.SELECT("edarrest");
+		sql.SELECT("rhythm_ems");
+		sql.SELECT("aed");
+		sql.SELECT("cpr_with_als");
+		sql.SELECT("bicarb");
+		sql.SELECT("airway");
+		sql.SELECT("rearrests");
+		sql.SELECT("admit_unit");
+		sql.SELECT("admit_floor");
+		sql.SELECT("icus___1");
+		sql.SELECT("icus___2");
+		sql.SELECT("icus___3");
+		sql.SELECT("icus___4");
+		sql.SELECT("icus___5");
+		sql.SELECT("icus___6");
+		sql.SELECT("icus___7");
+		sql.SELECT("icus___8");
+		sql.SELECT("icus___9");
+		sql.SELECT("icu_los");
+		sql.SELECT("hospital_los");
+		sql.SELECT("referredtocore");
+		sql.SELECT("organdonor");
+		sql.SELECT("nondonor");
+		sql.SELECT("donortype");
+		sql.SELECT("procured___1");
+		sql.SELECT("procured___2");
+		sql.SELECT("procured___3");
+		sql.SELECT("procured___4");
+		sql.SELECT("procured___5");
+		sql.SELECT("procured___6");
+		sql.SELECT("procured___7");
+		sql.SELECT("procured___8");
+		sql.SELECT("transplanted___1");
+		sql.SELECT("transplanted___2");
+		sql.SELECT("transplanted___3");
+		sql.SELECT("transplanted___4");
+		sql.SELECT("transplanted___5");
+		sql.SELECT("transplanted___6");
+		sql.SELECT("transplanted___7");
+		sql.SELECT("transplanted___8");
+		sql.SELECT("study_enrollments___10");
+		sql.SELECT("study_enrollments___11");
+		sql.SELECT("study_enrollments___12");
+		sql.SELECT("study_enrollments___13");
+		sql.SELECT("study_enrollments___14");
+		sql.SELECT("referral_ekg");
+		sql.SELECT("referral_pupils");
+		sql.SELECT("referral_croneals");
+		sql.SELECT("referral_motor");
+		sql.SELECT("complete");
 		sql.SELECT("referring_hospital");
 		sql.SELECT("referring_physician");
 		sql.SELECT("referringfollowup");
 		sql.SELECT("etiology_otherunknown");
+		sql.SELECT("prid_scene");
 		sql.SELECT("service_scene");
 		sql.SELECT("scene_chart");
 		sql.SELECT("scene_provider");
+		sql.SELECT("prid_interfacility");
 		sql.SELECT("service_interfacility");
 		sql.SELECT("interfacility_chart");
 		sql.SELECT("interfacility_provider");
@@ -894,6 +1109,11 @@ public class PatientSqlProvider {
 		sql.SELECT("nmb_id");
 		sql.SELECT("comica_id");
 		sql.SELECT("awake_id");
+		sql.SELECT("service2_scene");
+		sql.SELECT("scene_provider2");
+		sql.SELECT("prid_scene2");
+		sql.SELECT("scene_chart2");
+		sql.SELECT("lifelogic");
 		sql.FROM("patient");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -928,8 +1148,6 @@ public class PatientSqlProvider {
 		sql.SELECT("witnessed");
 		sql.SELECT("bystander_cpr");
 		sql.SELECT("etiology");
-		sql.SELECT("prid_scene");
-		sql.SELECT("prid_interfacility");
 		sql.SELECT("prehospital_rosc");
 		sql.SELECT("arrival");
 		sql.SELECT("ca_type");
@@ -985,6 +1203,56 @@ public class PatientSqlProvider {
 		sql.SELECT("ca_biomarker_id");
 		sql.SELECT("core_dataset_complete");
 		sql.SELECT("comment");
+		sql.SELECT("edarrest");
+		sql.SELECT("rhythm_ems");
+		sql.SELECT("aed");
+		sql.SELECT("cpr_with_als");
+		sql.SELECT("bicarb");
+		sql.SELECT("airway");
+		sql.SELECT("rearrests");
+		sql.SELECT("admit_unit");
+		sql.SELECT("admit_floor");
+		sql.SELECT("icus___1");
+		sql.SELECT("icus___2");
+		sql.SELECT("icus___3");
+		sql.SELECT("icus___4");
+		sql.SELECT("icus___5");
+		sql.SELECT("icus___6");
+		sql.SELECT("icus___7");
+		sql.SELECT("icus___8");
+		sql.SELECT("icus___9");
+		sql.SELECT("icu_los");
+		sql.SELECT("hospital_los");
+		sql.SELECT("referredtocore");
+		sql.SELECT("organdonor");
+		sql.SELECT("nondonor");
+		sql.SELECT("donortype");
+		sql.SELECT("procured___1");
+		sql.SELECT("procured___2");
+		sql.SELECT("procured___3");
+		sql.SELECT("procured___4");
+		sql.SELECT("procured___5");
+		sql.SELECT("procured___6");
+		sql.SELECT("procured___7");
+		sql.SELECT("procured___8");
+		sql.SELECT("transplanted___1");
+		sql.SELECT("transplanted___2");
+		sql.SELECT("transplanted___3");
+		sql.SELECT("transplanted___4");
+		sql.SELECT("transplanted___5");
+		sql.SELECT("transplanted___6");
+		sql.SELECT("transplanted___7");
+		sql.SELECT("transplanted___8");
+		sql.SELECT("study_enrollments___10");
+		sql.SELECT("study_enrollments___11");
+		sql.SELECT("study_enrollments___12");
+		sql.SELECT("study_enrollments___13");
+		sql.SELECT("study_enrollments___14");
+		sql.SELECT("referral_ekg");
+		sql.SELECT("referral_pupils");
+		sql.SELECT("referral_croneals");
+		sql.SELECT("referral_motor");
+		sql.SELECT("complete");
 		sql.FROM("patient");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -1049,12 +1317,6 @@ public class PatientSqlProvider {
 		}
 		if (record.getEtiology() != null) {
 			sql.SET("etiology = #{record.etiology,jdbcType=INTEGER}");
-		}
-		if (record.getPridScene() != null) {
-			sql.SET("prid_scene = #{record.pridScene,jdbcType=INTEGER}");
-		}
-		if (record.getPridInterfacility() != null) {
-			sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=INTEGER}");
 		}
 		if (record.getPrehospitalRosc() != null) {
 			sql.SET("prehospital_rosc = #{record.prehospitalRosc,jdbcType=INTEGER}");
@@ -1221,6 +1483,156 @@ public class PatientSqlProvider {
 		if (record.getComment() != null) {
 			sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
 		}
+		if (record.getEdarrest() != null) {
+			sql.SET("edarrest = #{record.edarrest,jdbcType=INTEGER}");
+		}
+		if (record.getRhythmEms() != null) {
+			sql.SET("rhythm_ems = #{record.rhythmEms,jdbcType=INTEGER}");
+		}
+		if (record.getAed() != null) {
+			sql.SET("aed = #{record.aed,jdbcType=INTEGER}");
+		}
+		if (record.getCprWithAls() != null) {
+			sql.SET("cpr_with_als = #{record.cprWithAls,jdbcType=INTEGER}");
+		}
+		if (record.getBicarb() != null) {
+			sql.SET("bicarb = #{record.bicarb,jdbcType=INTEGER}");
+		}
+		if (record.getAirway() != null) {
+			sql.SET("airway = #{record.airway,jdbcType=INTEGER}");
+		}
+		if (record.getRearrests() != null) {
+			sql.SET("rearrests = #{record.rearrests,jdbcType=INTEGER}");
+		}
+		if (record.getAdmitUnit() != null) {
+			sql.SET("admit_unit = #{record.admitUnit,jdbcType=INTEGER}");
+		}
+		if (record.getAdmitFloor() != null) {
+			sql.SET("admit_floor = #{record.admitFloor,jdbcType=INTEGER}");
+		}
+		if (record.getIcus1() != null) {
+			sql.SET("icus___1 = #{record.icus1,jdbcType=INTEGER}");
+		}
+		if (record.getIcus2() != null) {
+			sql.SET("icus___2 = #{record.icus2,jdbcType=INTEGER}");
+		}
+		if (record.getIcus3() != null) {
+			sql.SET("icus___3 = #{record.icus3,jdbcType=INTEGER}");
+		}
+		if (record.getIcus4() != null) {
+			sql.SET("icus___4 = #{record.icus4,jdbcType=INTEGER}");
+		}
+		if (record.getIcus5() != null) {
+			sql.SET("icus___5 = #{record.icus5,jdbcType=INTEGER}");
+		}
+		if (record.getIcus6() != null) {
+			sql.SET("icus___6 = #{record.icus6,jdbcType=INTEGER}");
+		}
+		if (record.getIcus7() != null) {
+			sql.SET("icus___7 = #{record.icus7,jdbcType=INTEGER}");
+		}
+		if (record.getIcus8() != null) {
+			sql.SET("icus___8 = #{record.icus8,jdbcType=INTEGER}");
+		}
+		if (record.getIcus9() != null) {
+			sql.SET("icus___9 = #{record.icus9,jdbcType=INTEGER}");
+		}
+		if (record.getIcuLos() != null) {
+			sql.SET("icu_los = #{record.icuLos,jdbcType=INTEGER}");
+		}
+		if (record.getHospitalLos() != null) {
+			sql.SET("hospital_los = #{record.hospitalLos,jdbcType=INTEGER}");
+		}
+		if (record.getReferredtocore() != null) {
+			sql.SET("referredtocore = #{record.referredtocore,jdbcType=INTEGER}");
+		}
+		if (record.getOrgandonor() != null) {
+			sql.SET("organdonor = #{record.organdonor,jdbcType=INTEGER}");
+		}
+		if (record.getNondonor() != null) {
+			sql.SET("nondonor = #{record.nondonor,jdbcType=INTEGER}");
+		}
+		if (record.getDonortype() != null) {
+			sql.SET("donortype = #{record.donortype,jdbcType=INTEGER}");
+		}
+		if (record.getProcured1() != null) {
+			sql.SET("procured___1 = #{record.procured1,jdbcType=INTEGER}");
+		}
+		if (record.getProcured2() != null) {
+			sql.SET("procured___2 = #{record.procured2,jdbcType=INTEGER}");
+		}
+		if (record.getProcured3() != null) {
+			sql.SET("procured___3 = #{record.procured3,jdbcType=INTEGER}");
+		}
+		if (record.getProcured4() != null) {
+			sql.SET("procured___4 = #{record.procured4,jdbcType=INTEGER}");
+		}
+		if (record.getProcured5() != null) {
+			sql.SET("procured___5 = #{record.procured5,jdbcType=INTEGER}");
+		}
+		if (record.getProcured6() != null) {
+			sql.SET("procured___6 = #{record.procured6,jdbcType=INTEGER}");
+		}
+		if (record.getProcured7() != null) {
+			sql.SET("procured___7 = #{record.procured7,jdbcType=INTEGER}");
+		}
+		if (record.getProcured8() != null) {
+			sql.SET("procured___8 = #{record.procured8,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted1() != null) {
+			sql.SET("transplanted___1 = #{record.transplanted1,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted2() != null) {
+			sql.SET("transplanted___2 = #{record.transplanted2,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted3() != null) {
+			sql.SET("transplanted___3 = #{record.transplanted3,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted4() != null) {
+			sql.SET("transplanted___4 = #{record.transplanted4,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted5() != null) {
+			sql.SET("transplanted___5 = #{record.transplanted5,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted6() != null) {
+			sql.SET("transplanted___6 = #{record.transplanted6,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted7() != null) {
+			sql.SET("transplanted___7 = #{record.transplanted7,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted8() != null) {
+			sql.SET("transplanted___8 = #{record.transplanted8,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments10() != null) {
+			sql.SET("study_enrollments___10 = #{record.studyEnrollments10,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments11() != null) {
+			sql.SET("study_enrollments___11 = #{record.studyEnrollments11,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments12() != null) {
+			sql.SET("study_enrollments___12 = #{record.studyEnrollments12,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments13() != null) {
+			sql.SET("study_enrollments___13 = #{record.studyEnrollments13,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments14() != null) {
+			sql.SET("study_enrollments___14 = #{record.studyEnrollments14,jdbcType=INTEGER}");
+		}
+		if (record.getReferralEkg() != null) {
+			sql.SET("referral_ekg = #{record.referralEkg,jdbcType=INTEGER}");
+		}
+		if (record.getReferralPupils() != null) {
+			sql.SET("referral_pupils = #{record.referralPupils,jdbcType=INTEGER}");
+		}
+		if (record.getReferralCroneals() != null) {
+			sql.SET("referral_croneals = #{record.referralCroneals,jdbcType=INTEGER}");
+		}
+		if (record.getReferralMotor() != null) {
+			sql.SET("referral_motor = #{record.referralMotor,jdbcType=INTEGER}");
+		}
+		if (record.getComplete() != null) {
+			sql.SET("complete = #{record.complete,jdbcType=INTEGER}");
+		}
 		if (record.getReferringHospital() != null) {
 			sql.SET("referring_hospital = #{record.referringHospital,jdbcType=LONGVARCHAR}");
 		}
@@ -1233,6 +1645,9 @@ public class PatientSqlProvider {
 		if (record.getEtiologyOtherunknown() != null) {
 			sql.SET("etiology_otherunknown = #{record.etiologyOtherunknown,jdbcType=LONGVARCHAR}");
 		}
+		if (record.getPridScene() != null) {
+			sql.SET("prid_scene = #{record.pridScene,jdbcType=LONGVARCHAR}");
+		}
 		if (record.getServiceScene() != null) {
 			sql.SET("service_scene = #{record.serviceScene,jdbcType=LONGVARCHAR}");
 		}
@@ -1241,6 +1656,9 @@ public class PatientSqlProvider {
 		}
 		if (record.getSceneProvider() != null) {
 			sql.SET("scene_provider = #{record.sceneProvider,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getPridInterfacility() != null) {
+			sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=LONGVARCHAR}");
 		}
 		if (record.getServiceInterfacility() != null) {
 			sql.SET("service_interfacility = #{record.serviceInterfacility,jdbcType=LONGVARCHAR}");
@@ -1632,6 +2050,21 @@ public class PatientSqlProvider {
 		if (record.getAwakeId() != null) {
 			sql.SET("awake_id = #{record.awakeId,jdbcType=LONGVARCHAR}");
 		}
+		if (record.getService2Scene() != null) {
+			sql.SET("service2_scene = #{record.service2Scene,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getSceneProvider2() != null) {
+			sql.SET("scene_provider2 = #{record.sceneProvider2,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getPridScene2() != null) {
+			sql.SET("prid_scene2 = #{record.pridScene2,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getSceneChart2() != null) {
+			sql.SET("scene_chart2 = #{record.sceneChart2,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getLifelogic() != null) {
+			sql.SET("lifelogic = #{record.lifelogic,jdbcType=LONGVARCHAR}");
+		}
 		applyWhere(sql, example, true);
 		return sql.toString();
 	}
@@ -1659,8 +2092,6 @@ public class PatientSqlProvider {
 		sql.SET("witnessed = #{record.witnessed,jdbcType=INTEGER}");
 		sql.SET("bystander_cpr = #{record.bystanderCpr,jdbcType=INTEGER}");
 		sql.SET("etiology = #{record.etiology,jdbcType=INTEGER}");
-		sql.SET("prid_scene = #{record.pridScene,jdbcType=INTEGER}");
-		sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=INTEGER}");
 		sql.SET("prehospital_rosc = #{record.prehospitalRosc,jdbcType=INTEGER}");
 		sql.SET("arrival = #{record.arrival,jdbcType=TIMESTAMP}");
 		sql.SET("ca_type = #{record.caType,jdbcType=INTEGER}");
@@ -1716,13 +2147,65 @@ public class PatientSqlProvider {
 		sql.SET("ca_biomarker_id = #{record.caBiomarkerId,jdbcType=INTEGER}");
 		sql.SET("core_dataset_complete = #{record.coreDatasetComplete,jdbcType=INTEGER}");
 		sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
+		sql.SET("edarrest = #{record.edarrest,jdbcType=INTEGER}");
+		sql.SET("rhythm_ems = #{record.rhythmEms,jdbcType=INTEGER}");
+		sql.SET("aed = #{record.aed,jdbcType=INTEGER}");
+		sql.SET("cpr_with_als = #{record.cprWithAls,jdbcType=INTEGER}");
+		sql.SET("bicarb = #{record.bicarb,jdbcType=INTEGER}");
+		sql.SET("airway = #{record.airway,jdbcType=INTEGER}");
+		sql.SET("rearrests = #{record.rearrests,jdbcType=INTEGER}");
+		sql.SET("admit_unit = #{record.admitUnit,jdbcType=INTEGER}");
+		sql.SET("admit_floor = #{record.admitFloor,jdbcType=INTEGER}");
+		sql.SET("icus___1 = #{record.icus1,jdbcType=INTEGER}");
+		sql.SET("icus___2 = #{record.icus2,jdbcType=INTEGER}");
+		sql.SET("icus___3 = #{record.icus3,jdbcType=INTEGER}");
+		sql.SET("icus___4 = #{record.icus4,jdbcType=INTEGER}");
+		sql.SET("icus___5 = #{record.icus5,jdbcType=INTEGER}");
+		sql.SET("icus___6 = #{record.icus6,jdbcType=INTEGER}");
+		sql.SET("icus___7 = #{record.icus7,jdbcType=INTEGER}");
+		sql.SET("icus___8 = #{record.icus8,jdbcType=INTEGER}");
+		sql.SET("icus___9 = #{record.icus9,jdbcType=INTEGER}");
+		sql.SET("icu_los = #{record.icuLos,jdbcType=INTEGER}");
+		sql.SET("hospital_los = #{record.hospitalLos,jdbcType=INTEGER}");
+		sql.SET("referredtocore = #{record.referredtocore,jdbcType=INTEGER}");
+		sql.SET("organdonor = #{record.organdonor,jdbcType=INTEGER}");
+		sql.SET("nondonor = #{record.nondonor,jdbcType=INTEGER}");
+		sql.SET("donortype = #{record.donortype,jdbcType=INTEGER}");
+		sql.SET("procured___1 = #{record.procured1,jdbcType=INTEGER}");
+		sql.SET("procured___2 = #{record.procured2,jdbcType=INTEGER}");
+		sql.SET("procured___3 = #{record.procured3,jdbcType=INTEGER}");
+		sql.SET("procured___4 = #{record.procured4,jdbcType=INTEGER}");
+		sql.SET("procured___5 = #{record.procured5,jdbcType=INTEGER}");
+		sql.SET("procured___6 = #{record.procured6,jdbcType=INTEGER}");
+		sql.SET("procured___7 = #{record.procured7,jdbcType=INTEGER}");
+		sql.SET("procured___8 = #{record.procured8,jdbcType=INTEGER}");
+		sql.SET("transplanted___1 = #{record.transplanted1,jdbcType=INTEGER}");
+		sql.SET("transplanted___2 = #{record.transplanted2,jdbcType=INTEGER}");
+		sql.SET("transplanted___3 = #{record.transplanted3,jdbcType=INTEGER}");
+		sql.SET("transplanted___4 = #{record.transplanted4,jdbcType=INTEGER}");
+		sql.SET("transplanted___5 = #{record.transplanted5,jdbcType=INTEGER}");
+		sql.SET("transplanted___6 = #{record.transplanted6,jdbcType=INTEGER}");
+		sql.SET("transplanted___7 = #{record.transplanted7,jdbcType=INTEGER}");
+		sql.SET("transplanted___8 = #{record.transplanted8,jdbcType=INTEGER}");
+		sql.SET("study_enrollments___10 = #{record.studyEnrollments10,jdbcType=INTEGER}");
+		sql.SET("study_enrollments___11 = #{record.studyEnrollments11,jdbcType=INTEGER}");
+		sql.SET("study_enrollments___12 = #{record.studyEnrollments12,jdbcType=INTEGER}");
+		sql.SET("study_enrollments___13 = #{record.studyEnrollments13,jdbcType=INTEGER}");
+		sql.SET("study_enrollments___14 = #{record.studyEnrollments14,jdbcType=INTEGER}");
+		sql.SET("referral_ekg = #{record.referralEkg,jdbcType=INTEGER}");
+		sql.SET("referral_pupils = #{record.referralPupils,jdbcType=INTEGER}");
+		sql.SET("referral_croneals = #{record.referralCroneals,jdbcType=INTEGER}");
+		sql.SET("referral_motor = #{record.referralMotor,jdbcType=INTEGER}");
+		sql.SET("complete = #{record.complete,jdbcType=INTEGER}");
 		sql.SET("referring_hospital = #{record.referringHospital,jdbcType=LONGVARCHAR}");
 		sql.SET("referring_physician = #{record.referringPhysician,jdbcType=LONGVARCHAR}");
 		sql.SET("referringfollowup = #{record.referringfollowup,jdbcType=LONGVARCHAR}");
 		sql.SET("etiology_otherunknown = #{record.etiologyOtherunknown,jdbcType=LONGVARCHAR}");
+		sql.SET("prid_scene = #{record.pridScene,jdbcType=LONGVARCHAR}");
 		sql.SET("service_scene = #{record.serviceScene,jdbcType=LONGVARCHAR}");
 		sql.SET("scene_chart = #{record.sceneChart,jdbcType=LONGVARCHAR}");
 		sql.SET("scene_provider = #{record.sceneProvider,jdbcType=LONGVARCHAR}");
+		sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=LONGVARCHAR}");
 		sql.SET("service_interfacility = #{record.serviceInterfacility,jdbcType=LONGVARCHAR}");
 		sql.SET("interfacility_chart = #{record.interfacilityChart,jdbcType=LONGVARCHAR}");
 		sql.SET("interfacility_provider = #{record.interfacilityProvider,jdbcType=LONGVARCHAR}");
@@ -1853,6 +2336,11 @@ public class PatientSqlProvider {
 		sql.SET("nmb_id = #{record.nmbId,jdbcType=LONGVARCHAR}");
 		sql.SET("comica_id = #{record.comicaId,jdbcType=LONGVARCHAR}");
 		sql.SET("awake_id = #{record.awakeId,jdbcType=LONGVARCHAR}");
+		sql.SET("service2_scene = #{record.service2Scene,jdbcType=LONGVARCHAR}");
+		sql.SET("scene_provider2 = #{record.sceneProvider2,jdbcType=LONGVARCHAR}");
+		sql.SET("prid_scene2 = #{record.pridScene2,jdbcType=LONGVARCHAR}");
+		sql.SET("scene_chart2 = #{record.sceneChart2,jdbcType=LONGVARCHAR}");
+		sql.SET("lifelogic = #{record.lifelogic,jdbcType=LONGVARCHAR}");
 		PatientExample example = (PatientExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -1881,8 +2369,6 @@ public class PatientSqlProvider {
 		sql.SET("witnessed = #{record.witnessed,jdbcType=INTEGER}");
 		sql.SET("bystander_cpr = #{record.bystanderCpr,jdbcType=INTEGER}");
 		sql.SET("etiology = #{record.etiology,jdbcType=INTEGER}");
-		sql.SET("prid_scene = #{record.pridScene,jdbcType=INTEGER}");
-		sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=INTEGER}");
 		sql.SET("prehospital_rosc = #{record.prehospitalRosc,jdbcType=INTEGER}");
 		sql.SET("arrival = #{record.arrival,jdbcType=TIMESTAMP}");
 		sql.SET("ca_type = #{record.caType,jdbcType=INTEGER}");
@@ -1938,6 +2424,56 @@ public class PatientSqlProvider {
 		sql.SET("ca_biomarker_id = #{record.caBiomarkerId,jdbcType=INTEGER}");
 		sql.SET("core_dataset_complete = #{record.coreDatasetComplete,jdbcType=INTEGER}");
 		sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
+		sql.SET("edarrest = #{record.edarrest,jdbcType=INTEGER}");
+		sql.SET("rhythm_ems = #{record.rhythmEms,jdbcType=INTEGER}");
+		sql.SET("aed = #{record.aed,jdbcType=INTEGER}");
+		sql.SET("cpr_with_als = #{record.cprWithAls,jdbcType=INTEGER}");
+		sql.SET("bicarb = #{record.bicarb,jdbcType=INTEGER}");
+		sql.SET("airway = #{record.airway,jdbcType=INTEGER}");
+		sql.SET("rearrests = #{record.rearrests,jdbcType=INTEGER}");
+		sql.SET("admit_unit = #{record.admitUnit,jdbcType=INTEGER}");
+		sql.SET("admit_floor = #{record.admitFloor,jdbcType=INTEGER}");
+		sql.SET("icus___1 = #{record.icus1,jdbcType=INTEGER}");
+		sql.SET("icus___2 = #{record.icus2,jdbcType=INTEGER}");
+		sql.SET("icus___3 = #{record.icus3,jdbcType=INTEGER}");
+		sql.SET("icus___4 = #{record.icus4,jdbcType=INTEGER}");
+		sql.SET("icus___5 = #{record.icus5,jdbcType=INTEGER}");
+		sql.SET("icus___6 = #{record.icus6,jdbcType=INTEGER}");
+		sql.SET("icus___7 = #{record.icus7,jdbcType=INTEGER}");
+		sql.SET("icus___8 = #{record.icus8,jdbcType=INTEGER}");
+		sql.SET("icus___9 = #{record.icus9,jdbcType=INTEGER}");
+		sql.SET("icu_los = #{record.icuLos,jdbcType=INTEGER}");
+		sql.SET("hospital_los = #{record.hospitalLos,jdbcType=INTEGER}");
+		sql.SET("referredtocore = #{record.referredtocore,jdbcType=INTEGER}");
+		sql.SET("organdonor = #{record.organdonor,jdbcType=INTEGER}");
+		sql.SET("nondonor = #{record.nondonor,jdbcType=INTEGER}");
+		sql.SET("donortype = #{record.donortype,jdbcType=INTEGER}");
+		sql.SET("procured___1 = #{record.procured1,jdbcType=INTEGER}");
+		sql.SET("procured___2 = #{record.procured2,jdbcType=INTEGER}");
+		sql.SET("procured___3 = #{record.procured3,jdbcType=INTEGER}");
+		sql.SET("procured___4 = #{record.procured4,jdbcType=INTEGER}");
+		sql.SET("procured___5 = #{record.procured5,jdbcType=INTEGER}");
+		sql.SET("procured___6 = #{record.procured6,jdbcType=INTEGER}");
+		sql.SET("procured___7 = #{record.procured7,jdbcType=INTEGER}");
+		sql.SET("procured___8 = #{record.procured8,jdbcType=INTEGER}");
+		sql.SET("transplanted___1 = #{record.transplanted1,jdbcType=INTEGER}");
+		sql.SET("transplanted___2 = #{record.transplanted2,jdbcType=INTEGER}");
+		sql.SET("transplanted___3 = #{record.transplanted3,jdbcType=INTEGER}");
+		sql.SET("transplanted___4 = #{record.transplanted4,jdbcType=INTEGER}");
+		sql.SET("transplanted___5 = #{record.transplanted5,jdbcType=INTEGER}");
+		sql.SET("transplanted___6 = #{record.transplanted6,jdbcType=INTEGER}");
+		sql.SET("transplanted___7 = #{record.transplanted7,jdbcType=INTEGER}");
+		sql.SET("transplanted___8 = #{record.transplanted8,jdbcType=INTEGER}");
+		sql.SET("study_enrollments___10 = #{record.studyEnrollments10,jdbcType=INTEGER}");
+		sql.SET("study_enrollments___11 = #{record.studyEnrollments11,jdbcType=INTEGER}");
+		sql.SET("study_enrollments___12 = #{record.studyEnrollments12,jdbcType=INTEGER}");
+		sql.SET("study_enrollments___13 = #{record.studyEnrollments13,jdbcType=INTEGER}");
+		sql.SET("study_enrollments___14 = #{record.studyEnrollments14,jdbcType=INTEGER}");
+		sql.SET("referral_ekg = #{record.referralEkg,jdbcType=INTEGER}");
+		sql.SET("referral_pupils = #{record.referralPupils,jdbcType=INTEGER}");
+		sql.SET("referral_croneals = #{record.referralCroneals,jdbcType=INTEGER}");
+		sql.SET("referral_motor = #{record.referralMotor,jdbcType=INTEGER}");
+		sql.SET("complete = #{record.complete,jdbcType=INTEGER}");
 		PatientExample example = (PatientExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -1994,12 +2530,6 @@ public class PatientSqlProvider {
 		}
 		if (record.getEtiology() != null) {
 			sql.SET("etiology = #{etiology,jdbcType=INTEGER}");
-		}
-		if (record.getPridScene() != null) {
-			sql.SET("prid_scene = #{pridScene,jdbcType=INTEGER}");
-		}
-		if (record.getPridInterfacility() != null) {
-			sql.SET("prid_interfacility = #{pridInterfacility,jdbcType=INTEGER}");
 		}
 		if (record.getPrehospitalRosc() != null) {
 			sql.SET("prehospital_rosc = #{prehospitalRosc,jdbcType=INTEGER}");
@@ -2166,6 +2696,156 @@ public class PatientSqlProvider {
 		if (record.getComment() != null) {
 			sql.SET("comment = #{comment,jdbcType=VARCHAR}");
 		}
+		if (record.getEdarrest() != null) {
+			sql.SET("edarrest = #{edarrest,jdbcType=INTEGER}");
+		}
+		if (record.getRhythmEms() != null) {
+			sql.SET("rhythm_ems = #{rhythmEms,jdbcType=INTEGER}");
+		}
+		if (record.getAed() != null) {
+			sql.SET("aed = #{aed,jdbcType=INTEGER}");
+		}
+		if (record.getCprWithAls() != null) {
+			sql.SET("cpr_with_als = #{cprWithAls,jdbcType=INTEGER}");
+		}
+		if (record.getBicarb() != null) {
+			sql.SET("bicarb = #{bicarb,jdbcType=INTEGER}");
+		}
+		if (record.getAirway() != null) {
+			sql.SET("airway = #{airway,jdbcType=INTEGER}");
+		}
+		if (record.getRearrests() != null) {
+			sql.SET("rearrests = #{rearrests,jdbcType=INTEGER}");
+		}
+		if (record.getAdmitUnit() != null) {
+			sql.SET("admit_unit = #{admitUnit,jdbcType=INTEGER}");
+		}
+		if (record.getAdmitFloor() != null) {
+			sql.SET("admit_floor = #{admitFloor,jdbcType=INTEGER}");
+		}
+		if (record.getIcus1() != null) {
+			sql.SET("icus___1 = #{icus1,jdbcType=INTEGER}");
+		}
+		if (record.getIcus2() != null) {
+			sql.SET("icus___2 = #{icus2,jdbcType=INTEGER}");
+		}
+		if (record.getIcus3() != null) {
+			sql.SET("icus___3 = #{icus3,jdbcType=INTEGER}");
+		}
+		if (record.getIcus4() != null) {
+			sql.SET("icus___4 = #{icus4,jdbcType=INTEGER}");
+		}
+		if (record.getIcus5() != null) {
+			sql.SET("icus___5 = #{icus5,jdbcType=INTEGER}");
+		}
+		if (record.getIcus6() != null) {
+			sql.SET("icus___6 = #{icus6,jdbcType=INTEGER}");
+		}
+		if (record.getIcus7() != null) {
+			sql.SET("icus___7 = #{icus7,jdbcType=INTEGER}");
+		}
+		if (record.getIcus8() != null) {
+			sql.SET("icus___8 = #{icus8,jdbcType=INTEGER}");
+		}
+		if (record.getIcus9() != null) {
+			sql.SET("icus___9 = #{icus9,jdbcType=INTEGER}");
+		}
+		if (record.getIcuLos() != null) {
+			sql.SET("icu_los = #{icuLos,jdbcType=INTEGER}");
+		}
+		if (record.getHospitalLos() != null) {
+			sql.SET("hospital_los = #{hospitalLos,jdbcType=INTEGER}");
+		}
+		if (record.getReferredtocore() != null) {
+			sql.SET("referredtocore = #{referredtocore,jdbcType=INTEGER}");
+		}
+		if (record.getOrgandonor() != null) {
+			sql.SET("organdonor = #{organdonor,jdbcType=INTEGER}");
+		}
+		if (record.getNondonor() != null) {
+			sql.SET("nondonor = #{nondonor,jdbcType=INTEGER}");
+		}
+		if (record.getDonortype() != null) {
+			sql.SET("donortype = #{donortype,jdbcType=INTEGER}");
+		}
+		if (record.getProcured1() != null) {
+			sql.SET("procured___1 = #{procured1,jdbcType=INTEGER}");
+		}
+		if (record.getProcured2() != null) {
+			sql.SET("procured___2 = #{procured2,jdbcType=INTEGER}");
+		}
+		if (record.getProcured3() != null) {
+			sql.SET("procured___3 = #{procured3,jdbcType=INTEGER}");
+		}
+		if (record.getProcured4() != null) {
+			sql.SET("procured___4 = #{procured4,jdbcType=INTEGER}");
+		}
+		if (record.getProcured5() != null) {
+			sql.SET("procured___5 = #{procured5,jdbcType=INTEGER}");
+		}
+		if (record.getProcured6() != null) {
+			sql.SET("procured___6 = #{procured6,jdbcType=INTEGER}");
+		}
+		if (record.getProcured7() != null) {
+			sql.SET("procured___7 = #{procured7,jdbcType=INTEGER}");
+		}
+		if (record.getProcured8() != null) {
+			sql.SET("procured___8 = #{procured8,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted1() != null) {
+			sql.SET("transplanted___1 = #{transplanted1,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted2() != null) {
+			sql.SET("transplanted___2 = #{transplanted2,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted3() != null) {
+			sql.SET("transplanted___3 = #{transplanted3,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted4() != null) {
+			sql.SET("transplanted___4 = #{transplanted4,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted5() != null) {
+			sql.SET("transplanted___5 = #{transplanted5,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted6() != null) {
+			sql.SET("transplanted___6 = #{transplanted6,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted7() != null) {
+			sql.SET("transplanted___7 = #{transplanted7,jdbcType=INTEGER}");
+		}
+		if (record.getTransplanted8() != null) {
+			sql.SET("transplanted___8 = #{transplanted8,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments10() != null) {
+			sql.SET("study_enrollments___10 = #{studyEnrollments10,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments11() != null) {
+			sql.SET("study_enrollments___11 = #{studyEnrollments11,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments12() != null) {
+			sql.SET("study_enrollments___12 = #{studyEnrollments12,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments13() != null) {
+			sql.SET("study_enrollments___13 = #{studyEnrollments13,jdbcType=INTEGER}");
+		}
+		if (record.getStudyEnrollments14() != null) {
+			sql.SET("study_enrollments___14 = #{studyEnrollments14,jdbcType=INTEGER}");
+		}
+		if (record.getReferralEkg() != null) {
+			sql.SET("referral_ekg = #{referralEkg,jdbcType=INTEGER}");
+		}
+		if (record.getReferralPupils() != null) {
+			sql.SET("referral_pupils = #{referralPupils,jdbcType=INTEGER}");
+		}
+		if (record.getReferralCroneals() != null) {
+			sql.SET("referral_croneals = #{referralCroneals,jdbcType=INTEGER}");
+		}
+		if (record.getReferralMotor() != null) {
+			sql.SET("referral_motor = #{referralMotor,jdbcType=INTEGER}");
+		}
+		if (record.getComplete() != null) {
+			sql.SET("complete = #{complete,jdbcType=INTEGER}");
+		}
 		if (record.getReferringHospital() != null) {
 			sql.SET("referring_hospital = #{referringHospital,jdbcType=LONGVARCHAR}");
 		}
@@ -2178,6 +2858,9 @@ public class PatientSqlProvider {
 		if (record.getEtiologyOtherunknown() != null) {
 			sql.SET("etiology_otherunknown = #{etiologyOtherunknown,jdbcType=LONGVARCHAR}");
 		}
+		if (record.getPridScene() != null) {
+			sql.SET("prid_scene = #{pridScene,jdbcType=LONGVARCHAR}");
+		}
 		if (record.getServiceScene() != null) {
 			sql.SET("service_scene = #{serviceScene,jdbcType=LONGVARCHAR}");
 		}
@@ -2186,6 +2869,9 @@ public class PatientSqlProvider {
 		}
 		if (record.getSceneProvider() != null) {
 			sql.SET("scene_provider = #{sceneProvider,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getPridInterfacility() != null) {
+			sql.SET("prid_interfacility = #{pridInterfacility,jdbcType=LONGVARCHAR}");
 		}
 		if (record.getServiceInterfacility() != null) {
 			sql.SET("service_interfacility = #{serviceInterfacility,jdbcType=LONGVARCHAR}");
@@ -2576,6 +3262,21 @@ public class PatientSqlProvider {
 		}
 		if (record.getAwakeId() != null) {
 			sql.SET("awake_id = #{awakeId,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getService2Scene() != null) {
+			sql.SET("service2_scene = #{service2Scene,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getSceneProvider2() != null) {
+			sql.SET("scene_provider2 = #{sceneProvider2,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getPridScene2() != null) {
+			sql.SET("prid_scene2 = #{pridScene2,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getSceneChart2() != null) {
+			sql.SET("scene_chart2 = #{sceneChart2,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getLifelogic() != null) {
+			sql.SET("lifelogic = #{lifelogic,jdbcType=LONGVARCHAR}");
 		}
 		sql.WHERE("id = #{id,jdbcType=CHAR}");
 		return sql.toString();

@@ -182,9 +182,9 @@ $(document)
                             'dataType' : 'json',
                             'success' : function(data) {
                                 if(data.msg=="fail"){
-                                    window.alert("database has been locked, please unlock it before change");
-                                }else{
-                                    window.alert("Successfully imported "+data.num+" patients");
+                                    window.alert("Successfully imported "+data.num+" patients, line" +data.num+1 +"is wrong");
+                                }else {
+                                    window.alert("Successfully imported "+data.num+" patients, all done");
                                 }
 
                             },

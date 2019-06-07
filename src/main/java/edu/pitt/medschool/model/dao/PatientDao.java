@@ -152,7 +152,12 @@ public class PatientDao {
 
     public int insertPatinet(PatientWithBLOBs p){
         try{
-            patientMapper.insert(p);
+            PatientExample patientExample = new PatientExample();
+            PatientExample.Criteria criteria = patientExample.createCriteria();
+            criteria.andIdEqualTo(p.getId());
+            if(patientMapper.updateByExampleSelective(p,patientExample)==0){
+                patientMapper.insert(p);
+            };
             return 1;
         }catch (Exception e){
             e.printStackTrace();

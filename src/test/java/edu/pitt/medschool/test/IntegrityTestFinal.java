@@ -68,7 +68,10 @@ public class IntegrityTestFinal {
     static FileWriter writer;
 
     public static void checkPatientFiles(String pid, FileWriter fw) throws IOException {
-        String queryString = String.format("SELECT \"I192_1\" FROM \"%s\" GROUP BY * LIMIT 1;", pid);
+        String queryTemplate = "SELECT %s(\"I192_1\") FROM \"%s\" GROUP BY *;";
+
+        String queryString = String.format(queryTemplate, "first", pid);
+
         Query query = new Query(queryString, "data");
         QueryResult result = idb.query(query);
         List<FileInfo> fileInfoList = new ArrayList<>();
@@ -94,7 +97,7 @@ public class IntegrityTestFinal {
             fw.write("%%%%%%%%%%%%%%%%%%%%%%%%%\n");
         }
 
-        queryString = String.format("SELECT \"I192_1\" FROM \"%s\" GROUP BY * ORDER BY time DESC LIMIT 1;", pid);
+        queryString = String.format(queryTemplate, "last", pid);
         query = new Query(queryString, "data");
         result = idb.query(query);
         if (result.getResults().get(0).getSeries() != null) {
@@ -117,8 +120,6 @@ public class IntegrityTestFinal {
         for (FileInfo fileInfo : fileInfoList) {
             fw.write(
                     fileInfo.getStart() + "," + fileInfo.getEnd() + "," + fileInfo.getUuid() + "," + fileInfo.getName() + "\n");
-            // System.out.println(
-            // fileInfo.getStart() + "," + fileInfo.getEnd() + "," + fileInfo.getUuid() + "," + fileInfo.getName());
         }
     }
 
@@ -223,7 +224,9 @@ public class IntegrityTestFinal {
     }
 
     public static void main(String[] args) throws IOException {
-        checkPatientImpedenceFiles();
+        // checkPatientImpedenceFiles();
+        checkPatientFiles("PUH-2015-198", writer);
+
         // writer = new FileWriter(integrityFile);
         //
         // String queryString = String.format("Show measurements");

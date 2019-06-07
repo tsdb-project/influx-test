@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -70,15 +71,25 @@ public class ValidateCsvService {
             String header_time = reader.readLine().split(",")[1];
             header_time = header_time + " " + reader.readLine().split(",")[1];
             String pid;
+            String fn_laterpart;
             // PUH-20xx_xxx
             // UAB-010_xx
             // TBI-1001_xxx
             if (filename.startsWith("PUH-")) {
                 pid = filename.substring(0, 12).trim().toUpperCase();
+                fn_laterpart = filename.substring(12).toLowerCase();
             } else if (filename.startsWith("UAB")) {
                 pid = filename.substring(0, 7).trim().toUpperCase();
+                fn_laterpart = filename.substring(7).toLowerCase();
             } else {
                 pid = filename.substring(0, 8).trim().toUpperCase();
+                fn_laterpart = filename.substring(8).toLowerCase();
+            }
+            // Ar or NoAr
+            if (fn_laterpart.contains("noar")) {
+                validateBean.setAr(false);
+            } else if (fn_laterpart.contains("ar")) {
+                validateBean.setAr(true);
             }
             File file = new File(dir);
             int count = 1;
@@ -110,6 +121,7 @@ public class ValidateCsvService {
             validateBean.setUuid(processFirstLineInCSV(firstline, validateBean.getPid()));
             validateBean.setHeaderTime(LocalDateTime.ofInstant(strToDate(header_time).toInstant(), zoneId));
             validateBean.setMachine(machineId);
+            validateBean.setDensity((count*1.0)/(Duration.between(start,end).getSeconds()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -281,10 +293,10 @@ public class ValidateCsvService {
     public WrongPatientsNum getWrongPatientsNum(List<PatientTimeLine> patientTimeLines){
         WrongPatientsNum wrongPatientsNum = new WrongPatientsNum();
         ArrayList<Wrongpatients> wrongpatients = getWrongPatients(patientTimeLines);
-        Integer overlap = 0;
-        Integer missAr=0;
-        Integer missNoar = 0;
-        Integer wrongName = 0;
+        int overlap = 0;
+        int missAr=0;
+        int missNoar = 0;
+        int wrongName = 0;
         for(Wrongpatients w:wrongpatients){
             if(w.isWrongname()){
                 wrongName++;
