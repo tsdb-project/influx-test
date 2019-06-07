@@ -212,4 +212,16 @@ public class CsvFileDao {
     public int deleteRecord(Integer id){
         return csvFileMapper.deleteByPrimaryKey(id);
     }
+
+    public int addCsvFileHearderWidth(CsvFile file){
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria criteria = csvFileExample.createCriteria();
+        criteria.andFilenameEqualTo(file.getFilename());
+        criteria.andUuidEqualTo(file.getUuid());
+        criteria.andPidEqualTo(file.getPid());
+        CsvFile csvFile = new CsvFile();
+        csvFile.setWidth(file.getWidth());
+        csvFile.setHeaderTime(file.getHeaderTime());
+        return csvFileMapper.updateByExampleSelective(csvFile,csvFileExample);
+    }
 }

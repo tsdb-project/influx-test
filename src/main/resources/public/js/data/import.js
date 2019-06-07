@@ -92,7 +92,7 @@ $(document)
                             $("body").removeClass("data-table-toggled")) : (c.addClass("card--fullscreen"),
                             $("body").addClass("data-table-toggled"))
                         }
-                    })
+                    });
                     
                     
                     $('#selectAllFiles').click(function() {
