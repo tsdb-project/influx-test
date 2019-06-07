@@ -1,17 +1,18 @@
 package edu.pitt.medschool.service;
 
-import edu.pitt.medschool.controller.load.vo.ActivityVO;
-import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dao.ImportProgressDao;
-import edu.pitt.medschool.model.dto.ImportLog;
-import edu.pitt.medschool.model.dto.ImportProgress;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import edu.pitt.medschool.controller.load.vo.ActivityVO;
+import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dao.ImportProgressDao;
+import edu.pitt.medschool.model.dto.ImportLog;
+import edu.pitt.medschool.model.dto.ImportProgress;
 
 /**
  * Import progress service
@@ -71,7 +72,8 @@ public class ImportProgressService {
      * @param status             Current file status
      * @param failReason         Reason why failed
      */
-    public void UpdateFileProgress(String batchId, String fileName, long totalFileSize, long fileSize, long processedSize, long totalProcessedSize, FileProgressStatus status, String failReason) {
+    public void UpdateFileProgress(String batchId, String fileName, long totalFileSize, long fileSize, long processedSize,
+            long totalProcessedSize, FileProgressStatus status, String failReason) {
         double allPercent = 0, currPercent = 0;
         if (totalFileSize != 0)
             allPercent = 1.0 * totalProcessedSize / totalFileSize;
