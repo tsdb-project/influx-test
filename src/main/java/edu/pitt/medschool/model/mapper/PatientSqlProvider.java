@@ -89,12 +89,6 @@ public class PatientSqlProvider {
 		if (record.getEtiology() != null) {
 			sql.VALUES("etiology", "#{etiology,jdbcType=INTEGER}");
 		}
-		if (record.getPridScene() != null) {
-			sql.VALUES("prid_scene", "#{pridScene,jdbcType=INTEGER}");
-		}
-		if (record.getPridInterfacility() != null) {
-			sql.VALUES("prid_interfacility", "#{pridInterfacility,jdbcType=INTEGER}");
-		}
 		if (record.getPrehospitalRosc() != null) {
 			sql.VALUES("prehospital_rosc", "#{prehospitalRosc,jdbcType=INTEGER}");
 		}
@@ -281,9 +275,6 @@ public class PatientSqlProvider {
 		if (record.getRearrests() != null) {
 			sql.VALUES("rearrests", "#{rearrests,jdbcType=INTEGER}");
 		}
-		if (record.getPridScene2() != null) {
-			sql.VALUES("prid_scene2", "#{pridScene2,jdbcType=INTEGER}");
-		}
 		if (record.getAdmitUnit() != null) {
 			sql.VALUES("admit_unit", "#{admitUnit,jdbcType=INTEGER}");
 		}
@@ -425,6 +416,9 @@ public class PatientSqlProvider {
 		if (record.getEtiologyOtherunknown() != null) {
 			sql.VALUES("etiology_otherunknown", "#{etiologyOtherunknown,jdbcType=LONGVARCHAR}");
 		}
+		if (record.getPridScene() != null) {
+			sql.VALUES("prid_scene", "#{pridScene,jdbcType=LONGVARCHAR}");
+		}
 		if (record.getServiceScene() != null) {
 			sql.VALUES("service_scene", "#{serviceScene,jdbcType=LONGVARCHAR}");
 		}
@@ -433,6 +427,9 @@ public class PatientSqlProvider {
 		}
 		if (record.getSceneProvider() != null) {
 			sql.VALUES("scene_provider", "#{sceneProvider,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getPridInterfacility() != null) {
+			sql.VALUES("prid_interfacility", "#{pridInterfacility,jdbcType=LONGVARCHAR}");
 		}
 		if (record.getServiceInterfacility() != null) {
 			sql.VALUES("service_interfacility", "#{serviceInterfacility,jdbcType=LONGVARCHAR}");
@@ -830,6 +827,9 @@ public class PatientSqlProvider {
 		if (record.getSceneProvider2() != null) {
 			sql.VALUES("scene_provider2", "#{sceneProvider2,jdbcType=LONGVARCHAR}");
 		}
+		if (record.getPridScene2() != null) {
+			sql.VALUES("prid_scene2", "#{pridScene2,jdbcType=LONGVARCHAR}");
+		}
 		if (record.getSceneChart2() != null) {
 			sql.VALUES("scene_chart2", "#{sceneChart2,jdbcType=LONGVARCHAR}");
 		}
@@ -865,8 +865,6 @@ public class PatientSqlProvider {
 		sql.SELECT("witnessed");
 		sql.SELECT("bystander_cpr");
 		sql.SELECT("etiology");
-		sql.SELECT("prid_scene");
-		sql.SELECT("prid_interfacility");
 		sql.SELECT("prehospital_rosc");
 		sql.SELECT("arrival");
 		sql.SELECT("ca_type");
@@ -929,7 +927,6 @@ public class PatientSqlProvider {
 		sql.SELECT("bicarb");
 		sql.SELECT("airway");
 		sql.SELECT("rearrests");
-		sql.SELECT("prid_scene2");
 		sql.SELECT("admit_unit");
 		sql.SELECT("admit_floor");
 		sql.SELECT("icus___1");
@@ -977,9 +974,11 @@ public class PatientSqlProvider {
 		sql.SELECT("referring_physician");
 		sql.SELECT("referringfollowup");
 		sql.SELECT("etiology_otherunknown");
+		sql.SELECT("prid_scene");
 		sql.SELECT("service_scene");
 		sql.SELECT("scene_chart");
 		sql.SELECT("scene_provider");
+		sql.SELECT("prid_interfacility");
 		sql.SELECT("service_interfacility");
 		sql.SELECT("interfacility_chart");
 		sql.SELECT("interfacility_provider");
@@ -1112,6 +1111,7 @@ public class PatientSqlProvider {
 		sql.SELECT("awake_id");
 		sql.SELECT("service2_scene");
 		sql.SELECT("scene_provider2");
+		sql.SELECT("prid_scene2");
 		sql.SELECT("scene_chart2");
 		sql.SELECT("lifelogic");
 		sql.FROM("patient");
@@ -1148,8 +1148,6 @@ public class PatientSqlProvider {
 		sql.SELECT("witnessed");
 		sql.SELECT("bystander_cpr");
 		sql.SELECT("etiology");
-		sql.SELECT("prid_scene");
-		sql.SELECT("prid_interfacility");
 		sql.SELECT("prehospital_rosc");
 		sql.SELECT("arrival");
 		sql.SELECT("ca_type");
@@ -1212,7 +1210,6 @@ public class PatientSqlProvider {
 		sql.SELECT("bicarb");
 		sql.SELECT("airway");
 		sql.SELECT("rearrests");
-		sql.SELECT("prid_scene2");
 		sql.SELECT("admit_unit");
 		sql.SELECT("admit_floor");
 		sql.SELECT("icus___1");
@@ -1320,12 +1317,6 @@ public class PatientSqlProvider {
 		}
 		if (record.getEtiology() != null) {
 			sql.SET("etiology = #{record.etiology,jdbcType=INTEGER}");
-		}
-		if (record.getPridScene() != null) {
-			sql.SET("prid_scene = #{record.pridScene,jdbcType=INTEGER}");
-		}
-		if (record.getPridInterfacility() != null) {
-			sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=INTEGER}");
 		}
 		if (record.getPrehospitalRosc() != null) {
 			sql.SET("prehospital_rosc = #{record.prehospitalRosc,jdbcType=INTEGER}");
@@ -1513,9 +1504,6 @@ public class PatientSqlProvider {
 		if (record.getRearrests() != null) {
 			sql.SET("rearrests = #{record.rearrests,jdbcType=INTEGER}");
 		}
-		if (record.getPridScene2() != null) {
-			sql.SET("prid_scene2 = #{record.pridScene2,jdbcType=INTEGER}");
-		}
 		if (record.getAdmitUnit() != null) {
 			sql.SET("admit_unit = #{record.admitUnit,jdbcType=INTEGER}");
 		}
@@ -1657,6 +1645,9 @@ public class PatientSqlProvider {
 		if (record.getEtiologyOtherunknown() != null) {
 			sql.SET("etiology_otherunknown = #{record.etiologyOtherunknown,jdbcType=LONGVARCHAR}");
 		}
+		if (record.getPridScene() != null) {
+			sql.SET("prid_scene = #{record.pridScene,jdbcType=LONGVARCHAR}");
+		}
 		if (record.getServiceScene() != null) {
 			sql.SET("service_scene = #{record.serviceScene,jdbcType=LONGVARCHAR}");
 		}
@@ -1665,6 +1656,9 @@ public class PatientSqlProvider {
 		}
 		if (record.getSceneProvider() != null) {
 			sql.SET("scene_provider = #{record.sceneProvider,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getPridInterfacility() != null) {
+			sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=LONGVARCHAR}");
 		}
 		if (record.getServiceInterfacility() != null) {
 			sql.SET("service_interfacility = #{record.serviceInterfacility,jdbcType=LONGVARCHAR}");
@@ -2062,6 +2056,9 @@ public class PatientSqlProvider {
 		if (record.getSceneProvider2() != null) {
 			sql.SET("scene_provider2 = #{record.sceneProvider2,jdbcType=LONGVARCHAR}");
 		}
+		if (record.getPridScene2() != null) {
+			sql.SET("prid_scene2 = #{record.pridScene2,jdbcType=LONGVARCHAR}");
+		}
 		if (record.getSceneChart2() != null) {
 			sql.SET("scene_chart2 = #{record.sceneChart2,jdbcType=LONGVARCHAR}");
 		}
@@ -2095,8 +2092,6 @@ public class PatientSqlProvider {
 		sql.SET("witnessed = #{record.witnessed,jdbcType=INTEGER}");
 		sql.SET("bystander_cpr = #{record.bystanderCpr,jdbcType=INTEGER}");
 		sql.SET("etiology = #{record.etiology,jdbcType=INTEGER}");
-		sql.SET("prid_scene = #{record.pridScene,jdbcType=INTEGER}");
-		sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=INTEGER}");
 		sql.SET("prehospital_rosc = #{record.prehospitalRosc,jdbcType=INTEGER}");
 		sql.SET("arrival = #{record.arrival,jdbcType=TIMESTAMP}");
 		sql.SET("ca_type = #{record.caType,jdbcType=INTEGER}");
@@ -2159,7 +2154,6 @@ public class PatientSqlProvider {
 		sql.SET("bicarb = #{record.bicarb,jdbcType=INTEGER}");
 		sql.SET("airway = #{record.airway,jdbcType=INTEGER}");
 		sql.SET("rearrests = #{record.rearrests,jdbcType=INTEGER}");
-		sql.SET("prid_scene2 = #{record.pridScene2,jdbcType=INTEGER}");
 		sql.SET("admit_unit = #{record.admitUnit,jdbcType=INTEGER}");
 		sql.SET("admit_floor = #{record.admitFloor,jdbcType=INTEGER}");
 		sql.SET("icus___1 = #{record.icus1,jdbcType=INTEGER}");
@@ -2207,9 +2201,11 @@ public class PatientSqlProvider {
 		sql.SET("referring_physician = #{record.referringPhysician,jdbcType=LONGVARCHAR}");
 		sql.SET("referringfollowup = #{record.referringfollowup,jdbcType=LONGVARCHAR}");
 		sql.SET("etiology_otherunknown = #{record.etiologyOtherunknown,jdbcType=LONGVARCHAR}");
+		sql.SET("prid_scene = #{record.pridScene,jdbcType=LONGVARCHAR}");
 		sql.SET("service_scene = #{record.serviceScene,jdbcType=LONGVARCHAR}");
 		sql.SET("scene_chart = #{record.sceneChart,jdbcType=LONGVARCHAR}");
 		sql.SET("scene_provider = #{record.sceneProvider,jdbcType=LONGVARCHAR}");
+		sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=LONGVARCHAR}");
 		sql.SET("service_interfacility = #{record.serviceInterfacility,jdbcType=LONGVARCHAR}");
 		sql.SET("interfacility_chart = #{record.interfacilityChart,jdbcType=LONGVARCHAR}");
 		sql.SET("interfacility_provider = #{record.interfacilityProvider,jdbcType=LONGVARCHAR}");
@@ -2342,6 +2338,7 @@ public class PatientSqlProvider {
 		sql.SET("awake_id = #{record.awakeId,jdbcType=LONGVARCHAR}");
 		sql.SET("service2_scene = #{record.service2Scene,jdbcType=LONGVARCHAR}");
 		sql.SET("scene_provider2 = #{record.sceneProvider2,jdbcType=LONGVARCHAR}");
+		sql.SET("prid_scene2 = #{record.pridScene2,jdbcType=LONGVARCHAR}");
 		sql.SET("scene_chart2 = #{record.sceneChart2,jdbcType=LONGVARCHAR}");
 		sql.SET("lifelogic = #{record.lifelogic,jdbcType=LONGVARCHAR}");
 		PatientExample example = (PatientExample) parameter.get("example");
@@ -2372,8 +2369,6 @@ public class PatientSqlProvider {
 		sql.SET("witnessed = #{record.witnessed,jdbcType=INTEGER}");
 		sql.SET("bystander_cpr = #{record.bystanderCpr,jdbcType=INTEGER}");
 		sql.SET("etiology = #{record.etiology,jdbcType=INTEGER}");
-		sql.SET("prid_scene = #{record.pridScene,jdbcType=INTEGER}");
-		sql.SET("prid_interfacility = #{record.pridInterfacility,jdbcType=INTEGER}");
 		sql.SET("prehospital_rosc = #{record.prehospitalRosc,jdbcType=INTEGER}");
 		sql.SET("arrival = #{record.arrival,jdbcType=TIMESTAMP}");
 		sql.SET("ca_type = #{record.caType,jdbcType=INTEGER}");
@@ -2436,7 +2431,6 @@ public class PatientSqlProvider {
 		sql.SET("bicarb = #{record.bicarb,jdbcType=INTEGER}");
 		sql.SET("airway = #{record.airway,jdbcType=INTEGER}");
 		sql.SET("rearrests = #{record.rearrests,jdbcType=INTEGER}");
-		sql.SET("prid_scene2 = #{record.pridScene2,jdbcType=INTEGER}");
 		sql.SET("admit_unit = #{record.admitUnit,jdbcType=INTEGER}");
 		sql.SET("admit_floor = #{record.admitFloor,jdbcType=INTEGER}");
 		sql.SET("icus___1 = #{record.icus1,jdbcType=INTEGER}");
@@ -2536,12 +2530,6 @@ public class PatientSqlProvider {
 		}
 		if (record.getEtiology() != null) {
 			sql.SET("etiology = #{etiology,jdbcType=INTEGER}");
-		}
-		if (record.getPridScene() != null) {
-			sql.SET("prid_scene = #{pridScene,jdbcType=INTEGER}");
-		}
-		if (record.getPridInterfacility() != null) {
-			sql.SET("prid_interfacility = #{pridInterfacility,jdbcType=INTEGER}");
 		}
 		if (record.getPrehospitalRosc() != null) {
 			sql.SET("prehospital_rosc = #{prehospitalRosc,jdbcType=INTEGER}");
@@ -2729,9 +2717,6 @@ public class PatientSqlProvider {
 		if (record.getRearrests() != null) {
 			sql.SET("rearrests = #{rearrests,jdbcType=INTEGER}");
 		}
-		if (record.getPridScene2() != null) {
-			sql.SET("prid_scene2 = #{pridScene2,jdbcType=INTEGER}");
-		}
 		if (record.getAdmitUnit() != null) {
 			sql.SET("admit_unit = #{admitUnit,jdbcType=INTEGER}");
 		}
@@ -2873,6 +2858,9 @@ public class PatientSqlProvider {
 		if (record.getEtiologyOtherunknown() != null) {
 			sql.SET("etiology_otherunknown = #{etiologyOtherunknown,jdbcType=LONGVARCHAR}");
 		}
+		if (record.getPridScene() != null) {
+			sql.SET("prid_scene = #{pridScene,jdbcType=LONGVARCHAR}");
+		}
 		if (record.getServiceScene() != null) {
 			sql.SET("service_scene = #{serviceScene,jdbcType=LONGVARCHAR}");
 		}
@@ -2881,6 +2869,9 @@ public class PatientSqlProvider {
 		}
 		if (record.getSceneProvider() != null) {
 			sql.SET("scene_provider = #{sceneProvider,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getPridInterfacility() != null) {
+			sql.SET("prid_interfacility = #{pridInterfacility,jdbcType=LONGVARCHAR}");
 		}
 		if (record.getServiceInterfacility() != null) {
 			sql.SET("service_interfacility = #{serviceInterfacility,jdbcType=LONGVARCHAR}");
@@ -3277,6 +3268,9 @@ public class PatientSqlProvider {
 		}
 		if (record.getSceneProvider2() != null) {
 			sql.SET("scene_provider2 = #{sceneProvider2,jdbcType=LONGVARCHAR}");
+		}
+		if (record.getPridScene2() != null) {
+			sql.SET("prid_scene2 = #{pridScene2,jdbcType=LONGVARCHAR}");
 		}
 		if (record.getSceneChart2() != null) {
 			sql.SET("scene_chart2 = #{sceneChart2,jdbcType=LONGVARCHAR}");
