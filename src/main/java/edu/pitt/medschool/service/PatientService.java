@@ -43,6 +43,10 @@ public class PatientService {
         return patientDao.getAllPatientsComments();
     }
 
+    public PatientWithBLOBs getPatientInfoByPid(String patientId) {
+        return patientDao.getPatientInfoByPid(patientId);
+    }
+
     public int changePatientComment(String pid, String comment) {
         int changeCommentResult = 0;
         try {

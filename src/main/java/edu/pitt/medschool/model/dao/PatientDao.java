@@ -39,6 +39,10 @@ public class PatientDao {
         return patientMapper.selectByExample(pe);
     }
 
+    public PatientWithBLOBs getPatientInfoByPid(String patientId) {
+        return patientMapper.selectByPrimaryKey(patientId);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public int changePatientComment(String pid, String comment) {
         if(comment.equals("")){

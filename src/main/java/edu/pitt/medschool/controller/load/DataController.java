@@ -172,6 +172,14 @@ public class DataController {
         return response;
     }
 
+    @RequestMapping(value = "/apis/patient/getPatientInfoByPid")
+    @ResponseBody
+    public RestfulResponse getPatientInfoByPid(@RequestParam(name = "pid") String patientId) throws Exception{
+        RestfulResponse response = new RestfulResponse(1, "success");
+        response.setData(patientService.getPatientInfoByPid(patientId));
+        return response;
+    }
+
     @RequestMapping(value = "/apis/patient/changePatientComment")
     @ResponseBody
     public RestfulResponse changePatientComment(@RequestParam(name = "pid") String patientId,@RequestParam(name = "comment", required = false,defaultValue = "") String comment) throws Exception{

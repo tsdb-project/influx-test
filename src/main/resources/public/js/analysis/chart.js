@@ -83,17 +83,35 @@ $(document).ready(function() {
  	*/
 	// placeholder patient comment
 	var patientComments = new Map();
-	$.ajax({
-		type: "GET",
-		url: "/apis/patient/getAllPatientsComments",
-		async: false,
-		success : function(text)
-		{
-			for(r in text.data){
-				patientComments.set(text.data[r].id,text.data[r].comment);
+	// $.ajax({
+	// 	type: "GET",
+	// 	url: "/apis/patient/getAllPatientsComments",
+	// 	async: false,
+	// 	success : function(text)
+	// 	{
+	// 		for(r in text.data){
+	// 			patientComments.set(text.data[r].id,text.data[r].comment);
+	// 		}
+	// 	}
+	// });
+
+
+	var currentPatient;
+	function getPatientInfo(patientId) {
+		$.ajax({
+			type: "GET",
+			url: "/apis/patient/getPatientInfoByPid",
+			data:{
+				pid:patientId
+			},
+			async: false,
+			success : function(text)
+			{
+				currentPatient = text;
+				console.log(currentPatient);
 			}
-		}
-	});
+		});
+	}
 
 	var columns = [];
 
@@ -787,7 +805,14 @@ $(document).ready(function() {
 	});
 
 	 function findPatientFiles (pid) {
+	 	getPatientInfo(pid);
 		$("#card-patient-id").html(pid + '<strong id="patientComment"></strong>');
+		if(currentPatient.arresttime != null){
+			$("#patient-arrest-time").html("arrest time: " + '<strong id="arresttime">' + currentPatient.arresttime +' </strong>');
+		}
+
+
+
 		$("#comment-patient").html(pid);
 		$("#resolve-all-pid").html(pid);
 
