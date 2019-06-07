@@ -135,15 +135,9 @@ public class DataController {
     @ResponseBody
     public Map<String,Object> ImportPatinets(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model)
         throws Exception{
-        Map<String,Object> map = new HashMap<>();
-        int count = 0;
-            map.put("msg","success");
-            for (int i = 0; i<dir.getFiles().size();i++){
-                List<PatientWithBLOBs> patients = patientService.getPatientsFromCsv(dir.getFiles().get(i));
-                count+=patientService.insertPatients(patients);
-            }
-            System.out.println("**********************************Import finished**********************************");
-            map.put("num",count);
+        Map map = new HashMap<>();
+        map = patientService.getPatientsFromCsv(dir.getFiles().get(0));
+        System.out.println("**********************************Import finished**********************************");
 
         return map;
     }
