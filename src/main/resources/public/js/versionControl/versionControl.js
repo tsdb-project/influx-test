@@ -85,9 +85,9 @@ $(document).ready(function () {
             data :null,
             render : function(data,type,row,meta) {
                 return "<th><button class=\"btn btn-primary btn-sm\" data-toggle=\"modal\" data-target=\"#confirm-alert-modal\" data-row=\"" +
-                    meta.row + "\"><i class=\"zmdi zmdi-edit\"></i>Confirm</button> " +
+                    meta.row + "\">Confirm</button> " +
                     "<button class=\"btn btn-danger btn-sm\" data-toggle=\"modal\" data-target=\"#cancel-alert-modal\" data-row=\"" +
-                    meta.row + "\" ><i class=\"zmdi zmdi-close\"></i>Cancel</a></th>";
+                    meta.row + "\" >Cancel</a></th>";
             }
         }],
         order: [[0, 'desc']],
