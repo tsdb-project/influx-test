@@ -126,6 +126,7 @@ public class IntegrityTestFinal {
 			}
 		}
 
+<<<<<<< HEAD
 		queryString = String.format(queryTemplate, "count", pid);
 		query = new Query(queryString, "data");
 		result = idb.query(query);
@@ -145,6 +146,16 @@ public class IntegrityTestFinal {
 				}
 			}
 		}
+=======
+    public static void checkPatientFiles(String pid, FileWriter fw) throws IOException {
+        String queryTemplate = "SELECT %s(\"I192_1\") FROM \"%s\" GROUP BY *;";
+
+        String queryString = String.format(queryTemplate, "first", pid);
+
+        Query query = new Query(queryString, "data");
+        QueryResult result = idb.query(query);
+        List<FileInfo> fileInfoList = new ArrayList<>();
+>>>>>>> 2437d304159342ea9959b2c66230eb6331b1c778
 
 		for (FileInfo fileInfo : fileInfoList) {
 			fw.write(fileInfo.getName() + "," + fileInfo.getStart() + "," + fileInfo.getEnd() + ","
@@ -152,6 +163,7 @@ public class IntegrityTestFinal {
 		}
 	}
 
+<<<<<<< HEAD
 	public static void checkPatientImpedenceFiles() throws IOException {
 		FileWriter impedenceWriter = new FileWriter(impedenceFile);
 		impedenceWriter.write("time,value,count\n");
@@ -258,9 +270,37 @@ public class IntegrityTestFinal {
 
 	public static void main(String[] args) throws IOException {
 		// checkPatientImpedenceFiles();
+=======
+        queryString = String.format(queryTemplate, "last", pid);
+        query = new Query(queryString, "data");
+        result = idb.query(query);
+        if (result.getResults().get(0).getSeries() != null) {
+            for (Result e : result.getResults()) {
+                for (Series s : e.getSeries()) {
+                    for (List<Object> o : s.getValues()) {
+                        for (int i = 0; i < fileInfoList.size(); i++) {
+                            if (fileInfoList.get(i).getName().equals(s.getTags().get("fileName"))
+                                    && fileInfoList.get(i).getUuid().equals(s.getTags().get("fileUUID"))) {
+                                FileInfo info = fileInfoList.get(i);
+                                info.setEnd(o.get(0).toString());
+                                fileInfoList.set(i, info);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (FileInfo fileInfo : fileInfoList) {
+            fw.write(
+                    fileInfo.getStart() + "," + fileInfo.getEnd() + "," + fileInfo.getUuid() + "," + fileInfo.getName() + "\n");
+        }
+    }
+>>>>>>> 2437d304159342ea9959b2c66230eb6331b1c778
 
 		writer = new FileWriter(integrityFile);
 
+<<<<<<< HEAD
 		String[] pidsArr = new String[] { "PUH-2015-198" };
 		for (String pid : pidsArr) {
 			System.out.println(pid);
@@ -269,6 +309,33 @@ public class IntegrityTestFinal {
 		}
 		writer.close();
 	}
+=======
+    public static void main(String[] args) throws IOException {
+        // checkPatientImpedenceFiles();
+        checkPatientFiles("PUH-2015-198", writer);
+
+        // writer = new FileWriter(integrityFile);
+        //
+        // String queryString = String.format("Show measurements");
+        // Query query = new Query(queryString, "data");
+        // QueryResult result = idb.query(query);
+        // List<List<Object>> pids = result.getResults().get(0).getSeries().get(0).getValues();
+        // int i = 0;
+        // for (List<Object> list : pids) {
+        // i++;
+        // String pid = list.get(0).toString();
+        // if (pid.equals("PUH-2015-123")) {
+        // System.out.println(pid);
+        // writer.write(pid + "\n");
+        // checkPatientFiles(pid, writer);
+        // }
+        // if (i > 5) {
+        // // break;
+        // }
+        // }
+        // writer.close();
+    }
+>>>>>>> 2437d304159342ea9959b2c66230eb6331b1c778
 
 	private static InfluxDB generateIdbClient(boolean needGzip) {
 		InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME,

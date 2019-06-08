@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import edu.pitt.medschool.model.WrongPatientsNum;
+import edu.pitt.medschool.model.dto.CsvFileExample;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -96,7 +97,9 @@ public class ValidateCsvService {
             for (int j = 0; j < 2; j++) {
                 reader.readLine();
             }
-            Double start_time = Double.valueOf(reader.readLine().split(",")[0]);
+            String[] firstdata = reader.readLine().split(",");
+            Double start_time = Double.valueOf(firstdata[0]);
+            validateBean.setWidth(firstdata.length);
             String end_time = null;
             while ((line = reader.readLine()) != null) {
                 end_time = line;
@@ -293,10 +296,10 @@ public class ValidateCsvService {
     public WrongPatientsNum getWrongPatientsNum(List<PatientTimeLine> patientTimeLines){
         WrongPatientsNum wrongPatientsNum = new WrongPatientsNum();
         ArrayList<Wrongpatients> wrongpatients = getWrongPatients(patientTimeLines);
-        Integer overlap = 0;
-        Integer missAr=0;
-        Integer missNoar = 0;
-        Integer wrongName = 0;
+        int overlap = 0;
+        int missAr=0;
+        int missNoar = 0;
+        int wrongName = 0;
         for(Wrongpatients w:wrongpatients){
             if(w.isWrongname()){
                 wrongName++;
@@ -316,5 +319,9 @@ public class ValidateCsvService {
         wrongPatientsNum.setOverlap(overlap);
         wrongPatientsNum.setWrongName(wrongName);
         return wrongPatientsNum;
+    }
+
+    public int addCsvFileHearderWidth(CsvFile csvFile){
+        return csvFileDao.addCsvFileHearderWidth(csvFile);
     }
 }

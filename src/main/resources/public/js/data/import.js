@@ -92,7 +92,7 @@ $(document)
                             $("body").removeClass("data-table-toggled")) : (c.addClass("card--fullscreen"),
                             $("body").addClass("data-table-toggled"))
                         }
-                    })
+                    });
                     
                     
                     $('#selectAllFiles').click(function() {
@@ -182,9 +182,9 @@ $(document)
                             'dataType' : 'json',
                             'success' : function(data) {
                                 if(data.msg=="fail"){
-                                    window.alert("database has been locked, please unlock it before change");
-                                }else{
-                                    window.alert("Successfully imported "+data.num+" patients");
+                                    window.alert("Successfully imported "+data.num+" patients, line" +data.num+1 +"is wrong");
+                                }else {
+                                    window.alert("Successfully imported "+data.num+" patients, all done");
                                 }
 
                             },

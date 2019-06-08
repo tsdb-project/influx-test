@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import edu.pitt.medschool.model.dto.CsvFile;
 import org.apache.commons.lang3.StringUtils;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
@@ -47,6 +46,7 @@ import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.FeatureDao;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.InfluxClusterDao;
+import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.Feature;
 import edu.pitt.medschool.model.dto.ImportedFile;
 
@@ -275,14 +275,14 @@ public class ImportCsvService {
         long currentProcessed = 0;
         String filename = file.getFileName().toString();
         long totalLines = 0;
-
+        String fileUUID = "";
         try {
             BufferedReader reader = Files.newBufferedReader(file);
             CSVReader csvReader = new CSVReader(reader);
 
             // First line contains some curcial info
             String firstLine = reader.readLine();
-            String fileUUID = processFirstLineInCSV(firstLine, pid);
+            fileUUID = processFirstLineInCSV(firstLine, pid);
             currentProcessed = firstLine.length();
             totalProcessedSize.addAndGet(firstLine.length());
 
@@ -486,7 +486,7 @@ public class ImportCsvService {
             idb.close();
         }
 
-        return new Object[] { "OK", currentProcessed, totalLines };
+        return new Object[] { "OK", currentProcessed, totalLines, fileUUID };
     }
 
     /**
@@ -532,12 +532,14 @@ public class ImportCsvService {
                 iff.setFilelines(((Long) impStr[2]).intValue());
                 iff.setUuid(taskUUID);
                 importedFileDao.insert(iff);
+
                 // add data to csv_file table
-                CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath,fileName);
+                CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath, fileName);
                 csvFile.setStatus(2);
                 validateCsvService.insertCsvFile(csvFile);
                 // add data to csv_log
-                versionControlService.setLog(csvFile,0);
+                versionControlService.setLog(csvFile, 0);
+
             } catch (Exception e) {
                 logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileFullPath,
                         Util.stackTraceErrorToString(e)));
@@ -593,6 +595,7 @@ public class ImportCsvService {
     private void logSuccessFiles(String fn, long thisFileSize, long thisFileProcessedSize) {
         importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize,
                 totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FINISHED, null);
+
     }
 
     private void logImportingFile(String fn, long thisFileSize, long thisFileProcessedSize, long currentLine) {

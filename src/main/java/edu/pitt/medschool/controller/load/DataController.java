@@ -6,7 +6,6 @@ package edu.pitt.medschool.controller.load;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import edu.pitt.medschool.model.dto.PatientWithBLOBs;
 import edu.pitt.medschool.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -38,6 +37,9 @@ public class DataController {
     RawDataService rawDataService;
     @Autowired
     VersionControlService versionControlService;
+
+    @Autowired
+    TemplateService templateService;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -118,15 +120,26 @@ public class DataController {
     @ResponseBody
     public Map<String, Object> importDir(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model) {
         Map<String, Object> map = new HashMap<>();
-            map.put("msg","success");
-            String[] allAR = new String[dir.getFiles().size()];
+        map.put("msg","success");
+        String[] allAR = new String[dir.getFiles().size()];
+        for (int i = 0; i < allAR.length; i++) {
+            allAR[i] = dir.getFiles().get(i);
+        }
+        importCsvService.AddArrayFiles(allAR);
+        return map;
+    }
 
-            for (int i = 0; i < allAR.length; i++) {
-                allAR[i] = dir.getFiles().get(i);
-            }
-
-            importCsvService.AddArrayFiles(allAR);
-
+    // analysis existing patients to add header time and column count
+    @RequestMapping(value = "api/data/validate")
+    @ResponseBody
+    public Map<String,Object> analysis(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model){
+        Map<String, Object> map = new HashMap<>();
+        map.put("msg","success");
+        String[] allfiles = new String[dir.getFiles().size()];
+        for(int i=0;i<allfiles.length;i++){
+            allfiles[i] = dir.getFiles().get(i);
+        }
+        templateService.AddArrayFiles(allfiles);
         return map;
     }
 
@@ -135,15 +148,9 @@ public class DataController {
     @ResponseBody
     public Map<String,Object> ImportPatinets(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model)
         throws Exception{
-        Map<String,Object> map = new HashMap<>();
-        int count = 0;
-            map.put("msg","success");
-            for (int i = 0; i<dir.getFiles().size();i++){
-                List<PatientWithBLOBs> patients = patientService.getPatientsFromCsv(dir.getFiles().get(i));
-                count+=patientService.insertPatients(patients);
-            }
-            System.out.println("**********************************Import finished**********************************");
-            map.put("num",count);
+        Map map = new HashMap<>();
+        map = patientService.getPatientsFromCsv(dir.getFiles().get(0));
+        System.out.println("**********************************Import finished**********************************");
 
         return map;
     }
