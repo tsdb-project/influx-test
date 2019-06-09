@@ -2,11 +2,9 @@ package edu.pitt.medschool.service;
 
 
 import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.util.FileLockUtil;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dto.CsvFile;
-import edu.pitt.medschool.model.dto.ImportedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,7 +133,7 @@ public class TemplateService {
 
         try {
             // add data to csv_file table
-            CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath, fileName);
+            CsvFile csvFile = validateCsvService.getHeaderTime(fileFullPath, fileName);
             // change to update
             validateCsvService.addCsvFileHearderWidth(csvFile);
 
