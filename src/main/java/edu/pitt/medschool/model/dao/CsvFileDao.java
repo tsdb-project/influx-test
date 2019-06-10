@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.pitt.medschool.model.dto.NotInCsvFile;
+import edu.pitt.medschool.model.mapper.NotInCsvFileMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,12 @@ import edu.pitt.medschool.model.mapper.CsvFileMapper;
 public class CsvFileDao {
     @Autowired
     CsvFileMapper csvFileMapper;
+
+    @Autowired
+    NotInCsvFileMapper notInCsvFileMapper;
+
+//    @Autowired
+//    CsvLogMapper csvLogMapper;
 
     @Value("${machine}")
     private String machineId;
@@ -208,5 +216,24 @@ public class CsvFileDao {
 
     public int deleteRecord(Integer id){
         return csvFileMapper.deleteByPrimaryKey(id);
+    }
+
+    public int addCsvFileHearderWidth(CsvFile file){
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria criteria = csvFileExample.createCriteria();
+        criteria.andFilenameEqualTo(file.getFilename());
+        criteria.andUuidEqualTo(file.getUuid());
+        criteria.andPidEqualTo(file.getPid());
+        CsvFile csvFile = new CsvFile();
+        csvFile.setWidth(file.getWidth());
+        csvFile.setHeaderTime(file.getHeaderTime());
+        if(csvFileMapper.selectByExample(csvFileExample).isEmpty()){
+            NotInCsvFile notInCsvFile = new NotInCsvFile();
+            notInCsvFile.setPid(file.getPid());
+            notInCsvFile.setFilename(file.getFilename());
+            notInCsvFile.setUuid(file.getUuid());
+            notInCsvFileMapper.insert(notInCsvFile);
+        }
+        return csvFileMapper.updateByExampleSelective(csvFile,csvFileExample);
     }
 }

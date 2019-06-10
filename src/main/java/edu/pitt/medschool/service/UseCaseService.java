@@ -236,7 +236,7 @@ public class UseCaseService {
                     String template = "select %s from \"%s\" where arType = 'ar' and time >= '%s' + %ds and time <= '%s' + %ds group by time(1s) fill(null)";
 
                     String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId
-                            + "\" where arType = 'ar' limit 1 offset 120";
+                            + "\" where arType = 'ar' limit 1 offset 30";
                     QueryResult recordResult = influxDB.query(new Query(firstRecordTimeQuery, dbName));
                     String firstRecordTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0)
                             .toString();

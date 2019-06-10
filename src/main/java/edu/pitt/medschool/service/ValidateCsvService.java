@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import edu.pitt.medschool.model.WrongPatientsNum;
+import edu.pitt.medschool.model.dto.CsvFileExample;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +60,53 @@ public class ValidateCsvService {
         return fLine.substring(fLine.length() - 40, fLine.length() - 4);
     }
 
+    public CsvFile getHeaderTime(String dir, String filename){
+        CsvFile validateBean = new CsvFile();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(dir));
+            String firstline = reader.readLine();
+            for (int i = 0; i < 3; i++) {
+                reader.readLine();
+            }
+            String header_time = reader.readLine().split(",")[1];
+            header_time = header_time + " " + reader.readLine().split(",")[1];
+            String pid;
+            // PUH-20xx_xxx
+            // UAB-010_xx
+            // TBI-1001_xxx
+            if (filename.startsWith("PUH-")) {
+                pid = filename.substring(0, 12).trim().toUpperCase();
+
+            } else if (filename.startsWith("UAB")) {
+                pid = filename.substring(0, 7).trim().toUpperCase();
+
+            } else {
+                pid = filename.substring(0, 8).trim().toUpperCase();
+
+            }
+
+            File file = new File(dir);
+            for (int j = 0; j < 2; j++) {
+                reader.readLine();
+            }
+            String[] firstdata = reader.readLine().split(",");
+            validateBean.setWidth(firstdata.length);
+
+            reader.close();
+
+            ZoneId zoneId = ZoneId.of("America/New_York");
+
+            validateBean.setFilename(file.getName());
+            validateBean.setPid(pid);
+            validateBean.setUuid(processFirstLineInCSV(firstline, validateBean.getPid()));
+            validateBean.setHeaderTime(LocalDateTime.ofInstant(strToDate(header_time).toInstant(), zoneId));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return validateBean;
+
+    }
+
     public CsvFile analyzeCsv(String dir,String filename) {
         CsvFile validateBean = new CsvFile();
         try {
@@ -96,7 +144,9 @@ public class ValidateCsvService {
             for (int j = 0; j < 2; j++) {
                 reader.readLine();
             }
-            Double start_time = Double.valueOf(reader.readLine().split(",")[0]);
+            String[] firstdata = reader.readLine().split(",");
+            Double start_time = Double.valueOf(firstdata[0]);
+            validateBean.setWidth(firstdata.length);
             String end_time = null;
             while ((line = reader.readLine()) != null) {
                 end_time = line;
@@ -316,5 +366,9 @@ public class ValidateCsvService {
         wrongPatientsNum.setOverlap(overlap);
         wrongPatientsNum.setWrongName(wrongName);
         return wrongPatientsNum;
+    }
+
+    public int addCsvFileHearderWidth(CsvFile csvFile){
+        return csvFileDao.addCsvFileHearderWidth(csvFile);
     }
 }

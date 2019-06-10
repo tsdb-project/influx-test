@@ -288,7 +288,9 @@ public class AnalysisService {
                     }
                     // Then fetch meta data regrading file segments and build the query string
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
-                    ExportQueryBuilder eq = new ExportQueryBuilder(
+                    // get the startTime eliminate first 30 rows
+                    String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,patientId,job.getAr());
+                    ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime),
                             Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
                             job.getAr());
                     String finalQueryString = eq.getQueryString();
@@ -406,11 +408,8 @@ public class AnalysisService {
             InfluxDB influxDB = generateIdbClient(false);
             Set<String> patients = new HashSet<String>();
             for (Medication medication : medicalRecordList_first) {
-                List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, medication.getId());
-                ExportMedicalQueryBuilder eq = new ExportMedicalQueryBuilder(Instant.now(), dtsb, groups, columns, exportQuery,
-                        job.getAr(), medication);
-                Instant valid = eq.getFirstAvailData();
-                if (valid.compareTo(medication.getChartDate().toInstant()) < 0) {
+                String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,medication.getId(),job.getAr());
+                if (Instant.parse(startTime).compareTo(medication.getChartDate().toInstant()) < 0) {
                     patients.add(medication.getId());
                 }
             }
@@ -531,7 +530,8 @@ public class AnalysisService {
                     }
                     // Then fetch meta data regrading file segments and build the query string
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, onerecord.getId());
-                    ExportMedicalQueryBuilder eq = new ExportMedicalQueryBuilder(
+                    String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,onerecord.getId(),job.getAr());
+                    ExportMedicalQueryBuilder eq = new ExportMedicalQueryBuilder(Instant.parse(startTime),
                             Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
                             job.getAr(), onerecord);
                     String finalQueryStrings = eq.getQueryString();
@@ -732,7 +732,8 @@ public class AnalysisService {
             }
             // Then fetch meta data regrading file segments and build the query string
             List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, eegChart.getPatientID());
-            ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb,
+            String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,eegChart.getPatientID(),eegChart.isAr());
+            ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime), Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb,
                     groups, columns, downsample, eegChart.isAr());
             String finalQueryString = eq.getQueryString();
             if (finalQueryString.isEmpty()) {
@@ -741,6 +742,7 @@ public class AnalysisService {
             logger.info(finalQueryString);
             // Execuate the query
             res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
+            logger.info("res finished");
             // covert res to map or list and return list
             int dataRows = res[0].getRowCount();
             for (int i = 0; i < dataRows; i++) {
@@ -750,6 +752,7 @@ public class AnalysisService {
                 rows.add(tmp);
             }
         } catch (Exception ee) {
+            ee.printStackTrace();
             logger.info("get eeg chart data failed");
         }
         influxDB.close();

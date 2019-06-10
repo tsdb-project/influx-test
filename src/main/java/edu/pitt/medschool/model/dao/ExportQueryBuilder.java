@@ -19,7 +19,7 @@ import edu.pitt.medschool.model.dto.DownsampleGroup;
 public class ExportQueryBuilder {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    static final int TRIMMING_OFFSET = 120;
+    static final int TRIMMING_OFFSET = 30;
 
     private static class Template {
         static final String defaultDownsampleColName = "ds_label_";
@@ -70,7 +70,7 @@ public class ExportQueryBuilder {
      * @param ds            Downsample itself
      * @param needAr        This job is Ar or NoAr
      */
-    public ExportQueryBuilder(Instant fakeStartTime, List<DataTimeSpanBean> dts, List<DownsampleGroup> v,
+    public ExportQueryBuilder(Instant startTime, Instant fakeStartTime, List<DataTimeSpanBean> dts, List<DownsampleGroup> v,
             List<List<String>> columns, Downsample ds, boolean needAr) {
         // no available data
         if (dts == null || dts.isEmpty()) {
@@ -85,7 +85,7 @@ public class ExportQueryBuilder {
 
         populateDownsampleGroup(v);
         populateDownsampleData(ds);
-        findValidFirstLastData();
+        findValidFirstLastData(startTime);
 
         // If no available data then stop building
         if (this.validTimeSpanIds.isEmpty()) {
@@ -96,7 +96,7 @@ public class ExportQueryBuilder {
             this.queryEndTime = this.firstAvailData.plusSeconds(this.exportTotalDuration);
         }
         if (this.exportStartOffset > 0) {
-            this.queryStartTime = this.firstAvailData.plusSeconds(this.exportStartOffset);
+            this.queryStartTime = this.queryStartTime.plusSeconds(this.exportStartOffset);
             this.queryEndTime = this.lastAvailData.plusSeconds(this.exportStartOffset);
         }
         calcOffsetInSeconds(fakeStartTime);
@@ -122,14 +122,14 @@ public class ExportQueryBuilder {
     }
 
     private void populateDownsampleData(Downsample ds) {
-        this.exportStartOffset = ds.getOrigin() + TRIMMING_OFFSET;
+        this.exportStartOffset = ds.getOrigin();
         this.downsampleInterval = ds.getPeriod();
         this.isDownSampleFirst = ds.getDownsampleFirst();
         this.exportTotalDuration = ds.getDuration();
     }
 
     // Find first, last data and if ArType matches
-    private void findValidFirstLastData() {
+    private void findValidFirstLastData(Instant starttime) {
         for (int i = 0; i < this.numDataSegments; i++) {
             DataTimeSpanBean d = this.timeseriesMetadata.get(i);
             if (!isDataArTypeGood(d)) {
@@ -143,6 +143,7 @@ public class ExportQueryBuilder {
             if (tmpE.compareTo(this.lastAvailData) > 0)
                 this.queryEndTime = this.lastAvailData = tmpE;
         }
+        this.queryStartTime = starttime;
     }
 
     public String getQueryString() {
