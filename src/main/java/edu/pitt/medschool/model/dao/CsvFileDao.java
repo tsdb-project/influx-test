@@ -23,9 +23,6 @@ public class CsvFileDao {
     @Autowired
     CsvFileMapper csvFileMapper;
 
-//    @Autowired
-//    CsvLogMapper csvLogMapper;
-
     @Value("${machine}")
     private String machineId;
 
@@ -70,16 +67,16 @@ public class CsvFileDao {
 //        csvFileCriteria.andMachineEqualTo(machineId);
         csvFileCriteria.andUuidEqualTo(file.getUuid());
 
-        int changeComment = csvFileMapper.updateByExample(file, csvFileExample);
+        int changeCommentResult = csvFileMapper.updateByExample(file, csvFileExample);
         try {
-            if (changeComment == 0) {
+            if (changeCommentResult == 0) {
                 throw new Exception();
             }
         } catch (Exception e) {
             logger.error("No CSV file record available!");
             throw e;
         }
-        return changeComment;
+        return changeCommentResult;
     }
 
 

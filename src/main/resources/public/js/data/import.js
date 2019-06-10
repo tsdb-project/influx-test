@@ -162,35 +162,35 @@ $(document)
                     });
 
                     // new for import patients
-                    $("#importPatients").click(function() {
-                        $("#importPatients").attr('disabled', '');
-
-                        var data = {
-                            'files' : []
-                        };
-                        $.each($('.file-checkbox:checked'), function() {
-                            data['files'].push($(this).val());
-                        });
-
-                        var files = data;
-
-                        $.ajax({
-                            'url' : "/api/data/importPatients",
-                            'type' : 'post',
-                            'data' : JSON.stringify(files),
-                            'contentType' : "application/json",
-                            'dataType' : 'json',
-                            'success' : function(data) {
-                                if(data.msg=="fail"){
-                                    window.alert("Successfully imported "+data.num+" patients, line" +data.num+1 +"is wrong");
-                                }else {
-                                    window.alert("Successfully imported "+data.num+" patients, all done");
-                                }
-
-                            },
-                            'error' : function() {
-                            }
-                        });
-
-                    });
+                    // $("#importPatients").click(function() {
+                    //     $("#importPatients").attr('disabled', '');
+                    //
+                    //     var data = {
+                    //         'files' : []
+                    //     };
+                    //     $.each($('.file-checkbox:checked'), function() {
+                    //         data['files'].push($(this).val());
+                    //     });
+                    //
+                    //     var files = data;
+                    //
+                    //     $.ajax({
+                    //         'url' : "/api/data/importPatients",
+                    //         'type' : 'post',
+                    //         'data' : JSON.stringify(files),
+                    //         'contentType' : "application/json",
+                    //         'dataType' : 'json',
+                    //         'success' : function(data) {
+                    //             if(data.msg=="fail"){
+                    //                 window.alert("Successfully imported "+data.num+" patients, line" +data.num+1 +"is wrong");
+                    //             }else {
+                    //                 window.alert("Successfully imported "+data.num+" patients, all done");
+                    //             }
+                    //
+                    //         },
+                    //         'error' : function() {
+                    //         }
+                    //     });
+                    //
+                    // });
                 });

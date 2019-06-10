@@ -5,13 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.pitt.medschool.model.dto.PatientWithBLOBs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.MysqlColumnBean;
@@ -55,10 +52,9 @@ public class PatientController {
         return map;
     }
 
-    @RequestMapping(value = "/patients/{idx}", method = RequestMethod.GET)
-    public Patient getOnePatientByIndex(@PathVariable String idx) {
-        List<Patient> p = patientDao.selectById(idx);
-        return p.get(0);
+    @RequestMapping(value = "/patients/{pid}", method = RequestMethod.GET)
+    public PatientWithBLOBs getOnePatientByPid(@PathVariable String pid) {
+        return patientService.getPatientByPid(pid);
     }
 
     @RequestMapping(value = "/patients/find", method = RequestMethod.POST)
@@ -72,5 +68,13 @@ public class PatientController {
     @RequestMapping(value = "/patients/columns", method = RequestMethod.GET)
     public List<MysqlColumnBean> getColumnInfo() {
         return patientService.getColumnInfo();
+    }
+
+    @PostMapping(value = "/patient/updatePatientInfo")
+    @ResponseBody
+    public RestfulResponse updatePatientInfo(@RequestBody(required = true) PatientWithBLOBs patient) throws Exception{
+        RestfulResponse response = new RestfulResponse(1, "success");
+        response.setData(patientService.updatePatientInfo(patient));
+        return response;
     }
 }

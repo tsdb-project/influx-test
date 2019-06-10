@@ -2,6 +2,8 @@ package edu.pitt.medschool.model.dao;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,8 @@ import edu.pitt.medschool.model.mapper.PatientMapper;
 public class PatientDao {
     @Autowired
     PatientMapper patientMapper;
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Transactional(rollbackFor = Exception.class)
     public int insert(PatientWithBLOBs p) throws Exception {
@@ -39,21 +43,21 @@ public class PatientDao {
         return patientMapper.selectByExample(pe);
     }
 
-    public PatientWithBLOBs getPatientInfoByPid(String patientId) {
-        return patientMapper.selectByPrimaryKey(patientId);
-    }
-
     @Transactional(rollbackFor = Exception.class)
-    public int changePatientComment(String pid, String comment) {
-        if(comment.equals("")){
-            return patientMapper.deletePatientComment(pid);
-        }else{
-            PatientExample pe = new PatientExample();
-            pe.createCriteria().andIdEqualTo(pid);
-            PatientWithBLOBs patient = new PatientWithBLOBs();
-            patient.setComment(comment);
-            return patientMapper.updateByExampleSelective(patient,pe);
+    public int updatePatientInfo(PatientWithBLOBs patient) throws Exception  {
+        PatientExample pe = new PatientExample();
+        pe.createCriteria().andIdEqualTo(patient.getId().toUpperCase());
+
+        int changeCommentResult = patientMapper.updateByExampleWithBLOBs(patient,pe);
+        try {
+            if (changeCommentResult == 0) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            logger.error("CANNOT FIND THIS PATIENT!");
+            throw e;
         }
+        return changeCommentResult;
     }
 
 
@@ -67,10 +71,8 @@ public class PatientDao {
         return patientMapper.selectByExample(pe);
     }
 
-    public List<Patient> selectById(String pid) {
-        PatientExample pe = new PatientExample();
-        pe.createCriteria().andIdEqualTo(pid.toUpperCase());
-        return patientMapper.selectByExample(pe);
+    public PatientWithBLOBs selectById(String pid) {
+        return patientMapper.selectByPrimaryKey(pid.toUpperCase());
     }
 
     public List<Patient> selectAll() {

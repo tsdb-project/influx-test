@@ -46,18 +46,18 @@ public class PatientService {
         return patientDao.getAllPatientsComments();
     }
 
-    public PatientWithBLOBs getPatientInfoByPid(String patientId) {
-        return patientDao.getPatientInfoByPid(patientId);
+    public PatientWithBLOBs getPatientByPid(String patientId) {
+        return patientDao.selectById(patientId);
     }
 
-    public int changePatientComment(String pid, String comment) {
-        int changeCommentResult = 0;
+    public int updatePatientInfo(PatientWithBLOBs patient) {
+        int updateResult = 0;
         try {
-            changeCommentResult = patientDao.changePatientComment(pid,comment);
+            updateResult = patientDao.updatePatientInfo(patient);
         }catch (Exception e){
-            logger.debug("PATIENT CHANGE COMMENT FAILED!");
+            logger.debug("PATIENT INFO UPDATE FAILED!");
         }
-        return changeCommentResult;
+        return updateResult;
     }
 
     // Transfer MM/DD/YY HH:MM to yyyy-MM-dd HH:mm:ss
