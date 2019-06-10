@@ -66,7 +66,7 @@ public class ExportMedicalQueryBuilder {
      * @param ds            MedicalDownsample itself
      * @param needAr        This job is Ar or NoAr
      */
-    public ExportMedicalQueryBuilder(Instant fakeStartTime, List<DataTimeSpanBean> dts, List<MedicalDownsampleGroup> v, List<List<String>> columns,
+    public ExportMedicalQueryBuilder(Instant startTime, Instant fakeStartTime, List<DataTimeSpanBean> dts, List<MedicalDownsampleGroup> v, List<List<String>> columns,
                                      MedicalDownsample ds, boolean needAr, Medication records) {
     	 if (dts == null || dts.isEmpty()) {
              return;
@@ -88,7 +88,7 @@ public class ExportMedicalQueryBuilder {
          if (this.exportTotalDuration > 0) {
              this.queryEndTime = this.firstAvailData.plusSeconds(this.exportTotalDuration);
          }
-         this.queryStartTime = this.firstAvailData;
+         this.queryStartTime = startTime;
          this.queryEndTime = this.lastAvailData;
          this.expectStartTime = this.medicalTime.minus(ds.getBeforeMedicine(),ChronoUnit.SECONDS);
          this.expectEndTime = this.medicalTime.plusSeconds(ds.getAfterMedicine());
