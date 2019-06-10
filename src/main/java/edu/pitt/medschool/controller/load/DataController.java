@@ -6,6 +6,7 @@ package edu.pitt.medschool.controller.load;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import edu.pitt.medschool.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -46,6 +47,14 @@ public class DataController {
     public Model importData(Model model) {
         model.addAttribute("nav", "data");
         model.addAttribute("subnav", "import");
+        return model;
+    }
+
+    @RequestMapping("data/patientImport")
+    @ResponseBody
+    public Model importPatientData(Model model) {
+        model.addAttribute("nav", "data");
+        model.addAttribute("subnav", "patientImport");
         return model;
     }
 
@@ -146,12 +155,11 @@ public class DataController {
     // import patients
     @RequestMapping(value = "api/data/importPatients")
     @ResponseBody
-    public Map<String,Object> ImportPatinets(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model)
+    public Map<String,Object> ImportPatinets(@RequestParam(name = "dir") String dirString, Model model)
         throws Exception{
         Map map = new HashMap<>();
-        map = patientService.getPatientsFromCsv(dir.getFiles().get(0));
+        map = patientService.getPatientsFromCsv(dirString);
         System.out.println("**********************************Import finished**********************************");
-
         return map;
     }
 
@@ -176,14 +184,6 @@ public class DataController {
     public RestfulResponse getAllPatientsComments() throws Exception{
         RestfulResponse response = new RestfulResponse(1, "success");
         response.setData(patientService.getAllPatientsComments());
-        return response;
-    }
-
-    @RequestMapping(value = "/apis/patient/changePatientComment")
-    @ResponseBody
-    public RestfulResponse changePatientComment(@RequestParam(name = "pid") String patientId,@RequestParam(name = "comment", required = false,defaultValue = "") String comment) throws Exception{
-        RestfulResponse response = new RestfulResponse(1, "success");
-        response.setData(patientService.changePatientComment(patientId,comment));
         return response;
     }
 

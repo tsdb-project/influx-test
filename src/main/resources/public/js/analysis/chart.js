@@ -95,6 +95,23 @@ $(document).ready(function() {
 		}
 	});
 
+
+	var currentPatientInfo;
+	function getPatientInfoByPid(patientId) {
+		$.ajax({
+			type: "GET",
+			url: "/apis/patients/" + patientId,
+			async: false,
+			success : function(text)
+			{
+				currentPatientInfo = text;
+			},error: function () {
+				notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+					'find patient information failed!');
+			}
+		});
+	}
+
 	var columns = [];
 
 	// check file suffix
@@ -519,7 +536,21 @@ $(document).ready(function() {
 					data : "csvFile.length"
 				},
 				{
-					data : "csvFile.density"
+					data:"csvFile.width"
+				},
+				{
+					data:null,
+					render: function(data, type, row, meta) {
+						if(data.csvFile.headerTime != null){
+							return moment(data.csvFile.headerTime).format("MM/DD/YYYY HH:mm:ss")
+						}else {
+							return ""
+						}
+					}
+				},
+				{
+					data : null,
+					render:function(data, type, row, meta) {return data.csvFile.density.toFixed(3)}
 				},
 				{
 					data : null,
@@ -605,7 +636,7 @@ $(document).ready(function() {
 					render : $.fn.dataTable.render.moment("YYYY-MM-DDTHH:mm:ss", "MM/DD/YYYY HH:mm:ss")
 				},
 				{
-					targets : 4,
+					targets : 6,
 					createdCell : function(td, cellData, rowData, row, col) {
 						if (cellData > 1 || cellData < 0.8) {
 							var alpha = 1 - cellData > 0 ? 1 - cellData : 1;
@@ -614,7 +645,7 @@ $(document).ready(function() {
 						}
 					}
 				}, {
-					targets : 5,
+					targets : 7,
 					createdCell : function(td, cellData, rowData, row, col) {
 						if (cellData.counterpart.length != 1) {
 							var color = 'rgba(255, 107, 104, 0.5)';
@@ -622,7 +653,7 @@ $(document).ready(function() {
 						}
 					}
 				}, {
-					targets : 6,
+					targets : 8,
 					createdCell : function(td, cellData, rowData, row, col) {
 						if (cellData.startsWith("-") || parseInt(cellData) > 4) {
 							var color = 'rgba(255, 107, 104, 0.5)';
@@ -655,23 +686,20 @@ $(document).ready(function() {
 		}else{
 			$('#patient-comment-modal').modal('hide');
 
-			var currentPid = $("#comment-patient").html();
-			var currentComment = $("#patient-comment-fleid").val();
+			currentPatientInfo.comment = $("#patient-comment-fleid").val();
 
 			$.ajax({
-				type: "GET",
-				url: "/apis/patient/changePatientComment",
-				async: false,
-				'data': {
-					pid: currentPid,
-					comment: currentComment
-				},
+				'type': 'POST',
+				'url': "/apis/patient/updatePatientInfo",
+				'async': false,
+				'data': JSON.stringify(currentPatientInfo),
 				'contentType': "application/json",
 				'dataType': 'json',
 				'success': function () {
 
-					patientComments.set(currentPid,currentComment);
-					$("#patientComment").html(": " + currentComment);
+					patientComments.set(currentPatientInfo.id,currentPatientInfo.comment);
+					$("#patientComment").html(": " + currentPatientInfo.comment);
+
 					for (f in files) {
 						var fileType = files[f].csvFile.ar? 'ar' : 'noar';
 						var year = files[f].csvFile.filename.split('.')[0].split('-')[1];
@@ -690,31 +718,29 @@ $(document).ready(function() {
 
 	// patient comment delete function
 	$('#delete-patient-comment-button').on("click", function () {
-		if (! patientComments.has($("#comment-patient").html())) {
+		if (currentPatientInfo.comment == null) {
 			notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "There is no comment for this patient!");
 		}else{
 			$('#patient-comment-modal').modal('hide');
 
-			var currentPid = $("#comment-patient").html();
-			patientComments.delete(currentPid);
+			currentPatientInfo.comment = null;
 
 			$.ajax({
-				type: "GET",
-				url: "/apis/patient/changePatientComment",
-				async: false,
-				'data': {
-					pid: currentPid
-				},
+				'type': 'POST',
+				'url': "/apis/patient/updatePatientInfo",
+				'async': false,
+				'data': JSON.stringify(currentPatientInfo),
 				'contentType': "application/json",
 				'dataType': 'json',
 				'success': function () {
-					patientComments.delete(currentPid);
+					patientComments.delete(currentPatientInfo.id);
+
 					$("#patientComment").empty();
 					$("#patient-comment-fleid").val("");
 
 					for (f in files) {
 						var action = "normal";
-						if(worryPatients.has(currentPid)  && files[f].csvFile.conflictResolved == false){action = "problematic"};
+						if(worryPatients.has(currentPatientInfo.id)  && files[f].csvFile.conflictResolved == false){action = "problematic"};
 						if(files[f].csvFile.comment != null){action = "commented"};
 						if(files[f].csvFile.conflictResolved == true){action = "resolved"};
 
@@ -739,7 +765,7 @@ $(document).ready(function() {
 			'url': "/apis/patient/resolveAllFiles",
 			'async': false,
 			'data': {
-				pid: $("#resolve-all-pid").html()
+				pid: currentPatientInfo.id
 			},
 			'contentType': "application/json",
 			'dataType': 'json',
@@ -750,7 +776,7 @@ $(document).ready(function() {
 					"url": "/apis/patient/files",
 					"type": "GET",
 					'data': {
-						pid: $("#resolve-all-pid").html()
+						pid: currentPatientInfo.id
 					},
 					'contentType': "application/json",
 					'dataType': 'json',
@@ -787,9 +813,15 @@ $(document).ready(function() {
 	});
 
 	 function findPatientFiles (pid) {
+	 	getPatientInfoByPid(pid);
+
 		$("#card-patient-id").html(pid + '<strong id="patientComment"></strong>');
-		$("#comment-patient").html(pid);
-		$("#resolve-all-pid").html(pid);
+
+		if(currentPatientInfo.arresttime != null){
+			$("#arresttime").html( moment(currentPatientInfo.arresttime).format('MM/DD/YYYY HH:mm:ss'));
+		}else {
+			$("#arresttime").html("arrest time is not currently in the database.");
+		}
 
 		if(patientComments.has(pid)){
 			$("#patientComment").html(": " + patientComments.get(pid));
@@ -797,6 +829,9 @@ $(document).ready(function() {
 		}else {
 			$("#patient-comment-fleid").val("");
 		}
+
+		 $("#comment-patient").html(pid);
+		 $("#resolve-all-pid").html(pid);
 
 		$.ajax({
 			"url" : "/apis/patient/files",
@@ -974,13 +1009,15 @@ $(document).ready(function() {
 		$("#resolve-file").html(csvFile.filename);
 
 		var fileInfoHtml = "";
-		fileInfoHtml += "<tr><td>Filename</td><td>" + csvFile.filename + "</td></tr>"
-		fileInfoHtml += "<tr><td>Start Time</td><td>" + moment(csvFile.startTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>"
-		fileInfoHtml += "<tr><td>End Time</td><td>" + moment(csvFile.endTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>"
-		fileInfoHtml += "<tr><td>Row Count</td><td>" + csvFile.length + "</td></tr>"
-		fileInfoHtml += "<tr><td>Density</td><td>" + csvFile.density + "</td></tr>"
-		fileInfoHtml += "<tr><td>File UUID</td><td>" + csvFile.uuid + "</td></tr>"
-		fileInfoHtml += "<tr><td>Import Path</td><td>" + csvFile.path + "</td></tr>"
+		fileInfoHtml += "<tr><td>Filename</td><td>" + csvFile.filename + "</td></tr>";
+		fileInfoHtml += "<tr><td>Start Time</td><td>" + moment(csvFile.startTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>";
+		fileInfoHtml += "<tr><td>End Time</td><td>" + moment(csvFile.endTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>";
+		fileInfoHtml += "<tr><td>Row Count</td><td>" + csvFile.length + "</td></tr>";
+		fileInfoHtml += "<tr><td>Column Count</td><td>" + csvFile.width + "</td></tr>";
+		fileInfoHtml += "<tr><td>Header Time</td><td>" + csvFile.headerTime + "</td></tr>";
+		fileInfoHtml += "<tr><td>Density</td><td>" + csvFile.density + "</td></tr>";
+		fileInfoHtml += "<tr><td>File UUID</td><td>" + csvFile.uuid + "</td></tr>";
+		fileInfoHtml += "<tr><td>Import Path</td><td>" + csvFile.path + "</td></tr>";
 
 		$("#resolve-file-info").html(fileInfoHtml);
 
@@ -1043,13 +1080,15 @@ $(document).ready(function() {
 		$("#cancel-resolved-file").html(csvFile.filename);
 
 		var fileInfoHtml = "";
-		fileInfoHtml += "<tr><td>Filename</td><td>" + csvFile.filename + "</td></tr>"
-		fileInfoHtml += "<tr><td>Start Time</td><td>" + moment(csvFile.startTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>"
-		fileInfoHtml += "<tr><td>End Time</td><td>" + moment(csvFile.endTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>"
-		fileInfoHtml += "<tr><td>Row Count</td><td>" + csvFile.length + "</td></tr>"
-		fileInfoHtml += "<tr><td>Density</td><td>" + csvFile.density + "</td></tr>"
-		fileInfoHtml += "<tr><td>File UUID</td><td>" + csvFile.uuid + "</td></tr>"
-		fileInfoHtml += "<tr><td>Import Path</td><td>" + csvFile.path + "</td></tr>"
+		fileInfoHtml += "<tr><td>Filename</td><td>" + csvFile.filename + "</td></tr>";
+		fileInfoHtml += "<tr><td>Start Time</td><td>" + moment(csvFile.startTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>";
+		fileInfoHtml += "<tr><td>End Time</td><td>" + moment(csvFile.endTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>";
+		fileInfoHtml += "<tr><td>Row Count</td><td>" + csvFile.length + "</td></tr>";
+		fileInfoHtml += "<tr><td>Column Count</td><td>" + csvFile.width + "</td></tr>";
+		fileInfoHtml += "<tr><td>Header Time</td><td>" + csvFile.headerTime + "</td></tr>";
+		fileInfoHtml += "<tr><td>Density</td><td>" + csvFile.density + "</td></tr>";
+		fileInfoHtml += "<tr><td>File UUID</td><td>" + csvFile.uuid + "</td></tr>";
+		fileInfoHtml += "<tr><td>Import Path</td><td>" + csvFile.path + "</td></tr>";
 
 		$("#cancel-resolved-file-info").html(fileInfoHtml);
 
@@ -1119,13 +1158,15 @@ $(document).ready(function() {
 		$("#delete-file").html(csvFile.filename);
 
 		var fileInfoHtml = "";
-		fileInfoHtml += "<tr><td>Filename</td><td>" + csvFile.filename + "</td></tr>"
-		fileInfoHtml += "<tr><td>Start Time</td><td>" + moment(csvFile.startTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>"
-		fileInfoHtml += "<tr><td>End Time</td><td>" + moment(csvFile.endTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>"
-		fileInfoHtml += "<tr><td>Row Count</td><td>" + csvFile.length + "</td></tr>"
-		fileInfoHtml += "<tr><td>Density</td><td>" + csvFile.density + "</td></tr>"
-		fileInfoHtml += "<tr><td>File UUID</td><td>" + csvFile.uuid + "</td></tr>"
-		fileInfoHtml += "<tr><td>Import Path</td><td>" + csvFile.path + "</td></tr>"
+		fileInfoHtml += "<tr><td>Filename</td><td>" + csvFile.filename + "</td></tr>";
+		fileInfoHtml += "<tr><td>Start Time</td><td>" + moment(csvFile.startTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>";
+		fileInfoHtml += "<tr><td>End Time</td><td>" + moment(csvFile.endTime).format("MM/DD/YYYY HH:mm:ss") + "</td></tr>";
+		fileInfoHtml += "<tr><td>Row Count</td><td>" + csvFile.length + "</td></tr>";
+		fileInfoHtml += "<tr><td>Column Count</td><td>" + csvFile.width + "</td></tr>";
+		fileInfoHtml += "<tr><td>Header Time</td><td>" + csvFile.headerTime + "</td></tr>";
+		fileInfoHtml += "<tr><td>Density</td><td>" + csvFile.density + "</td></tr>";
+		fileInfoHtml += "<tr><td>File UUID</td><td>" + csvFile.uuid + "</td></tr>";
+		fileInfoHtml += "<tr><td>Import Path</td><td>" + csvFile.path + "</td></tr>";
 
 		$("#file-info").html(fileInfoHtml);
 
@@ -1185,7 +1226,7 @@ $(document).ready(function() {
 	});
 
 	$('#ParientEEG').click(function() {
-		window.location.href = '/analysis/medInfo/' + $("#resolve-all-pid").html();
+		window.location.href = '/analysis/medInfo/' + currentPatientInfo.id;
 	});
 
 });

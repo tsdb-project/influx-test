@@ -86,7 +86,7 @@ public class ExportMedicalQueryBuilder {
          // If no available data then stop building
          if (this.validTimeSpanIds.isEmpty()) return;
          if (this.exportTotalDuration > 0) {
-             this.queryEndTime = this.firstAvailData.plusSeconds(this.exportTotalDuration);
+             this.queryEndTime = startTime.plusSeconds(this.exportTotalDuration);
          }
          this.queryStartTime = startTime;
          this.queryEndTime = this.lastAvailData;

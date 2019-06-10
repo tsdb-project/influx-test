@@ -136,7 +136,7 @@ public class QueryUserDefinedService {
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
-        qrb.setInterestPatient(patientDao.selectById(pid.toUpperCase()).get(0));
+        qrb.setInterestPatient(patientDao.selectById(pid.toUpperCase()));
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
@@ -164,7 +164,7 @@ public class QueryUserDefinedService {
             return null;
 
         QueryResultBean qrb = new QueryResultBean();
-        qrb.setInterestPatient(patientDao.selectById(pid.toUpperCase()).get(0));
+        qrb.setInterestPatient(patientDao.selectById(pid.toUpperCase()));
         qrb.setQueryNickname(queryN);
         qrb.setAR(isAr);
 
