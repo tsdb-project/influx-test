@@ -408,12 +408,8 @@ public class AnalysisService {
             InfluxDB influxDB = generateIdbClient(false);
             Set<String> patients = new HashSet<String>();
             for (Medication medication : medicalRecordList_first) {
-                List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, medication.getId());
                 String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,medication.getId(),job.getAr());
-                ExportMedicalQueryBuilder eq = new ExportMedicalQueryBuilder(Instant.parse(startTime),Instant.now(), dtsb, groups, columns, exportQuery,
-                        job.getAr(), medication);
-                Instant valid = eq.getFirstAvailData();
-                if (valid.compareTo(medication.getChartDate().toInstant()) < 0) {
+                if (Instant.parse(startTime).compareTo(medication.getChartDate().toInstant()) < 0) {
                     patients.add(medication.getId());
                 }
             }
