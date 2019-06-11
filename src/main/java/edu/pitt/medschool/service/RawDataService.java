@@ -268,6 +268,7 @@ public class RawDataService {
     @Transactional(rollbackFor = Exception.class)
     public int deletePatientDataByFile(CsvFile file) throws Exception {
         Map<String, String> tags = new HashMap<>();
+        // change for delete OOM file(ignore _A/B.csv)
         tags.put("fileName", file.getFilename().replace(".csv", ""));
 
 //      delete from influxDB

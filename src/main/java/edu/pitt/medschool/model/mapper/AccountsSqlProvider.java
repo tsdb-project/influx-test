@@ -39,8 +39,8 @@ public class AccountsSqlProvider {
 	public String insertSelective(Accounts record) {
 		SQL sql = new SQL();
 		sql.INSERT_INTO("accounts");
-		if (record.getIdaccounts() != null) {
-			sql.VALUES("idaccounts", "#{idaccounts,jdbcType=INTEGER}");
+		if (record.getId() != null) {
+			sql.VALUES("id", "#{id,jdbcType=INTEGER}");
 		}
 		if (record.getUsername() != null) {
 			sql.VALUES("username", "#{username,jdbcType=VARCHAR}");
@@ -51,8 +51,23 @@ public class AccountsSqlProvider {
 		if (record.getPassword() != null) {
 			sql.VALUES("password", "#{password,jdbcType=VARCHAR}");
 		}
-		if (record.getRight() != null) {
-			sql.VALUES("right", "#{right,jdbcType=INTEGER}");
+		if (record.getRole() != null) {
+			sql.VALUES("role", "#{role,jdbcType=VARCHAR}");
+		}
+		if (record.getFirstName() != null) {
+			sql.VALUES("first_name", "#{firstName,jdbcType=VARCHAR}");
+		}
+		if (record.getLastName() != null) {
+			sql.VALUES("last_name", "#{lastName,jdbcType=VARCHAR}");
+		}
+		if (record.getEnable() != null) {
+			sql.VALUES("enable", "#{enable,jdbcType=BIT}");
+		}
+		if (record.getLastUpdate() != null) {
+			sql.VALUES("last_update", "#{lastUpdate,jdbcType=TIMESTAMP}");
+		}
+		if (record.getCreateTime() != null) {
+			sql.VALUES("create_time", "#{createTime,jdbcType=TIMESTAMP}");
 		}
 		return sql.toString();
 	}
@@ -64,14 +79,19 @@ public class AccountsSqlProvider {
 	public String selectByExample(AccountsExample example) {
 		SQL sql = new SQL();
 		if (example != null && example.isDistinct()) {
-			sql.SELECT_DISTINCT("idaccounts");
+			sql.SELECT_DISTINCT("id");
 		} else {
-			sql.SELECT("idaccounts");
+			sql.SELECT("id");
 		}
 		sql.SELECT("username");
 		sql.SELECT("email");
 		sql.SELECT("password");
-		sql.SELECT("right");
+		sql.SELECT("role");
+		sql.SELECT("first_name");
+		sql.SELECT("last_name");
+		sql.SELECT("enable");
+		sql.SELECT("last_update");
+		sql.SELECT("create_time");
 		sql.FROM("accounts");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -89,8 +109,8 @@ public class AccountsSqlProvider {
 		AccountsExample example = (AccountsExample) parameter.get("example");
 		SQL sql = new SQL();
 		sql.UPDATE("accounts");
-		if (record.getIdaccounts() != null) {
-			sql.SET("idaccounts = #{record.idaccounts,jdbcType=INTEGER}");
+		if (record.getId() != null) {
+			sql.SET("id = #{record.id,jdbcType=INTEGER}");
 		}
 		if (record.getUsername() != null) {
 			sql.SET("username = #{record.username,jdbcType=VARCHAR}");
@@ -101,8 +121,23 @@ public class AccountsSqlProvider {
 		if (record.getPassword() != null) {
 			sql.SET("password = #{record.password,jdbcType=VARCHAR}");
 		}
-		if (record.getRight() != null) {
-			sql.SET("right = #{record.right,jdbcType=INTEGER}");
+		if (record.getRole() != null) {
+			sql.SET("role = #{record.role,jdbcType=VARCHAR}");
+		}
+		if (record.getFirstName() != null) {
+			sql.SET("first_name = #{record.firstName,jdbcType=VARCHAR}");
+		}
+		if (record.getLastName() != null) {
+			sql.SET("last_name = #{record.lastName,jdbcType=VARCHAR}");
+		}
+		if (record.getEnable() != null) {
+			sql.SET("enable = #{record.enable,jdbcType=BIT}");
+		}
+		if (record.getLastUpdate() != null) {
+			sql.SET("last_update = #{record.lastUpdate,jdbcType=TIMESTAMP}");
+		}
+		if (record.getCreateTime() != null) {
+			sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
 		}
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -115,11 +150,16 @@ public class AccountsSqlProvider {
 	public String updateByExample(Map<String, Object> parameter) {
 		SQL sql = new SQL();
 		sql.UPDATE("accounts");
-		sql.SET("idaccounts = #{record.idaccounts,jdbcType=INTEGER}");
+		sql.SET("id = #{record.id,jdbcType=INTEGER}");
 		sql.SET("username = #{record.username,jdbcType=VARCHAR}");
 		sql.SET("email = #{record.email,jdbcType=VARCHAR}");
 		sql.SET("password = #{record.password,jdbcType=VARCHAR}");
-		sql.SET("right = #{record.right,jdbcType=INTEGER}");
+		sql.SET("role = #{record.role,jdbcType=VARCHAR}");
+		sql.SET("first_name = #{record.firstName,jdbcType=VARCHAR}");
+		sql.SET("last_name = #{record.lastName,jdbcType=VARCHAR}");
+		sql.SET("enable = #{record.enable,jdbcType=BIT}");
+		sql.SET("last_update = #{record.lastUpdate,jdbcType=TIMESTAMP}");
+		sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
 		AccountsExample example = (AccountsExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -141,10 +181,25 @@ public class AccountsSqlProvider {
 		if (record.getPassword() != null) {
 			sql.SET("password = #{password,jdbcType=VARCHAR}");
 		}
-		if (record.getRight() != null) {
-			sql.SET("right = #{right,jdbcType=INTEGER}");
+		if (record.getRole() != null) {
+			sql.SET("role = #{role,jdbcType=VARCHAR}");
 		}
-		sql.WHERE("idaccounts = #{idaccounts,jdbcType=INTEGER}");
+		if (record.getFirstName() != null) {
+			sql.SET("first_name = #{firstName,jdbcType=VARCHAR}");
+		}
+		if (record.getLastName() != null) {
+			sql.SET("last_name = #{lastName,jdbcType=VARCHAR}");
+		}
+		if (record.getEnable() != null) {
+			sql.SET("enable = #{enable,jdbcType=BIT}");
+		}
+		if (record.getLastUpdate() != null) {
+			sql.SET("last_update = #{lastUpdate,jdbcType=TIMESTAMP}");
+		}
+		if (record.getCreateTime() != null) {
+			sql.SET("create_time = #{createTime,jdbcType=TIMESTAMP}");
+		}
+		sql.WHERE("id = #{id,jdbcType=INTEGER}");
 		return sql.toString();
 	}
 
