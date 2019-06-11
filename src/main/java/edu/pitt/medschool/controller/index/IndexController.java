@@ -28,5 +28,4 @@ public class IndexController {
         modelAndView.setViewName("index/home");
         return modelAndView;
     }
-
 }
