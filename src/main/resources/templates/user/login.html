@@ -27,7 +27,7 @@
                     <i data-toggle="dropdown" class="zmdi zmdi-more-vert actions__item"></i>
 
                     <div class="dropdown-menu dropdown-menu-right">
-                        <a class="dropdown-item" data-ma-action="login-switch" data-ma-target="#l-register" href="">Create an account</a>
+                        <a class="dropdown-item" data-ma-action="login-switch" data-ma-target="#create-user-modal" href="">Create an account</a>
                         <a class="dropdown-item" data-ma-action="login-switch" data-ma-target="#l-forget-password" href="">Forgot password?</a>
                     </div>
                 </div>
@@ -54,53 +54,54 @@
     </div>
 
     <!-- Register -->
-    <div class="login__block" id="l-register">
-        <div class="login__block__header palette-Blue bg">
-            <i class="zmdi zmdi-account-circle"></i>
-            Create an account
-
-            <div class="actions actions--inverse login__block__actions">
-                <div class="dropdown">
-                    <i data-toggle="dropdown" class="zmdi zmdi-more-vert actions__item"></i>
-
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <a class="dropdown-item" data-ma-action="login-switch" data-ma-target="#l-login" href="">Already have an account?</a>
-                        <a class="dropdown-item" data-ma-action="login-switch" data-ma-target="#l-forget-password" href="">Forgot password?</a>
-                    </div>
+    <div class="modal fade" id="create-user-modal" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title pull-left">Create User</h5>
                 </div>
-            </div>
-        </div>
+                <form role="form" id="create-user-form">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" class="form-control" placeholder="e.g: dsmith" id="c_username" required>
+                            <i class="form-group__bar"></i>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>First Name</label>
+                                    <input type="text" class="form-control" placeholder="e.g: David" id="c_firstname" required>
+                                    <i class="form-group__bar"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Last Name</label>
+                                    <input type="text" class="form-control" placeholder="e.g: Smith" id="c_lastname" required>
+                                    <i class="form-group__bar"></i>
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="login__block__body">
-            <div class="form-group form-group--float form-group--centered">
-                <input type="text" class="form-control">
-                <label>Name</label>
-                <i class="form-group__bar"></i>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <div class="radio">
+                                <input type="radio" name="c_role" id="c_role-1" value="ROLE_ADMIN" required>
+                                <label class="radio__label" for="c_role-1">System Administrator</label>
+                            </div>
+                            <div class="radio">
+                                <input type="radio" name="c_role" id="c_role-2" value="ROLE_USER">
+                                <label class="radio__label" for="c_role-2">Instructor</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        <input type="submit" class="btn btn-info" autocomplete="off" id="create-button" value="Create">
+                    </div>
+                </form>
             </div>
-
-            <div class="form-group form-group--float form-group--centered">
-                <input type="text" class="form-control">
-                <label>Email Address</label>
-                <i class="form-group__bar"></i>
-            </div>
-
-            <div class="form-group form-group--float form-group--centered">
-                <input type="password" class="form-control">
-                <label>Password</label>
-                <i class="form-group__bar"></i>
-            </div>
-
-            <div class="form-group">
-                <label class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input">
-                    <span class="custom-control-indicator"></span>
-                    <span class="custom-control-description">Accept the license agreement</span>
-                </label>
-            </div>
-
-            <button href="index.html" class="btn btn--icon login__block__btn">
-                <i class="zmdi zmdi-check"></i>
-            </button>
         </div>
     </div>
 
@@ -178,6 +179,7 @@
 <script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>
 <script src="/vendors/bower_components/popper.js/dist/umd/popper.min.js"></script>
 <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/js/register.js"></script>
 
 <!-- App functions and actions -->
 <script src="/js/app.min.js"></script>
