@@ -23,7 +23,7 @@
                         <i class="zmdi zmdi-collection-text"></i>
                         Raw Data
                     </a>
-                    <ul>
+                    <ul sec:authorize="hasRole('ADMIN')">
                         <li id="import">
                             <a href="/data/import">Import CSV</a>
                         </li>
@@ -72,7 +72,7 @@
                         <li id="job">
                             <a href="/analysis/job">Export Jobs</a>
                         </li>
-                        <li id="chart">
+                        <li id="chart" sec:authorize="hasRole('ADMIN')">
                             <a href="/analysis/chart">View Charts</a>
                         </li>
                         <li id="wrongpatients">
@@ -83,7 +83,7 @@
                         </li> -->
                     </ul>
                 </li>
-                <li id="versionControl">
+                <li id="versionControl" sec:authorize="hasRole('ADMIN')">
                     <a href="/versionControl">
                         <i class="zmdi zmdi-format-clear-all"></i>
                         Version Control
