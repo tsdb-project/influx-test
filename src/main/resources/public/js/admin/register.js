@@ -2,14 +2,15 @@ $(document).ready(function() {
     var $createUserForm = $('#create-user-form');
     $createUserForm.on('submit', function(ev){
         ev.preventDefault();
-        if ($createUserForm[0].checkValidity()) {
+        if ($createUserForm[0].checkValidity() && $("#c_password")===$("#c_password2")){
             var form = {
                 "username" : $("#c_username").val(),
                 "firstname" : $("#c_firstname").val(),
                 "lastname" : $("#c_lastname").val(),
                 "email":$("#c_email").val(),
+                "password":$("#c_password").val(),
                 "enabled" : true,
-                "role" : $('input[name=c_role]:checked', '#create-user-form').val()
+                "role" : "user"
             };
             $.ajax({
                 'url' : "/user/user",
