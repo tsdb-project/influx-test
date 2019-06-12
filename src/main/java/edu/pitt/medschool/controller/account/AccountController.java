@@ -24,11 +24,11 @@ public class AccountController {
 //        return modelAndView;
 //    }
 //
-//    @RequestMapping("/profile")
-//    public ModelAndView userProfile(ModelAndView modelAndView) {
-//        modelAndView.setViewName("user/profile");
-//        return modelAndView;
-//    }
+    @RequestMapping("/profile")
+    public ModelAndView userProfile(ModelAndView modelAndView) {
+        modelAndView.setViewName("user/profile");
+        return modelAndView;
+    }
 
     @RequestMapping("/management")
     public ModelAndView userManagement(ModelAndView modelAndView) {
@@ -39,6 +39,7 @@ public class AccountController {
     }
 
     @GetMapping(value = { "/user", "/user/{id}" })
+    @ResponseBody
     public RestfulResponse userList(@PathVariable Optional<Integer> id) {
         if (id.isPresent()) {
             Accounts userVO = usersService.selectById(id.get());
@@ -50,10 +51,15 @@ public class AccountController {
     }
 
     @PutMapping("/user")
+    @ResponseBody
     public RestfulResponse createOrUpdateUser(@RequestBody(required = true) Accounts userVO) {
         int updatedRow;
         if (userVO.getId() == null) {
-            updatedRow = usersService.insertUser(userVO);
+            if(! usersService.selectByUserName(userVO.getUsername()).isEmpty()){
+                return new RestfulResponse(0, "failed");
+            }else {
+                updatedRow = usersService.insertUser(userVO);
+            }
         } else {
             updatedRow = usersService.updateUser(userVO);
         }
@@ -61,12 +67,14 @@ public class AccountController {
     }
 
     @PatchMapping("/reset_password/{id}")
+    @ResponseBody
     public RestfulResponse resetPassword(@PathVariable Integer id) {
         int res = usersService.resetPassword(id);
         return new RestfulResponse(1, "success",res);
     }
 
     @PatchMapping("/toggle_enable/{id}")
+    @ResponseBody
     public RestfulResponse toggleEnableUser(@PathVariable Integer id, @RequestBody(required = true) Boolean enable) {
         int res = usersService.toggleEnabled(id, enable);
         return new RestfulResponse(1, "success",res);

@@ -1,13 +1,46 @@
 $(document).ready(function() {
-    $.ajax({
-        'url' : "/user/user",
-        'type' : 'GET',
-        'success' : function(data) {
-            console.log(data)
-        },
-        'error' : function() {
-        }
-    });
+
+    //notify function
+    function notify(from, align, icon, type, animIn, animOut, msg) {
+        $.notify({
+            icon: icon,
+            title: '',
+            message: msg,
+            url: ''
+        }, {
+            element: 'body',
+            type: type,
+            allow_dismiss: false,
+            placement: {
+                from: from,
+                align: align
+            },
+            offset: {
+                x: 20,
+                y: 20
+            },
+            spacing: 10,
+            z_index: 1000000000,
+            delay: 1500,
+            timer: 750,
+            url_target: '_blank',
+            mouse_over: false,
+            animate: {
+                enter: animIn,
+                exit: animOut
+            },
+            template: '<div data-notify="container" class="alert alert-dismissible alert-{0} alert--notify" role="alert">' +
+                '<span data-notify="icon"></span> ' +
+                '<span data-notify="title">{1}</span> ' +
+                '<span data-notify="message">{2}</span>' +
+                '<div class="progress" data-notify="progressbar">' +
+                '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+                '</div>' +
+                '<a href="{3}" target="{4}" data-notify="url"></a>' +
+                '<button type="button" aria-hidden="true" data-notify="dismiss" class="alert--notify__close">Close</button>' +
+                '</div>'
+        });
+    };
 
 
 
@@ -15,8 +48,8 @@ $(document).ready(function() {
         "data" : []
     };
 
-    $.fn.dataTable.moment('M/D/YYYY, h:mm:ss a');
-    var table = $('#queryTable').DataTable({
+    $.fn.dataTable.moment('M/D/YYYY, hh:mm:ss a');
+    var table = $('#userTable').DataTable({
         ajax : {
             "url" : "/user/user"
         },
@@ -32,19 +65,19 @@ $(document).ready(function() {
         }, {
             data : null,
             render : function(data) {
-                return data.firstname + ' ' + data.lastname;
+                return data.firstName + ' ' + data.lastName;
             }
         }, {
             data : 'username'
         }, {
             data : null,
             render : function(data) {
-                return data.role == "ADMIN" ? "System Administrator" : "Instructor";
+                return data.role == "ROLE_ADMIN" ? "System Administrator" : "User";
             }
         }, {
             data : null,
             render : function(data) {
-                return data.enabled ? "Yes" : "No";
+                return data.enable ? "Yes" : "No";
             }
         }, {
             data : null,
@@ -54,7 +87,7 @@ $(document).ready(function() {
         }, {
             data : null,
             render : function(data) {
-                return localeDateString(data.updateTime)
+                return localeDateString(data.lastUpdate)
             }
         }, {
             data : null,
@@ -62,7 +95,7 @@ $(document).ready(function() {
                 html = '<div class="btn-demo">';
                 html += '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#edit-user-modal" data-id="' + data.id + '"><i class="zmdi zmdi-edit"></i> Edit</button>'
                 html += '<button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#reset-password-modal" data-id="' + data.id + '"><i class="zmdi zmdi-undo"></i> Reset Password</button>'
-                if (data.enabled) {
+                if (data.enable) {
                     html += '<button class="btn btn-light btn-sm" data-toggle="modal" data-target="#toggle-disable-modal" data-id="' + data.id + '"><i class="zmdi zmdi-block"></i> Disable</button>'
                 } else {
                     html += '<button class="btn btn-light btn-sm" data-toggle="modal" data-target="#toggle-enable-modal" data-id="' + data.id + '"><i class="zmdi zmdi-arrow-right"></i> Enable</button>'
@@ -77,36 +110,42 @@ $(document).ready(function() {
         ],
     });
 
-    var $createUserForm = $('#create-user-form');
-    $createUserForm.on('submit', function(ev){
-        ev.preventDefault();
-        if ($createUserForm[0].checkValidity()) {
-            var form = {
-                "username" : $("#c_username").val(),
-                "firstName" : $("#c_firstname").val(),
-                "lastName" : $("#c_lastname").val(),
-                "enabled" : true,
-                "role" : $('input[name=c_role]:checked', '#create-user-form').val()
-            };
-
-            $.ajax({
-                'url' : "/user/user",
-                'type' : 'put',
-                'data' : JSON.stringify(form),
-                'contentType' : "application/json",
-                'dataType' : 'json',
-                'success' : function(data) {
-                    table.ajax.reload();
-                    $("#create-user-modal").modal('hide');
-                },
-                'error' : function() {
-                }
-            });
-        } else {
-            $createUserForm.find(':submit').click();
-            console.log("invalid form");
-        }
-    });
+    // var $createUserForm = $('#create-user-form');
+    // $createUserForm.on('submit', function(ev){
+    //     ev.preventDefault();
+    //     if ($createUserForm[0].checkValidity()) {
+    //         var form = {
+    //             "username" : $("#c_username").val(),
+    //             "firstName" : $("#c_firstname").val(),
+    //             "lastName" : $("#c_lastname").val(),
+    //             "enabled" : true,
+    //             "role" : $('input[name=c_role]:checked', '#create-user-form').val()
+    //         };
+    //
+    //         $.ajax({
+    //             'url' : "/user/user",
+    //             'type' : 'put',
+    //             'data' : JSON.stringify(form),
+    //             'contentType' : "application/json",
+    //             'dataType' : 'json',
+    //             'success' : function(data) {
+    //                 console.log(data);
+    //                 if(data.code == 0){
+    //                     notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+    //                         'found user with the same user name!');
+    //                 }else{
+    //                     table.ajax.reload();
+    //                     $("#create-user-modal").modal('hide');
+    //                 }
+    //             },
+    //             'error' : function() {
+    //             }
+    //         });
+    //     } else {
+    //         $createUserForm.find(':submit').click();
+    //         console.log("invalid form");
+    //     }
+    // });
 
     var $editUserForm = $('#edit-user-form');
     $editUserForm.on('submit', function(ev){
@@ -114,10 +153,12 @@ $(document).ready(function() {
         if ($editUserForm[0].checkValidity()) {
             var form = {
                 "id" : $("#e_id").val(),
-                "firstname" : $("#e_firstname").val(),
-                "lastname" : $("#e_lastname").val(),
+                "firstName" : $("#e_firstname").val(),
+                "lastName" : $("#e_lastname").val(),
+                "email" : $("#e_email").val(),
                 "role" : $('input[name=e_role]:checked', '#edit-user-form').val()
             };
+
             $.ajax({
                 'url' : "/user/user",
                 'type' : 'put',
@@ -147,8 +188,9 @@ $(document).ready(function() {
                 var user = data.data;
                 $('#e_id').val(user.id);
                 $('#e_username').val(user.username);
-                $('#e_firstname').val(user.firstname);
-                $('#e_lastname').val(user.lastname);
+                $('#e_firstname').val(user.firstName);
+                $('#e_lastname').val(user.lastName);
+                $('#e_email').val(user.email);
                 $("input[name=e_role][value=" + user.role + "]").prop('checked', true);
             },
             'error': function() {}

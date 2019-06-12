@@ -18,7 +18,7 @@
                     </a>
                 </li>
                 <!-- Menu Data-->
-                <li class="navigation__sub" id="data">
+                <li class="navigation__sub" id="data" sec:authorize="hasRole('ADMIN')">
                     <a href="">
                         <i class="zmdi zmdi-collection-text"></i>
                         Raw Data
@@ -105,7 +105,7 @@
                     </ul>
                 </li>
                 <li id="user">
-                    <a href="/user/management">
+                    <a href="/user/management" sec:authorize="hasRole('ADMIN')">
                         <i class="zmdi zmdi-accounts"></i>
                         User Management
                     </a>

@@ -17,6 +17,10 @@ public class UsersService {
         return accountsDao.selectAll();
     }
 
+    public List<Accounts> selectByUserName(String username) {
+        return accountsDao.selectByUsername(username);
+    }
+
     public int insertUser(Accounts userVO) {
         return accountsDao.insertUser(userVO);
     }
