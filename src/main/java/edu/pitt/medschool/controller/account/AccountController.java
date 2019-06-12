@@ -24,8 +24,10 @@ public class AccountController {
 //        return modelAndView;
 //    }
 //
-    @RequestMapping("/profile")
-    public ModelAndView userProfile(ModelAndView modelAndView) {
+    @RequestMapping("/profile/{username}")
+    public ModelAndView userProfile(@PathVariable String username, ModelAndView modelAndView) {
+        Accounts userVO = usersService.selectByUserName(username).get(0);
+        modelAndView.addObject("userInfo",userVO);
         modelAndView.setViewName("user/profile");
         return modelAndView;
     }
@@ -70,6 +72,13 @@ public class AccountController {
     @ResponseBody
     public RestfulResponse resetPassword(@PathVariable Integer id) {
         int res = usersService.resetPassword(id);
+        return new RestfulResponse(1, "success",res);
+    }
+
+    @PostMapping("/change_password")
+    @ResponseBody
+    public RestfulResponse changePassword(@RequestParam(name = "id" )  Integer id ,@RequestParam(name = "password", required = false, defaultValue = "")  String password ) {
+        int res = usersService.changePassword(id,password);
         return new RestfulResponse(1, "success",res);
     }
 

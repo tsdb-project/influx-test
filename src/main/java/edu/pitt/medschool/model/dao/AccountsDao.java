@@ -82,6 +82,17 @@ public class AccountsDao {
         return accountsMapper.updateByPrimaryKeySelective(users);
     }
 
+    public int changePassword(Integer id, String password) {
+        Accounts users = new Accounts();
+        users.setId(id);
+        ZoneId america = ZoneId.of("America/New_York");
+        LocalDateTime americaDateTime = LocalDateTime.now(america);
+        users.setLastUpdate(americaDateTime);
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        users.setPassword(encoder.encode(password));
+        return accountsMapper.updateByPrimaryKeySelective(users);
+    }
+
     public int toggleEnabled(Integer id, Boolean enable) {
         Accounts users = new Accounts();
         users.setId(id);
