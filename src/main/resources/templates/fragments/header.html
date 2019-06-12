@@ -37,14 +37,9 @@
                             </div>
                         </div>
 
-                        <a href="/user/profile" class="listview__item">
+                        <a th:href="@{'/user/profile/' + ${#authentication.name}}", class="listview__item">
                             <div class="listview__content">
                                 <div class="listview__heading">View Profile</div>
-                            </div>
-                        </a>
-                        <a href="" class="listview__item">
-                            <div class="listview__content">
-                                <div class="listview__heading">Settings</div>
                             </div>
                         </a>
                         <a href="javascript: document.logoutForm.submit()" role="menuitem" class="listview__item">

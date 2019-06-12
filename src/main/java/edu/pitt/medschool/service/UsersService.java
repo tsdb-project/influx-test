@@ -37,6 +37,10 @@ public class UsersService {
         return accountsDao.resetPassword(id);
     }
 
+    public int changePassword(Integer id, String password) {
+        return accountsDao.changePassword(id,password);
+    }
+
     public int toggleEnabled(Integer id, Boolean enable) {
         return accountsDao.toggleEnabled(id, enable);
     }
