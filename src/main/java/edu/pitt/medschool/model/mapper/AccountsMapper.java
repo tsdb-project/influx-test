@@ -145,4 +145,18 @@ public interface AccountsMapper {
 			"enable = #{enable,jdbcType=BIT},", "last_update = #{lastUpdate,jdbcType=TIMESTAMP},",
 			"create_time = #{createTime,jdbcType=TIMESTAMP}", "where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(Accounts record);
+
+	@Select({ "select", "id, username, email, password, role, first_name, last_name, enable, last_update, ",
+			"create_time", "from accounts"})
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+			@Result(column = "username", property = "username", jdbcType = JdbcType.VARCHAR),
+			@Result(column = "email", property = "email", jdbcType = JdbcType.VARCHAR),
+			@Result(column = "password", property = "password", jdbcType = JdbcType.VARCHAR),
+			@Result(column = "role", property = "role", jdbcType = JdbcType.VARCHAR),
+			@Result(column = "first_name", property = "firstName", jdbcType = JdbcType.VARCHAR),
+			@Result(column = "last_name", property = "lastName", jdbcType = JdbcType.VARCHAR),
+			@Result(column = "enable", property = "enable", jdbcType = JdbcType.BIT),
+			@Result(column = "last_update", property = "lastUpdate", jdbcType = JdbcType.TIMESTAMP),
+			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP) })
+	List<Accounts> selectAll();
 }
