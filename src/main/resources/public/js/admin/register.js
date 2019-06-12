@@ -57,6 +57,7 @@ $(document).ready(function() {
                 "enabled" : true,
                 "role" : "ROLE_USER"
             };
+
             $.ajax({
                 'url' : "/user/user",
                 'type' : 'put',
@@ -64,15 +65,13 @@ $(document).ready(function() {
                 'contentType' : "application/json",
                 'dataType' : 'json',
                 'success' : function(data) {
-                    table.ajax.reload();
-                    $("#create-user-modal").modal('hide');
                     if(data.code == 0){
                         notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
                             'found user with the same user name!');
                     }else{
-                    notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
-                        'register success!');
-                    location.reload();
+                        notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
+                            'register success!');
+                        location.reload();
                     }
                 },
                 'error' : function() {
