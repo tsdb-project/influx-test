@@ -44,7 +44,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .failureUrl("/login?error").permitAll()
 
                 .and().sessionManagement()
-                .maximumSessions(1)                //系统中同一个账号的登陆数量限制
+                .maximumSessions(1)
                 .sessionRegistry(sessionRegistry)
                 .and().and()
 

@@ -24,18 +24,20 @@
             <li class="dropdown">
                 <a href="" data-toggle="dropdown">
                     <i class="zmdi zmdi-account-circle"></i>
+                    Hello,
+                    <span sec:authentication="principal.firstname"></span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right dropdown-menu--block">
                     <div class="listview listview--hover">
                         <div class="listview__header" style="text-transform: none">
                             <img class="user__img" src="/demo/img/profile-pics/4.jpg" alt="" style="margin: 0">
                             <div>
-                                <div class="user__name">admin</div>
-                                <div class="user__email">brainflux1@gmail.com</div>
+                                <div class="user__name" th:text="${#authentication.principal.firstname} + ' ' + ${#authentication.principal.lastname} + ' (' + ${#authentication.name} + ')'">username</div>
+                                <!--<div class="user__email" th:text="${#authentication.principal.email}">email</div>-->
                             </div>
                         </div>
 
-                        <a href="" class="listview__item">
+                        <a href="/user/profile" class="listview__item">
                             <div class="listview__content">
                                 <div class="listview__heading">View Profile</div>
                             </div>
@@ -45,10 +47,13 @@
                                 <div class="listview__heading">Settings</div>
                             </div>
                         </a>
-                        <a href="" class="listview__item">
+                        <a href="javascript: document.logoutForm.submit()" role="menuitem" class="listview__item">
                             <div class="listview__content">
                                 <div class="listview__heading">Logout</div>
                             </div>
+                            <form name="logoutForm" th:action="@{/logout}" method="post" th:hidden="true">
+                                <input hidden type="submit" value="Sign Out" />
+                            </form>
                         </a>
                     </div>
                 </div>

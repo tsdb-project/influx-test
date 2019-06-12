@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Lecture Classroom Evaluation System</title>
+    <title>Brain Flux System</title>
     <!-- Vendor styles -->
     <link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
     <link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
@@ -71,22 +71,40 @@
             </div>
         </div>
 
-        <div class="login__block__body">
+        <form class="login__block__body" id="create-user-form">
             <div class="form-group form-group--float form-group--centered">
-                <input type="text" class="form-control">
-                <label>Name</label>
+                <input type="text" class="form-control" id="c_username" required>
+                <label>Username</label>
                 <i class="form-group__bar"></i>
             </div>
 
             <div class="form-group form-group--float form-group--centered">
-                <input type="text" class="form-control">
+                <input type="text" class="form-control" id="c_firstname" required>
+                <label>First Name</label>
+                <i class="form-group__bar"></i>
+            </div>
+
+            <div class="form-group form-group--float form-group--centered">
+                <input type="text" class="form-control" id="c_lastname" required>
+                <label>Last Name</label>
+                <i class="form-group__bar"></i>
+            </div>
+
+            <div class="form-group form-group--float form-group--centered">
+                <input type="email" class="form-control" id="c_email" required>
                 <label>Email Address</label>
                 <i class="form-group__bar"></i>
             </div>
 
             <div class="form-group form-group--float form-group--centered">
-                <input type="password" class="form-control">
+                <input type="password" class="form-control" id="c_password" required>
                 <label>Password</label>
+                <i class="form-group__bar"></i>
+            </div>
+
+            <div class="form-group form-group--float form-group--centered">
+                <input type="password" class="form-control" id="c_password2" required>
+                <label>Password Confirm</label>
                 <i class="form-group__bar"></i>
             </div>
 
@@ -98,10 +116,10 @@
                 </label>
             </div>
 
-            <button href="index.html" class="btn btn--icon login__block__btn">
+            <button type="submit" class="btn btn--icon login__block__btn">
                 <i class="zmdi zmdi-check"></i>
             </button>
-        </div>
+        </form>
     </div>
 
     <!-- Forgot Password -->
@@ -179,7 +197,10 @@
 <script src="/vendors/bower_components/popper.js/dist/umd/popper.min.js"></script>
 <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 
+<script src="/vendors/bower_components/remarkable-bootstrap-notify/dist/bootstrap-notify.min.js"></script>
+
 <!-- App functions and actions -->
+<script src="/js/admin/register.js"></script>
 <script src="/js/app.min.js"></script>
 </body>
 </html>

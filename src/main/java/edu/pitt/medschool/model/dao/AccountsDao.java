@@ -8,6 +8,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Repository
@@ -35,51 +37,46 @@ public class AccountsDao {
 
     @Transactional
     public int insertUser(Accounts userVO) {
-        System.out.println(userVO.getFirstName());
-
         Accounts users = new Accounts();
+        ZoneId america = ZoneId.of("America/New_York");
+        LocalDateTime americaDateTime = LocalDateTime.now(america);
         users.setUsername(userVO.getUsername());
         users.setFirstName(userVO.getFirstName());
         users.setLastName(userVO.getLastName());
+        users.setEmail(userVO.getEmail());
+        users.setCreateTime(americaDateTime);
+        users.setLastUpdate(americaDateTime);
         users.setRole(userVO.getRole());
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String pwdString = encoder.encode(DEFAULTPASSWORD);
+        String pwdString = encoder.encode(userVO.getPassword());
         users.setPassword(pwdString);
 
 
         return accountsMapper.insertSelective(users);
-//        if (res == 1) {
-//            Authorities authorities = new Authorities();
-//            authorities.setId(users.getId());
-//            authorities.setUsername(userVO.getUsername());
-//            authorities.setAuthority(userVO.getRole());
-//            res = authoritiesMapper.insertSelective(authorities);
-//        }
     }
 
     @Transactional
     public int updateUser(Accounts userVO) {
         Accounts users = new Accounts();
+        ZoneId america = ZoneId.of("America/New_York");
+        LocalDateTime americaDateTime = LocalDateTime.now(america);
         users.setId(userVO.getId());
         users.setFirstName(userVO.getFirstName());
         users.setLastName(userVO.getLastName());
-
-//        Authorities authorities = new Authorities();
-//        authorities.setId(userVO.getId());
-//        authorities.setAuthority(userVO.getRole());
+        users.setEmail(userVO.getEmail());
+        users.setLastUpdate(americaDateTime);
+        users.setRole(userVO.getRole());
 
         return accountsMapper.updateByPrimaryKeySelective(users);
-//        if (res == 1) {
-//            AuthoritiesExample example = new AuthoritiesExample();
-//            example.createCriteria().andIdEqualTo(userVO.getId());
-//            res = authoritiesMapper.updateByExampleSelective(authorities, example);
-//        }
     }
 
     public int resetPassword(Integer id) {
         Accounts users = new Accounts();
         users.setId(id);
+        ZoneId america = ZoneId.of("America/New_York");
+        LocalDateTime americaDateTime = LocalDateTime.now(america);
+        users.setLastUpdate(americaDateTime);
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         users.setPassword(encoder.encode(DEFAULTPASSWORD));
         return accountsMapper.updateByPrimaryKeySelective(users);
@@ -88,6 +85,9 @@ public class AccountsDao {
     public int toggleEnabled(Integer id, Boolean enable) {
         Accounts users = new Accounts();
         users.setId(id);
+        ZoneId america = ZoneId.of("America/New_York");
+        LocalDateTime americaDateTime = LocalDateTime.now(america);
+        users.setLastUpdate(americaDateTime);
         users.setEnable(enable);
         return accountsMapper.updateByPrimaryKeySelective(users);
     }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Lecture Classroom Evaluation System</title>
+    <title>Brain Flux System</title>
     <!-- Vendor styles -->
     <link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
     <link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
@@ -39,14 +39,14 @@
         </header>
         <div class="card">
             <div class="card-body">
-                <div class="btn-demo">
-                    <button class="btn btn-info" data-toggle="modal" data-target="#create-user-modal">
-                        <i class="zmdi zmdi-account-add"></i>
-                        Create User
-                    </button>
-                </div>
+                <!--<div class="btn-demo">-->
+                    <!--<button class="btn btn-info" data-toggle="modal" data-target="#create-user-modal">-->
+                        <!--<i class="zmdi zmdi-account-add"></i>-->
+                        <!--Create User-->
+                    <!--</button>-->
+                <!--</div>-->
                 <div class="table-responsive">
-                    <table id="queryTable" class="table table-bordered">
+                    <table id="userTable" class="table table-bordered">
                         <thead class="thead-default">
                         <tr>
                             <th>ID</th>
@@ -69,56 +69,57 @@
         </div>
 
         <!-- User Edit Modal -->
-        <div class="modal fade" id="create-user-modal" data-backdrop="static">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title pull-left">Create User</h5>
-                    </div>
-                    <form role="form" id="create-user-form">
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label>Username</label>
-                                <input type="text" class="form-control" placeholder="e.g: dsmith" id="c_username" required>
-                                <i class="form-group__bar"></i>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>First Name</label>
-                                        <input type="text" class="form-control" placeholder="e.g: David" id="c_firstname" required>
-                                        <i class="form-group__bar"></i>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Last Name</label>
-                                        <input type="text" class="form-control" placeholder="e.g: Smith" id="c_lastname" required>
-                                        <i class="form-group__bar"></i>
-                                    </div>
-                                </div>
-                            </div>
+        <!--<div class="modal fade" id="create-user-modal" data-backdrop="static">-->
+            <!--<div class="modal-dialog">-->
+                <!--<div class="modal-content">-->
+                    <!--<div class="modal-header">-->
+                        <!--<h5 class="modal-title pull-left">Create User</h5>-->
+                    <!--</div>-->
+                    <!--<form role="form" id="create-user-form">-->
+                        <!--<div class="modal-body">-->
+                            <!--<div class="form-group">-->
+                                <!--<label>Username</label>-->
+                                <!--<input type="text" class="form-control" placeholder="e.g: dsmith" id="c_username" required>-->
+                                <!--<i class="form-group__bar"></i>-->
+                            <!--</div>-->
+                            <!--<div class="row">-->
+                                <!--<div class="col-md-6">-->
+                                    <!--<div class="form-group">-->
+                                        <!--<label>First Name</label>-->
+                                        <!--<input type="text" class="form-control" placeholder="e.g: David" id="c_firstname" required>-->
+                                        <!--<i class="form-group__bar"></i>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                                <!--<div class="col-md-6">-->
+                                    <!--<div class="form-group">-->
+                                        <!--<label>Last Name</label>-->
+                                        <!--<input type="text" class="form-control" placeholder="e.g: Smith" id="c_lastname" required>-->
+                                        <!--<i class="form-group__bar"></i>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                            <!--</div>-->
 
-                            <div class="form-group">
-                                <label>Role</label>
-                                <div class="radio">
-                                    <input type="radio" name="c_role" id="c_role-1" value="ROLE_ADMIN" required>
-                                    <label class="radio__label" for="c_role-1">System Administrator</label>
-                                </div>
-                                <div class="radio">
-                                    <input type="radio" name="c_role" id="c_role-2" value="ROLE_USER">
-                                    <label class="radio__label" for="c_role-2">Instructor</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                            <input type="submit" class="btn btn-info" autocomplete="off" id="create-button" value="Create">
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+                            <!--<div class="form-group">-->
+                                <!--<label>Role</label>-->
+                                <!--<div class="radio">-->
+                                    <!--<input type="radio" name="c_role" id="c_role-1" value="ROLE_ADMIN">-->
+                                    <!--<label class="radio__label" for="c_role-1">System Administrator</label>-->
+                                <!--</div>-->
+                                <!--<div class="radio">-->
+                                    <!--<input type="radio" name="c_role" id="c_role-2" value="ROLE_USER" checked>-->
+                                    <!--<label class="radio__label" for="c_role-2">Instructor</label>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="modal-footer">-->
+                            <!--<button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>-->
+                            <!--<input type="submit" class="btn btn-info" autocomplete="off" id="create-button" value="Create">-->
+                        <!--</div>-->
+                    <!--</form>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+
         <div class="modal fade" id="edit-user-modal" data-backdrop="static">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -146,7 +147,14 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Last Name</label>
-                                        <input type="text" class="form-control" placeholder="e.g: Smith" id="e_lastname" required>
+                                        <input type="text" class="form-control" placeholder="e.g: 123@pitt.edu" id="e_lastname" required>
+                                        <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="text" class="form-control" placeholder="e.g: Smith" id="e_email" required>
                                         <i class="form-group__bar"></i>
                                     </div>
                                 </div>
@@ -154,11 +162,11 @@
                             <div class="form-group">
                                 <label>Role</label>
                                 <div class="radio">
-                                    <input type="radio" name="e_role" id="e_role-1" value="ADMIN">
+                                    <input type="radio" name="e_role" id="e_role-1" value="ROLE_ADMIN">
                                     <label class="radio__label" for="e_role-1">System Administrator</label>
                                 </div>
                                 <div class="radio">
-                                    <input type="radio" name="e_role" id="e_role-2" value="USER" checked>
+                                    <input type="radio" name="e_role" id="e_role-2" value="ROLE_USER" checked>
                                     <label class="radio__label" for="e_role-2">User</label>
                                 </div>
                             </div>
@@ -175,7 +183,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title pull-left">Rest Password for User</h5>
+                        <h5 class="modal-title pull-left">Reset Password for User</h5>
                     </div>
                     <div class="modal-body">Confirm reset password?</div>
                     <div class="modal-footer">
@@ -236,6 +244,8 @@
 <script src="/vendors/bower_components/nouislider/distribute/nouislider.min.js"></script>
 <script src="/vendors/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
 <script src="/vendors/bower_components/trumbowyg/dist/trumbowyg.min.js"></script>
+
+<script src="/vendors/bower_components/remarkable-bootstrap-notify/dist/bootstrap-notify.min.js"></script>
 
 <!-- Vendors: Data tables -->
 <script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
