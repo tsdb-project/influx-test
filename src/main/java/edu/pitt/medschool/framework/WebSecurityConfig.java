@@ -8,12 +8,25 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    SessionRegistry sessionRegistry;
+
+
+    @Bean
+    public SessionRegistry getSessionRegistry(){
+        SessionRegistry sessionRegistry = new SessionRegistryImpl();
+        return sessionRegistry;
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -21,8 +34,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/css/**", "/vendors/**", "/js/**", "/demo/**", "/fonts/**", "/img/**", "/scss/**","/manual/**").permitAll()
                 .antMatchers("/", "/data/**","/query/**","/analysis/**","/versionControl/**").hasAnyRole("USER", "ADMIN")
-                .antMatchers("/analysis/chart").hasAnyRole("ADMIN").and()
-                .formLogin().loginPage("/login").failureUrl("/login?error").permitAll().and()
+                .antMatchers("/analysis/chart").hasAnyRole("ADMIN")
+
+                .and().formLogin()
+                .loginPage("/login")
+                .usernameParameter("username")
+                .passwordParameter("password")
+                .defaultSuccessUrl("/")
+                .failureUrl("/login?error").permitAll()
+
+                .and().sessionManagement()
+                .maximumSessions(1)                //系统中同一个账号的登陆数量限制
+                .sessionRegistry(sessionRegistry)
+                .and().and()
+
                 .logout().permitAll();
     }
 
@@ -31,13 +56,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-//    @Autowired
-//    @Qualifier("customUserDetailService")
-//    UserDetailsService userDetailsService;
+    @Autowired
+    @Qualifier("customUserDetailService")
+    UserDetailsService userDetailsService;
 
-//    @Autowired
-//    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-//    }
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+    }
 
 }
