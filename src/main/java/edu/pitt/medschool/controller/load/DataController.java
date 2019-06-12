@@ -165,7 +165,8 @@ public class DataController {
 
     @RequestMapping(value = "/api/data/activity/list")
     @ResponseBody
-    public RestfulResponse activityList(RestfulResponse response) {
+    public RestfulResponse activityList() {
+        RestfulResponse response = new RestfulResponse(1,"success");
         response.setData(importProgressService.getActivityList(importCsvService.GetUUID()));
         return response;
     }
