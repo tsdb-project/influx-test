@@ -236,4 +236,11 @@ public class CsvFileDao {
         }
         return csvFileMapper.updateByExampleSelective(csvFile,csvFileExample);
     }
+
+    public List<CsvFile> selectByUuid(String uuid){
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria criteria = csvFileExample.createCriteria();
+        criteria.andUuidEqualTo(uuid);
+        return csvFileMapper.selectByExample(csvFileExample);
+    }
 }

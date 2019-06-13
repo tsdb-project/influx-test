@@ -224,18 +224,20 @@ public class DataController {
     @DeleteMapping(value = "/apis/file")
     @ResponseBody
     public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) CsvFile file) throws Exception {
-        int deleteResult;
-        int log;
-        int second;
+        int deleteResult =1;
         System.out.println(file.getComment());
         if(file.getStatus()==1){
-            log = versionControlService.setLog(file,1);
-            second = rawDataService.deletePatientDataByFile(file);
-            deleteResult = log*second;
+            List<CsvFile> files = rawDataService.selectFilesByUuid(file.getUuid());
+            for(CsvFile file1: files){
+                deleteResult*=versionControlService.setLog(file1,1);
+            }
+            deleteResult*=rawDataService.deletePatientDataByFile(files);
         }else {
-            log = versionControlService.setLog(file,2);
-            second = rawDataService.deletePatientDataByFile(file);
-            deleteResult = log*second;
+            List<CsvFile> files = rawDataService.selectFilesByUuid(file.getUuid());
+            for(CsvFile file1: files){
+                deleteResult*=versionControlService.setLog(file1,2);
+            }
+            deleteResult*=rawDataService.deletePatientDataByFile(files);
         }
         RestfulResponse response;
         if( deleteResult !=0 ){
@@ -249,8 +251,12 @@ public class DataController {
     @PostMapping(value = "/apis/pseudoDeleteFile")
     @ResponseBody
     public RestfulResponse pseudoDeleteFile(@RequestBody(required = true) CsvFile file) throws Exception {
-        file.setStatus(1);
-        int deleteResult = versionControlService.setLog(file,0) * rawDataService.pseudoDeleteFile(file);
+        List<CsvFile> files = rawDataService.selectFilesByUuid(file.getUuid());
+        int deleteResult =1;
+        for(CsvFile file1: files){
+            file1.setStatus(1);
+            deleteResult *= versionControlService.setLog(file1,0) * rawDataService.pseudoDeleteFile(file1);
+        }
         RestfulResponse response;
         if( deleteResult == 1 ){
             response = new RestfulResponse(1, "success");

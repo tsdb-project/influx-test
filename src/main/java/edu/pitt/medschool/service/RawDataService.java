@@ -266,20 +266,23 @@ public class RawDataService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public int deletePatientDataByFile(CsvFile file) throws Exception {
+    public int deletePatientDataByFile(List<CsvFile> files) throws Exception {
         Map<String, String> tags = new HashMap<>();
         // change for delete OOM file(ignore _A/B.csv)
-        tags.put("fileName", file.getFilename().replace(".csv", ""));
+        tags.put("uuid",files.get(0).getUuid());
 
 //      delete from influxDB
         boolean deleteInfluxDataResult = true;
-        deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
+        deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(files.get(0).getPid(), tags);
 
 
-        int deleteResult = 0;
+        int deleteResult = 1;
         if (deleteInfluxDataResult) {
             System.out.println("delete from influx success");
-            deleteResult =  importedFileDao.deletePatientDataByFile(file)*csvFileDao.deletePatientDataByFile(file);
+            for(CsvFile file:files){
+                deleteResult *=  importedFileDao.deletePatientDataByFile(file)*csvFileDao.deletePatientDataByFile(file);
+            }
+
         }
         try {
             if (deleteResult == 0) {
@@ -300,6 +303,10 @@ public class RawDataService {
             logger.debug("DELETE DATA FAILED!");
         }
         return deleteResult;
+    }
+
+    public List<CsvFile> selectFilesByUuid(String uuid){
+        return csvFileDao.selectByUuid(uuid);
     }
 
 }
