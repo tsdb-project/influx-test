@@ -85,9 +85,7 @@ $(document).ready(function () {
                 "email": $("#e_email").val(),
                 "role" : $('#e_role').val()
             };
-
-            console.log(form);
-
+            
             $.ajax({
                 'url': "/user/user",
                 'type': 'put',
