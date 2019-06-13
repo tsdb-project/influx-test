@@ -112,7 +112,7 @@ $(document).ready(function () {
     });
 
     $("#ConfirmButton").click(function(){
-        if($("#password").val()!=='admi'){
+        if($("#password").val()!=='admin'){
             notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "wrong password");
             return
         }
@@ -186,7 +186,7 @@ $(document).ready(function () {
     });
 
     $("#CancelButton").click(function(){
-        if($("#password2").val()!=='admi'){
+        if($("#password2").val()!=='admin'){
             notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "wrong password");
             return
         }
@@ -252,8 +252,6 @@ $(document).ready(function () {
                 }
             });
         }
-
-
     });
 
 
