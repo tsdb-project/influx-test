@@ -71,7 +71,7 @@ public class ImportedFileDao {
         ImportedFileExample importedFileExample = new ImportedFileExample();
         Criteria criteria = importedFileExample.createCriteria();
         criteria.andPidEqualTo(file.getPid());
-        criteria.andUuidEqualTo(file.getUuid());
+        criteria.andFilenameEqualTo(file.getFilename());
         criteria.andIsarEqualTo(file.getAr());
         criteria.andUuidEqualTo(machineId);
 
