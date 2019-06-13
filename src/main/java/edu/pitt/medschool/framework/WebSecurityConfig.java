@@ -49,6 +49,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().and()
 
                 .logout().permitAll();
+
+        http
+                .headers()
+                .xssProtection()
+                .disable();
     }
 
     @Bean
