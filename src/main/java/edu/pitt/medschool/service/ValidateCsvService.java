@@ -216,7 +216,7 @@ public class ValidateCsvService {
             if (timelines.containsKey(p.getPid()) && timelines.get(p.getPid()).containsKey(p.getFiletype())) {
                 HashMap<String, List<long[]>> innermap = timelines.get(p.getPid());
                 List<long[]> timeline = innermap.get(p.getFiletype());
-                long[] ts = { p.getRelativeStartTime(), p.getRelativeEndTime() };
+                long[] ts = { p.getRelativeStartTime(), p.getRelativeEndTime(), p.getLength() };
                 timeline.add(ts);
                 innermap.put(p.getFiletype(), timeline);
                 timelines.put(p.getPid(), innermap);
@@ -224,7 +224,7 @@ public class ValidateCsvService {
             } else if (timelines.containsKey(p.getPid()) && !timelines.get(p.getPid()).containsKey(p.getFiletype())) {
                 List<long[]> tmplist = new ArrayList<>();
                 HashMap<String, List<long[]>> innermap = timelines.get(p.getPid());
-                long[] ts = { p.getRelativeStartTime(), p.getRelativeEndTime() };
+                long[] ts = { p.getRelativeStartTime(), p.getRelativeEndTime(), p.getLength() };
                 tmplist.add(ts);
                 innermap.put(p.getFiletype(), tmplist);
                 timelines.put(p.getPid(), innermap);
@@ -232,7 +232,7 @@ public class ValidateCsvService {
             } else {
                 List<long[]> tmplist = new ArrayList<>();
                 HashMap<String, List<long[]>> innermap = new HashMap<>();
-                long[] ts = { p.getRelativeStartTime(), p.getRelativeEndTime() };
+                long[] ts = { p.getRelativeStartTime(), p.getRelativeEndTime(), p.getLength() };
                 tmplist.add(ts);
                 innermap.put(p.getFiletype(), tmplist);
                 timelines.put(p.getPid(), innermap);
@@ -286,6 +286,18 @@ public class ValidateCsvService {
                     }
                 }
             }
+            if(ar!=null && noar!=null){
+                for (long[] longs : ar) {
+                    boolean diff_time = true;
+                    for (long[] longs1 : noar) {
+                        if (longs[0] == longs1[0] && longs[1] == longs1[1] && longs[2] == longs1[2]) {
+                            diff_time = false;
+                        }
+                    }
+                    wrongpatient.setDiffTime(diff_time);
+                }
+            }
+
 
             List<Integer> ar_num = documents.get(patinet.getKey()).get("ar");
             List<Integer> noar_num = documents.get(patinet.getKey()).get("noar");
@@ -332,7 +344,7 @@ public class ValidateCsvService {
             wrongpatient.setNoar_miss(miss_noar);
 
             if (!wrongpatient.getAr_miss().isEmpty() || wrongpatient.isIsoverlap() || !wrongpatient.getNoar_miss().isEmpty()
-                    || wrongpatient.isWrongname()) {
+                    || wrongpatient.isWrongname() || wrongpatient.isDiffTime()) {
                 wrongpatients.add(wrongpatient);
             }
 
@@ -347,6 +359,7 @@ public class ValidateCsvService {
         int missAr=0;
         int missNoar = 0;
         int wrongName = 0;
+        int diffTime = 0;
         for(Wrongpatients w:wrongpatients){
             if(w.isWrongname()){
                 wrongName++;
@@ -360,11 +373,15 @@ public class ValidateCsvService {
             if(w.isIsoverlap()){
                 overlap++;
             }
+            if(w.isDiffTime()){
+                diffTime++;
+            }
         }
         wrongPatientsNum.setMissAr(missAr);
         wrongPatientsNum.setMissNoar(missNoar);
         wrongPatientsNum.setOverlap(overlap);
         wrongPatientsNum.setWrongName(wrongName);
+        wrongPatientsNum.setDiffTime(diffTime);
         return wrongPatientsNum;
     }
 

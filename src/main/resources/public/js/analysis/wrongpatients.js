@@ -28,6 +28,11 @@ $(document).ready(function () {
         },{
             data:null,
             render:function (data) {
+                return booleanToStr(data.diffTime);
+            }
+        },{
+            data:null,
+            render:function (data) {
                 return booleanToStr(data.wrongname);
             }
         }],
@@ -46,6 +51,7 @@ $(document).ready(function () {
             document.getElementById("missAr").innerText=total.missAr;
             document.getElementById("missNoar").innerText=total.missNoar;
             document.getElementById("wrongName").innerText=total.wrongName;
+            document.getElementById("diffTime").innerText=total.diffTime;
         },
         'error' : function() {
         }
@@ -66,21 +72,26 @@ $(document).ready(function () {
             }
         });
         console.log(response);
-        var str ="pid;isoverlap;ar_miss;noar_miss;wrongname";
+        var str ="pid,isoverlap,ar_miss,noar_miss,different ar/noar range,wrongname";
         str+="\n";
         for(var i=0; i<response.length;i++){
-            str+=response[i].pid+";";
+            str+=response[i].pid+",";
             if(response[i].isoverlap){
-                str+="T;";
+                str+="T,";
             }else {
-                str+=";";
+                str+=",";
             }
-            str+=response[i].ar_miss+";";
-            str+=response[i].noar_miss+";";
-            if(response[i].wrongname){
-                str+="T;";
+            str+="\""+response[i].ar_miss+"\",";
+            str+="\""+response[i].noar_miss+"\",";
+            if(response[i].diffTime){
+                str+="T,";
             }else {
-                str+=";";
+                str+=",";
+            }
+            if(response[i].wrongname){
+                str+="T,";
+            }else {
+                str+=",";
             }
             str+="\n";
         }

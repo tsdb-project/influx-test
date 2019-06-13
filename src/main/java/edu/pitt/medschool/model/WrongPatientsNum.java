@@ -5,6 +5,7 @@ public class WrongPatientsNum {
     private int missAr;
     private int missNoar;
     private int wrongName;
+    private int diffTime;
 
     public int getOverlap() {
         return overlap;
@@ -36,5 +37,13 @@ public class WrongPatientsNum {
 
     public void setWrongName(int wrongName) {
         this.wrongName = wrongName;
+    }
+
+    public int getDiffTime() {
+        return diffTime;
+    }
+
+    public void setDiffTime(int diffTime) {
+        this.diffTime = diffTime;
     }
 }

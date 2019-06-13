@@ -13,7 +13,7 @@ $(document).ready(
                 columns : [ {
                     data : null,
                     render : function(data) {
-                        if (data.finished == false) {
+                        if (data.finished === false) {
                             return '<i class="zmdi zmdi-settings zmdi-hc-spin"></i>';
                         } else {
                             return '<i class="zmdi zmdi-check"></i>';

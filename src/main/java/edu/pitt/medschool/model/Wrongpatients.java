@@ -8,9 +8,12 @@ public class Wrongpatients {
     private List<Integer> ar_miss;
     private List<Integer> noar_miss;
     private boolean wrongname;
+    private boolean diffTime;
+
     public Wrongpatients(){
         this.isoverlap = false;
         this.wrongname = false;
+        this.diffTime = false;
     }
     public String getPid() {
         return pid;
@@ -48,5 +51,13 @@ public class Wrongpatients {
 
     public void setNoar_miss(List<Integer> noar_miss) {
         this.noar_miss = noar_miss;
+    }
+
+    public boolean isDiffTime() {
+        return diffTime;
+    }
+
+    public void setDiffTime(boolean diffTime) {
+        this.diffTime = diffTime;
     }
 }
