@@ -232,7 +232,7 @@ public class CsvFileDao {
             notInCsvFile.setPid(file.getPid());
             notInCsvFile.setFilename(file.getFilename());
             notInCsvFile.setUuid(file.getUuid());
-            notInCsvFileMapper.insert(notInCsvFile);
+            notInCsvFileMapper.insertSelective(notInCsvFile);
         }
         return csvFileMapper.updateByExampleSelective(csvFile,csvFileExample);
     }
