@@ -95,7 +95,7 @@
                     <form role="form" id="change-password-form">
                         <div class="modal-body">
                             <div class="form-group">
-                                <input type="text" class="form-control" id="c_id" hidden>
+                                <input type="text" class="form-control" th:value="${userInfo.id}" id="c_id" hidden>
                             </div>
                             <div class="form-group">
                                 <label>New password</label>
@@ -108,11 +108,11 @@
                                 <i class="form-group__bar"></i>
                             </div>
                         </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                            <input type="submit" class="btn btn-info" autocomplete="off" id="change-password-button" value="Save">
+                        </div>
                     </form>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-info" data-dismiss="modal" id="change-password-button">Change</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -126,7 +126,7 @@
                     <form role="form" id="edit-user-form">
                         <div class="modal-body">
                             <div class="form-group">
-                                <input type="text" class="form-control" id="e_id" hidden>
+                                <input type="text" class="form-control" th:value="${userInfo.id}" id="e_id" hidden>
                             </div>
                             <div class="form-group">
                                 <label>Username - Not allowed for change once created</label>
@@ -181,10 +181,12 @@
 <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
 <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
 
+<script src="/vendors/bower_components/remarkable-bootstrap-notify/dist/bootstrap-notify.min.js"></script>
+
 <!-- App functions and actions -->
 <script src="/js/navigation.js"></script>
 <script src="/js/app.min.js"></script>
-
 <script src="/js/admin/profile.js"></script>
+
 </body>
 </html>

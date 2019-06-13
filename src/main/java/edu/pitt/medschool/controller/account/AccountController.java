@@ -1,5 +1,6 @@
 package edu.pitt.medschool.controller.account;
 
+import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dto.Accounts;
 import edu.pitt.medschool.service.UsersService;
@@ -77,8 +78,8 @@ public class AccountController {
 
     @PostMapping("/change_password")
     @ResponseBody
-    public RestfulResponse changePassword(@RequestParam(name = "id" )  Integer id ,@RequestParam(name = "password", required = false, defaultValue = "")  String password ) {
-        int res = usersService.changePassword(id,password);
+    public RestfulResponse changePassword(@RequestBody(required = true) Accounts userVO ) {
+        int res = usersService.changePassword(userVO.getId(),userVO.getPassword());
         return new RestfulResponse(1, "success",res);
     }
 

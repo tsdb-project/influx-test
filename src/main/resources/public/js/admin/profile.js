@@ -41,41 +41,30 @@ $(document).ready(function () {
                 '</div>'
         });
     };
-
-    // $.ajax({
-    //     'url': "/user/reset_password/" + id,
-    //     'type': 'patch',
-    //     'data': JSON.stringify(id),
-    //     'contentType': "application/json",
-    //     'dataType': 'json',
-    //     'success': function(data) {
-    //         table.ajax.reload();
-    //     },
-    //     'error': function() {}
-    // });
-
+    
     var $changePasswordForm = $('#change-password-form');
     $changePasswordForm.on('submit', function (ev) {
         ev.preventDefault();
         if ($changePasswordForm[0].checkValidity() && $("#c_newPassword").val() === $("#c_confirmPassword").val()) {
+
             $.ajax({
                 'url': "/user/change_password/",
-                'data': {
+                'data': JSON.stringify({
                     "id": $("#c_id").val(),
                     "password": $("#c_newPassword").val()
-                },
+                }),
                 'type': 'POST',
                 'contentType': "application/json",
                 'dataType': 'json',
                 'success': function (data) {
-
+                    $("#change-password-modal").modal('hide');
                 },
                 'error': function () {
                 }
             });
         }else{
             notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
-                'Two passwords are not the same please try again');
+                'Two passwords are not the same, please try again');
         }
 
     });
@@ -87,12 +76,13 @@ $(document).ready(function () {
         if ($editUserForm[0].checkValidity()) {
             var form = {
                 "id": $("#e_id").val(),
-                "username": $("#e_username").val(),
                 "firstName": $("#e_firstname").val(),
                 "lastName": $("#e_lastname").val(),
                 "email": $("#e_email").val(),
                 "role" : $('#e_role').val()
             };
+
+            console.log(form);
 
             $.ajax({
                 'url': "/user/user",
@@ -101,7 +91,6 @@ $(document).ready(function () {
                 'contentType': "application/json",
                 'dataType': 'json',
                 'success': function (data) {
-                    table.ajax.reload();
                     $("#edit-user-modal").modal('hide');
                 },
                 'error': function () {
