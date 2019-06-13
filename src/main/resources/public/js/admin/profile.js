@@ -41,6 +41,10 @@ $(document).ready(function () {
                 '</div>'
         });
     };
+
+    var creatTime = $('#creatTime').html();
+    creatTime = moment(creatTime).format("MM/DD/YYYY HH:mm:ss");
+    $('#creatTime').html(creatTime);
     
     var $changePasswordForm = $('#change-password-form');
     $changePasswordForm.on('submit', function (ev) {
@@ -92,6 +96,7 @@ $(document).ready(function () {
                 'dataType': 'json',
                 'success': function (data) {
                     $("#edit-user-modal").modal('hide');
+                    location.reload();
                 },
                 'error': function () {
                 }
