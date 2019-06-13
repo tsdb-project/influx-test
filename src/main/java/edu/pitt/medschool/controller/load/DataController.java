@@ -227,17 +227,9 @@ public class DataController {
         int deleteResult =1;
         System.out.println(file.getComment());
         if(file.getStatus()==1){
-            List<CsvFile> files = rawDataService.selectFilesByUuid(file.getUuid());
-            for(CsvFile file1: files){
-                deleteResult*=versionControlService.setLog(file1,1);
-            }
-            deleteResult*=rawDataService.deletePatientDataByFile(files);
+            deleteResult=versionControlService.setLog(file,1)*rawDataService.deletePatientDataByFile(file);
         }else {
-            List<CsvFile> files = rawDataService.selectFilesByUuid(file.getUuid());
-            for(CsvFile file1: files){
-                deleteResult*=versionControlService.setLog(file1,2);
-            }
-            deleteResult*=rawDataService.deletePatientDataByFile(files);
+            deleteResult=versionControlService.setLog(file,2)*rawDataService.deletePatientDataByFile(file);
         }
         RestfulResponse response;
         if( deleteResult !=0 ){
@@ -251,12 +243,8 @@ public class DataController {
     @PostMapping(value = "/apis/pseudoDeleteFile")
     @ResponseBody
     public RestfulResponse pseudoDeleteFile(@RequestBody(required = true) CsvFile file) throws Exception {
-        List<CsvFile> files = rawDataService.selectFilesByUuid(file.getUuid());
-        int deleteResult =1;
-        for(CsvFile file1: files){
-            file1.setStatus(1);
-            deleteResult *= versionControlService.setLog(file1,0) * rawDataService.pseudoDeleteFile(file1);
-        }
+        file.setStatus(1);
+        int deleteResult= versionControlService.setLog(file,0) * rawDataService.pseudoDeleteFile(file);
         RestfulResponse response;
         if( deleteResult == 1 ){
             response = new RestfulResponse(1, "success");

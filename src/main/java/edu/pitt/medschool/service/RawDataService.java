@@ -266,23 +266,22 @@ public class RawDataService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public int deletePatientDataByFile(List<CsvFile> files) throws Exception {
+    public int deletePatientDataByFile(CsvFile file) throws Exception {
         Map<String, String> tags = new HashMap<>();
         // change for delete OOM file(ignore _A/B.csv)
-        tags.put("uuid",files.get(0).getUuid());
+        //tags.put("fileName",file.getFilename().replace(".csv",""));
+        tags.put("arType",file.getAr()?"ar":"noar");
+        tags.put("uuid",file.getUuid());
 
 //      delete from influxDB
         boolean deleteInfluxDataResult = true;
-        deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(files.get(0).getPid(), tags);
+        deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.getPid(), tags);
 
 
-        int deleteResult = 1;
+        int deleteResult = 0;
         if (deleteInfluxDataResult) {
             System.out.println("delete from influx success");
-            for(CsvFile file:files){
-                deleteResult *=  importedFileDao.deletePatientDataByFile(file)*csvFileDao.deletePatientDataByFile(file);
-            }
-
+            deleteResult =  importedFileDao.deletePatientDataByFile(file)*csvFileDao.deletePatientDataByFile(file);
         }
         try {
             if (deleteResult == 0) {
