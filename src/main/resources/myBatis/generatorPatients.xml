@@ -48,7 +48,7 @@
         <table tableName="accounts" catalog="upmc">
             <property name="ignoreQualifiersAtRuntime" value="true" />
         </table>
-        <table tableName="not_in_csv_file" catalog="upmc">
+        <table tableName="csv_file_new" catalog="upmc">
             <property name="ignoreQualifiersAtRuntime" value="true" />
         </table>
         

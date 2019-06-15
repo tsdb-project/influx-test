@@ -47,7 +47,11 @@
                 <th>end time</th>
                 <th>action</th>
                 <th>comment</th>
-                <th>operations</th>
+                <th>
+                  <div class="custom-control custom-checkbox">
+                    <label for="selectAllFiles">Select All</label><input type="checkbox" class="custom-control-input" id="selectAllFiles">
+                  </div>
+                </th>
               </tr>
               </thead>
               <tbody style="cursor: pointer">
@@ -56,14 +60,14 @@
               </tbody>
             </table>
           </div>
-          <!--<div class="row" style="margin-bottom: 10px;">-->
-            <!--<div class="col-sm-2 col-md-2">-->
-              <!--<button class="btn btn-primary btn-sm btn-block" id="addFilter">cancel selected changes</button>-->
-            <!--</div>-->
-            <!--<div class="col-sm-2 col-md-2">-->
-              <!--<button type="button" class="btn btn-success btn-sm btn-block" id="queryFilter">confirm selected changes</button>-->
-            <!--</div>-->
-          <!--</div>-->
+          <div class="row" style="margin-bottom: 10px;">
+            <div class="col-sm-2 col-md-2">
+              <button class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#confirm-alert-modal">Commit</button>
+            </div>
+            <div class="col-sm-2 col-md-2">
+              <button class="btn btn-success btn-sm btn-block" data-toggle="modal" data-target="#cancel-alert-modal">Cancel</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal fade" id="confirm-alert-modal" tabindex="-1">
@@ -72,11 +76,10 @@
             <div class="modal-header">
               <h5 class="modal-title pull-left">Double check</h5>
             </div>
-            <div class="modal-body">Are you sure to confirm this change? This operation is irrevocable
+            <div class="modal-body">
               <div class="row">
                 <div class="col-sm-12 col-md-12">
-                  <label>please input your password</label>
-                  <input type="password" id="password">
+                  <label>Are you sure to confirm this change? This operation is irrevocable</label>
                 </div>
                 <div class="col-sm-12 col-md-12" style="height: 15px"></div>
               </div>
@@ -95,11 +98,10 @@
             <div class="modal-header">
               <h5 class="modal-title pull-left">Double check</h5>
             </div>
-            <div class="modal-body">Are you sure to cancel this change? This operation is irrevocable
+            <div class="modal-body">
               <div class="row">
                 <div class="col-sm-12 col-md-12">
-                  <label>please input your password</label>
-                  <input type="password" id="password2">
+                  <label>Are you sure to cancel this change? This operation is irrevocable</label>
                 </div>
                 <div class="col-sm-12 col-md-12" style="height: 15px"></div>
               </div>
@@ -138,19 +140,7 @@
           </div>
         </div>
       </div>
-      <div class="modal fade" id="wrong-password-modal" tabindex="-1">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title pull-left">Error</h5>
-            </div>
-            <div class="modal-body">Wrong password, please try again.</div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-link" data-dismiss="modal">OK</button>
-            </div>
-          </div>
-        </div>
-      </div>
+
       <div th:insert="fragments/footer :: footer"></div>
     </div>
   </section>

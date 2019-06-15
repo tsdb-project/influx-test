@@ -6,6 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,12 +27,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import edu.pitt.medschool.framework.influxdb.ResultTable;
 import org.apache.commons.lang3.StringUtils;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
+import org.influxdb.dto.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +55,8 @@ import edu.pitt.medschool.model.dao.InfluxClusterDao;
 import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.Feature;
 import edu.pitt.medschool.model.dto.ImportedFile;
+
+import static edu.pitt.medschool.service.PerformanceTest.idb;
 
 /**
  * Auto-parallel importing CSV data
@@ -535,6 +543,16 @@ public class ImportCsvService {
 
                 // add data to csv_file table
                 CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath, fileName);
+                long[] result = InfluxUtil.getTimeRangeandRows(csvFile.getPid(),fileName.substring(0, StringUtils.lastIndexOfIgnoreCase(fileName, "ar") + 2));
+                LocalDateTime start = LocalDateTime
+                        .ofInstant(TimeUtil.serialTimeToDate(result[1], TimeUtil.nycTimeZone).toInstant(), ZoneId.of("America/New_York"));
+                LocalDateTime end = LocalDateTime.ofInstant(
+                        TimeUtil.serialTimeToDate(result[2], TimeUtil.nycTimeZone).toInstant(),
+                        ZoneId.of("America/New_York"));
+                csvFile.setDensity((result[0]*1.0)/(Duration.between(start,end).getSeconds()));
+                csvFile.setStartTime(start);
+                csvFile.setEndTime(end);
+                csvFile.setLength((int)result[0]);
                 csvFile.setStatus(2);
                 validateCsvService.insertCsvFile(csvFile);
                 // add data to csv_log

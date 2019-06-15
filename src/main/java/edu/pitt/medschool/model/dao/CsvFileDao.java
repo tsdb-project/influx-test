@@ -1,11 +1,8 @@
 package edu.pitt.medschool.model.dao;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.pitt.medschool.model.dto.NotInCsvFile;
-import edu.pitt.medschool.model.mapper.NotInCsvFileMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +21,6 @@ import edu.pitt.medschool.model.mapper.CsvFileMapper;
 public class CsvFileDao {
     @Autowired
     CsvFileMapper csvFileMapper;
-
-    @Autowired
-    NotInCsvFileMapper notInCsvFileMapper;
 
 //    @Autowired
 //    CsvLogMapper csvLogMapper;
@@ -227,13 +221,6 @@ public class CsvFileDao {
         CsvFile csvFile = new CsvFile();
         csvFile.setWidth(file.getWidth());
         csvFile.setHeaderTime(file.getHeaderTime());
-        if(csvFileMapper.selectByExample(csvFileExample).isEmpty()){
-            NotInCsvFile notInCsvFile = new NotInCsvFile();
-            notInCsvFile.setPid(file.getPid());
-            notInCsvFile.setFilename(file.getFilename());
-            notInCsvFile.setUuid(file.getUuid());
-            notInCsvFileMapper.insertSelective(notInCsvFile);
-        }
         return csvFileMapper.updateByExampleSelective(csvFile,csvFileExample);
     }
 
