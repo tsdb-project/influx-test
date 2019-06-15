@@ -223,20 +223,21 @@ public class DataController {
 
     @DeleteMapping(value = "/apis/file")
     @ResponseBody
-    public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) CsvFile file) throws Exception {
+    public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) List<CsvFile> csvFiles) throws Exception {
         int deleteResult =1;
-        System.out.println(file.getComment());
-        List<CsvFile> files = rawDataService.selectFilesByUuidType(file);
-        if(file.getStatus()==1){
-            for(CsvFile file1:files){
-                deleteResult*=versionControlService.setLog(file1,1);
+        for(CsvFile csvFile : csvFiles){
+            List<CsvFile> files = rawDataService.selectFilesByUuidType(csvFile);
+            if(csvFile.getStatus()==1){
+                for(CsvFile file1:files){
+                    deleteResult*=versionControlService.setLog(file1,1);
+                }
+                deleteResult*=rawDataService.deletePatientDataByFile(files);
+            }else {
+                for(CsvFile file1:files){
+                    deleteResult*=versionControlService.setLog(file1,2);
+                }
+                deleteResult*=rawDataService.deletePatientDataByFile(files);
             }
-            deleteResult*=rawDataService.deletePatientDataByFile(files);
-        }else {
-            for(CsvFile file1:files){
-                deleteResult*=versionControlService.setLog(file1,2);
-            }
-            deleteResult*=rawDataService.deletePatientDataByFile(files);
         }
         RestfulResponse response;
         if( deleteResult !=0 ){
