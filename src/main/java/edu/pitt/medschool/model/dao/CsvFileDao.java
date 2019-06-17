@@ -1,6 +1,7 @@
 package edu.pitt.medschool.model.dao;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -198,7 +199,13 @@ public class CsvFileDao {
         CsvFileExample example = new CsvFileExample();
         Criteria criteria = example.createCriteria();
         criteria.andStatusGreaterThanOrEqualTo(1);
-        return csvFileMapper.selectByExample(example);
+        List<CsvFile> csvFiles =  csvFileMapper.selectByExample(example);
+        ZoneId utcTz = ZoneId.of("UTC");
+        ZoneId nycTz = ZoneId.of("America/New_York");
+        for(CsvFile csvFile:csvFiles){
+            csvFile.setStartTime(csvFile.getStartTime().atZone(utcTz).withZoneSameInstant(nycTz).toLocalDateTime());
+        }
+        return csvFiles;
     }
 
     public CsvFile getElementByID(Integer id){
