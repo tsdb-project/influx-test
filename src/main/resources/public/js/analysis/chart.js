@@ -55,7 +55,7 @@ $(document).ready(function() {
 		async: false,
 		success : function(text)
 		{
-			patientTimelines = JSON.parse(text);
+			patientTimelines = text.data;
 		}
 	});
 

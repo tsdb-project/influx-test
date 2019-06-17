@@ -280,7 +280,7 @@ public class AnalysisService {
 
                     // First get the group by time offset
                     ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
-                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
+                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1 tz('America/New_York')",
                             patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
                     if (testOffset.length != 1) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> don't have enough data to export.%n", patientId));
@@ -429,10 +429,6 @@ public class AnalysisService {
         }
 
         logger.info("medicalRecordList:" + Integer.toString(medicalRecordList.size()));
-        // for (int i=0;i<medicalRecordList.size();i++){
-        // logger.info("medical time out:"+Integer.toString(i)+medicalRecordList.get(i).getChartDate().toString());
-        // logger.info("medical time in:"+Integer.toString(i)+medicalRecordList.get(i).getChartDate().toInstant().toString());
-        // }
 
         ExportMedicalOutput outputWriter;
         try {
@@ -521,7 +517,7 @@ public class AnalysisService {
 
                     // First get the group by time offset
                     ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
-                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
+                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1 tz('America/New_York')",
                             onerecord.getId(), job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
                     if (testOffset.length != 1) {
                         outputWriter.writeMetaFile(
@@ -725,7 +721,7 @@ public class AnalysisService {
         try {
             logger.info(eegChart.getPatientID());
             ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
-                    "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
+                    "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1 tz('America/New_York')",
                     eegChart.getPatientID(), eegChart.isAr() ? "ar" : "noar", eegChart.getPeriod()));
             if (testOffset.length != 1) {
                 logger.info("no enough data");

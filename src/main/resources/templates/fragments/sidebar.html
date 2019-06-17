@@ -75,7 +75,10 @@
                         <li id="chart" sec:authorize="hasRole('ADMIN')">
                             <a href="/analysis/chart">View Charts</a>
                         </li>
-                        <li id="wrongpatients">
+                        <li id="userchart" sec:authorize="hasRole('USER')">
+                            <a href="/analysis/userchart">View Charts</a>
+                        </li>
+                        <li id="wrongpatients" sec:authorize="hasRole('ADMIN')">
                             <a href="/analysis/wrongpatients">Detect wrong data</a>
                         </li>
                         <!-- <li id="export">

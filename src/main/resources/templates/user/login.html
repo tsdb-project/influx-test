@@ -46,7 +46,9 @@
                 <label>Password</label>
                 <i class="form-group__bar"></i>
             </div>
-            <div></div>
+            <div class="alert alert-danger form-group" th:if="${param.error}">
+                <span>username or password is incorrect</span>
+            </div>
             <button type="submit" class="btn btn--icon login__block__btn">
                 <i class="zmdi zmdi-long-arrow-right"></i>
             </button>

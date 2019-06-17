@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.pitt.medschool.model.dto.NotInCsvFile;
-import edu.pitt.medschool.model.mapper.NotInCsvFileMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +22,6 @@ import edu.pitt.medschool.model.mapper.CsvFileMapper;
 public class CsvFileDao {
     @Autowired
     CsvFileMapper csvFileMapper;
-
-    @Autowired
-    NotInCsvFileMapper notInCsvFileMapper;
 
 //    @Autowired
 //    CsvLogMapper csvLogMapper;
@@ -149,7 +144,7 @@ public class CsvFileDao {
         CsvFileExample csvFileExample = new CsvFileExample();
         Criteria csvFileCriteria = csvFileExample.createCriteria();
         csvFileCriteria.andPidEqualTo(file.getPid());
-        csvFileCriteria.andUuidEqualTo(file.getUuid());
+        csvFileCriteria.andFilenameEqualTo(file.getFilename());
         csvFileCriteria.andArEqualTo(file.getAr());
 //        csvFileCriteria.andMachineEqualTo(machineId);
 
@@ -180,7 +175,7 @@ public class CsvFileDao {
 
         CsvFile csvFile = new CsvFile();
         csvFile.setStatus(1);
-//      csvFile.setUpdateTime(LocalDateTime.now());
+        csvFile.setLastUpdate(LocalDateTime.now());
 
         int deleteResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
         try {
@@ -195,9 +190,9 @@ public class CsvFileDao {
     }
 
     //    method for select delected files
-    public List<String> selectDeletedFilesByPatientId(String patientId) {
-        return csvFileMapper.selectDeletedFilesByPatientId(patientId);
-    }
+//    public List<String> selectDeletedFilesByPatientId(String patientId) {
+//        return csvFileMapper.selectDeletedFilesByPatientId(patientId);
+//    }
 
     public List<CsvFile> getAllchanges(){
         CsvFileExample example = new CsvFileExample();
@@ -227,20 +222,14 @@ public class CsvFileDao {
         CsvFile csvFile = new CsvFile();
         csvFile.setWidth(file.getWidth());
         csvFile.setHeaderTime(file.getHeaderTime());
-        if(csvFileMapper.selectByExample(csvFileExample).isEmpty()){
-            NotInCsvFile notInCsvFile = new NotInCsvFile();
-            notInCsvFile.setPid(file.getPid());
-            notInCsvFile.setFilename(file.getFilename());
-            notInCsvFile.setUuid(file.getUuid());
-            notInCsvFileMapper.insertSelective(notInCsvFile);
-        }
         return csvFileMapper.updateByExampleSelective(csvFile,csvFileExample);
     }
 
-    public List<CsvFile> selectByUuid(String uuid){
+    public List<CsvFile> selectByUuidType(CsvFile file){
         CsvFileExample csvFileExample = new CsvFileExample();
         Criteria criteria = csvFileExample.createCriteria();
-        criteria.andUuidEqualTo(uuid);
+        criteria.andUuidEqualTo(file.getUuid());
+        criteria.andArEqualTo(file.getAr());
         return csvFileMapper.selectByExample(csvFileExample);
     }
 }

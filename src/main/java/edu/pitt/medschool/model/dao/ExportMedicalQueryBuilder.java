@@ -21,6 +21,7 @@ public class ExportMedicalQueryBuilder {
 
         static final String aggregationCount = "COUNT(%s) AS C";
         static final String timeCondition = "(time >= '%s' AND time < '%s')";
+        static final String timeZone ="tz('America/New_York')";
     }
 	
 	// Downsample configs
@@ -194,6 +195,8 @@ public class ExportMedicalQueryBuilder {
         } else {
             this.queryString = whenDownsampleFirst(whereClause);
         }
+        // add time zone as ET
+        this.queryString = addTimeZone(this.queryString);
     }
 
     /**
@@ -326,6 +329,10 @@ public class ExportMedicalQueryBuilder {
         if (toWrap.startsWith("(") && toWrap.endsWith(")"))
             return toWrap;
         return String.format("(%s)", toWrap);
+    }
+
+    private String addTimeZone(String queryString){
+        return queryString+Template.timeZone;
     }
 
     /**

@@ -30,6 +30,7 @@ public class ExportQueryBuilder {
 
         static final String aggregationCount = "COUNT(%s) AS C";
         static final String timeCondition = "(time >= '%s' AND time < '%s')";
+        static final String timeZone = "tz('America/New_York')";
     }
 
     // Downsample configs
@@ -180,7 +181,12 @@ public class ExportQueryBuilder {
         } else {
             this.queryString = whenDownsampleFirst(whereClause);
         }
+        // add time zone, change the output tz to ET
+        this.queryString = addTimeZone(this.queryString);
     }
+
+
+
 
     /**
      * Aggr part for Aggr first
@@ -328,6 +334,10 @@ public class ExportQueryBuilder {
             return origin;
         else
             return String.format("%s AS %s", wrapByBracket(origin), alias);
+    }
+
+    private String addTimeZone(String queryString){
+        return queryString+Template.timeZone;
     }
 
     /**

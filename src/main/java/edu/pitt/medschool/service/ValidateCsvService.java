@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -140,18 +141,11 @@ public class ValidateCsvService {
                 validateBean.setAr(true);
             }
             File file = new File(dir);
-            int count = 1;
             for (int j = 0; j < 2; j++) {
                 reader.readLine();
             }
             String[] firstdata = reader.readLine().split(",");
-            Double start_time = Double.valueOf(firstdata[0]);
             validateBean.setWidth(firstdata.length);
-            String end_time = null;
-            while ((line = reader.readLine()) != null) {
-                end_time = line;
-                count += 1;
-            }
             reader.close();
 
             ZoneId zoneId = ZoneId.of("America/New_York");
@@ -159,19 +153,12 @@ public class ValidateCsvService {
             validateBean.setSize(file.length());
             validateBean.setPath(dir);
             validateBean.setFilename(file.getName());
-            validateBean.setLength(count);
-            LocalDateTime start = LocalDateTime
-                    .ofInstant(TimeUtil.serialTimeToDate(start_time, TimeUtil.nycTimeZone).toInstant(), zoneId);
-            validateBean.setStartTime(start);
-            LocalDateTime end = LocalDateTime.ofInstant(
-                    TimeUtil.serialTimeToDate(Double.valueOf(end_time.split(",")[0]), TimeUtil.nycTimeZone).toInstant(),
-                    zoneId);
-            validateBean.setEndTime(end);
             validateBean.setPid(pid);
             validateBean.setUuid(processFirstLineInCSV(firstline, validateBean.getPid()));
-            validateBean.setHeaderTime(LocalDateTime.ofInstant(strToDate(header_time).toInstant(), zoneId));
             validateBean.setMachine(machineId);
-            validateBean.setDensity((count*1.0)/(Duration.between(start,end).getSeconds()));
+            validateBean.setHeaderTime(LocalDateTime.ofInstant(strToDate(header_time).toInstant(), zoneId));
+            validateBean.setLastUpdate(LocalDateTime.now());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -186,9 +173,9 @@ public class ValidateCsvService {
         return csvFileDao.getPatientTimeLines(machine);
     }
 
-    public String getFilteredtPatientTimeLines(String machine, GraphFilter filter) throws Exception {
-        throw new NumberFormatException();
-    }
+//    public String getFilteredtPatientTimeLines(String machine, GraphFilter filter) throws Exception {
+//        throw new NumberFormatException();
+//    }
 
     static class TimelineCompare implements Comparator<long[]> {
         @Override

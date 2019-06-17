@@ -1,5 +1,6 @@
 package edu.pitt.medschool.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,7 +9,7 @@ public class PatientTimeLine {
     private String pid;
     private String filename;
     private String filetype;
-    private Date arrestTime;
+    private LocalDateTime arrestTime;
     private long relativeStartTime;
     private long relativeEndTime;
     private int length;
@@ -40,11 +41,11 @@ public class PatientTimeLine {
         this.filetype = filetype;
     }
 
-    public Date getArrestTime() {
+    public LocalDateTime getArrestTime() {
         return arrestTime;
     }
 
-    public void setArrestTime(Date arrestTime) {
+    public void setArrestTime(LocalDateTime arrestTime) {
         this.arrestTime = arrestTime;
     }
 
