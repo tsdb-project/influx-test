@@ -27,6 +27,11 @@ $(document)
                                         language : {
                                             searchPlaceholder : "Search for files in the table..."
                                         },
+                                        columnDefs: [{
+                                            "targets": [2],
+                                            "orderable": false,
+                                            "searchable": false
+                                        }],
                                         columns : [
                                                 {
                                                     data : 'name'

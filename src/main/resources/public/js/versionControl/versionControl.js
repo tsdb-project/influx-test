@@ -57,13 +57,17 @@ $(document).ready(function () {
         language : {
             searchPlaceholder : "Search for files in the table..."
         },
-        autoWidth : !1,
-        responsive : !0,
         columnDefs: [{
             "targets": [0],
             "visible": false,
+            "searchable": false},
+            {
+            "targets": 7,
+            "orderable": false,
             "searchable": false
         }],
+        autoWidth : !1,
+        responsive : !0,
         columns: [{
             data: 'id'
         },{
