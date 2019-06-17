@@ -82,15 +82,36 @@ $(document).ready(function () {
         },{
             data:'comment'
         },{
-            data :null,
+            data : null,
             render : function(data,type,row,meta) {
-                return "<th><button class=\"btn btn-primary btn-sm\" data-toggle=\"modal\" data-target=\"#confirm-alert-modal\" data-row=\"" +
-                    meta.row + "\">Confirm</button> " +
-                    "<button class=\"btn btn-danger btn-sm\" data-toggle=\"modal\" data-target=\"#cancel-alert-modal\" data-row=\"" +
-                    meta.row + "\" >Cancel</a></th>";
+                var name = meta.row;
+                var checkbox = "<th><div class=\"custom-control custom-checkbox\">"
+                    + "<input type=\"checkbox\" class=\"custom-control-input file-checkbox\" value=\"" + name
+                    + "\" name=\"files\"><label class=\"custom-control-label\" for=\"customCheck1\"></label></div></th>";
+                return checkbox;
             }
         }],
-        order: [[0, 'desc']],
+        paging : false,
+        dom : '<"dataTables__top"fB>rt<"dataTables__bottom"i><"clear">',
+        buttons : [
+            {
+                extend : "excelHtml5",
+                title : "Export Data"
+            }, {
+                extend : "csvHtml5",
+                title : "Export Data"
+            }, {
+                extend : "print",
+                title : "Material Admin"
+            }
+        ],
+        initComplete : function(a, b) {
+            $(this)
+                .closest(".dataTables_wrapper")
+                .find(".dataTables__top")
+                .prepend(
+                    '<div class="dataTables_buttons hidden-sm-down actions"><span class="actions__item zmdi zmdi-print" data-table-action="print" /><span class="actions__item zmdi zmdi-fullscreen" data-table-action="fullscreen" /><div class="dropdown actions__item"><i data-toggle="dropdown" class="zmdi zmdi-download" /><ul class="dropdown-menu dropdown-menu-right"><a href="" class="dropdown-item" data-table-action="excel">Excel (.xlsx)</a><a href="" class="dropdown-item" data-table-action="csv">CSV (.csv)</a></ul></div></div>')
+        }
     });
 
     function getStatus(data){
@@ -102,26 +123,34 @@ $(document).ready(function () {
         }
     }
 
-    var csvFile =[];
-    fileTable.on('click','button',function (event) {
-        var row = event.target.dataset.row;
-        csvFile = files[row];
-        console.log(row);
-        console.log(csvFile.status);
-        console.log(csvFile.comment);
-    });
+    var import_list =[];
+    var delete_list = [];
+    var csvFile = [];
+    var rownumbers = [];
+
 
     $("#ConfirmButton").click(function(){
-        if($("#password").val()!=='admin'){
-            notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "wrong password");
-            return
+        $.each($('.file-checkbox:checked'), function() {
+            rownumbers.push($(this).val());
+            csvFile.push(files[$(this).val()]);
+        });
+
+        for(var i=0;i<csvFile.length;i++){
+            if(csvFile[i].status===1){
+                delete_list.push(csvFile[i]);
+            }else {
+                import_list.push(csvFile[i]);
+            }
         }
         //confirm delete
-        if(csvFile.status===1){
+        console.log(delete_list);
+        console.log(import_list);
+        console.log(rownumbers);
+        if(delete_list.length !==0){
             $.ajax({
                 'url' : "/apis/file",
                 'type' : 'DELETE',
-                'data' : JSON.stringify(csvFile),
+                'data' : JSON.stringify(delete_list),
                 'contentType' : "application/json",
                 'dataType' : 'json',
                 'success' : function(data) {
@@ -148,11 +177,11 @@ $(document).ready(function () {
             });
         }
         // confirm import data
-        if(csvFile.status===2){
+        if(import_list.length !==0){
             $.ajax({
                 'url' : "/versionControl/confirmImport",
                 'type' : 'POST',
-                'data' : JSON.stringify(csvFile),
+                'data' : JSON.stringify(import_list),
                 'contentType' : "application/json",
                 'dataType' : 'json',
                 'success' : function(data) {
@@ -185,17 +214,56 @@ $(document).ready(function () {
 
     });
 
-    $("#CancelButton").click(function(){
-        if($("#password2").val()!=='admin'){
-            notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "wrong password");
-            return
+    $(".dataTables_filter input[type=search]").focus(function() {
+        $(this).closest(".dataTables_filter").addClass("dataTables_filter--toggled")
+    }),
+        $(".dataTables_filter input[type=search]").blur(function() {
+            $(this).closest(".dataTables_filter").removeClass("dataTables_filter--toggled")
+        }),
+        $("body").on("click", "[data-table-action]", function(a) {
+            a.preventDefault();
+            var b = $(this).data("table-action");
+            if ("excel" === b && $(this).closest(".dataTables_wrapper").find(".buttons-excel").trigger("click"),
+            "csv" === b && $(this).closest(".dataTables_wrapper").find(".buttons-csv").trigger("click"),
+            "print" === b && $(this).closest(".dataTables_wrapper").find(".buttons-print").trigger("click"),
+            "fullscreen" === b) {
+                var c = $(this).closest(".card");
+                c.hasClass("card--fullscreen") ? (c.removeClass("card--fullscreen"),
+                    $("body").removeClass("data-table-toggled")) : (c.addClass("card--fullscreen"),
+                    $("body").addClass("data-table-toggled"))
+            }
+        });
+
+    $('#selectAllFiles').click(function() {
+        if ($('#selectAllFiles').is(':checked')) {
+            $('.custom-control-input').prop("checked", true);
+        } else {
+            $('.custom-control-input').prop("checked", false);
         }
+    });
+
+    $("#CancelButton").click(function(){
+        $.each($('.file-checkbox:checked'), function() {
+            rownumbers.push($(this).val());
+            csvFile.push(files[$(this).val()]);
+        });
+
+        for(var i=0;i<csvFile.length;i++){
+            if(csvFile[i].status===1){
+                delete_list.push(csvFile[i]);
+            }else {
+                import_list.push(csvFile[i]);
+            }
+        }
+        console.log(delete_list);
+        console.log(import_list);
+        console.log(rownumbers);
         // cancel delete
-        if(csvFile.status===1){
+        if(delete_list.length !==0){
             $.ajax({
                 'url': "/versionControl/cancelDelete",
                 'type': 'post',
-                'data': JSON.stringify(csvFile.id),
+                'data': JSON.stringify(delete_list),
                 'contentType': "application/json",
                 'dataType': 'json',
                 'success': function(data) {
@@ -222,11 +290,11 @@ $(document).ready(function () {
             });
         }
         // cancel import
-        if(csvFile.status===2){
+        if(import_list.length !==0){
             $.ajax({
                 'url' : "/apis/file",
                 'type' : 'DELETE',
-                'data' : JSON.stringify(csvFile),
+                'data' : JSON.stringify(import_list),
                 'contentType' : "application/json",
                 'dataType' : 'json',
                 'success' : function(data) {

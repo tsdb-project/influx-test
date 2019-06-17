@@ -223,13 +223,21 @@ public class DataController {
 
     @DeleteMapping(value = "/apis/file")
     @ResponseBody
-    public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) CsvFile file) throws Exception {
+    public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) List<CsvFile> csvFiles) throws Exception {
         int deleteResult =1;
-        System.out.println(file.getComment());
-        if(file.getStatus()==1){
-            deleteResult=versionControlService.setLog(file,1)*rawDataService.deletePatientDataByFile(file);
-        }else {
-            deleteResult=versionControlService.setLog(file,2)*rawDataService.deletePatientDataByFile(file);
+        for(CsvFile csvFile : csvFiles){
+            List<CsvFile> files = rawDataService.selectFilesByUuidType(csvFile);
+            if(csvFile.getStatus()==1){
+                for(CsvFile file1:files){
+                    deleteResult*=versionControlService.setLog(file1,1);
+                }
+                deleteResult*=rawDataService.deletePatientDataByFile(files);
+            }else {
+                for(CsvFile file1:files){
+                    deleteResult*=versionControlService.setLog(file1,2);
+                }
+                deleteResult*=rawDataService.deletePatientDataByFile(files);
+            }
         }
         RestfulResponse response;
         if( deleteResult !=0 ){
@@ -244,7 +252,11 @@ public class DataController {
     @ResponseBody
     public RestfulResponse pseudoDeleteFile(@RequestBody(required = true) CsvFile file) throws Exception {
         file.setStatus(1);
-        int deleteResult= versionControlService.setLog(file,0) * rawDataService.pseudoDeleteFile(file);
+        List<CsvFile> files = rawDataService.selectFilesByUuidType(file);
+        int deleteResult=1;
+        for(CsvFile file1:files){
+            deleteResult*=versionControlService.setLog(file1,0) * rawDataService.pseudoDeleteFile(file1);
+        }
         RestfulResponse response;
         if( deleteResult == 1 ){
             response = new RestfulResponse(1, "success");

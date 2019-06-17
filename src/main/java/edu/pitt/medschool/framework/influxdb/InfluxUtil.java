@@ -163,6 +163,25 @@ public class InfluxUtil {
         return (long) qr.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
     }
 
+    public static long[] getTimeRangeandRows(String tn, String filename){
+        Query q1 = new Query("SELECT COUNT(\"Time\") FROM \"" + tn + "\" WHERE fileName='"+filename+"'", DBConfiguration.Data.DBNAME);
+        Query q2 = new Query("SELECT FIRST(\"Time\") FROM \""+tn+"\"WHERE fileName='"+filename+"'",DBConfiguration.Data.DBNAME);
+        Query q3 = new Query("SELECT LAST(\"Time\") FROM \""+tn+"\"WHERE fileName='"+filename+"'",DBConfiguration.Data.DBNAME);
+        InfluxDB i = generateIdbClient(true);
+        QueryResult qr1 = i.query(q1);
+        QueryResult qr2 = i.query(q2);
+        QueryResult qr3 = i.query(q3);
+        long[] result = new long[3];
+        result[0] = (long)qr1.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
+        result[1] = (long)qr2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0);
+        result[2] = (long)qr3.getResults().get(0).getSeries().get(0).getValues().get(0).get(0);
+        i.close();
+        if(qr1.getResults().get(0).getSeries() == null||qr2.getResults().get(0).getSeries()==null||qr3.getResults().get(0).getSeries()==null){
+            logger.info("cannot find time in %s",filename);
+        }
+        return result;
+    }
+
     /**
      * Generate one IdbClient for one thread when doing exports
      *

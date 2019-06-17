@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -36,37 +37,36 @@ public class VersionControlController {
 
     @RequestMapping(value = "versionControl/cancelDelete", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> cancelChange(@RequestBody(required = true) Integer id) throws Exception {
+    public Map<String, Object> cancelChange(@RequestBody(required = true) List<CsvFile> csvFileList) throws Exception {
         Map<String, Object> map = new HashMap<>();
-        CsvFile csvFile = versionControlService.getElementByID(id);
-        if(versionControlService.setLog(csvFile,2)!=1){
+        int cancelResult=1;
+        for(CsvFile csvFile:csvFileList){
+            cancelResult *= versionControlService.setLog(csvFile,2);
+            csvFile.setStatus(0);
+            cancelResult*=versionControlService.updateStatus(csvFile);
+        }
+        if(cancelResult!=1){
             map.put("res", new RestfulResponse(0, "cancel failed"));
         }else{
-            csvFile.setStatus(0);
-            if (versionControlService.updateStatus(csvFile) == 1) {
-                map.put("res", new RestfulResponse(1, "success"));
-            } else {
-                map.put("res", new RestfulResponse(0, "cancel failed"));
-            }
+            map.put("res", new RestfulResponse(1, "success"));
         }
         return map;
     }
 
     @RequestMapping(value = "versionControl/confirmImport",method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> confirmChange(@RequestBody(required = true) CsvFile file) throws Exception {
+    public Map<String, Object> confirmChange(@RequestBody(required = true) List<CsvFile> csvFiles) throws Exception {
         Map<String, Object> map = new HashMap<>();
-        if(versionControlService.setLog(file,1)!=1){
+        int confirmResult = 1;
+        for(CsvFile csvFile: csvFiles){
+            confirmResult*=versionControlService.setLog(csvFile,1);
+            csvFile.setStatus(0);
+            confirmResult*=versionControlService.updateStatus(csvFile);
+        }
+        if(confirmResult!=1){
             map.put("res", new RestfulResponse(0, "confirm failed"));
-            return map;
         }else {
-            file.setStatus(0);
-            if (versionControlService.updateStatus(file) == 1) {
-                map.put("res", new RestfulResponse(1, "success"));
-            } else {
-                map.put("res", new RestfulResponse(0, "confirm failed"));
-            }
-
+            map.put("res", new RestfulResponse(1, "success"));
         }
         return map;
     }
