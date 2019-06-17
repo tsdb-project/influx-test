@@ -543,24 +543,24 @@ public class ImportCsvService {
 
                 // add data to csv_file table
                 CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath, fileName);
-                long[] result = InfluxUtil.getTimeRangeandRows(csvFile.getPid(),fileName.substring(0, StringUtils.lastIndexOfIgnoreCase(fileName, "ar") + 2));
-                LocalDateTime start = LocalDateTime
-                        .ofInstant(TimeUtil.serialTimeToDate(result[1], TimeUtil.nycTimeZone).toInstant(), ZoneId.of("America/New_York"));
-                LocalDateTime end = LocalDateTime.ofInstant(
-                        TimeUtil.serialTimeToDate(result[2], TimeUtil.nycTimeZone).toInstant(),
-                        ZoneId.of("America/New_York"));
-                csvFile.setDensity((result[0]*1.0)/(Duration.between(start,end).getSeconds()));
-                csvFile.setStartTime(start);
-                csvFile.setEndTime(end);
-                csvFile.setLength((int)result[0]);
+                CsvFile result = InfluxUtil.getTimeRangeandRows(csvFile.getPid(),fileName.substring(0, StringUtils.lastIndexOfIgnoreCase(fileName, "ar") + 2));
+                logger.info("st",result.getStartTime());
+                logger.info("et",result.getEndTime());
+                logger.info("count",result.getLength());
+                csvFile.setDensity((result.getLength()*1.0)/(Duration.between(result.getStartTime(),result.getEndTime()).getSeconds()));
+                csvFile.setStartTime(result.getStartTime());
+                csvFile.setEndTime(result.getEndTime());
+                csvFile.setLength(result.getLength());
                 csvFile.setStatus(2);
                 validateCsvService.insertCsvFile(csvFile);
                 // add data to csv_log
                 versionControlService.setLog(csvFile, 0);
 
             } catch (Exception e) {
-                logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileFullPath,
+                logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileName,
                         Util.stackTraceErrorToString(e)));
+                logMySQLFail(fileName);
+
             }
             // keep processed size consistent with the actual file size once a file is done with the import process
             totalProcessedSize.addAndGet(thisFileSize - (Long) impStr[1]);
@@ -628,6 +628,12 @@ public class ImportCsvService {
         }
         importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize,
                 totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
+    }
+
+    private void logMySQLFail(String fn){
+        CsvFile file = new CsvFile();
+        file.setFilename(fn);
+        versionControlService.setLog(file,-1);
     }
 
     private void transferFailedFiles(Path path) {

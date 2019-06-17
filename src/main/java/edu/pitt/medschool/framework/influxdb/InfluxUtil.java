@@ -1,5 +1,8 @@
 package edu.pitt.medschool.framework.influxdb;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -7,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import edu.pitt.medschool.model.dto.CsvFile;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
@@ -163,7 +167,7 @@ public class InfluxUtil {
         return (long) qr.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
     }
 
-    public static long[] getTimeRangeandRows(String tn, String filename){
+    public static CsvFile getTimeRangeandRows(String tn, String filename){
         Query q1 = new Query("SELECT COUNT(\"Time\") FROM \"" + tn + "\" WHERE fileName='"+filename+"'", DBConfiguration.Data.DBNAME);
         Query q2 = new Query("SELECT FIRST(\"Time\") FROM \""+tn+"\"WHERE fileName='"+filename+"'",DBConfiguration.Data.DBNAME);
         Query q3 = new Query("SELECT LAST(\"Time\") FROM \""+tn+"\"WHERE fileName='"+filename+"'",DBConfiguration.Data.DBNAME);
@@ -171,10 +175,10 @@ public class InfluxUtil {
         QueryResult qr1 = i.query(q1);
         QueryResult qr2 = i.query(q2);
         QueryResult qr3 = i.query(q3);
-        long[] result = new long[3];
-        result[0] = (long)qr1.getResults().get(0).getSeries().get(0).getValues().get(0).get(1);
-        result[1] = (long)qr2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0);
-        result[2] = (long)qr3.getResults().get(0).getSeries().get(0).getValues().get(0).get(0);
+        CsvFile result = new CsvFile();
+        result.setLength(((Double)qr1.getResults().get(0).getSeries().get(0).getValues().get(0).get(1)).intValue());
+        result.setStartTime(LocalDateTime.ofInstant(Instant.parse(qr2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString()), ZoneId.of("UTC")));
+        result.setEndTime(LocalDateTime.ofInstant(Instant.parse(qr3.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString()), ZoneId.of("UTC")));
         i.close();
         if(qr1.getResults().get(0).getSeries() == null||qr2.getResults().get(0).getSeries()==null||qr3.getResults().get(0).getSeries()==null){
             logger.info("cannot find time in %s",filename);
