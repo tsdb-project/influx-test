@@ -1,11 +1,7 @@
 package edu.pitt.medschool.service;
 
 import java.text.ParseException;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -129,6 +125,14 @@ public class RawDataService {
         }
     }
 
+    private LocalDateTime shiftFromUTCToNyc(LocalDateTime time){
+        ZoneId utcTz = ZoneId.of("UTC");
+        ZoneId nycTz = ZoneId.of("America/New_York");
+        ZonedDateTime utcTime = time.atZone(utcTz);
+        ZonedDateTime nycTime = utcTime.withZoneSameInstant(nycTz);
+        return nycTime.toLocalDateTime();
+    }
+
     public List<CsvFileVO> selectPatientFilesByPatientId(String patientId) {
         List<CsvFile> list = csvFileDao.selectByPatientId(patientId);
 
@@ -136,6 +140,10 @@ public class RawDataService {
         List<CsvFileVO> noar = new ArrayList<>();
 
         for (CsvFile csvFile : list) {
+
+            csvFile.setStartTime(shiftFromUTCToNyc(csvFile.getStartTime()));
+            csvFile.setEndTime(shiftFromUTCToNyc(csvFile.getEndTime()));
+
             if (csvFile.getAr()) {
                 ar.add(new CsvFileVO(csvFile));
             } else {
@@ -181,7 +189,8 @@ public class RawDataService {
             arrestTime = patientMeta.getArresttime() == null ? patientMeta.getArrestdate().atStartOfDay()
                     : patientMeta.getArresttime();
             ZoneId zoneId = ZoneId.of("America/New_York");
-            arrestTime = arrestTime.atZone(zoneId).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+//            arrestTime = arrestTime.atZone(zoneId).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+            arrestTime = arrestTime.atZone(zoneId).toLocalDateTime();
         }
 
         for (int i = 0; i < ar.size(); i++) {
@@ -221,16 +230,16 @@ public class RawDataService {
         return ar;
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public List<String> getDeletedFilesByPid(String pid) throws Exception {
-        List<String> resolveResult = new ArrayList<>();
-        try {
-            resolveResult = csvFileDao.selectDeletedFilesByPatientId(pid);
-        }catch (Exception e){
-            logger.debug("RETREVING DELETED FILES FAILED!");
-        }
-        return resolveResult;
-    }
+//    @Transactional(rollbackFor = Exception.class)
+//    public List<String> getDeletedFilesByPid(String pid) throws Exception {
+//        List<String> resolveResult = new ArrayList<>();
+//        try {
+//            resolveResult = csvFileDao.selectDeletedFilesByPatientId(pid);
+//        }catch (Exception e){
+//            logger.debug("RETREVING DELETED FILES FAILED!");
+//        }
+//        return resolveResult;
+//    }
 
     @Transactional(rollbackFor = Exception.class)
     public int resolveAllFilesByPid(String pid) throws Exception {

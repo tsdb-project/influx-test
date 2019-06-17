@@ -180,7 +180,7 @@ public class CsvFileDao {
 
         CsvFile csvFile = new CsvFile();
         csvFile.setStatus(1);
-//      csvFile.setUpdateTime(LocalDateTime.now());
+        csvFile.setLastUpdate(LocalDateTime.now());
 
         int deleteResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
         try {
@@ -195,9 +195,9 @@ public class CsvFileDao {
     }
 
     //    method for select delected files
-    public List<String> selectDeletedFilesByPatientId(String patientId) {
-        return csvFileMapper.selectDeletedFilesByPatientId(patientId);
-    }
+//    public List<String> selectDeletedFilesByPatientId(String patientId) {
+//        return csvFileMapper.selectDeletedFilesByPatientId(patientId);
+//    }
 
     public List<CsvFile> getAllchanges(){
         CsvFileExample example = new CsvFileExample();

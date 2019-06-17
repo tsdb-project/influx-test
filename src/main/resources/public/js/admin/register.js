@@ -71,10 +71,12 @@ $(document).ready(function() {
                     }else{
                         notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
                             'register success!');
-                        location.reload();
+                        setTimeout("window.location.href = '/login'",1000);
                     }
                 },
                 'error' : function() {
+                    notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                        'register failed!');
                 }
             });
         } else {

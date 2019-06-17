@@ -186,9 +186,9 @@ public class ValidateCsvService {
         return csvFileDao.getPatientTimeLines(machine);
     }
 
-    public String getFilteredtPatientTimeLines(String machine, GraphFilter filter) throws Exception {
-        throw new NumberFormatException();
-    }
+//    public String getFilteredtPatientTimeLines(String machine, GraphFilter filter) throws Exception {
+//        throw new NumberFormatException();
+//    }
 
     static class TimelineCompare implements Comparator<long[]> {
         @Override

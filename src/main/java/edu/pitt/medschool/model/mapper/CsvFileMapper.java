@@ -185,9 +185,9 @@ public interface CsvFileMapper {
             "from csv_file c, patient p where c.pid = p.id and c.machine= '${machine}' and c.status <> 1 and p.arrestdate is not null" })
     List<TimeLine> getPatientTimeLines(@Param("machine") String machine);
 
-	@Select({ "select filename from csv_file where pid = '${patientId}' and status = 1" })
-	@Results({ @Result(column = "filename", property = "filename", jdbcType = JdbcType.VARCHAR) })
-	List<String> selectDeletedFilesByPatientId(@Param("patientId") String patientId);
+//	@Select({ "select filename from csv_file where pid = '${patientId}' and status = 1" })
+//	@Results({ @Result(column = "filename", property = "filename", jdbcType = JdbcType.VARCHAR) })
+//	List<String> selectDeletedFilesByPatientId(@Param("patientId") String patientId);
 
 //	@Select({"select c.id as id, c.pid as pid, c.filename as filename, c.start_time as startTime, c.end_time as endTime," +
 //			"c.status as status, c.comment as comment from csv_file c where c.status =1 or c.status = 2"})

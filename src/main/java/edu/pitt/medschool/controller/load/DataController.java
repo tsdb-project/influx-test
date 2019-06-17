@@ -212,13 +212,13 @@ public class DataController {
         return response;
     }
 
-    @RequestMapping(value = "/apis/patient/getDeletedFiles")
-    @ResponseBody
-    public RestfulResponse getDeletedFiles(@RequestParam(name = "pid", required = true) String pid) throws Exception{
-        RestfulResponse response = new RestfulResponse(1, "success");
-        response.setData(rawDataService.getDeletedFilesByPid(pid));
-        return response;
-    }
+//    @RequestMapping(value = "/apis/patient/getDeletedFiles")
+//    @ResponseBody
+//    public RestfulResponse getDeletedFiles(@RequestParam(name = "pid", required = true) String pid) throws Exception{
+//        RestfulResponse response = new RestfulResponse(1, "success");
+//        response.setData(rawDataService.getDeletedFilesByPid(pid));
+//        return response;
+//    }
 
 
     @DeleteMapping(value = "/apis/file")

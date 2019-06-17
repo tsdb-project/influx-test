@@ -140,6 +140,14 @@ public class AnalysisController {
         return model;
     }
 
+    @RequestMapping("analysis/userchart")
+    @ResponseBody
+    public Model userchartPage(Model model) {
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "userchart");
+        return model;
+    }
+
     @RequestMapping("analysis/wrongpatients")
     @ResponseBody
     public  Model wrongPatinetsPage(Model model){
@@ -150,17 +158,18 @@ public class AnalysisController {
 
     @RequestMapping("analysis/getPatientTimelines")
     @ResponseBody
-    public String getPatientTimelines(Model model) {
-        return new Gson().toJson(validateCsvService.getPatientTimeLines("realpsc"));
+    public RestfulResponse getPatientTimelines(Model model) {
+        RestfulResponse response = new RestfulResponse(1,"success");
+        response.setData(validateCsvService.getPatientTimeLines("realpsc"));
+        return response;
     }
 
 
     @RequestMapping(value = {"analysis/getWrongPatients"},method = RequestMethod.GET)
     @ResponseBody
     public RestfulResponse getWrongPatients(Model model){
-        List<Wrongpatients> wrongPatients = new ArrayList<>();
         RestfulResponse response = new RestfulResponse(1,"success");
-        wrongPatients = validateCsvService.getWrongPatients(validateCsvService.getPatientTimeLines("realpsc"));
+        List<Wrongpatients> wrongPatients = validateCsvService.getWrongPatients(validateCsvService.getPatientTimeLines("realpsc"));
         response.setData(wrongPatients);
         return response;
     }
@@ -168,18 +177,17 @@ public class AnalysisController {
     @RequestMapping(value = {"analysis/getWrongPatientsNum"},method = RequestMethod.GET)
     @ResponseBody
     public RestfulResponse getWrongPatientsNum(Model model){
-        WrongPatientsNum wrongPatientsNum = new WrongPatientsNum();
         RestfulResponse response = new RestfulResponse(1,"success");
-        wrongPatientsNum = validateCsvService.getWrongPatientsNum(validateCsvService.getPatientTimeLines("realpsc"));
+        WrongPatientsNum wrongPatientsNum = validateCsvService.getWrongPatientsNum(validateCsvService.getPatientTimeLines("realpsc"));
         response.setData(wrongPatientsNum);
         return response;
     }
 
-    @RequestMapping(value = { "analysis/getPatientTimelines" }, method = RequestMethod.POST)
-    @ResponseBody
-    public String getFilteredPatientTimelines(@RequestBody(required = true) GraphFilter filter) throws Exception {
-        return validateCsvService.getFilteredtPatientTimeLines("realpsc", filter);
-    }
+//    @RequestMapping(value = { "analysis/getPatientTimelines" }, method = RequestMethod.POST)
+//    @ResponseBody
+//    public String getFilteredPatientTimelines(@RequestBody(required = true) GraphFilter filter) throws Exception {
+//        return validateCsvService.getFilteredtPatientTimeLines("realpsc", filter);
+//    }
 
     @RequestMapping(value = { "analysis/selecIdByfilter/{condition}" })
     @ResponseBody

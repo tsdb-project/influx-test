@@ -1,6 +1,9 @@
 package edu.pitt.medschool.model.dto;
 
-import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.regex.Pattern;
 
 import edu.pitt.medschool.model.PatientTimeLine;
@@ -8,11 +11,11 @@ import edu.pitt.medschool.model.PatientTimeLine;
 public class TimeLine {
     private String pid;
     private String filename;
-    private Timestamp start_time;
-    private java.sql.Timestamp end_time;
-    private Timestamp arrestdate;
+    private LocalDateTime start_time;
+    private LocalDateTime end_time;
+    private LocalDate arrestdate;
     private int len;
-    private java.sql.Timestamp arresttime;
+    private LocalDateTime arresttime;
     private String uuid;
     private boolean resolved;
     private String comment;
@@ -31,27 +34,27 @@ public class TimeLine {
         this.filename = filename;
     }
 
-    public java.sql.Timestamp getStart_time() {
+    public LocalDateTime getStart_time() {
         return start_time;
     }
 
-    public void setStart_time(Timestamp start_time) {
+    public void setStart_time(LocalDateTime start_time) {
         this.start_time = start_time;
     }
 
-    public Timestamp getEnd_time() {
+    public LocalDateTime getEnd_time() {
         return end_time;
     }
 
-    public void setEnd_time(Timestamp end_time) {
+    public void setEnd_time(LocalDateTime end_time) {
         this.end_time = end_time;
     }
 
-    public Timestamp getArrestdate() {
+    public LocalDate getArrestdate() {
         return arrestdate;
     }
 
-    public void setArrestdate(Timestamp arrestdate) {
+    public void setArrestdate(LocalDate arrestdate) {
         this.arrestdate = arrestdate;
     }
 
@@ -63,11 +66,11 @@ public class TimeLine {
         this.len = len;
     }
 
-    public Timestamp getArresttime() {
+    public LocalDateTime getArresttime() {
         return arresttime;
     }
 
-    public void setArresttime(Timestamp arresttime) {
+    public void setArresttime(LocalDateTime arresttime) {
         this.arresttime = arresttime;
     }
 
@@ -91,12 +94,19 @@ public class TimeLine {
         // TODO Auto-generated method stub
         PatientTimeLine patientTimeLine = new PatientTimeLine();
         String filename = this.getFilename();
-        Timestamp arrestTime = this.getArrestdate();
+
+        LocalDateTime arrestTime;
         if (this.getArresttime() != null) {
-            arrestTime = this.getArresttime();
+            arrestTime = this.getArresttime().atZone(ZoneId.of("America/New_York")).toLocalDateTime();
+        }else {
+            arrestTime = this.getArrestdate().atStartOfDay().atZone(ZoneId.of("America/New_York")).toLocalDateTime();
         }
-        long relativeStartTime = (this.getStart_time().getTime() - arrestTime.getTime()) / 1000;
-        long relativeEndTime = (this.getEnd_time().getTime() - arrestTime.getTime()) / 1000;
+
+        LocalDateTime startTime = this.getStart_time().atZone(ZoneId.of("UTC")).toLocalDateTime();
+        LocalDateTime endTime = this.getEnd_time().atZone(ZoneId.of("UTC")).toLocalDateTime();
+        long relativeStartTime = Duration.between(arrestTime,startTime).toMillis()/1000;
+        long relativeEndTime = Duration.between(arrestTime,endTime).toMillis()/1000;
+
         int len = this.getLen();
         String uuid = this.getUuid();
         String pid = this.getPid();
