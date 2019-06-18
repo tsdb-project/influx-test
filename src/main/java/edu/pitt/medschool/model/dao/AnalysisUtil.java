@@ -44,14 +44,14 @@ public class AnalysisUtil {
         List<DataTimeSpanBean> res = new ArrayList<>(uuids.size());
         for (Object uuid : uuids) {
             // Query 4 at the same time to save some requests
-            String template = "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1; ";
-            template += "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1; ";
-            template += "show tag values from \"" + pid + "\" with key = arType where fileUUID = '%s';";
-            template += "SELECT count(Time) FROM \"" + pid + "\" WHERE fileUUID = '%s';";
+            String template = "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1 tz('America/New_York'); ";
+            template += "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1 tz('America/New_York'); ";
+            template += "show tag values from \"" + pid + "\" with key = arType where fileUUID = '%s' tz('America/New_York');";
+            template += "SELECT count(Time) FROM \"" + pid + "\" WHERE fileUUID = '%s' tz('America/New_York');";
 
             DataTimeSpanBean dts = new DataTimeSpanBean();
             ResultTable[] table = justQueryData(i, true,
-                    String.format(template, uuid, "ASC", uuid, "DESC", uuid, uuid)+" tz('America/New_York')");
+                    String.format(template, uuid, "ASC", uuid, "DESC", uuid, uuid));
 
             Instant start = Instant.parse((CharSequence) table[0].getDataByColAndRow(0, 0)),
                     end = Instant.parse((CharSequence) table[1].getDataByColAndRow(0, 0));
