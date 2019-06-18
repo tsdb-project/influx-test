@@ -54,8 +54,8 @@ public class AnalysisUtil {
             DataTimeSpanBean dts = new DataTimeSpanBean();
             ResultTable[] table = justQueryData(i, true,query);
 
-            Instant start = Instant.parse(((String)table[0].getDataByColAndRow(0, 0)).substring(0,18)+"Z"),
-                    end = Instant.parse(((String)table[1].getDataByColAndRow(0, 0)).substring(0,18)+"Z");
+            Instant start = Instant.parse(((String)table[0].getDataByColAndRow(0, 0)).substring(0,19)+"Z"),
+                    end = Instant.parse(((String)table[1].getDataByColAndRow(0, 0)).substring(0,19)+"Z");
             List<Object> arType = table[2].getDatalistByColumnName("value");
             long count = Math.round((double) table[3].getDataByColAndRow(1, 0)),
                     timeDelta = end.toEpochMilli() - start.toEpochMilli();
