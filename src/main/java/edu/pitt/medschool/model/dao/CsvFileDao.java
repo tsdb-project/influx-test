@@ -200,7 +200,9 @@ public class CsvFileDao {
         ZoneId nycTz = ZoneId.of("America/New_York");
         for(CsvFile csvFile:csvFiles){
             csvFile.setStartTime(csvFile.getStartTime().atZone(utcTz).withZoneSameInstant(nycTz).toLocalDateTime());
+            csvFile.setEndTime(csvFile.getEndTime().atZone(utcTz).withZoneSameInstant(nycTz).toLocalDateTime());
         }
+
         return csvFiles;
     }
 
@@ -209,7 +211,14 @@ public class CsvFileDao {
     }
 
     public int updateStatus(CsvFile csvFile){
-        return csvFileMapper.updateByPrimaryKey(csvFile);
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria criteria = csvFileExample.createCriteria();
+        criteria.andFilenameEqualTo(csvFile.getFilename());
+        criteria.andUuidEqualTo(csvFile.getUuid());
+        criteria.andPidEqualTo(csvFile.getPid());
+        CsvFile csvFile1 = new CsvFile();
+        csvFile1.setStatus(0);
+        return csvFileMapper.updateByExampleSelective(csvFile1,csvFileExample);
     }
 
     public int deleteRecord(Integer id){

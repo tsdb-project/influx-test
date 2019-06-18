@@ -201,10 +201,6 @@ $(document).ready(function () {
                             fileTable.clear();
                             fileTable.rows.add(files);
                             fileTable.draw();
-                            $("#csv-file-card").show();
-                            $('html, body').animate({
-                                scrollTop : ($("#csv-file-table").offset().top)
-                            }, 500);
                         },
                         'error' : function() {
                         }

@@ -7,6 +7,10 @@ import java.io.Serializable;
  */
 public class RestfulResponse implements Serializable {
 
+    public RestfulResponse(){
+
+    }
+
     private static final long serialVersionUID = 8467939889876968376L;
 
     private Integer code;
