@@ -71,6 +71,11 @@ public class CsvFileDao {
 //        csvFileCriteria.andMachineEqualTo(machineId);
         csvFileCriteria.andUuidEqualTo(file.getUuid());
 
+        CsvFile csvFile = new CsvFile();
+        csvFile.setComment(file.getComment());
+        ZoneId america = ZoneId.of("America/New_York");
+        csvFile.setLastUpdate(LocalDateTime.now(america));
+
         int changeCommentResult = csvFileMapper.updateByExample(file, csvFileExample);
         try {
             if (changeCommentResult == 0) {
@@ -100,19 +105,19 @@ public class CsvFileDao {
         }else{
             csvFile.setConflictResolved(true);
         }
+        ZoneId america = ZoneId.of("America/New_York");
+        csvFile.setLastUpdate(LocalDateTime.now(america));
 
-//        csvFile.setUpdateTime(LocalDateTime.now());
-
-        int changeCommentResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
+        int resolveFileResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
         try {
-            if (changeCommentResult == 0) {
+            if (resolveFileResult == 0) {
                 throw new Exception();
             }
         } catch (Exception e) {
             logger.error("No CSV file record available!");
             throw e;
         }
-        return changeCommentResult;
+        return resolveFileResult;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -126,7 +131,8 @@ public class CsvFileDao {
 
         CsvFile csvFile = new CsvFile();
         csvFile.setConflictResolved(true);
-//        csvFile.setUpdateTime(LocalDateTime.now());
+        ZoneId america = ZoneId.of("America/New_York");
+        csvFile.setLastUpdate(LocalDateTime.now(america));
 
         int resolveResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
         try {
@@ -172,7 +178,8 @@ public class CsvFileDao {
 
         CsvFile csvFile = new CsvFile();
         csvFile.setStatus(1);
-        csvFile.setLastUpdate(LocalDateTime.now());
+        ZoneId america = ZoneId.of("America/New_York");
+        csvFile.setLastUpdate(LocalDateTime.now(america));
 
         int deleteResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
         try {
