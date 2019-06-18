@@ -176,7 +176,7 @@ $(document).ready(function () {
                     });
                 },
                 'error': function () {
-                    notify("top", "center", null, "failed", "animated fadeIn", "animated fadeOut", "Import confirmed failed.");
+                    notify("top", "center", null, "failed", "animated fadeIn", "animated fadeOut", "Import confirm failed.");
                 }
             });
         }

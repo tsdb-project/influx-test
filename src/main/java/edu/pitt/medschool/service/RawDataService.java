@@ -280,7 +280,7 @@ public class RawDataService {
         // change for delete OOM file(ignore _A/B.csv)
         //tags.put("fileName",file.getFilename().replace(".csv",""));
         tags.put("arType",file.get(0).getAr()?"ar":"noar");
-        tags.put("uuid",file.get(0).getUuid());
+        tags.put("fileUUID",file.get(0).getUuid());
 
 //      delete from influxDB
         boolean deleteInfluxDataResult = true;
