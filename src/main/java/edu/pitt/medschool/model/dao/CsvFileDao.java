@@ -71,12 +71,15 @@ public class CsvFileDao {
 //        csvFileCriteria.andMachineEqualTo(machineId);
         csvFileCriteria.andUuidEqualTo(file.getUuid());
 
-        CsvFile csvFile = new CsvFile();
-        csvFile.setComment(file.getComment());
-        ZoneId america = ZoneId.of("America/New_York");
-        csvFile.setLastUpdate(LocalDateTime.now(america));
+        ZoneId utcTz = ZoneId.of("UTC");
+        ZoneId nycTz = ZoneId.of("America/New_York");
+        file.setStartTime(file.getStartTime().atZone(nycTz).withZoneSameInstant(utcTz).toLocalDateTime());
+        file.setEndTime(file.getEndTime().atZone(nycTz).withZoneSameInstant(utcTz).toLocalDateTime());
 
-        int changeCommentResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
+        ZoneId america = ZoneId.of("America/New_York");
+        file.setLastUpdate(LocalDateTime.now(america));
+
+        int changeCommentResult = csvFileMapper.updateByExample(file, csvFileExample);
         try {
             if (changeCommentResult == 0) {
                 throw new Exception();
