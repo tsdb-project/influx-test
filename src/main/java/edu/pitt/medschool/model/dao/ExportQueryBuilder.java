@@ -30,7 +30,7 @@ public class ExportQueryBuilder {
 
         static final String aggregationCount = "COUNT(%s) AS C";
         static final String timeCondition = "(time >= '%s' AND time < '%s')";
-        static final String timeZone = "tz('America/New_York')";
+        static final String timeZone = " tz('America/New_York')";
     }
 
     // Downsample configs

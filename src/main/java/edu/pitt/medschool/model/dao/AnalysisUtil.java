@@ -51,7 +51,7 @@ public class AnalysisUtil {
 
             DataTimeSpanBean dts = new DataTimeSpanBean();
             ResultTable[] table = justQueryData(i, true,
-                    String.format(template, uuid, "ASC", uuid, "DESC", uuid, uuid));
+                    String.format(template, uuid, "ASC", uuid, "DESC", uuid, uuid)+" tz('America/New_York')");
 
             Instant start = Instant.parse((CharSequence) table[0].getDataByColAndRow(0, 0)),
                     end = Instant.parse((CharSequence) table[1].getDataByColAndRow(0, 0));
