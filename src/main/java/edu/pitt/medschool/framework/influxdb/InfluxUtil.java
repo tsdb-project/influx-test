@@ -98,8 +98,10 @@ public class InfluxUtil {
         for (String tag : tags.keySet()) {
             whereClause.append("\"").append(tag).append("\"");
             whereClause.append(" = ").append("'").append(tags.get(tag)).append("' ");
+            whereClause.append("and ");
             usingWhereClause = true;
         }
+        whereClause.delete(whereClause.length()-5,whereClause.length());
         String query = String.format(queryTemplate, patient, usingWhereClause ? whereClause : whereClause);
         logger.debug(query);
         InfluxDB influxDB = generateIdbClient(false);
