@@ -147,11 +147,7 @@ public class CsvFileDao {
         csvFileCriteria.andPidEqualTo(file.getPid());
         csvFileCriteria.andFilenameEqualTo(file.getFilename());
         csvFileCriteria.andArEqualTo(file.getAr());
-//        csvFileCriteria.andMachineEqualTo(machineId);
-
-        CsvFile csvFile = new CsvFile();
-        csvFile.setStatus(1);
-
+        csvFileCriteria.andMachineEqualTo(machineId);
         int deleteResult = csvFileMapper.deleteByExample(csvFileExample);
         //int deleteResult = csvFileMapper.deleteByPrimaryKey(file.getId());
         try {
@@ -237,6 +233,7 @@ public class CsvFileDao {
         Criteria criteria = csvFileExample.createCriteria();
         criteria.andUuidEqualTo(file.getUuid());
         criteria.andArEqualTo(file.getAr());
+        criteria.andMachineEqualTo(machineId);
         return csvFileMapper.selectByExample(csvFileExample);
     }
 }
