@@ -76,7 +76,7 @@ public class CsvFileDao {
         ZoneId america = ZoneId.of("America/New_York");
         csvFile.setLastUpdate(LocalDateTime.now(america));
 
-        int changeCommentResult = csvFileMapper.updateByExample(csvFile, csvFileExample);
+        int changeCommentResult = csvFileMapper.updateByExampleSelective(csvFile, csvFileExample);
         try {
             if (changeCommentResult == 0) {
                 throw new Exception();
