@@ -287,7 +287,7 @@ public class RawDataService {
         deleteInfluxDataResult = InfluxUtil.deleteDataByTagValues(file.get(0).getPid(), tags);
 
 
-        int deleteResult = 0;
+        int deleteResult = 1;
         if (deleteInfluxDataResult) {
             System.out.println("delete from influx success");
             for(CsvFile file1:file){
