@@ -291,7 +291,7 @@ public class AnalysisService {
                     // get the startTime eliminate first 30 rows
                     String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,patientId,job.getAr());
                     ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime),
-                            Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
+                            Instant.parse(((String) testOffset[0].getDataByColAndRow(0, 0)).substring(0,19)+"Z"), dtsb, groups, columns, exportQuery,
                             job.getAr());
                     String finalQueryString = eq.getQueryString();
                     logger.info(finalQueryString);
@@ -528,7 +528,7 @@ public class AnalysisService {
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, onerecord.getId());
                     String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,onerecord.getId(),job.getAr());
                     ExportMedicalQueryBuilder eq = new ExportMedicalQueryBuilder(Instant.parse(startTime),
-                            Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
+                            Instant.parse(((String) testOffset[0].getDataByColAndRow(0, 0)).substring(0,19)+"Z"), dtsb, groups, columns, exportQuery,
                             job.getAr(), onerecord);
                     String finalQueryStrings = eq.getQueryString();
                     // logger.info("medical time out:"+onerecord.getChartDate().toString());
@@ -729,7 +729,7 @@ public class AnalysisService {
             // Then fetch meta data regrading file segments and build the query string
             List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, eegChart.getPatientID());
             String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,eegChart.getPatientID(),eegChart.isAr());
-            ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime), Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb,
+            ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime), Instant.parse(((String) testOffset[0].getDataByColAndRow(0, 0)).substring(0,19)+"Z"), dtsb,
                     groups, columns, downsample, eegChart.isAr());
             String finalQueryString = eq.getQueryString();
             if (finalQueryString.isEmpty()) {
