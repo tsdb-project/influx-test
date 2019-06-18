@@ -121,7 +121,7 @@ public class AnalysisUtil {
                 + "\" where arType = \'" +artype+ "\' limit 1 offset 30 tz('America/New_York')";
         QueryResult recordResult = i.query(new Query(firstRecordTimeQuery, dbName));
         logger.info(firstRecordTimeQuery);
-        String startTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+        String startTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString().substring(0,19)+"Z";
         logger.info(startTime);
         return startTime;
     }
