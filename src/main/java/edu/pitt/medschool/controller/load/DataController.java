@@ -226,17 +226,10 @@ public class DataController {
     public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) List<CsvFile> csvFiles) throws Exception {
         int deleteResult =1;
         for(CsvFile csvFile : csvFiles){
-            List<CsvFile> files = rawDataService.selectFilesByUuidType(csvFile);
             if(csvFile.getStatus()==1){
-                for(CsvFile file1:files){
-                    deleteResult*=versionControlService.setLog(file1,1);
-                }
-                deleteResult*=rawDataService.deletePatientDataByFile(files);
+                    deleteResult=versionControlService.setLog(csvFile,1)*rawDataService.deletePatientDataByFile(csvFile);
             }else {
-                for(CsvFile file1:files){
-                    deleteResult*=versionControlService.setLog(file1,2);
-                }
-                deleteResult*=rawDataService.deletePatientDataByFile(files);
+                    deleteResult=versionControlService.setLog(csvFile,2)*rawDataService.deletePatientDataByFile(csvFile);
             }
         }
         RestfulResponse response;
