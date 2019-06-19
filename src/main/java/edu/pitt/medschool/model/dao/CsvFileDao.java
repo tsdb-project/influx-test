@@ -158,10 +158,7 @@ public class CsvFileDao {
     public int pseudoDeleteFile(CsvFile file) throws Exception {
         CsvFileExample csvFileExample = new CsvFileExample();
         Criteria csvFileCriteria = csvFileExample.createCriteria();
-        csvFileCriteria.andPidEqualTo(file.getPid());
-        csvFileCriteria.andArEqualTo(file.getAr());
-//        csvFileCriteria.andMachineEqualTo(machineId);
-        csvFileCriteria.andUuidEqualTo(file.getUuid());
+        csvFileCriteria.andIdEqualTo(file.getId());
 
         CsvFile csvFile = new CsvFile();
         csvFile.setStatus(1);
