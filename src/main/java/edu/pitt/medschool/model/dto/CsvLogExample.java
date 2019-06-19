@@ -293,52 +293,62 @@ public class CsvLogExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andActivityEqualTo(Integer value) {
+		public Criteria andActivityEqualTo(String value) {
 			addCriterion("activity =", value, "activity");
 			return (Criteria) this;
 		}
 
-		public Criteria andActivityNotEqualTo(Integer value) {
+		public Criteria andActivityNotEqualTo(String value) {
 			addCriterion("activity <>", value, "activity");
 			return (Criteria) this;
 		}
 
-		public Criteria andActivityGreaterThan(Integer value) {
+		public Criteria andActivityGreaterThan(String value) {
 			addCriterion("activity >", value, "activity");
 			return (Criteria) this;
 		}
 
-		public Criteria andActivityGreaterThanOrEqualTo(Integer value) {
+		public Criteria andActivityGreaterThanOrEqualTo(String value) {
 			addCriterion("activity >=", value, "activity");
 			return (Criteria) this;
 		}
 
-		public Criteria andActivityLessThan(Integer value) {
+		public Criteria andActivityLessThan(String value) {
 			addCriterion("activity <", value, "activity");
 			return (Criteria) this;
 		}
 
-		public Criteria andActivityLessThanOrEqualTo(Integer value) {
+		public Criteria andActivityLessThanOrEqualTo(String value) {
 			addCriterion("activity <=", value, "activity");
 			return (Criteria) this;
 		}
 
-		public Criteria andActivityIn(List<Integer> values) {
+		public Criteria andActivityLike(String value) {
+			addCriterion("activity like", value, "activity");
+			return (Criteria) this;
+		}
+
+		public Criteria andActivityNotLike(String value) {
+			addCriterion("activity not like", value, "activity");
+			return (Criteria) this;
+		}
+
+		public Criteria andActivityIn(List<String> values) {
 			addCriterion("activity in", values, "activity");
 			return (Criteria) this;
 		}
 
-		public Criteria andActivityNotIn(List<Integer> values) {
+		public Criteria andActivityNotIn(List<String> values) {
 			addCriterion("activity not in", values, "activity");
 			return (Criteria) this;
 		}
 
-		public Criteria andActivityBetween(Integer value1, Integer value2) {
+		public Criteria andActivityBetween(String value1, String value2) {
 			addCriterion("activity between", value1, value2, "activity");
 			return (Criteria) this;
 		}
 
-		public Criteria andActivityNotBetween(Integer value1, Integer value2) {
+		public Criteria andActivityNotBetween(String value1, String value2) {
 			addCriterion("activity not between", value1, value2, "activity");
 			return (Criteria) this;
 		}
@@ -660,6 +670,11 @@ public class CsvLogExample {
 
 		public Criteria andCommentNotBetween(String value1, String value2) {
 			addCriterion("comment not between", value1, value2, "comment");
+			return (Criteria) this;
+		}
+
+		public Criteria andActivityLikeInsensitive(String value) {
+			addCriterion("upper(activity) like", value.toUpperCase(), "activity");
 			return (Criteria) this;
 		}
 

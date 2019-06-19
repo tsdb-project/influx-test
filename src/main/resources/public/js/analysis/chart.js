@@ -116,7 +116,7 @@ $(document).ready(function() {
 
 	// check file suffix
 	function checkSuffix(filename) {
-		var regex = RegExp('[ -_][0]*[1-9]+[0]*(noar|ar).csv','g');
+		var regex = RegExp('[ -_][0]*[1-9]+[0]*(noar|ar|NOAR|AR).csv','g');
 		return regex.test(filename);
 	}
 
