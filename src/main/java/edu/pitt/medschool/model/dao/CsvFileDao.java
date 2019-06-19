@@ -64,13 +64,6 @@ public class CsvFileDao {
 
     @Transactional(rollbackFor = Exception.class)
     public int changeComment(CsvFile file) throws Exception {
-        CsvFileExample csvFileExample = new CsvFileExample();
-        Criteria csvFileCriteria = csvFileExample.createCriteria();
-        csvFileCriteria.andPidEqualTo(file.getPid());
-        csvFileCriteria.andFilenameEqualTo(file.getFilename());
-//        csvFileCriteria.andMachineEqualTo(machineId);
-        csvFileCriteria.andUuidEqualTo(file.getUuid());
-
         ZoneId utcTz = ZoneId.of("UTC");
         ZoneId nycTz = ZoneId.of("America/New_York");
         file.setStartTime(file.getStartTime().atZone(nycTz).withZoneSameInstant(utcTz).toLocalDateTime());
@@ -79,7 +72,7 @@ public class CsvFileDao {
         ZoneId america = ZoneId.of("America/New_York");
         file.setLastUpdate(LocalDateTime.now(america));
 
-        int changeCommentResult = csvFileMapper.updateByExample(file, csvFileExample);
+        int changeCommentResult = csvFileMapper.updateByPrimaryKey(file);
         try {
             if (changeCommentResult == 0) {
                 throw new Exception();
@@ -96,10 +89,7 @@ public class CsvFileDao {
     public int resolveFileByFile(CsvFile file) throws Exception {
         CsvFileExample csvFileExample = new CsvFileExample();
         Criteria csvFileCriteria = csvFileExample.createCriteria();
-        csvFileCriteria.andPidEqualTo(file.getPid());
-        csvFileCriteria.andFilenameEqualTo(file.getFilename());
-//        csvFileCriteria.andMachineEqualTo(machineId);
-        csvFileCriteria.andUuidEqualTo(file.getUuid());
+        csvFileCriteria.andIdEqualTo(file.getId());
 
 
         CsvFile csvFile = new CsvFile();
