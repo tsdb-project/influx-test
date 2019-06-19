@@ -314,8 +314,4 @@ public class RawDataService {
         return deleteResult;
     }
 
-    public List<CsvFile> selectFilesByUuidType(CsvFile file){
-        return csvFileDao.selectByUuidType(file);
-    }
-
 }
