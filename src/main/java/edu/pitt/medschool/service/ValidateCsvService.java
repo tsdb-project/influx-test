@@ -18,6 +18,8 @@ import java.util.List;
 
 import edu.pitt.medschool.model.WrongPatientsNum;
 import edu.pitt.medschool.model.dto.CsvFileExample;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,9 @@ import edu.pitt.medschool.model.dto.GraphFilter;
 
 @Service
 public class ValidateCsvService {
+
+    @Autowired
+    VersionControlService versionControlService;
 
     @Value("${machine}")
     private String machineId;
@@ -87,11 +92,8 @@ public class ValidateCsvService {
             }
 
             File file = new File(dir);
-            for (int j = 0; j < 2; j++) {
-                reader.readLine();
-            }
-            String[] firstdata = reader.readLine().split(",");
-            validateBean.setWidth(firstdata.length);
+            String[] colText = reader.readLine().split(",");
+            validateBean.setWidth(colText.length);
 
             reader.close();
 
@@ -141,18 +143,17 @@ public class ValidateCsvService {
                 validateBean.setAr(true);
             }
             File file = new File(dir);
-            for (int j = 0; j < 2; j++) {
-                reader.readLine();
-            }
+            String[] colText = reader.readLine().split(",");
+            String col = reader.readLine();
             String[] firstdata = reader.readLine().split(",");
-            validateBean.setWidth(firstdata.length);
+            validateBean.setWidth(colText.length);
             reader.close();
 
             ZoneId zoneId = ZoneId.of("America/New_York");
 
             validateBean.setSize(file.length());
             validateBean.setPath(dir);
-            validateBean.setFilename(file.getName());
+            validateBean.setFilename(file.getName().substring(0, StringUtils.lastIndexOfIgnoreCase(filename, "ar") + 2)+".csv");
             validateBean.setPid(pid);
             validateBean.setUuid(processFirstLineInCSV(firstline, validateBean.getPid()));
             validateBean.setMachine(machineId);
@@ -166,7 +167,19 @@ public class ValidateCsvService {
     }
 
     public int insertCsvFile(CsvFile csvFile) throws Exception {
-        return csvFileDao.insert(csvFile);
+        List<CsvFile> csvFileList = csvFileDao.selectByUuidPidFileName(csvFile);
+        if(csvFileList.isEmpty()){
+            return csvFileDao.insert(csvFile);
+        }
+        else {
+            if (csvFileList.size() !=1)
+                    versionControlService.setLog(csvFile,"Duplicate");
+            CsvFile csvFile1 = new CsvFile();
+            csvFile1.setLastUpdate(LocalDateTime.now(ZoneId.of("America/New_York")));
+            csvFile1.setWidth(csvFile.getWidth()+csvFileList.get(0).getWidth());
+            return csvFileDao.updateCsvFileWidth(csvFile1);
+        }
+
     }
 
     public List<PatientTimeLine> getPatientTimeLines(String machine) {
@@ -375,4 +388,5 @@ public class ValidateCsvService {
     public int addCsvFileHearderWidth(CsvFile csvFile){
         return csvFileDao.addCsvFileHearderWidth(csvFile);
     }
+
 }

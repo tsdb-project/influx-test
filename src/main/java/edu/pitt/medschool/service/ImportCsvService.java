@@ -554,7 +554,7 @@ public class ImportCsvService {
                 csvFile.setStatus(2);
                 validateCsvService.insertCsvFile(csvFile);
                 // add data to csv_log
-                versionControlService.setLog(csvFile, 0);
+                versionControlService.setLog(csvFile, "Pending");
 
             } catch (Exception e) {
                 logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileName,
@@ -633,7 +633,7 @@ public class ImportCsvService {
     private void logMySQLFail(String fn){
         CsvFile file = new CsvFile();
         file.setFilename(fn);
-        versionControlService.setLog(file,-1);
+        versionControlService.setLog(file,"Fail_Import");
     }
 
     private void transferFailedFiles(Path path) {

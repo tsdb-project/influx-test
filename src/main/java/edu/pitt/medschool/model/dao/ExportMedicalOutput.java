@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -182,6 +183,8 @@ public class ExportMedicalOutput {
      * @param record The medical record of this aggregate result
      */
     private void writeMainData(String patientId, ResultTable r, ExportMedicalQueryBuilder eq, int numSegments, long totalDataSeconds, Medication record) {
+        ZoneId utcTz = ZoneId.of("UTC");
+        ZoneId nycTz = ZoneId.of("America/New_York");
         int dataRows = r.getRowCount();
         long thisPatientTotalCount = 0, thisPatientTotalInsufficientCount = 0;
 
@@ -213,7 +216,7 @@ public class ExportMedicalOutput {
                 }
             }
             mainDataLong[this.numberOfLabels+3] = record.getDrugName();
-            mainDataLong[this.numberOfLabels+4] = record.getChartDate().toInstant().toString();
+            mainDataLong[this.numberOfLabels+4] = record.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant().toString();
             mainDataLong[this.numberOfLabels+5] = record.getDose().toString();
             mainDataLong[this.numberOfLabels+6] = record.getDoseUnit();
             thisPatientTotalCount += count;

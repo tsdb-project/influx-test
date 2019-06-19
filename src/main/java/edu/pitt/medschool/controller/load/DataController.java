@@ -227,9 +227,9 @@ public class DataController {
         int deleteResult =1;
         for(CsvFile csvFile : csvFiles){
             if(csvFile.getStatus()==1){
-                    deleteResult=versionControlService.setLog(csvFile,1)*rawDataService.deletePatientDataByFile(csvFile);
+                    deleteResult=versionControlService.setLog(csvFile,"Commit_Start")*rawDataService.deletePatientDataByFile(csvFile)*versionControlService.setLog(csvFile,"Commit_Finished");
             }else {
-                    deleteResult=versionControlService.setLog(csvFile,2)*rawDataService.deletePatientDataByFile(csvFile);
+                    deleteResult=versionControlService.setLog(csvFile,"Cancel_Start")*rawDataService.deletePatientDataByFile(csvFile)*versionControlService.setLog(csvFile,"Cancel_Finished");
             }
         }
         RestfulResponse response;
@@ -246,7 +246,7 @@ public class DataController {
     public RestfulResponse pseudoDeleteFile(@RequestBody(required = true) CsvFile file) throws Exception {
         file.setStatus(1);
         int deleteResult=1;
-            deleteResult=versionControlService.setLog(file,0) * rawDataService.pseudoDeleteFile(file);
+            deleteResult=versionControlService.setLog(file,"Pending") * rawDataService.pseudoDeleteFile(file);
         RestfulResponse response;
         if( deleteResult == 1 ){
             response = new RestfulResponse(1, "success");
