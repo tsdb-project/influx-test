@@ -245,11 +245,8 @@ public class DataController {
     @ResponseBody
     public RestfulResponse pseudoDeleteFile(@RequestBody(required = true) CsvFile file) throws Exception {
         file.setStatus(1);
-        List<CsvFile> files = rawDataService.selectFilesByUuidType(file);
         int deleteResult=1;
-        for(CsvFile file1:files){
-            deleteResult*=versionControlService.setLog(file1,0) * rawDataService.pseudoDeleteFile(file1);
-        }
+            deleteResult=versionControlService.setLog(file,0) * rawDataService.pseudoDeleteFile(file);
         RestfulResponse response;
         if( deleteResult == 1 ){
             response = new RestfulResponse(1, "success");
