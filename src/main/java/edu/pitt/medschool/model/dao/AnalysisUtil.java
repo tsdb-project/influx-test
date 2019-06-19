@@ -44,8 +44,8 @@ public class AnalysisUtil {
         List<DataTimeSpanBean> res = new ArrayList<>(uuids.size());
         for (Object uuid : uuids) {
             // Query 4 at the same time to save some requests
-            String template = "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1 tz('America/New_York');";
-            template += "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1 tz('America/New_York');";
+            String template = "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1;";
+            template += "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1;";
             template += "show tag values from \"" + pid + "\" with key = arType where fileUUID = '%s';";
             template += "SELECT count(Time) FROM \"" + pid + "\" WHERE fileUUID = '%s';";
 
@@ -54,8 +54,8 @@ public class AnalysisUtil {
             DataTimeSpanBean dts = new DataTimeSpanBean();
             ResultTable[] table = justQueryData(i, true,query);
 
-            Instant start = Instant.parse(((String)table[0].getDataByColAndRow(0, 0)).substring(0,19)+"Z"),
-                    end = Instant.parse(((String)table[1].getDataByColAndRow(0, 0)).substring(0,19)+"Z");
+            Instant start = Instant.parse((CharSequence) table[0].getDataByColAndRow(0, 0)),
+                    end = Instant.parse((CharSequence) table[1].getDataByColAndRow(0, 0));
             List<Object> arType = table[2].getDatalistByColumnName("value");
             long count = Math.round((double) table[3].getDataByColAndRow(1, 0)),
                     timeDelta = end.toEpochMilli() - start.toEpochMilli();
@@ -118,10 +118,10 @@ public class AnalysisUtil {
         String artype = ar? "ar" : "noar";
         logger.debug("<" + patientId + "> STARTED PROCESSING ");
         String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId
-                + "\" where arType = \'" +artype+ "\' limit 1 offset 30 tz('America/New_York')";
+                + "\" where arType = \'" +artype+ "\' limit 1 offset 30";
         QueryResult recordResult = i.query(new Query(firstRecordTimeQuery, dbName));
         logger.info(firstRecordTimeQuery);
-        String startTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString().substring(0,19)+"Z";
+        String startTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
         logger.info(startTime);
         return startTime;
     }
