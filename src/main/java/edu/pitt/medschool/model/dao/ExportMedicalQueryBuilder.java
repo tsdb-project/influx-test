@@ -2,6 +2,7 @@ package edu.pitt.medschool.model.dao;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,9 @@ import edu.pitt.medschool.model.DataTimeSpanBean;
 import edu.pitt.medschool.model.dto.*;
 
 public class ExportMedicalQueryBuilder {
+
+    private ZoneId utcTz = ZoneId.of("UTC");
+    private ZoneId nycTz = ZoneId.of("America/New_York");
 	
 	private static class Template {
         static final String defaultDownsampleColName = "ds_label_";
@@ -21,7 +25,6 @@ public class ExportMedicalQueryBuilder {
 
         static final String aggregationCount = "COUNT(%s) AS C";
         static final String timeCondition = "(time >= '%s' AND time < '%s')";
-        static final String timeZone =" tz('America/New_York')";
     }
 	
 	// Downsample configs
@@ -79,7 +82,7 @@ public class ExportMedicalQueryBuilder {
          this.columnNames = columns;
          this.validTimeSpanIds = new ArrayList<>(this.numDataSegments);
          this.isAr = needAr;
-         this.medicalTime = records.getChartDate().toInstant();
+         this.medicalTime = records.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant();
          populateDownsampleGroup(v);
          populateDownsampleData(ds);
          findValidFirstLastData();
@@ -195,8 +198,6 @@ public class ExportMedicalQueryBuilder {
         } else {
             this.queryString = whenDownsampleFirst(whereClause);
         }
-        // add time zone as ET
-        this.queryString = addTimeZone(this.queryString);
     }
 
     /**
@@ -329,10 +330,6 @@ public class ExportMedicalQueryBuilder {
         if (toWrap.startsWith("(") && toWrap.endsWith(")"))
             return toWrap;
         return String.format("(%s)", toWrap);
-    }
-
-    private String addTimeZone(String queryString){
-        return queryString+Template.timeZone;
     }
 
     /**

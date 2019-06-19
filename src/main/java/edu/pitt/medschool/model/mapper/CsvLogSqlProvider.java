@@ -46,7 +46,7 @@ public class CsvLogSqlProvider {
 			sql.VALUES("status", "#{status,jdbcType=INTEGER}");
 		}
 		if (record.getActivity() != null) {
-			sql.VALUES("activity", "#{activity,jdbcType=INTEGER}");
+			sql.VALUES("activity", "#{activity,jdbcType=VARCHAR}");
 		}
 		if (record.getTimestamp() != null) {
 			sql.VALUES("timestamp", "#{timestamp,jdbcType=TIMESTAMP}");
@@ -108,7 +108,7 @@ public class CsvLogSqlProvider {
 			sql.SET("status = #{record.status,jdbcType=INTEGER}");
 		}
 		if (record.getActivity() != null) {
-			sql.SET("activity = #{record.activity,jdbcType=INTEGER}");
+			sql.SET("activity = #{record.activity,jdbcType=VARCHAR}");
 		}
 		if (record.getTimestamp() != null) {
 			sql.SET("timestamp = #{record.timestamp,jdbcType=TIMESTAMP}");
@@ -138,7 +138,7 @@ public class CsvLogSqlProvider {
 		sql.UPDATE("csv_log");
 		sql.SET("id = #{record.id,jdbcType=INTEGER}");
 		sql.SET("status = #{record.status,jdbcType=INTEGER}");
-		sql.SET("activity = #{record.activity,jdbcType=INTEGER}");
+		sql.SET("activity = #{record.activity,jdbcType=VARCHAR}");
 		sql.SET("timestamp = #{record.timestamp,jdbcType=TIMESTAMP}");
 		sql.SET("filename = #{record.filename,jdbcType=VARCHAR}");
 		sql.SET("stat_time = #{record.statTime,jdbcType=TIMESTAMP}");
@@ -160,7 +160,7 @@ public class CsvLogSqlProvider {
 			sql.SET("status = #{status,jdbcType=INTEGER}");
 		}
 		if (record.getActivity() != null) {
-			sql.SET("activity = #{activity,jdbcType=INTEGER}");
+			sql.SET("activity = #{activity,jdbcType=VARCHAR}");
 		}
 		if (record.getTimestamp() != null) {
 			sql.SET("timestamp = #{timestamp,jdbcType=TIMESTAMP}");

@@ -41,9 +41,10 @@ public class VersionControlController {
         Map<String, Object> map = new HashMap<>();
         int cancelResult=1;
         for(CsvFile csvFile:csvFileList){
-            cancelResult *= versionControlService.setLog(csvFile,2);
+            cancelResult *= versionControlService.setLog(csvFile,"Cancel_Start");
             csvFile.setStatus(0);
             cancelResult*=versionControlService.updateStatus(csvFile);
+            cancelResult*=versionControlService.setLog(csvFile,"Cancel_Finished");
         }
         if(cancelResult!=1){
             map.put("res", new RestfulResponse(0, "cancel failed"));
@@ -59,9 +60,10 @@ public class VersionControlController {
         Map<String, Object> map = new HashMap<>();
         int confirmResult = 1;
         for(CsvFile csvFile: csvFiles){
-            confirmResult*=versionControlService.setLog(csvFile,1);
+            confirmResult*=versionControlService.setLog(csvFile,"Commit_Start");
             csvFile.setStatus(0);
             confirmResult*=versionControlService.updateStatus(csvFile);
+            confirmResult*=versionControlService.setLog(csvFile,"Commit_Finished");
         }
         if(confirmResult!=1){
             map.put("res", new RestfulResponse(0, "confirm failed"));

@@ -225,12 +225,23 @@ public class CsvFileDao {
         return csvFileMapper.updateByExampleSelective(csvFile,csvFileExample);
     }
 
-    public List<CsvFile> selectByUuidType(CsvFile file){
+    public List<CsvFile> selectByUuidPidFileName(CsvFile file){
         CsvFileExample csvFileExample = new CsvFileExample();
         Criteria criteria = csvFileExample.createCriteria();
+        criteria.andFilenameEqualTo(file.getFilename());
         criteria.andUuidEqualTo(file.getUuid());
-        criteria.andArEqualTo(file.getAr());
+        criteria.andPidEqualTo(file.getPid());
         criteria.andMachineEqualTo(machineId);
         return csvFileMapper.selectByExample(csvFileExample);
+    }
+
+    public int updateCsvFileWidth(CsvFile file){
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria criteria = csvFileExample.createCriteria();
+        criteria.andFilenameEqualTo(file.getFilename());
+        criteria.andUuidEqualTo(file.getUuid());
+        criteria.andPidEqualTo(file.getPid());
+        criteria.andMachineEqualTo(machineId);
+        return csvFileMapper.updateByExampleSelective(file,csvFileExample);
     }
 }

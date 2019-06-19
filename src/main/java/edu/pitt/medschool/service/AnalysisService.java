@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -280,7 +281,7 @@ public class AnalysisService {
 
                     // First get the group by time offset
                     ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
-                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1 tz('America/New_York')",
+                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
                             patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
                     if (testOffset.length != 1) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> don't have enough data to export.%n", patientId));
@@ -291,7 +292,7 @@ public class AnalysisService {
                     // get the startTime eliminate first 30 rows
                     String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,patientId,job.getAr());
                     ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime),
-                            Instant.parse(((String) testOffset[0].getDataByColAndRow(0, 0)).substring(0,19)+"Z"), dtsb, groups, columns, exportQuery,
+                            Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
                             job.getAr());
                     String finalQueryString = eq.getQueryString();
                     logger.info(finalQueryString);
@@ -361,6 +362,8 @@ public class AnalysisService {
      * 
      */
     private void mainMedicalExportProcess(ExportWithBLOBs job) {
+        ZoneId utcTz = ZoneId.of("UTC");
+        ZoneId nycTz = ZoneId.of("America/New_York");
         int jobId = job.getId();
         int queryId = job.getQueryId();
         MedicalDownsample exportQuery = medicalDownsampleDao.selectByPrimaryKey(queryId);
@@ -409,7 +412,7 @@ public class AnalysisService {
             Set<String> patients = new HashSet<String>();
             for (Medication medication : medicalRecordList_first) {
                 String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,medication.getId(),job.getAr());
-                if (Instant.parse(startTime).compareTo(medication.getChartDate().toInstant()) < 0) {
+                if (Instant.parse(startTime).compareTo(medication.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant()) < 0) {
                     patients.add(medication.getId());
                 }
             }
@@ -507,7 +510,7 @@ public class AnalysisService {
             InfluxDB influxDB = generateIdbClient(false);
             Medication onerecord;
             while ((onerecord = idQueue.poll()) != null) {
-                logger.info("date:" + onerecord.getChartDate().toString());
+                logger.info("date:" + onerecord.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz));
                 try {
                     // This job marked as removed, so this thread should exit
                     if (this.jobStopIndicator.containsKey(jobId)) {
@@ -517,7 +520,7 @@ public class AnalysisService {
 
                     // First get the group by time offset
                     ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
-                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1 tz('America/New_York')",
+                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
                             onerecord.getId(), job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
                     if (testOffset.length != 1) {
                         outputWriter.writeMetaFile(
@@ -528,7 +531,7 @@ public class AnalysisService {
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, onerecord.getId());
                     String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,onerecord.getId(),job.getAr());
                     ExportMedicalQueryBuilder eq = new ExportMedicalQueryBuilder(Instant.parse(startTime),
-                            Instant.parse(((String) testOffset[0].getDataByColAndRow(0, 0)).substring(0,19)+"Z"), dtsb, groups, columns, exportQuery,
+                            Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
                             job.getAr(), onerecord);
                     String finalQueryStrings = eq.getQueryString();
                     // logger.info("medical time out:"+onerecord.getChartDate().toString());
@@ -540,7 +543,7 @@ public class AnalysisService {
                     logger.info(finalQueryStrings);
                     if (finalQueryStrings.isEmpty()) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> <%s> no available data.%n", onerecord.getId(),
-                                onerecord.getChartDate().toInstant()));
+                                onerecord.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant()));
                         continue;
                     }
                     logger.debug("Query for <{}>: {}", onerecord.getId(), finalQueryStrings);
@@ -548,7 +551,7 @@ public class AnalysisService {
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryStrings);
                     if (res.length != 1) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> <%s> empty result from database.%n",
-                                onerecord.getId(), onerecord.getChartDate().toInstant()));
+                                onerecord.getId(), onerecord.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant()));
                         continue;
                     }
                     // write into csv file
@@ -721,7 +724,7 @@ public class AnalysisService {
         try {
             logger.info(eegChart.getPatientID());
             ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
-                    "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1 tz('America/New_York')",
+                    "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
                     eegChart.getPatientID(), eegChart.isAr() ? "ar" : "noar", eegChart.getPeriod()));
             if (testOffset.length != 1) {
                 logger.info("no enough data");
@@ -729,7 +732,7 @@ public class AnalysisService {
             // Then fetch meta data regrading file segments and build the query string
             List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, eegChart.getPatientID());
             String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,eegChart.getPatientID(),eegChart.isAr());
-            ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime), Instant.parse(((String) testOffset[0].getDataByColAndRow(0, 0)).substring(0,19)+"Z"), dtsb,
+            ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime), Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb,
                     groups, columns, downsample, eegChart.isAr());
             String finalQueryString = eq.getQueryString();
             if (finalQueryString.isEmpty()) {

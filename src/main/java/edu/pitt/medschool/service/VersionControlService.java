@@ -34,7 +34,7 @@ public class VersionControlService {
     }
 
 
-    public int setLog(CsvFile csvFile, Integer status){
+    public int setLog(CsvFile csvFile, String status){
         CsvLog csvLog = new CsvLog();
         ZoneId america = ZoneId.of("America/New_York");
         LocalDateTime americaDateTime = LocalDateTime.now(america);
