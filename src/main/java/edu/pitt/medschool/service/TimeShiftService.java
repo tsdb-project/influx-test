@@ -106,7 +106,8 @@ public class TimeShiftService {
             List<CsvFile> driftARFileList = findCorrespondingFiles(driftMap,path);
 
 //                delete those files from both databases
-             deleteResult = deleteOriginalFiles(driftARFileList);
+//             deleteResult = deleteOriginalFiles(driftARFileList);
+             deleteResult = 1;
 
              if (deleteResult !=0){
                 reimport(driftARFileList,driftMap);
@@ -145,7 +146,7 @@ public class TimeShiftService {
     private int deleteOriginalFiles(List<CsvFile> filesList){
         int deleteResult = 1;
         for (CsvFile file : filesList){
-            deleteResult=setLog(file,"Delete_Origin_Start")* deletePatientDataByFile(file)* setLog(file,"Delete_Origin_Finished");
+            deleteResult=setLog(file,"Delete_Origin_Start")* deletePatientDataByFile(file)* setLog(file,"Delete_Origin_End");
         }
         return deleteResult;
     }
@@ -291,7 +292,7 @@ public class TimeShiftService {
                 totalAllSize.addAndGet(currS);
                 everyFileSize.put(p.toString(), currS);
                 fileQueue.offer(p);
-//                logQueuedFile(path, currS);
+                logQueuedFile(path, currS);
             }
         } catch (IOException e) {
             logger.error(Util.stackTraceErrorToString(e));
@@ -534,7 +535,7 @@ public class TimeShiftService {
                     records = BatchPoints.database(dbName).tag("fileUUID", fileUUID).tag("arType", ar_type)
                             .tag("fileName", influxFilename).build();
                     batchCount = 0;
-//                    logImportingFile(file.toString(), aFileSize, currentProcessed, totalLines);
+                    logImportingFile(file.toString(), aFileSize, currentProcessed, totalLines);
 
                     if (end - start > softTimeout) {
                         logger.warn(String.format("Sleeping for %ds", timeoutSleep));
@@ -629,7 +630,7 @@ public class TimeShiftService {
             // keep processed size consistent with the actual file size once a file is done with the import process
             totalProcessedSize.addAndGet(thisFileSize - (Long) impStr[1]);
             processingSet.remove(pFile);
-//            logSuccessFiles(fileFullPath, thisFileSize, thisFileSize);
+            logSuccessFiles(fileFullPath, thisFileSize, thisFileSize);
             FileLockUtil.release(fileFullPath);
             importFailCounter.remove(fileFullPath);
 
