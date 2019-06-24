@@ -95,7 +95,7 @@ public class TimeShiftService {
     public void fixTimeDrift(){
 
         // files path
-        String[] FilesPaths = new String[]{"/Users/jonathanelmer/Desktop/FixingTimeDrift"};
+        String[] FilesPaths = new String[]{"/Users/jonathanelmer/Desktop/FixingTimeDrift/"};
 
         int deleteResult = 0;
         try {
@@ -202,8 +202,7 @@ public class TimeShiftService {
 
                 Duration duration = Duration.between(sqlTime,correctTime);
                 if (!duration.isZero()){
-                    fileShiftList.put(fileName,duration.toHours());
-//                    fileShiftList.put(fileName + "noar.csv",duration.toHours());
+                    fileShiftList.put(fileName + ".csv",duration.toHours());
                 }
             }
 
