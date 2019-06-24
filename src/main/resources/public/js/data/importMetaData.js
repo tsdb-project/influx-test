@@ -106,7 +106,7 @@ $(document).ready(function () {
             'contentType' : "application/json",
             'dataType' : 'json',
             'success' : function(data) {
-                notify("top", "center", null, "successful", "animated bounceIn", "animated fadeOut",
+                notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
                     'successful ! ');
             },
             'error' : function() {
