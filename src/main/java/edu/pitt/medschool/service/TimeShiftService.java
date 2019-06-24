@@ -190,9 +190,8 @@ public class TimeShiftService {
                 String sqlHMS = sqlTimePart[1].length() == 4 ? "0" + sqlTimePart[1] : sqlTimePart[1];
                 String normalizedSqlTime = dayTime + "/" + monthTime + "/" + sqlDatePart[2] + " " + sqlHMS + ":00";
 
-                String[]correctOriTime = (values[3] + " " + values[4]).split(" ");
-                String correctDatePart = correctOriTime[0];
-                String correctHMS = correctOriTime[1].length() == 7 ? "0" + correctOriTime[1] : correctOriTime[1];
+                String correctDatePart = values[3];
+                String correctHMS = values[4].length() == 7 ? "0" + values[4] : values[4];
                 String normalizedCorrectTime = correctDatePart + " "+ correctHMS;
 
                 sqlTime = LocalDateTime.parse(normalizedSqlTime,DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss")).atZone(ZoneId.of("UTC")).toLocalDateTime();
