@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import com.opencsv.CSVReader;
 import edu.pitt.medschool.model.WrongPatientsNum;
 import edu.pitt.medschool.model.dto.CsvFileExample;
 import org.apache.commons.lang3.StringUtils;
@@ -70,6 +71,7 @@ public class ValidateCsvService {
         CsvFile validateBean = new CsvFile();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(dir));
+            CSVReader csvReader = new CSVReader(reader);
             String firstline = reader.readLine();
             for (int i = 0; i < 3; i++) {
                 reader.readLine();
@@ -92,9 +94,8 @@ public class ValidateCsvService {
             }
 
             File file = new File(dir);
-            String[] colText = reader.readLine().split(",");
+            String[] colText = csvReader.readNext();
             validateBean.setWidth(colText.length);
-
             reader.close();
 
             ZoneId zoneId = ZoneId.of("America/New_York");
@@ -114,6 +115,7 @@ public class ValidateCsvService {
         CsvFile validateBean = new CsvFile();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(dir));
+            CSVReader csvReader = new CSVReader(reader);
             String line;
             String firstline = reader.readLine();
             for (int i = 0; i < 3; i++) {
@@ -143,9 +145,7 @@ public class ValidateCsvService {
                 validateBean.setAr(true);
             }
             File file = new File(dir);
-            String[] colText = reader.readLine().split(",");
-            String col = reader.readLine();
-            String[] firstdata = reader.readLine().split(",");
+            String[] colText = csvReader.readNext();
             validateBean.setWidth(colText.length);
             reader.close();
 

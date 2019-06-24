@@ -7,6 +7,7 @@
     <!-- Vendor styles -->
     <link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
     <link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
+    <link rel="stylesheet" href="/vendors/bower_components/select2/dist/css/select2.min.css">
     <link rel="stylesheet" href="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.css">
     <link rel="icon" type="image/ico" href="/img/favicon.ico">
 
@@ -23,24 +24,61 @@
     <section class="content">
         <div class="content__inner">
             <header class="content__title">
-                <h1>Import Patient MetaData</h1>
-                <small>Import Patient MetaData file.</small>
+                <h1>Update MetaData</h1>
+                <small>Update patient information file or patient medication file.</small>
             </header>
 
             <div class="card">
                 <div class="card-body">
-                    <h3 class="card-title">File Search</h3>
-                    <h3 class="card-subtitle">please type in the directory of the patient metadata file to import.</h3>
+                    <h3 class="card-title">Submit Files</h3>
+                    <h3 class="card-subtitle">The choose file part still under construction, please use the file directory to update patient metadata</h3>
                     <div class="row">
-                        <div class="col-sm-10 col-md-10">
+                        <div class="col-sm-6 col-md-6">
                             <div class="form-group">
-                                <input type="text"  placeholder="Input Directory" class="form-control" name="directory" id="directory" >
+                                <input type="text" class="form-control" name="directory" id="directory" >
                                 <i class="form-group__bar"></i>
                             </div>
                         </div>
                         <div class="col-sm-2 col-md-2">
-                            <button class="btn btn-success waves-effect" id="importPatients">
-                                Import patients
+                            <button class="btn btn-info waves-effect" id="submitFiles">
+                                update patient metadata
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-6">
+                            <div class="form-group">
+                                <input type="file" class="form-control" name="file" id="file" >
+                                <i class="form-group__bar"></i>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 col-md-4">
+                            <div class="form-group">
+                                <select class="select2" data-placeholder="Select File Type" id="fileType">
+                                    <option disabled="disabled" selected="selected" value="">Select File Type</option>
+                                    <option  value="PatientInfo">Patient Information</option>
+                                    <option  value="medication">Patient Medication record</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 col-md-2">
+                            <button class="btn btn-info waves-effect" id="addFile">
+                                Add File
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row" id= "result" style="display: none">
+                        <div class="col-sm-8 col-md-8" id="uploadResult"></div>
+                        <div class="col-sm-4 col-md-4">
+                            <button class="btn btn-info waves-effect" id="Update">
+                                Update database
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 col-md-4">
+                            <button class="btn btn-info waves-effect" id="timeDrift">
+                                Fix time drift
                             </button>
                         </div>
                     </div>
@@ -60,6 +98,7 @@
 <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
 <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+<script src="/vendors/bower_components/select2/dist/js/select2.full.min.js"></script>
 <script src="/vendors/bower_components/dropzone/dist/min/dropzone.min.js"></script>
 <script src="/vendors/bower_components/remarkable-bootstrap-notify/dist/bootstrap-notify.min.js"></script>
 

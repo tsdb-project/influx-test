@@ -2,12 +2,7 @@ package edu.pitt.medschool.service;
 
 import java.text.ParseException;
 import java.time.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.influxdb.InfluxDB;

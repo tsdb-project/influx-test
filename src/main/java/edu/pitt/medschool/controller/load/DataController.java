@@ -38,9 +38,12 @@ public class DataController {
     RawDataService rawDataService;
     @Autowired
     VersionControlService versionControlService;
-
     @Autowired
     TemplateService templateService;
+    @Autowired
+    TimeShiftService timeShiftService;
+//    @Autowired
+//    ConvertToCsvServies convertToCsvServies;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -50,11 +53,11 @@ public class DataController {
         return model;
     }
 
-    @RequestMapping("data/patientImport")
+    @RequestMapping("data/updateMetadata")
     @ResponseBody
-    public Model importPatientData(Model model) {
+    public Model updateMetadataPage(Model model) {
         model.addAttribute("nav", "data");
-        model.addAttribute("subnav", "patientImport");
+        model.addAttribute("subnav", "updateMetadata");
         return model;
     }
 
@@ -151,6 +154,28 @@ public class DataController {
         templateService.AddArrayFiles(allfiles);
         return map;
     }
+
+//    @RequestMapping(value = "api/data/ImportErd")
+//    @ResponseBody
+//    public Map<String, Object> covertToCsv(@RequestBody(required = false) SearchFileVO dir, String dirString, Model model) {
+//        Map<String, Object> map = new HashMap<>();
+//        map.put("msg","success");
+//        String[] allAR = new String[dir.getFiles().size()];
+//        for (int i = 0; i < allAR.length; i++) {
+//            allAR[i] = dir.getFiles().get(i);
+//        }
+//        convertToCsvServies.AddArrayFiles(allAR);
+//        return map;
+//    }
+
+    @RequestMapping(value = "api/data/timeDrift")
+    @ResponseBody
+    public RestfulResponse timeDrift() {
+        RestfulResponse response = new RestfulResponse(1,"success");
+        timeShiftService.fixTimeDrift();
+        return response;
+    }
+
 
     // import patients
     @RequestMapping(value = "api/data/importPatients")

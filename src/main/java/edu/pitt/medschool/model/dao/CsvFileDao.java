@@ -244,4 +244,13 @@ public class CsvFileDao {
         criteria.andMachineEqualTo(machineId);
         return csvFileMapper.updateByExampleSelective(file,csvFileExample);
     }
+
+    public List<CsvFile> selectByFileNameandSize(String fileName, long size) {
+        CsvFileExample example = new CsvFileExample();
+        Criteria criteria = example.createCriteria();
+        criteria.andFilenameEqualTo(fileName);
+        criteria.andSizeEqualTo(size);
+
+        return csvFileMapper.selectByExample(example);
+    }
 }

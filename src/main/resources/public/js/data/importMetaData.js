@@ -42,14 +42,32 @@ $(document).ready(function () {
         });
     };
 
+    $("#addFile").click(function () {
+        if($("#file").val() == ""){
+            notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "No file is selected!");
+        }else{
+            if($("#fileType").val() == null){
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Pleae select file type!");
+            }else{
+                $("#addFile").attr('disabled', '');
+                $("#result").show();
+                $("#uploadResult").html(
+                    "<div class='alert alert-success form-group'> <span>" + $("#fileType").val()+ ": " + $("#file").val().substring(12) + " upload successful !</span> </div>"
+                )
+            }
+        }
+    });
+
+
 // new for import patients
-    $("#importPatients").click(function () {
+    $("#submitFiles").click(function () {
 
         var regex = RegExp('PCASDatabase_DATA_[LABELS]?[0-9]{4}[-_][0-9]{2}[-_][0-9]{2}[-_][0-9]{4}.csv','g');
+        // var pathParts = $('#file').val().split('\\');
         var pathParts = $('#directory').val().split('\\');
 
         if(regex.test(pathParts[pathParts.length-1])){
-            $("#importPatients").attr('disabled', '');
+            $("#submitFiles").attr('disabled', '');
 
             $.ajax({
                 'url' : "/api/data/importPatients",
@@ -78,6 +96,24 @@ $(document).ready(function () {
                 'This may not be the correct file to import');
         }
 
+    });
+
+
+    $("#timeDrift").click(function () {
+        $.ajax({
+            'url' : "/api/data/timeDrift",
+            'type' : 'GET',
+            'contentType' : "application/json",
+            'dataType' : 'json',
+            'success' : function(data) {
+                notify("top", "center", null, "successful", "animated bounceIn", "animated fadeOut",
+                    'successful ! ');
+            },
+            'error' : function() {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'failed! ');
+            }
+        });
     })
 
 });
