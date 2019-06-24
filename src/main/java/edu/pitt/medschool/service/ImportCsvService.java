@@ -1,24 +1,16 @@
 package edu.pitt.medschool.service;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -121,37 +113,94 @@ public class ImportCsvService {
     }
 
     public static void main(String[] args) throws IOException {
-        String[] testFiles = Util.getAllCsvFileInDirectory("/tsdb/ar");
-        String f = "UAB-236_02c_ ar_File A.csv";
-        String influxFilename = f.substring(0, StringUtils.lastIndexOfIgnoreCase(f, "ar") + 2);
-        System.out.println(influxFilename);
-        for (String filename : testFiles) {
-            Path file = Paths.get(filename);
-            BufferedReader reader = Files.newBufferedReader(file);
-            CSVReader csvReader = new CSVReader(reader);
-            if (!filename.equals("/tsdb/ar/PUH-2011-108_09ar.csv")) {
-                // continue;
-            }
+//        String[] testFiles = Util.getAllCsvFileInDirectory("/tsdb/ar");
+//        String f = "UAB-236_02c_ ar_File A.csv";
+//        String influxFilename = f.substring(0, StringUtils.lastIndexOfIgnoreCase(f, "ar") + 2);
+//        System.out.println(influxFilename);
+//        for (String filename : testFiles) {
+//            Path file = Paths.get(filename);
+//            BufferedReader reader = Files.newBufferedReader(file);
+//            CSVReader csvReader = new CSVReader(reader);
+//            if (!filename.equals("/tsdb/ar/PUH-2011-108_09ar.csv")) {
+//                // continue;
+//            }
+//
+//            reader.readLine();
+//
+//            // Next 6 lines no use expect time date
+//            for (int i = 0; i < 5; i++) {
+//                reader.readLine();
+//            }
+//
+//            /* Line 7 is the column text names. This segment of code is added on 5/20/2019, due to the reason that we discovered
+//             * that the split files of the files that went OOM in the Persyst export process were actually split in a vertical
+//             * fashion, not as we have been expecting in a long time. */
+//            String[] col = csvReader.readNext();
+//            if (col.length != NORMAL_CSV_COLUMN_COUNT) {
+//
+//            } else {
+//                System.out.println("OKAY");
+//            }
+//
+//            csvReader.close();
+//        }
 
-            reader.readLine();
 
-            // Next 6 lines no use expect time date
-            for (int i = 0; i < 5; i++) {
-                reader.readLine();
-            }
+//        Two ways to handle DST
+        String testDate = "2019.03.0923:59:59";
+        String values = "41571.8739583333";
 
-            /* Line 7 is the column text names. This segment of code is added on 5/20/2019, due to the reason that we discovered
-             * that the split files of the files that went OOM in the Persyst export process were actually split in a vertical
-             * fashion, not as we have been expecting in a long time. */
-            String[] col = csvReader.readNext();
-            if (col.length != NORMAL_CSV_COLUMN_COUNT) {
+        try{
 
-            } else {
-                System.out.println("OKAY");
-            }
+//            // Old fashion
+//            Date testStartTime = TimeUtil.dateTimeFormatToDate(testDate, "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
+//            long testStartTimeEpoch = testStartTime.getTime();
+//
+//            // Special operations when on DST shifting days
+//            if (TimeUtil.isThisDayOnDstShift(TimeUtil.nycTimeZone, testStartTime)) {
+//                // Auto-fix the time according to month
+//                Calendar calendar = Calendar.getInstance();
+//                calendar.setTime(testStartTime);
+//                if (calendar.get(Calendar.MONTH) < Calendar.JUNE) {
+//                    testStartTimeEpoch = TimeUtil.addOneHourToTimestamp(testStartTimeEpoch); // Mar
+//                } else {
+//                    testStartTimeEpoch = TimeUtil.subOneHourToTimestamp(testStartTimeEpoch); // Nov
+//                }
+//            }
+//
+//            // new fashion
+//            LocalDateTime headerTime = LocalDateTime.parse(testDate,DateTimeFormatter.ofPattern("yyyy.MM.ddHH:mm:ss"));
+//            long headerTimemiliSecond = headerTime.atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli();
 
-            csvReader.close();
+//            System.out.println("Old fashion: " + testStartTimeEpoch);
+//            System.out.println("new fashion: " + headerTimemiliSecond);
+
+            // check date converting
+
+            String dayoffset = values.split("\\.")[0];
+            Double secondoffset = Double.parseDouble("0." + values.split("\\.")[1]);
+
+            // fix 3 hours shift
+            double sTime = Double.parseDouble(values) - 0.125;
+            Date measurementDate = TimeUtil.serialTimeToDate(sTime, null);
+            long measurementEpoch = measurementDate.getTime();
+
+            LocalDateTime newdate = LocalDateTime
+                    .of(1899,12, 30,0,0,0)
+                    .plusDays(Long.valueOf(dayoffset))
+                    .plusSeconds((long) (secondoffset*86400));
+
+            long newdatesecond = newdate.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
+
+            System.out.println("test date: " + measurementDate.toInstant());
+            System.out.println("test date second: " + measurementEpoch);
+            System.out.println("new date: " + newdate.atZone(ZoneId.of("UTC")).toInstant());
+            System.out.println("new date second: " + newdatesecond);
+
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
     }
 
     public void _test() throws InterruptedException, IOException {
@@ -304,26 +353,28 @@ public class ImportCsvService {
                     testDate.append(tmp.split(",")[1].trim());
                 }
             }
+            LocalDateTime headerTime = LocalDateTime.parse(testDate,DateTimeFormatter.ofPattern("yyyy.MM.ddHH:mm:ss"));
+            long testStartTimeEpoch = headerTime.atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli();
 
             // Test date in the headers is in EASTERN Time
-            Date testStartTime = TimeUtil.dateTimeFormatToDate(testDate.toString(), "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
-            long testStartTimeEpoch = testStartTime.getTime();
-
-            // Special operations when on DST shifting days
-            if (TimeUtil.isThisDayOnDstShift(TimeUtil.nycTimeZone, testStartTime)) {
-                String errTemp = "%s hour on DST shift days";
-                String oper = "Add";
-                // Auto-fix the time according to month
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(testStartTime);
-                if (calendar.get(Calendar.MONTH) < Calendar.JUNE) {
-                    testStartTimeEpoch = TimeUtil.addOneHourToTimestamp(testStartTimeEpoch); // Mar
-                } else {
-                    testStartTimeEpoch = TimeUtil.subOneHourToTimestamp(testStartTimeEpoch); // Nov
-                    oper = "Sub";
-                }
-                logFailureFiles(file.toString(), String.format(errTemp, oper), aFileSize, currentProcessed, true);
-            }
+//            Date testStartTime = TimeUtil.dateTimeFormatToDate(testDate.toString(), "yyyy.MM.ddHH:mm:ss", TimeUtil.nycTimeZone);
+//            long testStartTimeEpoch = testStartTime.getTime();
+//
+//            // Special operations when on DST shifting days
+//            if (TimeUtil.isThisDayOnDstShift(TimeUtil.nycTimeZone, testStartTime)) {
+//                String errTemp = "%s hour on DST shift days";
+//                String oper = "Add";
+//                // Auto-fix the time according to month
+//                Calendar calendar = Calendar.getInstance();
+//                calendar.setTime(testStartTime);
+//                if (calendar.get(Calendar.MONTH) < Calendar.JUNE) {
+//                    testStartTimeEpoch = TimeUtil.addOneHourToTimestamp(testStartTimeEpoch); // Mar
+//                } else {
+//                    testStartTimeEpoch = TimeUtil.subOneHourToTimestamp(testStartTimeEpoch); // Nov
+//                    oper = "Sub";
+//                }
+//                logFailureFiles(file.toString(), String.format(errTemp, oper), aFileSize, currentProcessed, true);
+//            }
 
             currentProcessed += headerSize;
             totalProcessedSize.addAndGet(headerSize);
@@ -421,9 +472,9 @@ public class ImportCsvService {
                 }
 
                 // To avoid some problematic files where measurement date is not reliable
-                if (!TimeUtil.dateIsSameDay(measurementDate, testStartTime)) {
-                    // logger.warn(String.format("Measurement accross day on line %d!", totalLines + 8));
-                }
+//                if (!TimeUtil.dateIsSameDay(measurementDate, testStartTime)) {
+//                     logger.warn(String.format("Measurement accross day on line %d!", totalLines + 8));
+//                }
 
                 // Overlap?
                 if (measurementEpoch < previousMeasurementEpoch) {
@@ -551,6 +602,7 @@ public class ImportCsvService {
                 csvFile.setStartTime(result.getStartTime());
                 csvFile.setEndTime(result.getEndTime());
                 csvFile.setLength(result.getLength());
+                csvFile.setConflictResolved(false);
                 csvFile.setStatus(2);
                 validateCsvService.insertCsvFile(csvFile);
                 // add data to csv_log

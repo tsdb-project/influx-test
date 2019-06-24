@@ -102,8 +102,8 @@ public class TimeLine {
             arrestTime = this.getArrestdate().atStartOfDay().atZone(ZoneId.of("America/New_York")).toLocalDateTime();
         }
 
-        LocalDateTime startTime = this.getStart_time().atZone(ZoneId.of("UTC")).toLocalDateTime();
-        LocalDateTime endTime = this.getEnd_time().atZone(ZoneId.of("UTC")).toLocalDateTime();
+        LocalDateTime startTime = this.getStart_time().atZone(ZoneId.of("UTC")).withZoneSameInstant(ZoneId.of("America/New_York")).toLocalDateTime();
+        LocalDateTime endTime = this.getEnd_time().atZone(ZoneId.of("UTC")).withZoneSameInstant(ZoneId.of("America/New_York")).toLocalDateTime();
         long relativeStartTime = Duration.between(arrestTime,startTime).toMillis()/1000;
         long relativeEndTime = Duration.between(arrestTime,endTime).toMillis()/1000;
 

@@ -22,7 +22,5 @@ public class PatientMedInfoService {
         return medicationDao.getAllMedInfo(machine);
     }
 
-    public List<Medication> getMedInfoById(String machine, String id) {
-        return medicationDao.getMedInfoById(machine, id);
-    }
+    public List<Medication> getMedInfoById(String machine, String id) { return medicationDao.getMedInfoById(machine, id); }
 }
