@@ -106,8 +106,7 @@ public class TimeShiftService {
             List<CsvFile> driftARFileList = findCorrespondingFiles(driftMap,path);
 
 //                delete those files from both databases
-//             deleteResult = deleteOriginalFiles(driftARFileList);
-             deleteResult = 1;
+             deleteResult = deleteOriginalFiles(driftARFileList);
 
              if (deleteResult !=0){
                 reimport(driftARFileList,driftMap);
