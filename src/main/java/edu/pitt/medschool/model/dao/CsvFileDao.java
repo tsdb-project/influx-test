@@ -245,12 +245,10 @@ public class CsvFileDao {
         return csvFileMapper.updateByExampleSelective(file,csvFileExample);
     }
 
-    public List<CsvFile> selectByFileNameandSize(String fileName, long size) {
+    public List<CsvFile> selectByFileName(String fileName) {
         CsvFileExample example = new CsvFileExample();
         Criteria criteria = example.createCriteria();
         criteria.andFilenameEqualTo(fileName);
-        criteria.andSizeEqualTo(size);
-
         return csvFileMapper.selectByExample(example);
     }
 }
