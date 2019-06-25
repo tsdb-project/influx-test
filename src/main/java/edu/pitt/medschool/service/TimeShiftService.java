@@ -483,7 +483,7 @@ public class TimeShiftService {
                 if (measurementEpoch < testStartTimeEpoch) {
                     String err_text = String.format("Measurement time earlier than test start time on line %d!",
                             totalLines + 8);
-                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
+//                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
                     continue;
                 }
 
