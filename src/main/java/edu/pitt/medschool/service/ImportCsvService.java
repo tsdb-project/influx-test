@@ -335,7 +335,7 @@ public class ImportCsvService {
         String fileUUID = "";
 
         // fixing 3 hours time shift
-//        double offset = -3 *1.0 / 24;
+        double offset = 3 *1.0 / 24;
         try {
             BufferedReader reader = Files.newBufferedReader(file);
             CSVReader csvReader = new CSVReader(reader);
@@ -462,7 +462,7 @@ public class ImportCsvService {
                 }
 
                 // Compare date on every measures (They are all UTCs)
-                double sTime = Double.parseDouble(values[0]);
+                double sTime = Double.parseDouble(values[0] + offset );
                 Date measurementDate = TimeUtil.serialTimeToDate(sTime, null);
                 long measurementEpoch = measurementDate.getTime();
 
