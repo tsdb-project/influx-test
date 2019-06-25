@@ -462,7 +462,7 @@ public class ImportCsvService {
                 }
 
                 // Compare date on every measures (They are all UTCs)
-                double sTime = Double.parseDouble(values[0] + offset );
+                double sTime = Double.parseDouble(values[0]) + offset;
                 Date measurementDate = TimeUtil.serialTimeToDate(sTime, null);
                 long measurementEpoch = measurementDate.getTime();
 
