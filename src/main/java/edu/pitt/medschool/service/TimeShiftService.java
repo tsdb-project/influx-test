@@ -124,7 +124,7 @@ public class TimeShiftService {
 
         for(FileBean file: files){
             if(driftMap.containsKey(file.getName())){
-                List<CsvFile> csvFileList = csvFileDao.selectByFileNameandSize(file.getName(),file.getBytes());
+                List<CsvFile> csvFileList = csvFileDao.selectByFileName(file.getName());
 
                 if(csvFileList.size() == 1){
                     csvFileList.get(0).setPath(file.getDirectory()+file.getName());
