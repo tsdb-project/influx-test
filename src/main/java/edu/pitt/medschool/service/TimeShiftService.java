@@ -129,7 +129,6 @@ public class TimeShiftService {
                 if(csvFileList.size() == 1){
                     csvFileList.get(0).setPath(file.getDirectory()+file.getName());
                     foundFiles.add(csvFileList.get(0));
-                    driftMap.remove(file.getName());
 
                 }else {
                     System.out.println("Cannot find the unique file: " + file.getName());
@@ -138,7 +137,7 @@ public class TimeShiftService {
             }
         }
 
-        System.out.println("number of files not found: " + driftMap.size());
+        System.out.println("number of files not found: " + (driftMap.size() - foundFiles.size()));
         return foundFiles;
     };
 
@@ -362,7 +361,6 @@ public class TimeShiftService {
         String filename = file.getFileName().toString();
         long totalLines = 0;
         String fileUUID = "";
-
         double offset = driftMap.get(filename) *1.0 / 24;
 
         try {
@@ -477,7 +475,6 @@ public class TimeShiftService {
 
 //                use offset to fix time drift
                 double sTime = Double.parseDouble(values[0]) + offset;
-
 
                 Date measurementDate = TimeUtil.serialTimeToDate(sTime, null);
                 long measurementEpoch = measurementDate.getTime();
