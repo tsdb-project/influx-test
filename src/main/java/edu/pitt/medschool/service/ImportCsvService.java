@@ -335,7 +335,7 @@ public class ImportCsvService {
         String fileUUID = "";
 
         // fixing 3 hours time shift
-        double offset = -2 *1.0 / 24;
+        double offset = 3 *1.0 / 24;
         try {
             BufferedReader reader = Files.newBufferedReader(file);
             CSVReader csvReader = new CSVReader(reader);
