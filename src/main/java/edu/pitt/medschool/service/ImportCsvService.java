@@ -147,8 +147,10 @@ public class ImportCsvService {
 
 
 //        Two ways to handle DST
-        String testDate = "2019.03.0923:59:59";
-        String values = "41571.8739583333";
+        String start = "2017.01.03 11:57:54";
+        String end = "2017.01.03 13:15:59";
+        int length = 1795;
+//        String values = "41571.8739583333";
 
         try{
 
@@ -169,33 +171,43 @@ public class ImportCsvService {
 //            }
 //
 //            // new fashion
-//            LocalDateTime headerTime = LocalDateTime.parse(testDate,DateTimeFormatter.ofPattern("yyyy.MM.ddHH:mm:ss"));
-//            long headerTimemiliSecond = headerTime.atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli();
+            ZonedDateTime startTime = LocalDateTime.parse(start,DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")).atZone(ZoneId.of("UTC"));
+//            long startSecond = startTime.atZone(ZoneId.of("UTC")).getSecond();
+
+            ZonedDateTime endTime = LocalDateTime.parse(end,DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")).atZone(ZoneId.of("UTC"));
+//            long endSecond = endTime.atZone(ZoneId.of("UTC")).getSecond();
+
+            Long diff = Duration.between(startTime,endTime).getSeconds();
+
+            double density = length*1.0 / diff;
 
 //            System.out.println("Old fashion: " + testStartTimeEpoch);
-//            System.out.println("new fashion: " + headerTimemiliSecond);
+            System.out.println("start time: " + startTime);
+            System.out.println("end time: " + endTime);
+            System.out.println("difference: " + diff);
+            System.out.println("density: " + density);
 
-            // check date converting
-
-            String dayoffset = values.split("\\.")[0];
-            Double secondoffset = Double.parseDouble("0." + values.split("\\.")[1]);
-
-            // fix 3 hours shift
-            double sTime = Double.parseDouble(values) - 0.125;
-            Date measurementDate = TimeUtil.serialTimeToDate(sTime, null);
-            long measurementEpoch = measurementDate.getTime();
-
-            LocalDateTime newdate = LocalDateTime
-                    .of(1899,12, 30,0,0,0)
-                    .plusDays(Long.valueOf(dayoffset))
-                    .plusSeconds((long) (secondoffset*86400));
-
-            long newdatesecond = newdate.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
-
-            System.out.println("test date: " + measurementDate.toInstant());
-            System.out.println("test date second: " + measurementEpoch);
-            System.out.println("new date: " + newdate.atZone(ZoneId.of("UTC")).toInstant());
-            System.out.println("new date second: " + newdatesecond);
+//            // check date converting
+//
+//            String dayoffset = values.split("\\.")[0];
+//            Double secondoffset = Double.parseDouble("0." + values.split("\\.")[1]);
+//
+//            // fix 3 hours shift
+//            double sTime = Double.parseDouble(values) - 0.125;
+//            Date measurementDate = TimeUtil.serialTimeToDate(sTime, null);
+//            long measurementEpoch = measurementDate.getTime();
+//
+//            LocalDateTime newdate = LocalDateTime
+//                    .of(1899,12, 30,0,0,0)
+//                    .plusDays(Long.valueOf(dayoffset))
+//                    .plusSeconds((long) (secondoffset*86400));
+//
+//            long newdatesecond = newdate.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
+//
+//            System.out.println("test date: " + measurementDate.toInstant());
+//            System.out.println("test date second: " + measurementEpoch);
+//            System.out.println("new date: " + newdate.atZone(ZoneId.of("UTC")).toInstant());
+//            System.out.println("new date second: " + newdatesecond);
 
         }catch (Exception e){
             e.printStackTrace();
@@ -335,7 +347,7 @@ public class ImportCsvService {
         String fileUUID = "";
 
         // fixing 3 hours time shift
-//        double offset = 1 *1.0 / 24;
+        double offset = -3 *1.0 / 24;
         try {
             BufferedReader reader = Files.newBufferedReader(file);
             CSVReader csvReader = new CSVReader(reader);
@@ -462,7 +474,7 @@ public class ImportCsvService {
                 }
 
                 // Compare date on every measures (They are all UTCs)
-                double sTime = Double.parseDouble(values[0]);
+                double sTime = Double.parseDouble(values[0]) + offset;
                 Date measurementDate = TimeUtil.serialTimeToDate(sTime, null);
                 long measurementEpoch = measurementDate.getTime();
 
