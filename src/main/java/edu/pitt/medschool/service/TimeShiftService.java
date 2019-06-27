@@ -91,6 +91,13 @@ public class TimeShiftService {
     @Autowired
     InfluxClusterDao influxClusterDao;
 
+    public String GetUUID() {
+        return this.taskUUID;
+    }
+
+    public String getBatchId() {
+        return this.batchId;
+    }
 
     public void fixTimeDrift(){
 
