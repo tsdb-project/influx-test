@@ -102,8 +102,7 @@ public class TimeShiftService {
     public void fixTimeDrift(){
 
         // files path
-        String[] FilesPaths = new String[]{"/Volumes/16TB Drive 2/PUH CSV NOAR/"};
-//        "/Volumes/16TB Drive 2/PUH CSV AR/",
+        String[] FilesPaths = new String[]{"/Volumes/16TB Drive 2/PUH CSV AR/","/Volumes/16TB Drive 2/PUH CSV NOAR/"};
 
         int deleteResult = 0;
         try {
@@ -173,7 +172,7 @@ public class TimeShiftService {
 
     private HashMap<String,Long> analyzeCSV (){
         //        handle the time drift problem
-        String filename = "Time DriftTest_batch_6.csv";
+        String filename = "Time DriftTest_batch_7.csv";
         String fileName = "";
         LocalDateTime sqlTime;
         LocalDateTime correctTime;
@@ -209,7 +208,7 @@ public class TimeShiftService {
 
                 Duration duration = Duration.between(sqlTime,correctTime);
                 if (!duration.isZero()){
-//                    fileShiftList.put(fileName + "ar.csv",duration.toHours());
+                    fileShiftList.put(fileName + "ar.csv",duration.toHours());
                     fileShiftList.put(fileName + "noar.csv",duration.toHours());
                 }
             }
