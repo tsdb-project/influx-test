@@ -80,7 +80,7 @@ $(document).ready(function () {
                 // skip the redundant points for continuous infusion
                 if(cPoint.length>=1 && curDrug[point].dose == cPoint[cPoint.length - 1].y){continue;}
 
-                var time = new moment (curDrug[point].chartDate).format().toString(); // format current data point
+                var time = new moment (curDrug[point].chartDate).format('YYYY-MM-DD HH:mm:ss').toString(); // format current data point
 
                 //labels.add(time);
                 route.set(time,curDrug[point].route); // store routes used for current time point
