@@ -287,10 +287,8 @@ public class DataController {
             Model model) {
         Map<String, Object> map = new HashMap<>();
 
-//        String uuid = importCsvService.GetUUID();
-//        String batchId = importCsvService.getBatchId();
-        String uuid = timeShiftService.GetUUID();
-        String batchId = timeShiftService.getBatchId();
+        String uuid = importCsvService.GetUUID();
+        String batchId = importCsvService.getBatchId();
         List<ImportProgress> list = importProgressService.GetTaskAllFileProgress(uuid, batchId);
         map.put("progress", list);
         map.put("total", importProgressService.GetTaskOverallProgress(uuid, batchId));
