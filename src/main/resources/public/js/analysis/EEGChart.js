@@ -269,7 +269,7 @@ $(document).ready(function () {
 
             for (i in eegResponse){
                 EEGData.push({
-                    x: new moment(eegResponse[i][0]).tz('UTC').clone().tz("America/New_York"),
+                    x: new moment(eegResponse[i][0]).utc().zone("America/New_York").format(),
                     y: eegResponse[i][1]
                 });
             }
