@@ -49,11 +49,17 @@ $(document).ready(function () {
             if($("#fileType").val() == null){
                 notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", "Pleae select file type!");
             }else{
-                $("#addFile").attr('disabled', '');
-                $("#result").show();
-                $("#uploadResult").html(
-                    "<div class='alert alert-success form-group'> <span>" + $("#fileType").val()+ ": " + $("#file").val().substring(12) + " upload successful !</span> </div>"
-                )
+
+                var formData = new FormData();
+                formData.append("file", document.getElementById('metadata').files[0]);
+
+                console.log(formData['file']);
+
+                // $("#addFile").attr('disabled', '');
+                // $("#result").show();
+                // $("#uploadResult").html(
+                //     "<div class='alert alert-success form-group'> <span>" + $("#fileType").val()+ ": " + $("#file").val().substring(12) + " upload successful !</span> </div>"
+                // )
             }
         }
     });
