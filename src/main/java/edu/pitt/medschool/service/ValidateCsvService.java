@@ -174,11 +174,10 @@ public class ValidateCsvService {
         else {
             if (csvFileList.size() !=1)
                     versionControlService.setLog(csvFile,"Duplicate");
-            CsvFile csvFile1 = new CsvFile();
-            csvFile1.setLastUpdate(LocalDateTime.now(ZoneId.of("America/New_York")));
-            csvFile1.setWidth(csvFile.getWidth()+csvFileList.get(0).getWidth());
-            csvFile1.setSize(csvFile.getSize()+csvFileList.get(0).getSize());
-            return csvFileDao.updateCsvFileWidth(csvFile1);
+            csvFile.setLastUpdate(LocalDateTime.now(ZoneId.of("America/New_York")));
+            csvFile.setWidth(csvFile.getWidth()+csvFileList.get(0).getWidth());
+            csvFile.setSize(csvFile.getSize()+csvFileList.get(0).getSize());
+            return csvFileDao.updateCsvFileWidth(csvFile);
         }
 
     }
