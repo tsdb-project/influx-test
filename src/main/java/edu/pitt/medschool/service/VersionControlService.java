@@ -4,6 +4,7 @@ import edu.pitt.medschool.model.dao.CsvFileDao;
 import edu.pitt.medschool.model.dao.CsvLogDao;
 import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.CsvLog;
+import edu.pitt.medschool.model.mapper.CsvLogMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,16 +36,22 @@ public class VersionControlService {
 
 
     public int setLog(CsvFile csvFile, String status){
-        CsvLog csvLog = new CsvLog();
-        ZoneId america = ZoneId.of("America/New_York");
-        LocalDateTime americaDateTime = LocalDateTime.now(america);
-        csvLog.setActivity(status);
-        csvLog.setEndTime(csvFile.getEndTime());
-        csvLog.setStatus(csvFile.getStatus());
-        csvLog.setFilename(csvFile.getFilename());
-        csvLog.setStatTime(csvFile.getStartTime());
-        csvLog.setTimestamp(americaDateTime);
-        csvLog.setComment(csvFile.getComment());
-        return csvLogDao.addLog(csvLog);
+        List<CsvLog> csvLogs = csvLogDao.selectByFileName(csvFile);
+        if(csvLogs.isEmpty()){
+            CsvLog csvLog = new CsvLog();
+            ZoneId america = ZoneId.of("America/New_York");
+            LocalDateTime americaDateTime = LocalDateTime.now(america);
+            csvLog.setActivity(status);
+            csvLog.setEndTime(csvFile.getEndTime());
+            csvLog.setStatus(csvFile.getStatus());
+            csvLog.setFilename(csvFile.getFilename());
+            csvLog.setStatTime(csvFile.getStartTime());
+            csvLog.setTimestamp(americaDateTime);
+            csvLog.setComment(csvFile.getComment());
+            return csvLogDao.addLog(csvLog);
+        }else{
+            // maybe need to think about it
+            return 1;
+        }
     }
 }

@@ -231,7 +231,10 @@ public class CsvFileDao {
         criteria.andFilenameEqualTo(file.getFilename());
         criteria.andUuidEqualTo(file.getUuid());
         criteria.andPidEqualTo(file.getPid());
-        criteria.andMachineEqualTo(machineId);
+//        criteria.andMachineEqualTo(machineId);
+
+//        Right now machineId is 'realpsc', need to change later
+        criteria.andMachineEqualTo("realpsc");
         return csvFileMapper.selectByExample(csvFileExample);
     }
 
@@ -241,7 +244,10 @@ public class CsvFileDao {
         criteria.andFilenameEqualTo(file.getFilename());
         criteria.andUuidEqualTo(file.getUuid());
         criteria.andPidEqualTo(file.getPid());
-        criteria.andMachineEqualTo(machineId);
+//        criteria.andMachineEqualTo(machineId);
+
+//        Right now machineId is 'realpsc', need to change later
+        criteria.andMachineEqualTo("realpsc");
         return csvFileMapper.updateByExampleSelective(file,csvFileExample);
     }
 
