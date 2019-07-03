@@ -153,7 +153,7 @@ public class ValidateCsvService {
 
             validateBean.setSize(file.length());
             validateBean.setPath(dir);
-            validateBean.setFilename(file.getName().substring(0, StringUtils.lastIndexOfIgnoreCase(filename, "ar") + 2)+".csv");
+            validateBean.setFilename(filename);
             validateBean.setPid(pid);
             validateBean.setUuid(processFirstLineInCSV(firstline, validateBean.getPid()));
             validateBean.setMachine(machineId);
@@ -177,6 +177,7 @@ public class ValidateCsvService {
             CsvFile csvFile1 = new CsvFile();
             csvFile1.setLastUpdate(LocalDateTime.now(ZoneId.of("America/New_York")));
             csvFile1.setWidth(csvFile.getWidth()+csvFileList.get(0).getWidth());
+            csvFile1.setSize(csvFile.getSize()+csvFileList.get(0).getSize());
             return csvFileDao.updateCsvFileWidth(csvFile1);
         }
 

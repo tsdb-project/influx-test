@@ -347,7 +347,7 @@ public class ImportCsvService {
         String fileUUID = "";
 
         // fixing 3 hours time shift
-        double offset = -3 *1.0 / 24;
+//        double offset = -3 *1.0 / 24;
         try {
             BufferedReader reader = Files.newBufferedReader(file);
             CSVReader csvReader = new CSVReader(reader);
@@ -474,7 +474,7 @@ public class ImportCsvService {
                 }
 
                 // Compare date on every measures (They are all UTCs)
-                double sTime = Double.parseDouble(values[0]) + offset;
+                double sTime = Double.parseDouble(values[0]);
                 Date measurementDate = TimeUtil.serialTimeToDate(sTime, null);
                 long measurementEpoch = measurementDate.getTime();
 
@@ -570,6 +570,9 @@ public class ImportCsvService {
         long thisFileSize = everyFileSize.get(pFile.toString());
         String fileFullPath = pFile.toString(), fileName = pFile.getFileName().toString();
         String[] fileInfo = checkerFromFilename(fileName, thisFileSize);
+
+        // normalize the filename
+        fileName = fileName.substring(0, StringUtils.lastIndexOfIgnoreCase(fileName, "ar") + 2) + ".csv";
         processingSet.add(pFile);
 
         // Ar/NoAr Check & Response
@@ -610,9 +613,6 @@ public class ImportCsvService {
                 // add data to csv_file table
                 CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath, fileName);
                 CsvFile result = InfluxUtil.getTimeRangeandRows(csvFile.getPid(),fileName.substring(0, StringUtils.lastIndexOfIgnoreCase(fileName, "ar") + 2));
-                logger.info("st",result.getStartTime());
-                logger.info("et",result.getEndTime());
-                logger.info("count",result.getLength());
                 csvFile.setDensity((result.getLength()*1.0)/(Duration.between(result.getStartTime(),result.getEndTime()).getSeconds()));
                 csvFile.setStartTime(result.getStartTime());
                 csvFile.setEndTime(result.getEndTime());
