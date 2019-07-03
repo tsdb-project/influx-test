@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import edu.pitt.medschool.framework.influxdb.ResultTable;
+import edu.pitt.medschool.model.dao.*;
 import org.apache.commons.lang3.StringUtils;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
@@ -41,9 +42,6 @@ import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.util.FileLockUtil;
 import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dao.FeatureDao;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.InfluxClusterDao;
 import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.Feature;
 import edu.pitt.medschool.model.dto.ImportedFile;
@@ -99,6 +97,12 @@ public class ImportCsvService {
 
     @Autowired
     VersionControlService versionControlService;
+
+    @Autowired
+    CsvFileDao csvFileDao;
+
+    @Autowired
+    VersionDao versionDao;
 
     public double GetLoadFactor() {
         return loadFactor;
@@ -265,14 +269,14 @@ public class ImportCsvService {
             long currS = Files.size(p);
 
             if (FileLockUtil.isLocked(p.toFile())) {
-                throw new RuntimeException(path + " is currently being imported.");
+                throw new RuntimeException(p.toString() + " is currently being imported.");
             }
 
             if (FileLockUtil.aquire(p.toFile())) {
                 totalAllSize.addAndGet(currS);
                 everyFileSize.put(p.toString(), currS);
                 fileQueue.offer(p);
-                logQueuedFile(path, currS);
+                logQueuedFile(p.toString(), currS);
                 if (!isInvokedByAddArrayFiles)
                     this.startImport();
             }
@@ -339,10 +343,9 @@ public class ImportCsvService {
      *
      * @return Obj[0]: Err msg; Obj[1]: Processed size.
      */
-    private Object[] fileImport(String ar_type, String pid, Path file, long aFileSize) {
+    private Object[] fileImport(String ar_type, String pid, Path file, long aFileSize,String filename) {
         InfluxDB idb = generateIdbClient();
         long currentProcessed = 0;
-        String filename = file.getFileName().toString();
         long totalLines = 0;
         String fileUUID = "";
 
@@ -585,16 +588,44 @@ public class ImportCsvService {
         }
 
         // Duplication Check
+        Object[] impStr;
         if (fileInfo[2].equals("1")) {
             // TODO: If the same file appears already, having a summary of comparing the contents of the new and old
-            logFailureFiles(fileFullPath, "The same file has been imported.", thisFileSize, 0, false);
-            FileLockUtil.release(fileFullPath);
-            processingSet.remove(pFile);
-            return;
-        }
+            List<CsvFile> files = csvFileDao.getElementByName(fileName);
+            if(files.get(0).getEndVersion()==999){
+                logFailureFiles(fileFullPath, "The same file has been imported.", thisFileSize, 0, false);
+                FileLockUtil.release(fileFullPath);
+                processingSet.remove(pFile);
+                return;
+            }else {
+                // the file is deleted after publish, add version to the file name and import
+                logger.info("first import");
+                fileName ="V"+(versionDao.getLatestVersion()+1)+"_"+fileName;
+                impStr = fileImport(fileInfo[1], fileInfo[0], pFile, thisFileSize,fileName);
+            }
+        }else {
+            List<CsvFile> files = csvFileDao.getElementByName(fileName);
+            if(files.size()==0){
+                // New file, all good, just import!
+                logger.info("second import");
+                impStr = fileImport(fileInfo[1], fileInfo[0], pFile, thisFileSize,pFile.getFileName().toString());
+            }else if(files.get(0).getStartVersion()!=0 && files.get(0).getEndVersion()==999){
+                logFailureFiles(fileFullPath, "Old file should be stopped before import a complete version.", thisFileSize, 0, false);
+                FileLockUtil.release(fileFullPath);
+                processingSet.remove(pFile);
+                return;
+            }else if(files.get(0).getEndVersion()!=999){
+                // the file is deleted after publish, add version to the file name and import
+                logger.info("third import");
+                fileName ="V"+(versionDao.getLatestVersion()+1)+"_"+fileName;
+                impStr = fileImport(fileInfo[1], fileInfo[0], pFile, thisFileSize,fileName);
+            }else {
+                // add another part to an exist file
+                logger.info("fourth import");
+                impStr = fileImport(fileInfo[1], fileInfo[0], pFile, thisFileSize,pFile.getFileName().toString());
+            }
 
-        // New file, all good, just import!
-        Object[] impStr = fileImport(fileInfo[1], fileInfo[0], pFile, thisFileSize);
+        }
 
         // Main import function returned, doing cleanups
         if (impStr[0].equals("OK")) {
@@ -624,6 +655,8 @@ public class ImportCsvService {
 
                 // add data to csv_file table
                 CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath, fileName);
+                logger.info(fileName.substring(0, StringUtils.lastIndexOfIgnoreCase(fileName, "ar") + 2));
+                logger.info(csvFile.getPid());
                 CsvFile result = InfluxUtil.getTimeRangeandRows(csvFile.getPid(),fileName.substring(0, StringUtils.lastIndexOfIgnoreCase(fileName, "ar") + 2));
                 csvFile.setDensity((result.getLength()*1.0)/(Duration.between(result.getStartTime(),result.getEndTime()).getSeconds()));
                 csvFile.setStartTime(result.getStartTime());

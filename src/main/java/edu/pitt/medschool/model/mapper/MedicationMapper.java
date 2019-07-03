@@ -41,13 +41,14 @@ public interface MedicationMapper {
 	 */
 	@Insert({ "insert into medication (infused_vol, chart_date, ", "drug_name, dose, dose_unit, ",
 			"rate, rate_unit, ordered_as, ", "route, status, site, ", "infused_vol_unit, infuse_ind, ",
-			"iv_flag, bolus_flag, ", "tdrip_ind)",
+			"iv_flag, bolus_flag, ", "tdrip_ind, version)",
 			"values (#{infusedVol,jdbcType=INTEGER}, #{chartDate,jdbcType=TIMESTAMP}, ",
 			"#{drugName,jdbcType=VARCHAR}, #{dose,jdbcType=DOUBLE}, #{doseUnit,jdbcType=VARCHAR}, ",
 			"#{rate,jdbcType=DOUBLE}, #{rateUnit,jdbcType=VARCHAR}, #{orderedAs,jdbcType=VARCHAR}, ",
 			"#{route,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{site,jdbcType=VARCHAR}, ",
 			"#{infusedVolUnit,jdbcType=VARCHAR}, #{infuseInd,jdbcType=INTEGER}, ",
-			"#{ivFlag,jdbcType=INTEGER}, #{bolusFlag,jdbcType=INTEGER}, ", "#{tdripInd,jdbcType=INTEGER})" })
+			"#{ivFlag,jdbcType=INTEGER}, #{bolusFlag,jdbcType=INTEGER}, ",
+			"#{tdripInd,jdbcType=INTEGER}, #{version,jdbcType=INTEGER})" })
 	@SelectKey(statement = "SELECT LAST_INSERT_ID()", keyProperty = "id", before = false, resultType = String.class)
 	int insert(Medication record);
 
@@ -80,7 +81,8 @@ public interface MedicationMapper {
 			@Result(column = "infuse_ind", property = "infuseInd", jdbcType = JdbcType.INTEGER),
 			@Result(column = "iv_flag", property = "ivFlag", jdbcType = JdbcType.INTEGER),
 			@Result(column = "bolus_flag", property = "bolusFlag", jdbcType = JdbcType.INTEGER),
-			@Result(column = "tdrip_ind", property = "tdripInd", jdbcType = JdbcType.INTEGER) })
+			@Result(column = "tdrip_ind", property = "tdripInd", jdbcType = JdbcType.INTEGER),
+			@Result(column = "version", property = "version", jdbcType = JdbcType.INTEGER) })
 	List<Medication> selectByExampleWithRowbounds(MedicationExample example, RowBounds rowBounds);
 
 	/**
@@ -104,7 +106,8 @@ public interface MedicationMapper {
 			@Result(column = "infuse_ind", property = "infuseInd", jdbcType = JdbcType.INTEGER),
 			@Result(column = "iv_flag", property = "ivFlag", jdbcType = JdbcType.INTEGER),
 			@Result(column = "bolus_flag", property = "bolusFlag", jdbcType = JdbcType.INTEGER),
-			@Result(column = "tdrip_ind", property = "tdripInd", jdbcType = JdbcType.INTEGER) })
+			@Result(column = "tdrip_ind", property = "tdripInd", jdbcType = JdbcType.INTEGER),
+			@Result(column = "version", property = "version", jdbcType = JdbcType.INTEGER) })
 	List<Medication> selectByExample(MedicationExample example);
 
 	/**
@@ -155,10 +158,10 @@ public interface MedicationMapper {
 					"m.id as id, m.infused_vol as infusedVol, m.infused_vol_unit as infusedVolUnit, m.infuse_ind as infuseInd, " +
 					"m.iv_flag as ivFlag, m.ordered_as as orderedAs, m.rate as rate, m.rate_unit as rateUnit, m.route as route, " +
 					"m.site as site, m.status as status, m.tdrip_ind as tdripInd FROM upmc.medication m",
-            "WHERE drug_name='${drugName}' and m.id IN (${ids})" +
+            "WHERE drug_name='${drugName}' and m.id IN (${ids}) and m.version<=${version} " +
                     "order by m.id, m.chart_date;"
     })
-    List<Medication> selectAllbyMedication(@Param("drugName") String drugName, @Param("ids") String ids);
+    List<Medication> selectAllbyMedication(@Param("drugName") String drugName, @Param("ids") String ids, @Param("version") int version);
 
     @Select({
             "SELECT id FROM upmc.medication where drug_name='${drugName}'"
@@ -170,9 +173,9 @@ public interface MedicationMapper {
 					"m.id as id, m.infused_vol as infusedVol, m.infused_vol_unit as infusedVolUnit, m.infuse_ind as infuseInd, m.iv_flag as ivFlag, " +
 					"m.ordered_as as orderedAs, m.rate as rate, m.rate_unit as rateUnit, m.route as route, m.site as site, m.status as status, " +
 					"m.tdrip_ind as tdripInd FROM upmc.medication m "+
-			"WHERE drug_name='${drugName}' and m.id IN (${ids}) " +
+			"WHERE drug_name='${drugName}' and m.id IN (${ids}) and m.version<=${version} " +
 					"group by m.id " +
 					"order by m.id, m.chart_date;"
 	})
-    List<Medication> selectFirstMedication(@Param("drugName") String drugName, @Param("ids") String ids);
+    List<Medication> selectFirstMedication(@Param("drugName") String drugName, @Param("ids") String ids, @Param("version") int version);
 }

@@ -88,6 +88,9 @@ public class MedicationSqlProvider {
 		if (record.getTdripInd() != null) {
 			sql.VALUES("tdrip_ind", "#{tdripInd,jdbcType=INTEGER}");
 		}
+		if (record.getVersion() != null) {
+			sql.VALUES("version", "#{version,jdbcType=INTEGER}");
+		}
 		return sql.toString();
 	}
 
@@ -118,6 +121,7 @@ public class MedicationSqlProvider {
 		sql.SELECT("iv_flag");
 		sql.SELECT("bolus_flag");
 		sql.SELECT("tdrip_ind");
+		sql.SELECT("version");
 		sql.FROM("medication");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -186,6 +190,9 @@ public class MedicationSqlProvider {
 		if (record.getTdripInd() != null) {
 			sql.SET("tdrip_ind = #{record.tdripInd,jdbcType=INTEGER}");
 		}
+		if (record.getVersion() != null) {
+			sql.SET("version = #{record.version,jdbcType=INTEGER}");
+		}
 		applyWhere(sql, example, true);
 		return sql.toString();
 	}
@@ -214,6 +221,7 @@ public class MedicationSqlProvider {
 		sql.SET("iv_flag = #{record.ivFlag,jdbcType=INTEGER}");
 		sql.SET("bolus_flag = #{record.bolusFlag,jdbcType=INTEGER}");
 		sql.SET("tdrip_ind = #{record.tdripInd,jdbcType=INTEGER}");
+		sql.SET("version = #{record.version,jdbcType=INTEGER}");
 		MedicationExample example = (MedicationExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();

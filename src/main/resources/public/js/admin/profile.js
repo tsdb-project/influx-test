@@ -83,9 +83,10 @@ $(document).ready(function () {
                 "firstName": $("#e_firstname").val(),
                 "lastName": $("#e_lastname").val(),
                 "email": $("#e_email").val(),
-                "role" : $('#e_role').val()
+                "role" : $('#e_role').val(),
+                "databaseVersion":$('#e_versions').val()
             };
-            
+
             $.ajax({
                 'url': "/user/user",
                 'type': 'put',

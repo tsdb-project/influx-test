@@ -823,6 +823,66 @@ public class AccountsExample {
 			return (Criteria) this;
 		}
 
+		public Criteria andDatabaseVersionIsNull() {
+			addCriterion("database_version is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andDatabaseVersionIsNotNull() {
+			addCriterion("database_version is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andDatabaseVersionEqualTo(Integer value) {
+			addCriterion("database_version =", value, "databaseVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andDatabaseVersionNotEqualTo(Integer value) {
+			addCriterion("database_version <>", value, "databaseVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andDatabaseVersionGreaterThan(Integer value) {
+			addCriterion("database_version >", value, "databaseVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andDatabaseVersionGreaterThanOrEqualTo(Integer value) {
+			addCriterion("database_version >=", value, "databaseVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andDatabaseVersionLessThan(Integer value) {
+			addCriterion("database_version <", value, "databaseVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andDatabaseVersionLessThanOrEqualTo(Integer value) {
+			addCriterion("database_version <=", value, "databaseVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andDatabaseVersionIn(List<Integer> values) {
+			addCriterion("database_version in", values, "databaseVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andDatabaseVersionNotIn(List<Integer> values) {
+			addCriterion("database_version not in", values, "databaseVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andDatabaseVersionBetween(Integer value1, Integer value2) {
+			addCriterion("database_version between", value1, value2, "databaseVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andDatabaseVersionNotBetween(Integer value1, Integer value2) {
+			addCriterion("database_version not between", value1, value2, "databaseVersion");
+			return (Criteria) this;
+		}
+
 		public Criteria andUsernameLikeInsensitive(String value) {
 			addCriterion("upper(username) like", value.toUpperCase(), "username");
 			return (Criteria) this;

@@ -51,6 +51,13 @@
         <table tableName="csv_file_new" catalog="upmc">
             <property name="ignoreQualifiersAtRuntime" value="true" />
         </table>
+        <table tableName="medication">
+            <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
+        </table>
+        <table tableName="version">
+            <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
+        </table>
+        
         
     </context>
 </generatorConfiguration>

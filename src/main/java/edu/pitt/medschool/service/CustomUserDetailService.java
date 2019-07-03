@@ -43,6 +43,7 @@ public class CustomUserDetailService implements UserDetailsService {
         customUserDetails.setId(user.getId());
         customUserDetails.setFirstname(user.getFirstName());
         customUserDetails.setLastname(user.getLastName());
+        customUserDetails.setDatabaseVersion(user.getDatabaseVersion());
         return customUserDetails;
     }
 

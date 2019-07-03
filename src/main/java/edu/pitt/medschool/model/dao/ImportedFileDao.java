@@ -73,7 +73,7 @@ public class ImportedFileDao {
         criteria.andPidEqualTo(file.getPid());
         criteria.andFilenameEqualTo(file.getFilename());
         criteria.andIsarEqualTo(file.getAr());
-        criteria.andUuidEqualTo(machineId);
+        //criteria.andUuidEqualTo(machineId);
 
         ImportedFile importedFile = new ImportedFile();
         ZoneId america = ZoneId.of("America/New_York");

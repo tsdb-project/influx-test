@@ -20,7 +20,14 @@ import edu.pitt.medschool.model.dto.ImportProgress;
 @Service
 public class ImportProgressService {
 
+    @Autowired
+    ImportProgressDao importProgressDao;
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    public boolean isImporting() {
+        return importProgressDao.isImporting();
+    }
 
     public enum FileProgressStatus {
         STATUS_FINISHED, STATUS_FAIL, STATUS_INPROGRESS, STATUS_QUEUED

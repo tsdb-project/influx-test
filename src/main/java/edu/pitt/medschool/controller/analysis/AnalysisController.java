@@ -18,8 +18,12 @@ import java.util.stream.Stream;
 import javax.servlet.http.HttpServletResponse;
 
 
+import edu.pitt.medschool.config.DBConfiguration;
+import edu.pitt.medschool.model.PatientTimeLine;
 import edu.pitt.medschool.model.WrongPatientsNum;
 import edu.pitt.medschool.model.Wrongpatients;
+import edu.pitt.medschool.model.dto.*;
+import edu.pitt.medschool.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,20 +53,6 @@ import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
 import edu.pitt.medschool.controller.analysis.vo.MedicalDownsampleEditResponse;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dto.Downsample;
-import edu.pitt.medschool.model.dto.DownsampleGroup;
-import edu.pitt.medschool.model.dto.EEGChart;
-import edu.pitt.medschool.model.dto.ExportWithBLOBs;
-import edu.pitt.medschool.model.dto.GraphFilter;
-import edu.pitt.medschool.model.dto.MedicalDownsample;
-import edu.pitt.medschool.model.dto.MedicalDownsampleGroup;
-import edu.pitt.medschool.service.AnalysisService;
-import edu.pitt.medschool.service.ColumnService;
-import edu.pitt.medschool.service.ExportPostProcessingService;
-import edu.pitt.medschool.service.ExportService;
-import edu.pitt.medschool.service.PatientMedInfoService;
-import edu.pitt.medschool.service.PatientService;
-import edu.pitt.medschool.service.ValidateCsvService;
 
 /**
  * @author Isolachine
@@ -89,6 +79,8 @@ public class AnalysisController {
     ExportService exportService;
     @Autowired
     ExportPostProcessingService exportPostProcessingService;
+    @Autowired
+    UsersService usersService;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -140,6 +132,7 @@ public class AnalysisController {
         return model;
     }
 
+
     @RequestMapping("analysis/userchart")
     @ResponseBody
     public Model userchartPage(Model model) {
@@ -156,11 +149,24 @@ public class AnalysisController {
         return model;
     }
 
+
+    // now it only return the data of the latest version
     @RequestMapping("analysis/getPatientTimelines")
     @ResponseBody
     public RestfulResponse getPatientTimelines(Model model) {
         RestfulResponse response = new RestfulResponse(1,"success");
-        response.setData(validateCsvService.getPatientTimeLines("realpsc"));
+        response.setData(validateCsvService.getLatestVersionPatientTimeLines("realpsc"));
+        return response;
+    }
+
+    // for usr to get data by version
+    @RequestMapping(value = "analysis/getPatientTimelinesByVersion/{username}")
+    @ResponseBody
+    public RestfulResponse getPatientTimelinesByVersion(@PathVariable String username){
+        System.out.println(username.trim());
+        RestfulResponse response = new RestfulResponse(1,"success");
+        int version = usersService.selectByUserName(username.trim()).get(0).getDatabaseVersion();
+        response.setData(validateCsvService.getPatientTimeLinesByVersion("realpsc",version));
         return response;
     }
 
@@ -211,11 +217,16 @@ public class AnalysisController {
         return map;
     }
 
+    /*
+    add version control to this function, select files under selected version and add those fileNames into query.
+    for admin, use latest version without unpublished data
+     */
     @RequestMapping(value = { "analysis/eegChart" }, method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> geteegChart(@RequestBody(required = true) EEGChart eegChart) {
+        List<PatientTimeLine> files = validateCsvService.getPatientTimeLinesByVersionID("realpsc",usersService.getVersionByUserName(eegChart.getUsername()),eegChart.getPatientID());
         Map<String, Object> map = new HashMap<>();
-        ArrayList<List<Object>> rows = analysisService.getEEGChartData(eegChart);
+        ArrayList<List<Object>> rows = analysisService.getEEGChartData(eegChart,files);
         map.put("data", rows);
         return map;
     }

@@ -1303,6 +1303,126 @@ public class CsvFileExample {
 			return (Criteria) this;
 		}
 
+		public Criteria andStartVersionIsNull() {
+			addCriterion("start_version is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andStartVersionIsNotNull() {
+			addCriterion("start_version is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andStartVersionEqualTo(Integer value) {
+			addCriterion("start_version =", value, "startVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andStartVersionNotEqualTo(Integer value) {
+			addCriterion("start_version <>", value, "startVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andStartVersionGreaterThan(Integer value) {
+			addCriterion("start_version >", value, "startVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andStartVersionGreaterThanOrEqualTo(Integer value) {
+			addCriterion("start_version >=", value, "startVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andStartVersionLessThan(Integer value) {
+			addCriterion("start_version <", value, "startVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andStartVersionLessThanOrEqualTo(Integer value) {
+			addCriterion("start_version <=", value, "startVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andStartVersionIn(List<Integer> values) {
+			addCriterion("start_version in", values, "startVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andStartVersionNotIn(List<Integer> values) {
+			addCriterion("start_version not in", values, "startVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andStartVersionBetween(Integer value1, Integer value2) {
+			addCriterion("start_version between", value1, value2, "startVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andStartVersionNotBetween(Integer value1, Integer value2) {
+			addCriterion("start_version not between", value1, value2, "startVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionIsNull() {
+			addCriterion("end_version is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionIsNotNull() {
+			addCriterion("end_version is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionEqualTo(Integer value) {
+			addCriterion("end_version =", value, "endVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionNotEqualTo(Integer value) {
+			addCriterion("end_version <>", value, "endVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionGreaterThan(Integer value) {
+			addCriterion("end_version >", value, "endVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionGreaterThanOrEqualTo(Integer value) {
+			addCriterion("end_version >=", value, "endVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionLessThan(Integer value) {
+			addCriterion("end_version <", value, "endVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionLessThanOrEqualTo(Integer value) {
+			addCriterion("end_version <=", value, "endVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionIn(List<Integer> values) {
+			addCriterion("end_version in", values, "endVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionNotIn(List<Integer> values) {
+			addCriterion("end_version not in", values, "endVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionBetween(Integer value1, Integer value2) {
+			addCriterion("end_version between", value1, value2, "endVersion");
+			return (Criteria) this;
+		}
+
+		public Criteria andEndVersionNotBetween(Integer value1, Integer value2) {
+			addCriterion("end_version not between", value1, value2, "endVersion");
+			return (Criteria) this;
+		}
+
 		public Criteria andPidLikeInsensitive(String value) {
 			addCriterion("upper(pid) like", value.toUpperCase(), "pid");
 			return (Criteria) this;

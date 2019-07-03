@@ -53,13 +53,14 @@ public interface ExportMapper {
 	 * @mbg.generated
 	 */
 	@Insert({ "insert into export (query_id, ar, ", "layout, finished, canceled, ", "failed, machine, db_type, ",
-			"db_version, create_time, ", "update_time, deleted, ", "medical, patient_list, ", "query_json)",
+			"db_version, create_time, ", "update_time, deleted, ", "medical, username, patient_list, ", "query_json)",
 			"values (#{queryId,jdbcType=INTEGER}, #{ar,jdbcType=BIT}, ",
 			"#{layout,jdbcType=BIT}, #{finished,jdbcType=BIT}, #{canceled,jdbcType=BIT}, ",
 			"#{failed,jdbcType=BIT}, #{machine,jdbcType=VARCHAR}, #{dbType,jdbcType=VARCHAR}, ",
 			"#{dbVersion,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, ",
 			"#{updateTime,jdbcType=TIMESTAMP}, #{deleted,jdbcType=BIT}, ",
-			"#{medical,jdbcType=BIT}, #{patientList,jdbcType=LONGVARCHAR}, ", "#{queryJson,jdbcType=LONGVARCHAR})" })
+			"#{medical,jdbcType=BIT}, #{username,jdbcType=VARCHAR}, #{patientList,jdbcType=LONGVARCHAR}, ",
+			"#{queryJson,jdbcType=LONGVARCHAR})" })
 	@SelectKey(statement = "SELECT LAST_INSERT_ID()", keyProperty = "id", before = false, resultType = Integer.class)
 	int insert(ExportWithBLOBs record);
 
@@ -76,7 +77,7 @@ public interface ExportMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = ExportSqlProvider.class, method = "selectByExampleWithBLOBs")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "query_id", property = "queryId", jdbcType = JdbcType.INTEGER),
 			@Result(column = "ar", property = "ar", jdbcType = JdbcType.BIT),
 			@Result(column = "layout", property = "layout", jdbcType = JdbcType.BIT),
@@ -90,6 +91,7 @@ public interface ExportMapper {
 			@Result(column = "update_time", property = "updateTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
 			@Result(column = "medical", property = "medical", jdbcType = JdbcType.BIT),
+			@Result(column = "username", property = "username", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "patient_list", property = "patientList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "query_json", property = "queryJson", jdbcType = JdbcType.LONGVARCHAR) })
 	List<ExportWithBLOBs> selectByExampleWithBLOBsWithRowbounds(ExportExample example, RowBounds rowBounds);
@@ -99,7 +101,7 @@ public interface ExportMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = ExportSqlProvider.class, method = "selectByExampleWithBLOBs")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "query_id", property = "queryId", jdbcType = JdbcType.INTEGER),
 			@Result(column = "ar", property = "ar", jdbcType = JdbcType.BIT),
 			@Result(column = "layout", property = "layout", jdbcType = JdbcType.BIT),
@@ -113,6 +115,7 @@ public interface ExportMapper {
 			@Result(column = "update_time", property = "updateTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
 			@Result(column = "medical", property = "medical", jdbcType = JdbcType.BIT),
+			@Result(column = "username", property = "username", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "patient_list", property = "patientList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "query_json", property = "queryJson", jdbcType = JdbcType.LONGVARCHAR) })
 	List<ExportWithBLOBs> selectByExampleWithBLOBs(ExportExample example);
@@ -122,7 +125,7 @@ public interface ExportMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = ExportSqlProvider.class, method = "selectByExample")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "query_id", property = "queryId", jdbcType = JdbcType.INTEGER),
 			@Result(column = "ar", property = "ar", jdbcType = JdbcType.BIT),
 			@Result(column = "layout", property = "layout", jdbcType = JdbcType.BIT),
@@ -135,7 +138,8 @@ public interface ExportMapper {
 			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "update_time", property = "updateTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
-			@Result(column = "medical", property = "medical", jdbcType = JdbcType.BIT) })
+			@Result(column = "medical", property = "medical", jdbcType = JdbcType.BIT),
+			@Result(column = "username", property = "username", jdbcType = JdbcType.VARCHAR) })
 	List<Export> selectByExampleWithRowbounds(ExportExample example, RowBounds rowBounds);
 
 	/**
@@ -143,7 +147,7 @@ public interface ExportMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = ExportSqlProvider.class, method = "selectByExample")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "query_id", property = "queryId", jdbcType = JdbcType.INTEGER),
 			@Result(column = "ar", property = "ar", jdbcType = JdbcType.BIT),
 			@Result(column = "layout", property = "layout", jdbcType = JdbcType.BIT),
@@ -156,7 +160,8 @@ public interface ExportMapper {
 			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "update_time", property = "updateTime", jdbcType = JdbcType.TIMESTAMP),
 			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
-			@Result(column = "medical", property = "medical", jdbcType = JdbcType.BIT) })
+			@Result(column = "medical", property = "medical", jdbcType = JdbcType.BIT),
+			@Result(column = "username", property = "username", jdbcType = JdbcType.VARCHAR) })
 	List<Export> selectByExample(ExportExample example);
 
 	/**
@@ -164,7 +169,7 @@ public interface ExportMapper {
 	 * @mbg.generated
 	 */
 	@Select({ "select", "id, query_id, ar, layout, finished, canceled, failed, machine, db_type, db_version, ",
-			"create_time, update_time, deleted, medical, patient_list, query_json", "from export",
+			"create_time, update_time, deleted, medical, patient_list, query_json, username", "from export",
 			"where id = #{id,jdbcType=INTEGER}" })
 	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
 			@Result(column = "query_id", property = "queryId", jdbcType = JdbcType.INTEGER),
@@ -181,7 +186,8 @@ public interface ExportMapper {
 			@Result(column = "deleted", property = "deleted", jdbcType = JdbcType.BIT),
 			@Result(column = "medical", property = "medical", jdbcType = JdbcType.BIT),
 			@Result(column = "patient_list", property = "patientList", jdbcType = JdbcType.LONGVARCHAR),
-			@Result(column = "query_json", property = "queryJson", jdbcType = JdbcType.LONGVARCHAR) })
+			@Result(column = "query_json", property = "queryJson", jdbcType = JdbcType.LONGVARCHAR),
+			@Result(column = "username", property = "username", jdbcType = JdbcType.VARCHAR)})
 	ExportWithBLOBs selectByPrimaryKey(Integer id);
 
 	/**
@@ -239,7 +245,7 @@ public interface ExportMapper {
 			"medical = #{medical,jdbcType=BIT}", "where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(Export record);
 
-	@Select({"SELECT e.id, e.ar, e.machine, e.create_time, d.alias, e.finished FROM export e, downsample d WHERE e.query_id=d.id and e.medical=0 and e.deleted = 0 AND (e.machine = #{machineId,jdbcType=VARCHAR} or e.machine = 'realpsc')\r\n" + 
+	@Select({"SELECT e.id, e.ar, e.machine, e.create_time, d.alias, e.finished FROM export e, downsample d WHERE e.query_id=d.id and e.medical=0 and e.deleted = 0 AND (e.machine = #{machineId,jdbcType=VARCHAR} or e.machine = 'realpsc')\r\n" +
 			"union \r\n" + 
 			"SELECT e.id, e.ar, e.machine, e.create_time, md.alias, e.finished FROM export e, medical_downsample md where md.id = e.query_id and e.medical=1 and e.deleted = 0 AND (e.machine = #{machineId,jdbcType=VARCHAR} or e.machine = 'realpsc')"})
     @ResultType(ExportVO.class)

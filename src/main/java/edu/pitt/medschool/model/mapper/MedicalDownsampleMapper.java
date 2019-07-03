@@ -72,7 +72,7 @@ public interface MedicalDownsampleMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = MedicalDownsampleSqlProvider.class, method = "selectByExample")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "alias", property = "alias", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "medicine", property = "medicine", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "before_medicine", property = "beforeMedicine", jdbcType = JdbcType.INTEGER),
@@ -93,7 +93,7 @@ public interface MedicalDownsampleMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = MedicalDownsampleSqlProvider.class, method = "selectByExample")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "alias", property = "alias", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "medicine", property = "medicine", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "before_medicine", property = "beforeMedicine", jdbcType = JdbcType.INTEGER),

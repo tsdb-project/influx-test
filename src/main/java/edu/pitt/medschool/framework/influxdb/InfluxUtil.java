@@ -178,6 +178,7 @@ public class InfluxUtil {
         QueryResult qr2 = i.query(q2);
         QueryResult qr3 = i.query(q3);
         CsvFile result = new CsvFile();
+        logger.info((qr1.getResults().get(0).getSeries().get(0).getValues().get(0).get(1)).toString());
         result.setLength(((Double)qr1.getResults().get(0).getSeries().get(0).getValues().get(0).get(1)).intValue());
         result.setStartTime(LocalDateTime.ofInstant(Instant.parse(qr2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString()), ZoneId.of("UTC")));
         result.setEndTime(LocalDateTime.ofInstant(Instant.parse(qr3.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString()), ZoneId.of("UTC")));
