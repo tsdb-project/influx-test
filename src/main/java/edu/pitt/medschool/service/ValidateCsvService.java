@@ -24,12 +24,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import edu.pitt.medschool.framework.util.TimeUtil;
+
 import edu.pitt.medschool.model.PatientTimeLine;
 import edu.pitt.medschool.model.Wrongpatients;
 import edu.pitt.medschool.model.dao.CsvFileDao;
 import edu.pitt.medschool.model.dto.CsvFile;
-import edu.pitt.medschool.model.dto.GraphFilter;
+
 
 @Service
 public class ValidateCsvService {
@@ -307,6 +307,7 @@ public class ValidateCsvService {
                 }
             }
             if(ar!=null && noar!=null){
+                boolean diff = false;
                 for (long[] longs : ar) {
                     boolean diff_time = true;
                     for (long[] longs1 : noar) {
@@ -314,7 +315,8 @@ public class ValidateCsvService {
                             diff_time = false;
                         }
                     }
-                    wrongpatient.setDiffTime(diff_time);
+                    diff = diff || diff_time;
+                    wrongpatient.setDiffTime(diff);
                 }
             }
 
