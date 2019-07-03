@@ -175,7 +175,7 @@ public class ValidateCsvService {
             if (csvFileList.size() !=1)
                     versionControlService.setLog(csvFile,"Duplicate");
             csvFile.setLastUpdate(LocalDateTime.now(ZoneId.of("America/New_York")));
-            csvFile.setWidth(csvFile.getWidth()+csvFileList.get(0).getWidth());
+            csvFile.setWidth(csvFile.getWidth()+csvFileList.get(0).getWidth() -2 );
             csvFile.setSize(csvFile.getSize()+csvFileList.get(0).getSize());
             return csvFileDao.updateCsvFileWidth(csvFile);
         }

@@ -84,4 +84,23 @@ public class ImportedFileDao {
         return importedFileMapper.updateByExampleSelective(importedFile, importedFileExample);
     }
 
+    public List<ImportedFile> selectByFileNameDeleted(ImportedFile file){
+        ImportedFileExample importedFileExample = new ImportedFileExample();
+        Criteria criteria = importedFileExample.createCriteria();
+        criteria.andFilenameEqualTo(file.getFilename());
+        criteria.andDeletedEqualTo(false);
+        return importedFileMapper.selectByExample(importedFileExample);
+    }
+
+    public int updateImportedSize(ImportedFile file){
+        ImportedFileExample importedFileExample = new ImportedFileExample();
+        Criteria criteria = importedFileExample.createCriteria();
+        criteria.andFilenameEqualTo(file.getFilename());
+        criteria.andDeletedEqualTo(false);
+        ImportedFile newFile = new ImportedFile();
+        newFile.setFilesize(file.getFilesize());
+        newFile.setTimestamp(file.getTimestamp());
+        return importedFileMapper.updateByExampleSelective(file,importedFileExample);
+    }
+
 }
