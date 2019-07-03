@@ -608,7 +608,19 @@ public class ImportCsvService {
                 iff.setIsar(fileInfo[1].equals("ar"));
                 iff.setFilelines(((Long) impStr[2]).intValue());
                 iff.setUuid(taskUUID);
-                importedFileDao.insert(iff);
+                ZoneId america = ZoneId.of("America/New_York");
+                LocalDateTime americaDateTime = LocalDateTime.now(america);
+                iff.setTimestamp(americaDateTime);
+
+
+                List<ImportedFile> importedFiles = importedFileDao.selectByFileNameDeleted(iff);
+                if(importedFiles.isEmpty()){
+                    importedFileDao.insert(iff);
+                }else{
+                    iff.setFilesize(iff.getFilesize() + importedFiles.get(0).getFilesize());
+                    importedFileDao.updateImportedSize(iff);
+                }
+
 
                 // add data to csv_file table
                 CsvFile csvFile = validateCsvService.analyzeCsv(fileFullPath, fileName);
