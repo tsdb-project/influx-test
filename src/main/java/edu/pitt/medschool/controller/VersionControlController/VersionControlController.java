@@ -3,9 +3,7 @@ package edu.pitt.medschool.controller.VersionControlController;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.Version;
-import edu.pitt.medschool.service.RawDataService;
-import edu.pitt.medschool.service.ValidateCsvService;
-import edu.pitt.medschool.service.VersionControlService;
+import edu.pitt.medschool.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +22,8 @@ public class VersionControlController {
     ValidateCsvService validateCsvService;
     @Autowired
     RawDataService rawDataService;
+    @Autowired
+    ImportProgressService importProgressService;
     @RequestMapping("versionControl")
     public ModelAndView toVersionControl(ModelAndView modelAndView){
         modelAndView.addObject("nav", "versionControl");
@@ -61,6 +61,10 @@ public class VersionControlController {
     @ResponseBody
     public Map<String, Object> cancelChange(@RequestBody(required = true) List<CsvFile> csvFileList) throws Exception {
         Map<String, Object> map = new HashMap<>();
+        if(importProgressService.isImporting()){
+            map.put("res",new RestfulResponse(2,"Importing"));
+            return map;
+        }
         int cancelResult=1;
         for(CsvFile csvFile:csvFileList){
             cancelResult *= versionControlService.setLog(csvFile,"Cancel_Start");
@@ -80,6 +84,10 @@ public class VersionControlController {
     @ResponseBody
     public Map<String, Object> confirmChange(@RequestBody(required = true) List<CsvFile> csvFiles) throws Exception {
         Map<String, Object> map = new HashMap<>();
+        if(importProgressService.isImporting()){
+            map.put("res",new RestfulResponse(2,"Importing"));
+            return map;
+        }
         int confirmResult = 1;
         for(CsvFile csvFile: csvFiles){
             confirmResult*=versionControlService.setLog(csvFile,"Commit_Start");

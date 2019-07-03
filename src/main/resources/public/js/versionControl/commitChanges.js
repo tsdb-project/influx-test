@@ -150,7 +150,7 @@ $(document).ready(function () {
         console.log(delete_list);
         console.log(import_list);
         console.log(rownumbers);
-        if(delete_list.length !==0){
+        if(delete_list.length !== 0){
             $.ajax({
                 'url' : "/apis/file",
                 'type' : 'DELETE',
@@ -158,7 +158,12 @@ $(document).ready(function () {
                 'contentType' : "application/json",
                 'dataType' : 'json',
                 'success' : function(data) {
-                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion confirmed.");
+                    if(data.res.code===2){
+                        notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Some files are still being imported");
+                    }else{
+                        notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion confirmed.");
+                        delete_list = [];
+                    }
                     console.log(data);
                     $.ajax({
                         "url" : "/versionControl/getdata",
@@ -176,7 +181,7 @@ $(document).ready(function () {
                     });
                 },
                 'error': function () {
-                    notify("top", "center", null, "failed", "animated fadeIn", "animated fadeOut", "Import confirm failed.");
+                    notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Delete confirmed failed.");
                 }
             });
         }
@@ -189,7 +194,12 @@ $(document).ready(function () {
                 'contentType' : "application/json",
                 'dataType' : 'json',
                 'success' : function(data) {
-                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Import confirmed.");
+                    if(data.res.code===2){
+                        notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Some files are still being imported");
+                    }else {
+                        notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Import confirmed.");
+                        import_list = []
+                    }
                     console.log(data);
                     $.ajax({
                         "url" : "/versionControl/getdata",
@@ -267,7 +277,12 @@ $(document).ready(function () {
                 'contentType': "application/json",
                 'dataType': 'json',
                 'success': function(data) {
-                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion canceled.");
+                    if(data.res.code===2){
+                        notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Some files are still being imported");
+                    }else {
+                        notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion canceled.");
+                        delete_list = [];
+                    }
                     console.log(data);
                     $.ajax({
                         "url" : "/versionControl/getdata",
@@ -298,7 +313,12 @@ $(document).ready(function () {
                 'contentType' : "application/json",
                 'dataType' : 'json',
                 'success' : function(data) {
-                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Import canceled.");
+                    if(data.res.code===2){
+                        notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Some files are still being imported");
+                    }else {
+                        notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Import canceled.");
+                        import_list = [];
+                    }
                     console.log(data);
                     $.ajax({
                         "url" : "/versionControl/getdata",
