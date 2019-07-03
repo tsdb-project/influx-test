@@ -33,9 +33,9 @@ public class AnalysisUtil {
     /**
      * Get all the data periods for a patient
      */
-    public static List<DataTimeSpanBean> getPatientAllDataSpan(InfluxDB i, Logger logger, String pid) {
+    public static List<DataTimeSpanBean> getPatientAllDataSpan(InfluxDB i, Logger logger, String pid, String versionCondition) {
         pid = pid.toUpperCase().trim();
-        String uuidSearchQuery = "show tag values from \"" + pid + "\" with key = fileUUID";
+        String uuidSearchQuery = "show tag values from \"" + pid + "\" with key = fileUUID where "+versionCondition;
         ResultTable[] patientUuids = justQueryData(i, true, uuidSearchQuery);
         // No data for this patient
         if (patientUuids.length == 0) return new ArrayList<>(0);
@@ -44,10 +44,10 @@ public class AnalysisUtil {
         List<DataTimeSpanBean> res = new ArrayList<>(uuids.size());
         for (Object uuid : uuids) {
             // Query 4 at the same time to save some requests
-            String template = "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1;";
-            template += "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' ORDER BY time %s LIMIT 1;";
-            template += "show tag values from \"" + pid + "\" with key = arType where fileUUID = '%s';";
-            template += "SELECT count(Time) FROM \"" + pid + "\" WHERE fileUUID = '%s';";
+            String template = "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' and "+versionCondition+" ORDER BY time %s LIMIT 1;";
+            template += "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' and "+versionCondition+" ORDER BY time %s LIMIT 1;";
+            template += "show tag values from \"" + pid + "\" with key = arType where fileUUID = '%s' and "+versionCondition+";";
+            template += "SELECT count(Time) FROM \"" + pid + "\" WHERE fileUUID = '%s' and "+versionCondition+";";
 
             String query = String.format(template, uuid, "ASC", uuid, "DESC", uuid, uuid);
             logger.info(query);
@@ -114,11 +114,11 @@ public class AnalysisUtil {
     }
 
     // get the start time eliminate first 30 rows
-    public static String getPatientStartTime(InfluxDB i, Logger logger, String patientId, Boolean ar){
+    public static String getPatientStartTime(InfluxDB i, Logger logger, String patientId, Boolean ar, String versionCondition){
         String artype = ar? "ar" : "noar";
         logger.debug("<" + patientId + "> STARTED PROCESSING ");
         String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId
-                + "\" where arType = \'" +artype+ "\' limit 1 offset 30";
+                + "\" where arType = \'" +artype+ "\' and "+versionCondition+"limit 1 offset 30";
         QueryResult recordResult = i.query(new Query(firstRecordTimeQuery, dbName));
         logger.info(firstRecordTimeQuery);
         String startTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();

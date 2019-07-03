@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.pitt.medschool.model.dao.VersionDao;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Query;
@@ -44,6 +45,8 @@ public class RawDataService {
     ImportedFileDao importedFileDao;
     @Autowired
     PatientDao patientDao;
+    @Autowired
+    VersionDao versionDao;
 
     private final String dbDataName = DBConfiguration.Data.DBNAME;
 
@@ -134,7 +137,8 @@ public class RawDataService {
     }
 
     public List<CsvFileVO> selectPatientFilesByPatientId(String patientId) {
-        List<CsvFile> list = csvFileDao.selectByPatientId(patientId);
+        int currentVersion = versionDao.getLatestVersion();
+        List<CsvFile> list = csvFileDao.selectByPatientId(patientId,currentVersion);
 
         List<CsvFileVO> ar = new ArrayList<>();
         List<CsvFileVO> noar = new ArrayList<>();
@@ -276,6 +280,12 @@ public class RawDataService {
 
     @Transactional(rollbackFor = Exception.class)
     public int deletePatientDataByFile(CsvFile file) throws Exception {
+        // if this file is not a new one, only set end version not delete
+        if(file.getStartVersion()!=0){
+            file.setEndVersion(versionDao.getLatestVersion()+1);
+            file.setStatus(0);
+            return csvFileDao.updateEndVersion(file);
+        }
         Map<String, String> tags = new HashMap<>();
         // change for delete OOM file(ignore _A/B.csv)
         tags.put("fileName",file.getFilename().replace(".csv",""));

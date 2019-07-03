@@ -93,6 +93,12 @@ public class CsvFileSqlProvider {
 		if (record.getWidth() != null) {
 			sql.VALUES("width", "#{width,jdbcType=INTEGER}");
 		}
+		if (record.getStartVersion() != null) {
+			sql.VALUES("start_version", "#{startVersion,jdbcType=INTEGER}");
+		}
+		if (record.getEndVersion() != null) {
+			sql.VALUES("end_version", "#{endVersion,jdbcType=INTEGER}");
+		}
 		return sql.toString();
 	}
 
@@ -124,6 +130,8 @@ public class CsvFileSqlProvider {
 		sql.SELECT("status");
 		sql.SELECT("comment");
 		sql.SELECT("width");
+		sql.SELECT("start_version");
+		sql.SELECT("end_version");
 		sql.FROM("csv_file");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -195,6 +203,12 @@ public class CsvFileSqlProvider {
 		if (record.getWidth() != null) {
 			sql.SET("width = #{record.width,jdbcType=INTEGER}");
 		}
+		if (record.getStartVersion() != null) {
+			sql.SET("start_version = #{record.startVersion,jdbcType=INTEGER}");
+		}
+		if (record.getEndVersion() != null) {
+			sql.SET("end_version = #{record.endVersion,jdbcType=INTEGER}");
+		}
 		applyWhere(sql, example, true);
 		return sql.toString();
 	}
@@ -224,6 +238,8 @@ public class CsvFileSqlProvider {
 		sql.SET("status = #{record.status,jdbcType=INTEGER}");
 		sql.SET("comment = #{record.comment,jdbcType=VARCHAR}");
 		sql.SET("width = #{record.width,jdbcType=INTEGER}");
+		sql.SET("start_version = #{record.startVersion,jdbcType=INTEGER}");
+		sql.SET("end_version = #{record.endVersion,jdbcType=INTEGER}");
 		CsvFileExample example = (CsvFileExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -286,6 +302,12 @@ public class CsvFileSqlProvider {
 		}
 		if (record.getWidth() != null) {
 			sql.SET("width = #{width,jdbcType=INTEGER}");
+		}
+		if (record.getStartVersion() != null) {
+			sql.SET("start_version = #{startVersion,jdbcType=INTEGER}");
+		}
+		if (record.getEndVersion() != null) {
+			sql.SET("end_version = #{endVersion,jdbcType=INTEGER}");
 		}
 		sql.WHERE("id = #{id,jdbcType=INTEGER}");
 		return sql.toString();

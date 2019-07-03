@@ -3,12 +3,15 @@ package edu.pitt.medschool.controller.account;
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dto.Accounts;
+import edu.pitt.medschool.model.dto.Version;
 import edu.pitt.medschool.service.UsersService;
+import edu.pitt.medschool.service.VersionControlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +22,9 @@ public class AccountController {
     @Autowired
     UsersService usersService;
 
+    @Autowired
+    VersionControlService versionControlService;
+
 //    @RequestMapping("/login")
 //    public ModelAndView login(ModelAndView modelAndView) {
 //        modelAndView.setViewName("user/login");
@@ -28,7 +34,9 @@ public class AccountController {
     @RequestMapping("/profile/{username}")
     public ModelAndView userProfile(@PathVariable String username, ModelAndView modelAndView) {
         Accounts userVO = usersService.selectByUserName(username).get(0);
+        List<Version> versionList = versionControlService.getAllVersions();
         modelAndView.addObject("userInfo",userVO);
+        modelAndView.addObject("versions",versionList);
         modelAndView.setViewName("user/profile");
         return modelAndView;
     }
@@ -90,5 +98,11 @@ public class AccountController {
         return new RestfulResponse(1, "success",res);
     }
 
+    @RequestMapping("/getUserByName/{username}")
+    @ResponseBody
+    public RestfulResponse getUserByName(@PathVariable String username){
+        Accounts accounts = usersService.selectByUserName(username).get(0);
+        return new RestfulResponse(1,"success",accounts);
+    }
 
 }

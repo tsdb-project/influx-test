@@ -1,5 +1,4 @@
 $(document).ready(function() {
-
     //notify function
     function notify(from, align, icon, type, animIn, animOut, msg) {
         $.notify({
@@ -41,6 +40,21 @@ $(document).ready(function() {
                 '</div>'
         });
     };
+
+
+    $('#register').click(function () {
+        $.ajax({
+            'url' : "/user/getDBVersion",
+            'type' : 'get',
+            'contentType' : "application/json",
+            'dataType' : 'json',
+            'success' : function(data) {
+                for(var i=0;i<data.data.size();i++){
+                    $('#versionSelect').append("<option value=\""+data.data[i]+"\">Select"+data.data[i]+"</option>");
+                }
+            }
+        });
+    });
 
 
     var $createUserForm = $('#create-user-form');

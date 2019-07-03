@@ -88,6 +88,8 @@ public class ExportWithBLOBs extends Export {
 						: this.getDeleted().equals(other.getDeleted()))
 				&& (this.getMedical() == null ? other.getMedical() == null
 						: this.getMedical().equals(other.getMedical()))
+				&& (this.getUsername() == null ? other.getUsername() == null
+						: this.getUsername().equals(other.getUsername()))
 				&& (this.getPatientList() == null ? other.getPatientList() == null
 						: this.getPatientList().equals(other.getPatientList()))
 				&& (this.getQueryJson() == null ? other.getQueryJson() == null
@@ -116,6 +118,7 @@ public class ExportWithBLOBs extends Export {
 		result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());
 		result = prime * result + ((getDeleted() == null) ? 0 : getDeleted().hashCode());
 		result = prime * result + ((getMedical() == null) ? 0 : getMedical().hashCode());
+		result = prime * result + ((getUsername() == null) ? 0 : getUsername().hashCode());
 		result = prime * result + ((getPatientList() == null) ? 0 : getPatientList().hashCode());
 		result = prime * result + ((getQueryJson() == null) ? 0 : getQueryJson().hashCode());
 		return result;

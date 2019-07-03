@@ -244,7 +244,8 @@ $(document).ready(function () {
                 "period":$("#period").val() * $("#period_unit").val(),
                 "minBinRow":$("#min_bin_row").val() * $("#minBinRowUnit").val(),
                 "columns": JSON.stringify(map),
-                "ar":$('#ARFile label.active input').val() == "true" ? true : false
+                "ar":$('#ARFile label.active input').val() == "true" ? true : false,
+                "username":$('#user_name').html()
             };
 
 

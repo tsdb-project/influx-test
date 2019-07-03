@@ -46,7 +46,6 @@ public class ExportService {
         downsampleVO.setGroups(downsampleGroupDao.selectAllAggregationGroupByQueryId(job.getQueryId()));
         ObjectMapper mapper = new ObjectMapper();
         job.setQueryJson(mapper.writeValueAsString(downsampleVO));
-
         job.setMachine(uuid);
         job.setDbVersion(importProgressDao.selectDatabaseVersion(uuid));
         job.setMedical(false);

@@ -31,7 +31,8 @@ public class AccountsDao {
 
     public List<Accounts> selectByUsername(String username) {
         AccountsExample accountsExample = new AccountsExample();
-        accountsExample.createCriteria().andUsernameEqualTo(username);
+        AccountsExample.Criteria criteria = accountsExample.createCriteria();
+        criteria.andUsernameEqualTo(username);
         return accountsMapper.selectByExample(accountsExample);
     }
 
@@ -47,6 +48,7 @@ public class AccountsDao {
         users.setCreateTime(americaDateTime);
         users.setLastUpdate(americaDateTime);
         users.setRole(userVO.getRole());
+        users.setDatabaseVersion(userVO.getDatabaseVersion());
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String pwdString = encoder.encode(userVO.getPassword());
@@ -67,7 +69,7 @@ public class AccountsDao {
         users.setEmail(userVO.getEmail());
         users.setLastUpdate(americaDateTime);
         users.setRole(userVO.getRole());
-
+        users.setDatabaseVersion(userVO.getDatabaseVersion());
         return accountsMapper.updateByPrimaryKeySelective(users);
     }
 

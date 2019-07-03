@@ -9,6 +9,7 @@ public class EEGChart {
     private boolean ar;
     private String downsampleMethod;
     private String aggregationMethod;
+    private String username;
 
     public String getPatientID() {
         return patientID;
@@ -72,5 +73,13 @@ public class EEGChart {
 
     public void setAggregationMethod(String aggregationMethod) {
         this.aggregationMethod = aggregationMethod;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

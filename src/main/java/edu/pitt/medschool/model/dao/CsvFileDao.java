@@ -41,12 +41,40 @@ public class CsvFileDao {
         List<TimeLine> array = csvFileMapper.getPatientTimeLines(machine);
         List<PatientTimeLine> patientTimeLines = new ArrayList<PatientTimeLine>();
         for (int i = 0; i < array.size(); i++) {
+            //System.out.println(array.get(i).getFilename());
             patientTimeLines.add(array.get(i).toPatientTimeLine());
         }
         return patientTimeLines;
     }
 
-    public List<CsvFile> selectByPatientId(String patientId) {
+    public List<PatientTimeLine> getLatestPatientTimeLinesByVersion(int version,String machineId){
+        List<TimeLine> array = csvFileMapper.getLatestPatientTimeLines(version,machineId);
+        List<PatientTimeLine> patientTimeLines = new ArrayList<PatientTimeLine>();
+        for (int i = 0; i < array.size(); i++) {
+            patientTimeLines.add(array.get(i).toPatientTimeLine());
+        }
+        return patientTimeLines;
+    }
+
+    public List<PatientTimeLine> getPatientTimeLinesByVersion(int version,String machineId){
+        List<TimeLine> array = csvFileMapper.getPatientTimeLinesByVersion(version,machineId);
+        List<PatientTimeLine> patientTimeLines = new ArrayList<PatientTimeLine>();
+        for (int i = 0; i < array.size(); i++) {
+            patientTimeLines.add(array.get(i).toPatientTimeLine());
+        }
+        return patientTimeLines;
+    }
+
+    public List<PatientTimeLine> getPatientTimeLinesByVersionID(int version,String machineId,String pid){
+        List<TimeLine> array = csvFileMapper.getPatientTimeLinesByVersionID(version,machineId,pid);
+        List<PatientTimeLine> patientTimeLines = new ArrayList<PatientTimeLine>();
+        for (int i = 0; i < array.size(); i++) {
+            patientTimeLines.add(array.get(i).toPatientTimeLine());
+        }
+        return patientTimeLines;
+    }
+
+    public List<CsvFile> selectByPatientId(String patientId,int currentVersion) {
         CsvFileExample example = new CsvFileExample();
         Criteria criteria = example.createCriteria();
         criteria.andPidEqualTo(patientId);
@@ -57,6 +85,8 @@ public class CsvFileDao {
 
 //        using the different datawarehouse structure
         criteria.andStatusNotEqualTo(1);
+        criteria.andStatusLessThanOrEqualTo(currentVersion);
+        criteria.andEndVersionGreaterThan(currentVersion);
 
         return csvFileMapper.selectByExample(example);
     }
@@ -243,5 +273,53 @@ public class CsvFileDao {
         criteria.andPidEqualTo(file.getPid());
         criteria.andMachineEqualTo(machineId);
         return csvFileMapper.updateByExampleSelective(file,csvFileExample);
+    }
+
+    public Long getCsvDelete(int CurrentVersion) {
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria criteria = csvFileExample.createCriteria();
+        criteria.andEndVersionEqualTo(CurrentVersion);
+        return csvFileMapper.countByExample(csvFileExample);
+    }
+
+    public Long getCsvNumber(int CurrentVersion) {
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria criteria = csvFileExample.createCriteria();
+        criteria.andStartVersionLessThanOrEqualTo(CurrentVersion);
+        criteria.andEndVersionGreaterThan(CurrentVersion);
+        return csvFileMapper.countByExample(csvFileExample);
+    }
+
+    public Long getCsvIncrease(int currentVersion) {
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria criteria = csvFileExample.createCriteria();
+        criteria.andStartVersionEqualTo(currentVersion);
+        return csvFileMapper.countByExample(csvFileExample);
+    }
+
+    public int publishNewData(int currentVersion) {
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria criteria = csvFileExample.createCriteria();
+        criteria.andStartVersionEqualTo(0);
+        CsvFile csvFile = new CsvFile();
+        csvFile.setStartVersion(currentVersion);
+        return csvFileMapper.updateByExampleSelective(csvFile,csvFileExample);
+    }
+
+    public int updateEndVersion(CsvFile file) {
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria criteria = csvFileExample.createCriteria();
+        criteria.andIdEqualTo(file.getId());
+        CsvFile csvFile = new CsvFile();
+        csvFile.setEndVersion(file.getEndVersion());
+        csvFile.setStatus(file.getStatus());
+        return csvFileMapper.updateByExampleSelective(csvFile,csvFileExample);
+    }
+
+    public List<CsvFile> getElementByName(String fileName) {
+        CsvFileExample csvFileExample = new CsvFileExample();
+        Criteria criteria = csvFileExample.createCriteria();
+        criteria.andFilenameEqualTo(fileName);
+        return csvFileMapper.selectByExample(csvFileExample);
     }
 }

@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import edu.pitt.medschool.model.WrongPatientsNum;
+import edu.pitt.medschool.model.dao.VersionDao;
 import edu.pitt.medschool.model.dto.CsvFileExample;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +40,11 @@ public class ValidateCsvService {
     @Value("${machine}")
     private String machineId;
     private final CsvFileDao csvFileDao;
+    private final VersionDao versionDao;
 
-    public ValidateCsvService(CsvFileDao csvFileDao) {
+    public ValidateCsvService(CsvFileDao csvFileDao, VersionDao versionDao) {
         this.csvFileDao = csvFileDao;
+        this.versionDao = versionDao;
     }
 
     private Date strToDate(String str) {
@@ -132,7 +135,11 @@ public class ValidateCsvService {
             } else if (filename.startsWith("UAB")) {
                 pid = filename.substring(0, 7).trim().toUpperCase();
                 fn_laterpart = filename.substring(7).toLowerCase();
-            } else {
+            } else if(filename.startsWith("V")){
+                int i = filename.indexOf("_");
+                pid = filename.substring(i+1,i+13).trim().toUpperCase();
+                fn_laterpart = filename.substring(i+13).toLowerCase();
+            }else {
                 pid = filename.substring(0, 8).trim().toUpperCase();
                 fn_laterpart = filename.substring(8).toLowerCase();
             }
@@ -153,7 +160,7 @@ public class ValidateCsvService {
 
             validateBean.setSize(file.length());
             validateBean.setPath(dir);
-            validateBean.setFilename(file.getName().substring(0, StringUtils.lastIndexOfIgnoreCase(filename, "ar") + 2)+".csv");
+            validateBean.setFilename(filename);
             validateBean.setPid(pid);
             validateBean.setUuid(processFirstLineInCSV(firstline, validateBean.getPid()));
             validateBean.setMachine(machineId);
@@ -184,6 +191,19 @@ public class ValidateCsvService {
 
     public List<PatientTimeLine> getPatientTimeLines(String machine) {
         return csvFileDao.getPatientTimeLines(machine);
+    }
+
+    public List<PatientTimeLine> getLatestVersionPatientTimeLines(String machineId){
+        int latestVersion = versionDao.getLatestVersion();
+        return csvFileDao.getLatestPatientTimeLinesByVersion(latestVersion,machineId);
+    }
+
+    public List<PatientTimeLine> getPatientTimeLinesByVersion(String machineId,int version){
+        return csvFileDao.getPatientTimeLinesByVersion(version,machineId);
+    }
+
+    public List<PatientTimeLine> getPatientTimeLinesByVersionID(String machineId,int version, String pid){
+        return csvFileDao.getPatientTimeLinesByVersionID(version,machineId,pid);
     }
 
 //    public String getFilteredtPatientTimeLines(String machine, GraphFilter filter) throws Exception {
@@ -321,6 +341,13 @@ public class ValidateCsvService {
                 wrongpatient.setWrongname(true);
                 j++;
             }
+//            for(int m : ar_num){
+//                System.out.println("ar:"+m);
+//            }
+//            for(int n : noar_num){
+//                System.out.println("noar:"+n);
+//            }
+
             while (i < ar_num.size() && j < noar_num.size()) {
                 if (ar_num.get(i) == noar_num.get(j)) {
                     i++;
@@ -348,6 +375,10 @@ public class ValidateCsvService {
                 wrongpatients.add(wrongpatient);
             }
 
+        }
+        for(int i=0;i<wrongpatients.size();i++){
+            System.out.print(wrongpatients.get(i).getPid());
+            System.out.println(",");
         }
         return wrongpatients;
     }
