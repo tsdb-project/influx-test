@@ -19,10 +19,11 @@ public class CsvLogDao {
         return csvLogMapper.insert(csvLog);
     }
 
-    public List<CsvLog> selectByFileName(CsvFile file){
+    public List<CsvLog> selectByFileNameActivity(CsvFile file,String status){
         CsvLogExample csvLogExample = new CsvLogExample();
         Criteria criteria = csvLogExample.createCriteria();
         criteria.andFilenameEqualTo(file.getFilename());
+        criteria.andActivityEqualTo(status);
         return csvLogMapper.selectByExample(csvLogExample);
     }
 

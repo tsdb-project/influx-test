@@ -36,7 +36,7 @@ public class VersionControlService {
 
 
     public int setLog(CsvFile csvFile, String status){
-        List<CsvLog> csvLogs = csvLogDao.selectByFileName(csvFile);
+        List<CsvLog> csvLogs = csvLogDao.selectByFileNameActivity(csvFile,status);
         if(csvLogs.isEmpty()){
             CsvLog csvLog = new CsvLog();
             ZoneId america = ZoneId.of("America/New_York");
