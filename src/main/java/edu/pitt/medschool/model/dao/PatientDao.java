@@ -172,4 +172,27 @@ public class PatientDao {
         PatientExample.Criteria criteria = example.createCriteria();
         return patientMapper.countByExample(example);
     }
+
+    public int publishNewData(int currentVersion) {
+        PatientExample example = new PatientExample();
+        PatientExample.Criteria criteria = example.createCriteria();
+        criteria.andVersionEqualTo(0);
+        PatientWithBLOBs patient = new PatientWithBLOBs();
+        patient.setVersion(currentVersion);
+        return patientMapper.updateByExampleSelective(patient,example);
+    }
+
+    public Long getPatientIncrease(int currentVersion) {
+        PatientExample example = new PatientExample();
+        PatientExample.Criteria criteria = example.createCriteria();
+        criteria.andVersionEqualTo(currentVersion);
+        return patientMapper.countByExample(example);
+    }
+
+    public Long getPatientNumber(int currentVersion) {
+        PatientExample example = new PatientExample();
+        PatientExample.Criteria criteria = example.createCriteria();
+        criteria.andVersionLessThanOrEqualTo(currentVersion);
+        return patientMapper.countByExample(example);
+    }
 }

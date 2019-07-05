@@ -3540,6 +3540,8 @@ public class PatientWithBLOBs extends Patient {
 						: this.getReferralMotor().equals(other.getReferralMotor()))
 				&& (this.getComplete() == null ? other.getComplete() == null
 						: this.getComplete().equals(other.getComplete()))
+				&& (this.getVersion() == null ? other.getVersion() == null
+						: this.getVersion().equals(other.getVersion()))
 				&& (this.getReferringHospital() == null ? other.getReferringHospital() == null
 						: this.getReferringHospital().equals(other.getReferringHospital()))
 				&& (this.getReferringPhysician() == null ? other.getReferringPhysician() == null
@@ -3897,6 +3899,7 @@ public class PatientWithBLOBs extends Patient {
 		result = prime * result + ((getReferralCroneals() == null) ? 0 : getReferralCroneals().hashCode());
 		result = prime * result + ((getReferralMotor() == null) ? 0 : getReferralMotor().hashCode());
 		result = prime * result + ((getComplete() == null) ? 0 : getComplete().hashCode());
+		result = prime * result + ((getVersion() == null) ? 0 : getVersion().hashCode());
 		result = prime * result + ((getReferringHospital() == null) ? 0 : getReferringHospital().hashCode());
 		result = prime * result + ((getReferringPhysician() == null) ? 0 : getReferringPhysician().hashCode());
 		result = prime * result + ((getReferringfollowup() == null) ? 0 : getReferringfollowup().hashCode());

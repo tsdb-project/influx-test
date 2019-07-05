@@ -38,7 +38,7 @@ $(document).ready(function () {
     }
     var files = [];
     $.ajax({
-        "url" : "/versionControl/getdata",
+        "url" : "/versionControl/getAllVersion",
         "type" : "GET",
         'contentType' : "application/json",
         'dataType' : 'json',
@@ -55,47 +55,35 @@ $(document).ready(function () {
     var fileTable = $('#queryTable').DataTable({
         data: files,
         language : {
-            searchPlaceholder : "Search for files in the table..."
+            searchPlaceholder : "Search for version in the table..."
         },
-        columnDefs: [{
-            "targets": [0],
-            "visible": false,
-            "searchable": false},
-            {
-            "targets": 7,
-            "orderable": false,
-            "searchable": false
-        }],
         autoWidth : !1,
         responsive : !0,
         columns: [{
-            data: 'id'
+            data: 'versionId'
         },{
-            data:'pid'
+            data:'createDate'
         },{
-            data:'filename'
+            data:'patientNum'
         },{
-            data:'startTime',
+            data:'csvFileNum'
         },{
-            data:'endTime',
+            data:'medicationNum'
+        },{
+            data:'patientIncrease'
+        },{
+            data:'medicationIncrease'
+        },{
+            data :'csvIncrease'
+        },{
+            data:'csvDelete'
         },{
             data:null,
-            render:function (data) {
-                return getStatus(data.status);
-            }
-        },{
-            data:'comment'
-        },{
-            data : null,
-            render : function(data,type,row,meta) {
-                var name = meta.row;
-                var checkbox = "<th><div class=\"custom-control custom-checkbox\">"
-                    + "<input type=\"checkbox\" class=\"custom-control-input file-checkbox\" value=\"" + name
-                    + "\" name=\"files\"><label class=\"custom-control-label\" for=\"customCheck1\"></label></div></th>";
-                return checkbox;
+            render : function(data) {
+                return '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-id="' + data.versionId + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
             }
         }],
-        paging : false,
+        paging : true,
         dom : '<"dataTables__top"fB>rt<"dataTables__bottom"i><"clear">',
         buttons : [
             {
@@ -118,101 +106,7 @@ $(document).ready(function () {
         }
     });
 
-    function getStatus(data){
-        if(data===1){
-            return "Delete"
-        }
-        if(data===2){
-            return "Import"
-        }
-    }
 
-    var import_list =[];
-    var delete_list = [];
-    var csvFile = [];
-    var rownumbers = [];
-
-
-    $("#ConfirmButton").click(function(){
-        $.each($('.file-checkbox:checked'), function() {
-            rownumbers.push($(this).val());
-            csvFile.push(files[$(this).val()]);
-        });
-
-        for(var i=0;i<csvFile.length;i++){
-            if(csvFile[i].status===1){
-                delete_list.push(csvFile[i]);
-            }else {
-                import_list.push(csvFile[i]);
-            }
-        }
-        //confirm delete
-        console.log(delete_list);
-        console.log(import_list);
-        console.log(rownumbers);
-        if(delete_list.length !==0){
-            $.ajax({
-                'url' : "/apis/file",
-                'type' : 'DELETE',
-                'data' : JSON.stringify(delete_list),
-                'contentType' : "application/json",
-                'dataType' : 'json',
-                'success' : function(data) {
-                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion confirmed.");
-                    console.log(data);
-                    $.ajax({
-                        "url" : "/versionControl/getdata",
-                        "type" : "GET",
-                        'contentType' : "application/json",
-                        'dataType' : 'json',
-                        'success' : function(data) {
-                            files = data.data;
-                            fileTable.clear();
-                            fileTable.rows.add(files);
-                            fileTable.draw();
-                        },
-                        'error' : function() {
-                        }
-                    });
-                },
-                'error': function () {
-                    notify("top", "center", null, "failed", "animated fadeIn", "animated fadeOut", "Import confirm failed.");
-                }
-            });
-        }
-        // confirm import data
-        if(import_list.length !==0){
-            $.ajax({
-                'url' : "/versionControl/confirmImport",
-                'type' : 'POST',
-                'data' : JSON.stringify(import_list),
-                'contentType' : "application/json",
-                'dataType' : 'json',
-                'success' : function(data) {
-                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Import confirmed.");
-                    console.log(data);
-                    $.ajax({
-                        "url" : "/versionControl/getdata",
-                        "type" : "GET",
-                        'contentType' : "application/json",
-                        'dataType' : 'json',
-                        'success' : function(data) {
-                            files = data.data;
-                            fileTable.clear();
-                            fileTable.rows.add(files);
-                            fileTable.draw();
-                        },
-                        'error' : function() {
-                        }
-                    });
-                },
-                'error': function () {
-                    notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Import confirmed failed.");
-                }
-            });
-        }
-
-    });
 
     $(".dataTables_filter input[type=search]").focus(function() {
         $(this).closest(".dataTables_filter").addClass("dataTables_filter--toggled")
@@ -234,92 +128,41 @@ $(document).ready(function () {
             }
         });
 
-    $('#selectAllFiles').click(function() {
-        if ($('#selectAllFiles').is(':checked')) {
-            $('.custom-control-input').prop("checked", true);
-        } else {
-            $('.custom-control-input').prop("checked", false);
-        }
-    });
 
-    $("#CancelButton").click(function(){
-        $.each($('.file-checkbox:checked'), function() {
-            rownumbers.push($(this).val());
-            csvFile.push(files[$(this).val()]);
+    $("#PublishButton").click(function(){
+        $("#PublishButton").attr('disabled', '');
+        $.ajax({
+            'url' : "/versionControl/publish",
+            'type' : 'GET',
+            'contentType' : "application/json",
+            'dataType' : 'json',
+            'success' : function(data) {
+                if(data.res.code===0) {
+                    notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", data.res.msg);
+                }
+                else {
+                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "publish success");
+                    $.ajax({
+                        "url" : "/versionControl/getAllVersion",
+                        "type" : "GET",
+                        'contentType' : "application/json",
+                        'dataType' : 'json',
+                        'success' : function(data) {
+                            files = data.data;
+                            fileTable.clear();
+                            fileTable.rows.add(files);
+                            fileTable.draw();
+                        },
+                        'error' : function() {
+                        }
+                    });
+                }
+
+            },
+            'error': function () {
+            }
         });
 
-        for(var i=0;i<csvFile.length;i++){
-            if(csvFile[i].status===1){
-                delete_list.push(csvFile[i]);
-            }else {
-                import_list.push(csvFile[i]);
-            }
-        }
-        console.log(delete_list);
-        console.log(import_list);
-        console.log(rownumbers);
-        // cancel delete
-        if(delete_list.length !==0){
-            $.ajax({
-                'url': "/versionControl/cancelDelete",
-                'type': 'post',
-                'data': JSON.stringify(delete_list),
-                'contentType': "application/json",
-                'dataType': 'json',
-                'success': function(data) {
-                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Deletion canceled.");
-                    console.log(data);
-                    $.ajax({
-                        "url" : "/versionControl/getdata",
-                        "type" : "GET",
-                        'contentType' : "application/json",
-                        'dataType' : 'json',
-                        'success' : function(data) {
-                            files = data.data;
-                            fileTable.clear();
-                            fileTable.rows.add(files);
-                            fileTable.draw();
-                        },
-                        'error' : function() {
-                        }
-                    });
-                },
-                'error': function() {
-                    notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Deletion canceled failed.");
-                }
-            });
-        }
-        // cancel import
-        if(import_list.length !==0){
-            $.ajax({
-                'url' : "/apis/file",
-                'type' : 'DELETE',
-                'data' : JSON.stringify(import_list),
-                'contentType' : "application/json",
-                'dataType' : 'json',
-                'success' : function(data) {
-                    notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "Import canceled.");
-                    console.log(data);
-                    $.ajax({
-                        "url" : "/versionControl/getdata",
-                        "type" : "GET",
-                        'contentType' : "application/json",
-                        'dataType' : 'json',
-                        'success' : function(data) {
-                            files = data.data;
-                            fileTable.clear();
-                            fileTable.rows.add(files);
-                            fileTable.draw();
-                        },
-                        'error' : function() {
-                        }
-                    });
-                },
-                'error': function () {
-                    notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Import canceled failed.");
-                }
-            });
-        }
     });
 
 
@@ -330,4 +173,62 @@ $(document).ready(function () {
     $('#queryTable tbody').on('mouseout', 'tr', function () {
         $(this).removeAttr('style');
     });
+
+    $('#comment-modal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        console.log(id);
+        $.ajax({
+            'url': "/versionControl/getOneVersion/" + id,
+            'type': 'get',
+            'success': function(data) {
+                var version = data.data;
+                $("#version_id").val(version.versionId);
+                $("#version_comment").val(version.comment);
+
+            },
+            'error': function() {}
+        });
+    });
+
+    $("#edit_comment").click(function () {
+        console.log("edit button");
+        var version = {
+            "versionId":$("#version_id").val(),
+            "comment":$("#version_comment").val()
+        };
+        $.ajax({
+            'url' : "/versionControl/setComment",
+            'type' : 'put',
+            'data' : JSON.stringify(version),
+            'contentType' : "application/json",
+            'dataType' : 'json',
+            'success' : function(data) {
+                notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "edit comment success");
+            },
+            'error' : function() {
+            }
+        });
+    })
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

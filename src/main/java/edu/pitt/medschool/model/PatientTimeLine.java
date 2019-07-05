@@ -87,6 +87,7 @@ public class PatientTimeLine {
 
     public Integer getDocumentNo(){
         String doc = this.filename;
+        //todo:change to fit name with version
         Pattern pattern = Pattern.compile("([ -_][0]*[1-9]+[0]*(noar|ar|NOAR|AR).csv)");
         Matcher matcher = pattern.matcher(doc);
         if(matcher.find()){

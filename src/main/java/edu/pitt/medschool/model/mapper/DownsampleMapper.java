@@ -70,7 +70,7 @@ public interface DownsampleMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = DownsampleSqlProvider.class, method = "selectByExample")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "alias", property = "alias", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "period", property = "period", jdbcType = JdbcType.INTEGER),
 			@Result(column = "duration", property = "duration", jdbcType = JdbcType.INTEGER),
@@ -88,7 +88,7 @@ public interface DownsampleMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = DownsampleSqlProvider.class, method = "selectByExample")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "alias", property = "alias", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "period", property = "period", jdbcType = JdbcType.INTEGER),
 			@Result(column = "duration", property = "duration", jdbcType = JdbcType.INTEGER),

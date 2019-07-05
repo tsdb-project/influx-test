@@ -47,12 +47,12 @@ public interface AccountsMapper {
 	 * @mbg.generated
 	 */
 	@Insert({ "insert into accounts (id, username, ", "email, password, ", "role, first_name, ",
-			"last_name, enable, last_update, ", "create_time)",
+			"last_name, enable, last_update, ", "create_time, database_version)",
 			"values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, ",
 			"#{email,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, ",
 			"#{role,jdbcType=VARCHAR}, #{firstName,jdbcType=VARCHAR}, ",
 			"#{lastName,jdbcType=VARCHAR}, #{enable,jdbcType=BIT}, #{lastUpdate,jdbcType=TIMESTAMP}, ",
-			"#{createTime,jdbcType=TIMESTAMP})" })
+			"#{createTime,jdbcType=TIMESTAMP}, #{databaseVersion,jdbcType=INTEGER})" })
 	int insert(Accounts record);
 
 	/**
@@ -76,7 +76,8 @@ public interface AccountsMapper {
 			@Result(column = "last_name", property = "lastName", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "enable", property = "enable", jdbcType = JdbcType.BIT),
 			@Result(column = "last_update", property = "lastUpdate", jdbcType = JdbcType.TIMESTAMP),
-			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP) })
+			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
+			@Result(column = "database_version", property = "databaseVersion", jdbcType = JdbcType.INTEGER) })
 	List<Accounts> selectByExampleWithRowbounds(AccountsExample example, RowBounds rowBounds);
 
 	/**
@@ -93,7 +94,8 @@ public interface AccountsMapper {
 			@Result(column = "last_name", property = "lastName", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "enable", property = "enable", jdbcType = JdbcType.BIT),
 			@Result(column = "last_update", property = "lastUpdate", jdbcType = JdbcType.TIMESTAMP),
-			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP) })
+			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
+			@Result(column = "database_version", property = "databaseVersion", jdbcType = JdbcType.INTEGER) })
 	List<Accounts> selectByExample(AccountsExample example);
 
 	/**
@@ -101,7 +103,7 @@ public interface AccountsMapper {
 	 * @mbg.generated
 	 */
 	@Select({ "select", "id, username, email, password, role, first_name, last_name, enable, last_update, ",
-			"create_time", "from accounts", "where id = #{id,jdbcType=INTEGER}" })
+			"create_time, database_version", "from accounts", "where id = #{id,jdbcType=INTEGER}" })
 	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
 			@Result(column = "username", property = "username", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "email", property = "email", jdbcType = JdbcType.VARCHAR),
@@ -111,7 +113,8 @@ public interface AccountsMapper {
 			@Result(column = "last_name", property = "lastName", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "enable", property = "enable", jdbcType = JdbcType.BIT),
 			@Result(column = "last_update", property = "lastUpdate", jdbcType = JdbcType.TIMESTAMP),
-			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP) })
+			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
+			@Result(column = "database_version", property = "databaseVersion", jdbcType = JdbcType.INTEGER) })
 	Accounts selectByPrimaryKey(Integer id);
 
 	/**
@@ -143,7 +146,8 @@ public interface AccountsMapper {
 			"password = #{password,jdbcType=VARCHAR},", "role = #{role,jdbcType=VARCHAR},",
 			"first_name = #{firstName,jdbcType=VARCHAR},", "last_name = #{lastName,jdbcType=VARCHAR},",
 			"enable = #{enable,jdbcType=BIT},", "last_update = #{lastUpdate,jdbcType=TIMESTAMP},",
-			"create_time = #{createTime,jdbcType=TIMESTAMP}", "where id = #{id,jdbcType=INTEGER}" })
+			"create_time = #{createTime,jdbcType=TIMESTAMP},", "database_version = #{databaseVersion,jdbcType=INTEGER}",
+			"where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(Accounts record);
 
 	@Select({ "select", "id, username, email, password, role, first_name, last_name, enable, last_update, ",

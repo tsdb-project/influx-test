@@ -69,7 +69,7 @@ public interface MedicalDownsampleGroupMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = MedicalDownsampleGroupSqlProvider.class, method = "selectByExampleWithBLOBs")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "query_id", property = "queryId", jdbcType = JdbcType.INTEGER),
 			@Result(column = "label", property = "label", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "downsample", property = "downsample", jdbcType = JdbcType.VARCHAR),
@@ -86,7 +86,7 @@ public interface MedicalDownsampleGroupMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = MedicalDownsampleGroupSqlProvider.class, method = "selectByExampleWithBLOBs")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "query_id", property = "queryId", jdbcType = JdbcType.INTEGER),
 			@Result(column = "label", property = "label", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "downsample", property = "downsample", jdbcType = JdbcType.VARCHAR),
@@ -102,7 +102,7 @@ public interface MedicalDownsampleGroupMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = MedicalDownsampleGroupSqlProvider.class, method = "selectByExample")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "query_id", property = "queryId", jdbcType = JdbcType.INTEGER),
 			@Result(column = "label", property = "label", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "downsample", property = "downsample", jdbcType = JdbcType.VARCHAR),
@@ -118,7 +118,7 @@ public interface MedicalDownsampleGroupMapper {
 	 * @mbg.generated
 	 */
 	@SelectProvider(type = MedicalDownsampleGroupSqlProvider.class, method = "selectByExample")
-	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER),
 			@Result(column = "query_id", property = "queryId", jdbcType = JdbcType.INTEGER),
 			@Result(column = "label", property = "label", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "downsample", property = "downsample", jdbcType = JdbcType.VARCHAR),

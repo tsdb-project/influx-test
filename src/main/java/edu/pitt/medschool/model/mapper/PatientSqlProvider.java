@@ -404,6 +404,9 @@ public class PatientSqlProvider {
 		if (record.getComplete() != null) {
 			sql.VALUES("complete", "#{complete,jdbcType=INTEGER}");
 		}
+		if (record.getVersion() != null) {
+			sql.VALUES("version", "#{version,jdbcType=INTEGER}");
+		}
 		if (record.getReferringHospital() != null) {
 			sql.VALUES("referring_hospital", "#{referringHospital,jdbcType=LONGVARCHAR}");
 		}
@@ -970,6 +973,7 @@ public class PatientSqlProvider {
 		sql.SELECT("referral_croneals");
 		sql.SELECT("referral_motor");
 		sql.SELECT("complete");
+		sql.SELECT("version");
 		sql.SELECT("referring_hospital");
 		sql.SELECT("referring_physician");
 		sql.SELECT("referringfollowup");
@@ -1253,6 +1257,7 @@ public class PatientSqlProvider {
 		sql.SELECT("referral_croneals");
 		sql.SELECT("referral_motor");
 		sql.SELECT("complete");
+		sql.SELECT("version");
 		sql.FROM("patient");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -1632,6 +1637,9 @@ public class PatientSqlProvider {
 		}
 		if (record.getComplete() != null) {
 			sql.SET("complete = #{record.complete,jdbcType=INTEGER}");
+		}
+		if (record.getVersion() != null) {
+			sql.SET("version = #{record.version,jdbcType=INTEGER}");
 		}
 		if (record.getReferringHospital() != null) {
 			sql.SET("referring_hospital = #{record.referringHospital,jdbcType=LONGVARCHAR}");
@@ -2197,6 +2205,7 @@ public class PatientSqlProvider {
 		sql.SET("referral_croneals = #{record.referralCroneals,jdbcType=INTEGER}");
 		sql.SET("referral_motor = #{record.referralMotor,jdbcType=INTEGER}");
 		sql.SET("complete = #{record.complete,jdbcType=INTEGER}");
+		sql.SET("version = #{record.version,jdbcType=INTEGER}");
 		sql.SET("referring_hospital = #{record.referringHospital,jdbcType=LONGVARCHAR}");
 		sql.SET("referring_physician = #{record.referringPhysician,jdbcType=LONGVARCHAR}");
 		sql.SET("referringfollowup = #{record.referringfollowup,jdbcType=LONGVARCHAR}");
@@ -2474,6 +2483,7 @@ public class PatientSqlProvider {
 		sql.SET("referral_croneals = #{record.referralCroneals,jdbcType=INTEGER}");
 		sql.SET("referral_motor = #{record.referralMotor,jdbcType=INTEGER}");
 		sql.SET("complete = #{record.complete,jdbcType=INTEGER}");
+		sql.SET("version = #{record.version,jdbcType=INTEGER}");
 		PatientExample example = (PatientExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -2845,6 +2855,9 @@ public class PatientSqlProvider {
 		}
 		if (record.getComplete() != null) {
 			sql.SET("complete = #{complete,jdbcType=INTEGER}");
+		}
+		if (record.getVersion() != null) {
+			sql.SET("version = #{version,jdbcType=INTEGER}");
 		}
 		if (record.getReferringHospital() != null) {
 			sql.SET("referring_hospital = #{referringHospital,jdbcType=LONGVARCHAR}");

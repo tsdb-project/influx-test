@@ -60,4 +60,9 @@ public class ImportProgressDao {
         return iProgessMapper.selectDatabaseVersion(uuid);
     }
 
+    public boolean isImporting() {
+        ImportProgressExample example = new ImportProgressExample();
+        example.createCriteria().andStatusNotEqualTo("STATUS_FINISHED").andStatusNotEqualTo("STATUS_FAILED");
+        return (!iProgessMapper.selectByExample(example).isEmpty());
+    }
 }

@@ -41,6 +41,7 @@ public class ExportMedicalQueryBuilder {
     private String globalTimeLimitWhere = null;
     private ArrayList<String> columnNameAliases;
     private String queryString;
+    private String versionCondition;
 
     // Metadata for patients
     private String pid;
@@ -71,11 +72,12 @@ public class ExportMedicalQueryBuilder {
      * @param needAr        This job is Ar or NoAr
      */
     public ExportMedicalQueryBuilder(Instant startTime, Instant fakeStartTime, List<DataTimeSpanBean> dts, List<MedicalDownsampleGroup> v, List<List<String>> columns,
-                                     MedicalDownsample ds, boolean needAr, Medication records) {
+                                     MedicalDownsample ds, boolean needAr, Medication records, String versionCondition) {
     	 if (dts == null || dts.isEmpty()) {
              return;
          }
     	 this.queryString ="";
+    	 this.versionCondition = versionCondition;
          this.pid = dts.get(0).getPid();
          this.numDataSegments = dts.size();
          this.timeseriesMetadata = dts;
@@ -190,7 +192,7 @@ public class ExportMedicalQueryBuilder {
 
     // Lookup all in one query, DO NOT lookup by files
     private void buildQuery() {
-        String whereClause = this.artypeWhereClause(this.isAr) + " AND " + this.globalTimeLimitWhere;
+        String whereClause = this.artypeWhereClause(this.isAr) + " AND " + this.globalTimeLimitWhere+" AND "+this.versionCondition;
 
         if (!this.isDownSampleFirst) {
             String aggrQ = aggregationWhenAggregationFirst(whereClause);

@@ -135,7 +135,8 @@ $(document).ready(function() {
             "patientList": patientList,
             "layout": $('#layout label.active input').val() == "true",
             "ar": $('#ar label.active input').val() == "true",
-            "dbType": $('#selectdb label.active input').val()
+            "dbType": $('#selectdb label.active input').val(),
+            "username":$('#user_name').html()
         };
         $.ajax({
             url: "/api/medicalexport/medicalexport/",

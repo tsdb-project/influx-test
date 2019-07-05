@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -23,8 +24,8 @@ public class AnalysisServiceTest {
     @Test
     public void testGet() {
         Downsample query = analysisService.selectByPrimaryKey(26);
-        assertEquals("07/02/2018 19:21:48", DateFormatUtils.format(query.getCreateTime(), "MM/dd/yyyy HH:mm:ss"));
-        assertEquals("09/17/2018", DateFormatUtils.format(query.getUpdateTime(), "MM/dd/yyyy"));
+        assertEquals("07/02/2018 19:21:48", DateFormatUtils.format(query.getCreateTime().atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli(), "MM/dd/yyyy HH:mm:ss"));
+        assertEquals("09/17/2018", DateFormatUtils.format(query.getUpdateTime().atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli(), "MM/dd/yyyy"));
         assertEquals((int) query.getPeriod(), 3600);
         assertEquals((int) query.getDuration(), 172800);
         assertFalse(query.getDownsampleFirst());

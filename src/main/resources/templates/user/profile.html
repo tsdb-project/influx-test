@@ -65,6 +65,10 @@
                             <td>Created time</td>
                             <td id="creatTime" th:text="${userInfo.createTime}"></td>
                         </tr>
+                        <tr sec:authorize="hasRole('USER')">
+                            <td>Database Version</td>
+                            <td id="dbversion" th:text="${userInfo.databaseVersion}"></td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -157,6 +161,12 @@
                                 </div>
                                 <div class="form-group">
                                     <input type="text" class="form-control" th:value="${userInfo.role}" id="e_role" hidden>
+                                </div>
+                                <div class="form-group" sec:authorize="hasRole('USER')">
+                                    <label for="e_versions">Select database version</label>
+                                    <select class="select" id="e_versions">
+                                        <option th:each="e:${versions}" th:value="${e.getVersionId()}" th:selected="${userInfo.getDatabaseVersion()==e.getVersionId()}">[[${e.getVersionId()}]]</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>

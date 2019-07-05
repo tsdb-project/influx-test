@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
 </head>
 
@@ -25,15 +25,19 @@
                 <a href="" data-toggle="dropdown">
                     <i class="zmdi zmdi-account-circle"></i>
                     Hello,
-                    <span sec:authentication="principal.firstname"></span>
+                    <span id="first_name"></span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right dropdown-menu--block">
                     <div class="listview listview--hover">
                         <div class="listview__header" style="text-transform: none">
                             <img class="user__img" src="/demo/img/profile-pics/4.jpg" alt="" style="margin: 0">
                             <div>
-                                <div class="user__name" th:text="${#authentication.principal.firstname} + ' ' + ${#authentication.principal.lastname} + ' (' + ${#authentication.name} + ')'">username</div>
+                                <div class="user__name" th:text="${#authentication.name}" th:value="${#authentication.name}" hidden="hidden" id="user_name"></div>
+                            </div>
+                            <div>
+                                <span class="user__name" id="username"></span>
                                 <!--<div class="user__email" th:text="${#authentication.principal.email}">email</div>-->
+                                <div sec:authorize="hasRole('USER')" class="user__info" >DB version:<span id="user_version"></span></div>
                             </div>
                         </div>
 
@@ -54,6 +58,9 @@
                 </div>
             </li>
         </ul>
+        <script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="/js/admin/header.js"></script>
     </header>
+
 </body>
 </html>

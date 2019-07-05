@@ -18,7 +18,7 @@ public class AnalysisTest {
         @SuppressWarnings("unused")
         List<DataTimeSpanBean> tmp;
 
-        tmp = AnalysisUtil.getPatientAllDataSpan(i, null, "PUH-2010-141");
-        tmp = AnalysisUtil.getPatientAllDataSpan(i, null, "PUH-2010-127");
+        tmp = AnalysisUtil.getPatientAllDataSpan(i, null, "PUH-2010-141","");
+        tmp = AnalysisUtil.getPatientAllDataSpan(i, null, "PUH-2010-127","");
     }
 }
