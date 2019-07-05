@@ -181,6 +181,7 @@ $(document).ready(function () {
                         'error' : function() {
                         }
                     });
+                    $("#confirm-alert-modal").hidden();
                 },
                 'error': function () {
                     notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Delete confirmed failed.");
@@ -336,6 +337,7 @@ $(document).ready(function () {
                         'error' : function() {
                         }
                     });
+                    $("#cancel-alert-modal").hidden();
                 },
                 'error': function () {
                     notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Import canceled failed.");
