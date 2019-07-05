@@ -85,8 +85,8 @@ public class CsvFileDao {
 
 //        using the different datawarehouse structure
         criteria.andStatusNotEqualTo(1);
-        criteria.andStatusLessThanOrEqualTo(currentVersion);
-        criteria.andEndVersionGreaterThan(currentVersion);
+        criteria.andStartVersionLessThanOrEqualTo(currentVersion);
+        criteria.andEndVersionGreaterThan(currentVersion+1);
 
         return csvFileMapper.selectByExample(example);
     }
