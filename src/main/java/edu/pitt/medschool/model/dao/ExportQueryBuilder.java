@@ -46,6 +46,7 @@ public class ExportQueryBuilder {
     private String globalTimeLimitWhere = null;
     private ArrayList<String> columnNameAliases;
     private String queryString = "";
+    private String versionCondition ="";
 
     // Metadata for patients
     private String pid;
@@ -71,7 +72,7 @@ public class ExportQueryBuilder {
      * @param needAr        This job is Ar or NoAr
      */
     public ExportQueryBuilder(Instant startTime, Instant fakeStartTime, List<DataTimeSpanBean> dts, List<DownsampleGroup> v,
-            List<List<String>> columns, Downsample ds, boolean needAr) {
+            List<List<String>> columns, Downsample ds, boolean needAr, String versionCondition) {
         // no available data
         if (dts == null || dts.isEmpty()) {
             return;
@@ -82,6 +83,7 @@ public class ExportQueryBuilder {
         this.columnNames = columns;
         this.validTimeSpanIds = new ArrayList<>(this.numDataSegments);
         this.isAr = needAr;
+        this.versionCondition = versionCondition;
 
         populateDownsampleGroup(v);
         populateDownsampleData(ds);
@@ -172,7 +174,7 @@ public class ExportQueryBuilder {
 
     // Lookup all in one query, DO NOT lookup by files
     private void buildQuery() {
-        String whereClause = this.artypeWhereClause(this.isAr) + " AND " + this.globalTimeLimitWhere;
+        String whereClause = this.artypeWhereClause(this.isAr) + " AND " + this.globalTimeLimitWhere +" AND "+ this.versionCondition;
 
         if (!this.isDownSampleFirst) {
             String aggrQ = aggregationWhenAggregationFirst(whereClause);

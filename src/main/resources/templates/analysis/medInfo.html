@@ -56,7 +56,11 @@
                         Data Overview of <strong id="patientId" th:text="${patientId}"></strong>
                         <br>
                         <br>
-                        <a href="/analysis/chart">
+                        <a href="/analysis/chart" sec:authorize="hasRole('ADMIN')">
+                            <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>
+                            Return to Charts
+                        </a>
+                        <a href="/analysis/userchart" sec:authorize="hasRole('USER')">
                             <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>
                             Return to Charts
                         </a>

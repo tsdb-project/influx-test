@@ -15,6 +15,7 @@ public class CustomUserDetails implements UserDetails, CredentialsContainer {
     private int id;
     private String firstname;
     private String lastname;
+    private int databaseVersion;
 
     public CustomUserDetails(final User _user) {
         this.user = _user;
@@ -93,6 +94,14 @@ public class CustomUserDetails implements UserDetails, CredentialsContainer {
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public int getDatabaseVersion() {
+        return databaseVersion;
+    }
+
+    public void setDatabaseVersion(int databaseVersion) {
+        this.databaseVersion = databaseVersion;
     }
 
     @Override

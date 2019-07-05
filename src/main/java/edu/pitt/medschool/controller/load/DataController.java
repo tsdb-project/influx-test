@@ -248,7 +248,12 @@ public class DataController {
 
     @DeleteMapping(value = "/apis/file")
     @ResponseBody
-    public RestfulResponse deletePatientDataByFiles(@RequestBody(required = true) List<CsvFile> csvFiles) throws Exception {
+    public Map<String, Object> deletePatientDataByFiles(@RequestBody(required = true) List<CsvFile> csvFiles) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        if(importProgressService.isImporting()){
+            map.put("res",new RestfulResponse(2,"Importing"));
+            return map;
+        }
         int deleteResult =1;
         for(CsvFile csvFile : csvFiles){
             if(csvFile.getStatus()==1){
@@ -259,11 +264,11 @@ public class DataController {
         }
         RestfulResponse response;
         if( deleteResult !=0 ){
-            response = new RestfulResponse(1, "success");
+            map.put("res",new RestfulResponse(1, "success"));
         }else{
-            response = new RestfulResponse(0,  "fail");
+            map.put("res",new RestfulResponse(0,  "fail"));
         }
-        return response;
+        return map;
     }
 
     @PostMapping(value = "/apis/pseudoDeleteFile")

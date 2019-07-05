@@ -3,6 +3,7 @@ package edu.pitt.medschool.model.dto;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.time.LocalDateTime;
 
 public class MedicationExample {
     /**
@@ -303,52 +304,52 @@ public class MedicationExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andChartDateEqualTo(Date value) {
+		public Criteria andChartDateEqualTo(LocalDateTime value) {
 			addCriterion("chart_date =", value, "chartDate");
 			return (Criteria) this;
 		}
 
-		public Criteria andChartDateNotEqualTo(Date value) {
+		public Criteria andChartDateNotEqualTo(LocalDateTime value) {
 			addCriterion("chart_date <>", value, "chartDate");
 			return (Criteria) this;
 		}
 
-		public Criteria andChartDateGreaterThan(Date value) {
+		public Criteria andChartDateGreaterThan(LocalDateTime value) {
 			addCriterion("chart_date >", value, "chartDate");
 			return (Criteria) this;
 		}
 
-		public Criteria andChartDateGreaterThanOrEqualTo(Date value) {
+		public Criteria andChartDateGreaterThanOrEqualTo(LocalDateTime value) {
 			addCriterion("chart_date >=", value, "chartDate");
 			return (Criteria) this;
 		}
 
-		public Criteria andChartDateLessThan(Date value) {
+		public Criteria andChartDateLessThan(LocalDateTime value) {
 			addCriterion("chart_date <", value, "chartDate");
 			return (Criteria) this;
 		}
 
-		public Criteria andChartDateLessThanOrEqualTo(Date value) {
+		public Criteria andChartDateLessThanOrEqualTo(LocalDateTime value) {
 			addCriterion("chart_date <=", value, "chartDate");
 			return (Criteria) this;
 		}
 
-		public Criteria andChartDateIn(List<Date> values) {
+		public Criteria andChartDateIn(List<LocalDateTime> values) {
 			addCriterion("chart_date in", values, "chartDate");
 			return (Criteria) this;
 		}
 
-		public Criteria andChartDateNotIn(List<Date> values) {
+		public Criteria andChartDateNotIn(List<LocalDateTime> values) {
 			addCriterion("chart_date not in", values, "chartDate");
 			return (Criteria) this;
 		}
 
-		public Criteria andChartDateBetween(Date value1, Date value2) {
+		public Criteria andChartDateBetween(LocalDateTime value1, LocalDateTime value2) {
 			addCriterion("chart_date between", value1, value2, "chartDate");
 			return (Criteria) this;
 		}
 
-		public Criteria andChartDateNotBetween(Date value1, Date value2) {
+		public Criteria andChartDateNotBetween(LocalDateTime value1, LocalDateTime value2) {
 			addCriterion("chart_date not between", value1, value2, "chartDate");
 			return (Criteria) this;
 		}
@@ -1270,6 +1271,66 @@ public class MedicationExample {
 
 		public Criteria andTdripIndNotBetween(Integer value1, Integer value2) {
 			addCriterion("tdrip_ind not between", value1, value2, "tdripInd");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionIsNull() {
+			addCriterion("version is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionIsNotNull() {
+			addCriterion("version is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionEqualTo(Integer value) {
+			addCriterion("version =", value, "version");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionNotEqualTo(Integer value) {
+			addCriterion("version <>", value, "version");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionGreaterThan(Integer value) {
+			addCriterion("version >", value, "version");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionGreaterThanOrEqualTo(Integer value) {
+			addCriterion("version >=", value, "version");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionLessThan(Integer value) {
+			addCriterion("version <", value, "version");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionLessThanOrEqualTo(Integer value) {
+			addCriterion("version <=", value, "version");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionIn(List<Integer> values) {
+			addCriterion("version in", values, "version");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionNotIn(List<Integer> values) {
+			addCriterion("version not in", values, "version");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionBetween(Integer value1, Integer value2) {
+			addCriterion("version between", value1, value2, "version");
+			return (Criteria) this;
+		}
+
+		public Criteria andVersionNotBetween(Integer value1, Integer value2) {
+			addCriterion("version not between", value1, value2, "version");
 			return (Criteria) this;
 		}
 

@@ -78,6 +78,9 @@ public class ExportSqlProvider {
 		if (record.getMedical() != null) {
 			sql.VALUES("medical", "#{medical,jdbcType=BIT}");
 		}
+		if (record.getUsername() != null) {
+			sql.VALUES("username", "#{username,jdbcType=VARCHAR}");
+		}
 		if (record.getPatientList() != null) {
 			sql.VALUES("patient_list", "#{patientList,jdbcType=LONGVARCHAR}");
 		}
@@ -111,6 +114,7 @@ public class ExportSqlProvider {
 		sql.SELECT("update_time");
 		sql.SELECT("deleted");
 		sql.SELECT("medical");
+		sql.SELECT("username");
 		sql.SELECT("patient_list");
 		sql.SELECT("query_json");
 		sql.FROM("export");
@@ -145,6 +149,7 @@ public class ExportSqlProvider {
 		sql.SELECT("update_time");
 		sql.SELECT("deleted");
 		sql.SELECT("medical");
+		sql.SELECT("username");
 		sql.FROM("export");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -204,6 +209,9 @@ public class ExportSqlProvider {
 		if (record.getMedical() != null) {
 			sql.SET("medical = #{record.medical,jdbcType=BIT}");
 		}
+		if (record.getUsername() != null) {
+			sql.SET("username = #{record.username,jdbcType=VARCHAR}");
+		}
 		if (record.getPatientList() != null) {
 			sql.SET("patient_list = #{record.patientList,jdbcType=LONGVARCHAR}");
 		}
@@ -235,6 +243,7 @@ public class ExportSqlProvider {
 		sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
 		sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
 		sql.SET("medical = #{record.medical,jdbcType=BIT}");
+		sql.SET("username = #{record.username,jdbcType=VARCHAR}");
 		sql.SET("patient_list = #{record.patientList,jdbcType=LONGVARCHAR}");
 		sql.SET("query_json = #{record.queryJson,jdbcType=LONGVARCHAR}");
 		ExportExample example = (ExportExample) parameter.get("example");
@@ -263,6 +272,7 @@ public class ExportSqlProvider {
 		sql.SET("update_time = #{record.updateTime,jdbcType=TIMESTAMP}");
 		sql.SET("deleted = #{record.deleted,jdbcType=BIT}");
 		sql.SET("medical = #{record.medical,jdbcType=BIT}");
+		sql.SET("username = #{record.username,jdbcType=VARCHAR}");
 		ExportExample example = (ExportExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();

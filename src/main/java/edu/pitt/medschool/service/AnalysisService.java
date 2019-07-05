@@ -26,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import edu.pitt.medschool.model.PatientTimeLine;
+import edu.pitt.medschool.model.dao.*;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.slf4j.Logger;
@@ -44,19 +46,6 @@ import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.FileZip;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.DataTimeSpanBean;
-import edu.pitt.medschool.model.dao.AnalysisUtil;
-import edu.pitt.medschool.model.dao.DownsampleDao;
-import edu.pitt.medschool.model.dao.DownsampleGroupDao;
-import edu.pitt.medschool.model.dao.ExportDao;
-import edu.pitt.medschool.model.dao.ExportMedicalOutput;
-import edu.pitt.medschool.model.dao.ExportMedicalQueryBuilder;
-import edu.pitt.medschool.model.dao.ExportOutput;
-import edu.pitt.medschool.model.dao.ExportQueryBuilder;
-import edu.pitt.medschool.model.dao.ImportedFileDao;
-import edu.pitt.medschool.model.dao.MedicalDownsampleDao;
-import edu.pitt.medschool.model.dao.MedicalDownsampleGroupDao;
-import edu.pitt.medschool.model.dao.MedicationDao;
-import edu.pitt.medschool.model.dao.PatientDao;
 import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.EEGChart;
@@ -71,6 +60,12 @@ import okhttp3.OkHttpClient;
  */
 @Service
 public class AnalysisService {
+
+    @Autowired
+    ValidateCsvService validateCsvService;
+    @Autowired
+    UsersService usersService;
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${machine}")
@@ -88,6 +83,7 @@ public class AnalysisService {
     private final MedicationDao medicationDao;
     private final InfluxSwitcherService iss;
     private final ImportedFileDao importedFileDao;
+    private final VersionDao versionDao;
     private final ScheduledFuture<?> jobCheckerThread; // Thread for running managed jobs
 
     /**
@@ -104,7 +100,7 @@ public class AnalysisService {
     public AnalysisService(DownsampleDao downsampleDao, MedicalDownsampleDao medicalDownsampleDao,
             DownsampleGroupDao downsampleGroupDao, MedicalDownsampleGroupDao medicalDownsampleGroupDao, ExportDao exportDao,
             ColumnService columnService, InfluxSwitcherService iss, ImportedFileDao importedFileDao,
-            MedicationDao medicationDao, PatientDao patientDao) {
+            MedicationDao medicationDao, VersionDao versionDao) {
         this.downsampleDao = downsampleDao;
         this.medicalDownsampleDao = medicalDownsampleDao;
         this.downsampleGroupDao = downsampleGroupDao;
@@ -114,6 +110,7 @@ public class AnalysisService {
         this.iss = iss;
         this.importedFileDao = importedFileDao;
         this.medicationDao = medicationDao;
+        this.versionDao = versionDao;
         // Check the job queue every 20 seconds and have a initial delay of 10s
         this.jobCheckerThread = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             Thread.currentThread().setName("JobCheckerThread");
@@ -179,6 +176,10 @@ public class AnalysisService {
         } else {
             patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
         }
+
+        //get version condition
+        List<PatientTimeLine> files = validateCsvService.getPatientTimeLinesByVersion("realpsc",usersService.getVersionByUserName(job.getUsername()));
+        String versionCondition = versionDao.getVersionCondition(files);
 
         // Get columns data
         List<DownsampleGroup> groups = downsampleGroupDao.selectAllDownsampleGroup(queryId);
@@ -281,19 +282,19 @@ public class AnalysisService {
 
                     // First get the group by time offset
                     ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
-                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
+                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') and "+versionCondition+" GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
                             patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
                     if (testOffset.length != 1) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> don't have enough data to export.%n", patientId));
                         continue;
                     }
                     // Then fetch meta data regrading file segments and build the query string
-                    List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId);
+                    List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId,versionCondition);
                     // get the startTime eliminate first 30 rows
-                    String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,patientId,job.getAr());
+                    String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,patientId,job.getAr(),versionCondition);
                     ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime),
                             Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
-                            job.getAr());
+                            job.getAr(),versionCondition);
                     String finalQueryString = eq.getQueryString();
                     logger.info(finalQueryString);
                     if (finalQueryString.isEmpty()) {
@@ -396,13 +397,20 @@ public class AnalysisService {
             return;
         }
 
+        //get version condition
+        logger.info(job.getUsername());
+        int version = usersService.getVersionByUserName(job.getUsername());
+        logger.info(String.valueOf(version));
+        List<PatientTimeLine> files = validateCsvService.getPatientTimeLinesByVersion("realpsc",version);
+        String versionCondition = versionDao.getVersionCondition(files);
+
         // medicalRecordList save all medical records of all selected patients
         List<Medication> medicalRecordList = new ArrayList<Medication>();
         List<Medication> medicalRecordList_full = new ArrayList<Medication>();
         List<Medication> medicalRecordList_first = new ArrayList<Medication>();
         logger.info("patientIDS:" + Integer.toString(patientIDs.size()));
-        medicalRecordList_full = medicationDao.selectAllbyMedications(exportQuery.getMedicine(), patientIDs);
-        medicalRecordList_first = medicationDao.selectFirstbyMedications(exportQuery.getMedicine(), patientIDs);
+        medicalRecordList_full = medicationDao.selectAllbyMedications(exportQuery.getMedicine(), patientIDs,version);
+        medicalRecordList_first = medicationDao.selectFirstbyMedications(exportQuery.getMedicine(), patientIDs,version);
         if (exportQuery.getOnlyFirst() && exportQuery.getDataBeforeMedicine()) {
             logger.info("only first and before first");
             medicalRecordList = medicalRecordList_first;
@@ -411,7 +419,7 @@ public class AnalysisService {
             InfluxDB influxDB = generateIdbClient(false);
             Set<String> patients = new HashSet<String>();
             for (Medication medication : medicalRecordList_first) {
-                String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,medication.getId(),job.getAr());
+                String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,medication.getId(),job.getAr(),versionCondition);
                 if (Instant.parse(startTime).compareTo(medication.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant()) < 0) {
                     patients.add(medication.getId());
                 }
@@ -520,7 +528,7 @@ public class AnalysisService {
 
                     // First get the group by time offset
                     ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
-                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
+                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') and "+versionCondition+" GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
                             onerecord.getId(), job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
                     if (testOffset.length != 1) {
                         outputWriter.writeMetaFile(
@@ -528,11 +536,11 @@ public class AnalysisService {
                         continue;
                     }
                     // Then fetch meta data regrading file segments and build the query string
-                    List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, onerecord.getId());
-                    String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,onerecord.getId(),job.getAr());
+                    List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, onerecord.getId(),versionCondition);
+                    String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,onerecord.getId(),job.getAr(),versionCondition);
                     ExportMedicalQueryBuilder eq = new ExportMedicalQueryBuilder(Instant.parse(startTime),
                             Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
-                            job.getAr(), onerecord);
+                            job.getAr(), onerecord,versionCondition);
                     String finalQueryStrings = eq.getQueryString();
                     // logger.info("medical time out:"+onerecord.getChartDate().toString());
                     // logger.info("medical time in:"+eq.getMedicalTime().toEpochMilli());
@@ -697,7 +705,7 @@ public class AnalysisService {
     /**
      * get the eeg data for chart.
      */
-    public ArrayList<List<Object>> getEEGChartData(EEGChart eegChart) {
+    public ArrayList<List<Object>> getEEGChartData(EEGChart eegChart, List<PatientTimeLine> files) {
         List<List<String>> columns = new ArrayList<>(1);
         List<DownsampleGroup> groups = new ArrayList<>(1);
         ArrayList<List<Object>> rows = new ArrayList<>();
@@ -713,6 +721,7 @@ public class AnalysisService {
         downsample.setDuration(0);
         downsample.setOrigin(0);
         ResultTable[] res = new ResultTable[1];
+        String versionCondition = versionDao.getVersionCondition(files);
 
         try {
             columns.add(parseAggregationGroupColumnsString(eegChart.getColumns()));
@@ -724,16 +733,16 @@ public class AnalysisService {
         try {
             logger.info(eegChart.getPatientID());
             ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
-                    "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
+                    "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') and "+versionCondition+" GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
                     eegChart.getPatientID(), eegChart.isAr() ? "ar" : "noar", eegChart.getPeriod()));
             if (testOffset.length != 1) {
                 logger.info("no enough data");
             }
             // Then fetch meta data regrading file segments and build the query string
-            List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, eegChart.getPatientID());
-            String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,eegChart.getPatientID(),eegChart.isAr());
+            List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, eegChart.getPatientID(),versionCondition);
+            String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,eegChart.getPatientID(),eegChart.isAr(),versionCondition);
             ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime), Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb,
-                    groups, columns, downsample, eegChart.isAr());
+                    groups, columns, downsample, eegChart.isAr(), versionCondition);
             String finalQueryString = eq.getQueryString();
             if (finalQueryString.isEmpty()) {
                 logger.info("fail to generate query");

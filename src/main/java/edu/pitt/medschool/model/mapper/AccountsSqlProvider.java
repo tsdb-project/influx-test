@@ -69,6 +69,9 @@ public class AccountsSqlProvider {
 		if (record.getCreateTime() != null) {
 			sql.VALUES("create_time", "#{createTime,jdbcType=TIMESTAMP}");
 		}
+		if (record.getDatabaseVersion() != null) {
+			sql.VALUES("database_version", "#{databaseVersion,jdbcType=INTEGER}");
+		}
 		return sql.toString();
 	}
 
@@ -92,6 +95,7 @@ public class AccountsSqlProvider {
 		sql.SELECT("enable");
 		sql.SELECT("last_update");
 		sql.SELECT("create_time");
+		sql.SELECT("database_version");
 		sql.FROM("accounts");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -139,6 +143,9 @@ public class AccountsSqlProvider {
 		if (record.getCreateTime() != null) {
 			sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
 		}
+		if (record.getDatabaseVersion() != null) {
+			sql.SET("database_version = #{record.databaseVersion,jdbcType=INTEGER}");
+		}
 		applyWhere(sql, example, true);
 		return sql.toString();
 	}
@@ -160,6 +167,7 @@ public class AccountsSqlProvider {
 		sql.SET("enable = #{record.enable,jdbcType=BIT}");
 		sql.SET("last_update = #{record.lastUpdate,jdbcType=TIMESTAMP}");
 		sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
+		sql.SET("database_version = #{record.databaseVersion,jdbcType=INTEGER}");
 		AccountsExample example = (AccountsExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -198,6 +206,9 @@ public class AccountsSqlProvider {
 		}
 		if (record.getCreateTime() != null) {
 			sql.SET("create_time = #{createTime,jdbcType=TIMESTAMP}");
+		}
+		if (record.getDatabaseVersion() != null) {
+			sql.SET("database_version = #{databaseVersion,jdbcType=INTEGER}");
 		}
 		sql.WHERE("id = #{id,jdbcType=INTEGER}");
 		return sql.toString();

@@ -48,10 +48,13 @@ $(document).ready(function() {
 
     // Get Json data from csv_file table
     var patientTimelines = [];
+    var username = $('#user_name').html();
 
     $.ajax({
-        type: "GET",
-        url: "/analysis/getPatientTimelines",
+        type: "get",
+        url: "/analysis/getPatientTimelinesByVersion/"+username,
+        contentType: "application/json",
+        dataType: 'json',
         async: false,
         success : function(text)
         {
