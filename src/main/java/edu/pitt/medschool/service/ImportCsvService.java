@@ -147,9 +147,9 @@ public class ImportCsvService {
 
 
 //        Two ways to handle DST
-        String start = "2017.01.03 11:57:54";
-        String end = "2017.01.03 13:15:59";
-        int length = 1795;
+        String start = "2015.08.24 04:56:00";
+        String end = "2015.08.24 21:40:22";
+        int length = 32377;
 //        String values = "41571.8739583333";
 
         try{
@@ -569,10 +569,9 @@ public class ImportCsvService {
     private void internalImportMain(Path pFile) {
         long thisFileSize = everyFileSize.get(pFile.toString());
         String fileFullPath = pFile.toString(), fileName = pFile.getFileName().toString();
-        String[] fileInfo = checkerFromFilename(fileName, thisFileSize);
-
         // normalize the filename
         fileName = fileName.substring(0, StringUtils.lastIndexOfIgnoreCase(fileName, "ar") + 2) + ".csv";
+        String[] fileInfo = checkerFromFilename(fileName, thisFileSize);
         processingSet.add(pFile);
 
         // Ar/NoAr Check & Response
