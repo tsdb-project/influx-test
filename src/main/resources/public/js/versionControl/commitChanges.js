@@ -75,14 +75,16 @@ $(document).ready(function () {
         },{
             data:'filename'
         },{
-            data:'startTime',
+            data:'startTime'
         },{
-            data:'endTime',
+            data:'endTime'
         },{
             data:null,
             render:function (data) {
                 return getStatus(data.status);
             }
+        },{
+            data:'lastUpdate'
         },{
             data:'comment'
         },{
