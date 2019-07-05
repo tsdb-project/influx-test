@@ -62,7 +62,7 @@ public class ImportProgressDao {
 
     public boolean isImporting() {
         ImportProgressExample example = new ImportProgressExample();
-        example.createCriteria().andStatusNotEqualTo("STATUS_FINISHED").andStatusNotEqualTo("STATUS_FAILED");
+        example.createCriteria().andStatusNotEqualTo("STATUS_FINISHED").andStatusNotEqualTo("STATUS_FAIL");
         return (!iProgessMapper.selectByExample(example).isEmpty());
     }
 }
