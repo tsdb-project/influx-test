@@ -104,6 +104,6 @@ public interface VersionMapper {
 	@UpdateProvider(type = VersionSqlProvider.class, method = "updateByExample")
 	int updateByExample(@Param("record") Version record, @Param("example") VersionExample example);
 
-	@Select("SELECT IFNULL(MAX(version_id),0) FROM VERSION")
+	@Select("SELECT IFNULL(MAX(version_id),0) FROM version")
     int getlatestID();
 }
