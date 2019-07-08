@@ -25,4 +25,12 @@ public class ManualController {
         modelAndView.setViewName("manual/EEGDataCodebook");
         return modelAndView;
     }
+
+    @RequestMapping("manual/VersionControl")
+    public ModelAndView VersionControl(ModelAndView modelAndView){
+        modelAndView.addObject("nav", "manual");
+        modelAndView.addObject("subnav", "Version control");
+        modelAndView.setViewName("manual/version control");
+        return modelAndView;
+    }
 }
