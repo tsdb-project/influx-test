@@ -3,6 +3,7 @@ package edu.pitt.medschool.model.dto;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.time.LocalDateTime;
 
 public class ImportProgressExample {
     /**
@@ -633,52 +634,52 @@ public class ImportProgressExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeEqualTo(Date value) {
+		public Criteria andCreateTimeEqualTo(LocalDateTime value) {
 			addCriterion("create_time =", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotEqualTo(Date value) {
+		public Criteria andCreateTimeNotEqualTo(LocalDateTime value) {
 			addCriterion("create_time <>", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeGreaterThan(Date value) {
+		public Criteria andCreateTimeGreaterThan(LocalDateTime value) {
 			addCriterion("create_time >", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeGreaterThanOrEqualTo(Date value) {
+		public Criteria andCreateTimeGreaterThanOrEqualTo(LocalDateTime value) {
 			addCriterion("create_time >=", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeLessThan(Date value) {
+		public Criteria andCreateTimeLessThan(LocalDateTime value) {
 			addCriterion("create_time <", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeLessThanOrEqualTo(Date value) {
+		public Criteria andCreateTimeLessThanOrEqualTo(LocalDateTime value) {
 			addCriterion("create_time <=", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeIn(List<Date> values) {
+		public Criteria andCreateTimeIn(List<LocalDateTime> values) {
 			addCriterion("create_time in", values, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotIn(List<Date> values) {
+		public Criteria andCreateTimeNotIn(List<LocalDateTime> values) {
 			addCriterion("create_time not in", values, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeBetween(Date value1, Date value2) {
+		public Criteria andCreateTimeBetween(LocalDateTime value1, LocalDateTime value2) {
 			addCriterion("create_time between", value1, value2, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotBetween(Date value1, Date value2) {
+		public Criteria andCreateTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
 			addCriterion("create_time not between", value1, value2, "createTime");
 			return (Criteria) this;
 		}
@@ -693,53 +694,113 @@ public class ImportProgressExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andUpdateTimeEqualTo(Date value) {
+		public Criteria andUpdateTimeEqualTo(LocalDateTime value) {
 			addCriterion("update_time =", value, "updateTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andUpdateTimeNotEqualTo(Date value) {
+		public Criteria andUpdateTimeNotEqualTo(LocalDateTime value) {
 			addCriterion("update_time <>", value, "updateTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andUpdateTimeGreaterThan(Date value) {
+		public Criteria andUpdateTimeGreaterThan(LocalDateTime value) {
 			addCriterion("update_time >", value, "updateTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andUpdateTimeGreaterThanOrEqualTo(Date value) {
+		public Criteria andUpdateTimeGreaterThanOrEqualTo(LocalDateTime value) {
 			addCriterion("update_time >=", value, "updateTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andUpdateTimeLessThan(Date value) {
+		public Criteria andUpdateTimeLessThan(LocalDateTime value) {
 			addCriterion("update_time <", value, "updateTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andUpdateTimeLessThanOrEqualTo(Date value) {
+		public Criteria andUpdateTimeLessThanOrEqualTo(LocalDateTime value) {
 			addCriterion("update_time <=", value, "updateTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andUpdateTimeIn(List<Date> values) {
+		public Criteria andUpdateTimeIn(List<LocalDateTime> values) {
 			addCriterion("update_time in", values, "updateTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andUpdateTimeNotIn(List<Date> values) {
+		public Criteria andUpdateTimeNotIn(List<LocalDateTime> values) {
 			addCriterion("update_time not in", values, "updateTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andUpdateTimeBetween(Date value1, Date value2) {
+		public Criteria andUpdateTimeBetween(LocalDateTime value1, LocalDateTime value2) {
 			addCriterion("update_time between", value1, value2, "updateTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andUpdateTimeNotBetween(Date value1, Date value2) {
+		public Criteria andUpdateTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
 			addCriterion("update_time not between", value1, value2, "updateTime");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostIsNull() {
+			addCriterion("lost is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostIsNotNull() {
+			addCriterion("lost is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostEqualTo(Boolean value) {
+			addCriterion("lost =", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostNotEqualTo(Boolean value) {
+			addCriterion("lost <>", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostGreaterThan(Boolean value) {
+			addCriterion("lost >", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostGreaterThanOrEqualTo(Boolean value) {
+			addCriterion("lost >=", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostLessThan(Boolean value) {
+			addCriterion("lost <", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostLessThanOrEqualTo(Boolean value) {
+			addCriterion("lost <=", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostIn(List<Boolean> values) {
+			addCriterion("lost in", values, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostNotIn(List<Boolean> values) {
+			addCriterion("lost not in", values, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostBetween(Boolean value1, Boolean value2) {
+			addCriterion("lost between", value1, value2, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostNotBetween(Boolean value1, Boolean value2) {
+			addCriterion("lost not between", value1, value2, "lost");
 			return (Criteria) this;
 		}
 

@@ -80,7 +80,7 @@ public class ImportProgressService {
      * @param failReason         Reason why failed
      */
     public void UpdateFileProgress(String batchId, String fileName, long totalFileSize, long fileSize, long processedSize,
-            long totalProcessedSize, FileProgressStatus status, String failReason) {
+            long totalProcessedSize, FileProgressStatus status, String failReason,Boolean lost) {
         double allPercent = 0, currPercent = 0;
         if (totalFileSize != 0)
             allPercent = 1.0 * totalProcessedSize / totalFileSize;
@@ -96,6 +96,7 @@ public class ImportProgressService {
         importLog.setThisFileSize(fileSize);
         importLog.setAllFileSize(totalFileSize);
         importLog.setBatchId(batchId);
+        importLog.setLost(lost);
 
         if (failReason == null) {
             importLog.setReason("N/A");
