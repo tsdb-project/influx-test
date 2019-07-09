@@ -472,7 +472,7 @@ public class TimeShiftService {
 
                 if (columnCount != values.length) {
                     String err_text = String.format("File content columns length inconsistent on line %d!", totalLines + 8);
-                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
+                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true,true);
                     currentProcessed += lengthOfThisLine;
                     totalProcessedSize.addAndGet(lengthOfThisLine);
                     continue;
@@ -516,7 +516,7 @@ public class TimeShiftService {
                 }
                 if (gotParseProblem) {
                     String err_text = String.format("Failed to parse number on line %d!", totalLines + 8);
-                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true);
+                    logFailureFiles(file.toString(), err_text, aFileSize, currentProcessed, true,true);
                     continue;
                 }
 
@@ -579,7 +579,7 @@ public class TimeShiftService {
 
         // Ar/NoAr Check & Response
         if (fileInfo[1] == null) {
-            logFailureFiles(fileFullPath, "Ambiguous Ar/NoAr in file name.", thisFileSize, 0, false);
+            logFailureFiles(fileFullPath, "Ambiguous Ar/NoAr in file name.", thisFileSize, 0, false,false);
             FileLockUtil.release(fileFullPath);
             processingSet.remove(pFile);
             transferFailedFiles(pFile);
@@ -589,7 +589,7 @@ public class TimeShiftService {
         // Duplication Check
         if (fileInfo[2].equals("1")) {
             // TODO: If the same file appears already, having a summary of comparing the contents of the new and old
-            logFailureFiles(fileFullPath, "The same file has been imported.", thisFileSize, 0, false);
+            logFailureFiles(fileFullPath, "The same file has been imported.", thisFileSize, 0, false,false);
             FileLockUtil.release(fileFullPath);
             processingSet.remove(pFile);
             return;
@@ -641,7 +641,7 @@ public class TimeShiftService {
         } else {
             // Import fail
             long procedSize = (long) impStr[1];
-            logFailureFiles(fileFullPath, (String) impStr[0], thisFileSize, procedSize, false);
+            logFailureFiles(fileFullPath, (String) impStr[0], thisFileSize, procedSize, false,false);
             FileLockUtil.release(fileFullPath);
             processingSet.remove(pFile);
             logger.error((String) impStr[0]);
@@ -676,27 +676,27 @@ public class TimeShiftService {
 
     private void logQueuedFile(String fn, long thisFileSize) {
         importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, 0, totalProcessedSize.get(),
-                ImportProgressService.FileProgressStatus.STATUS_QUEUED, null);
+                ImportProgressService.FileProgressStatus.STATUS_QUEUED, null,false);
     }
 
     private void logSuccessFiles(String fn, long thisFileSize, long thisFileProcessedSize) {
         importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize,
-                totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FINISHED, null);
+                totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FINISHED, null,false);
 
     }
 
     private void logImportingFile(String fn, long thisFileSize, long thisFileProcessedSize, long currentLine) {
         importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize,
                 totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_INPROGRESS,
-                String.valueOf(currentLine));
+                String.valueOf(currentLine),false);
     }
 
-    private void logFailureFiles(String fn, String reason, long thisFileSize, long thisFileProcessedSize, boolean isSoftError) {
+    private void logFailureFiles(String fn, String reason, long thisFileSize, long thisFileProcessedSize, boolean isSoftError,boolean lost) {
         if (!isSoftError) {
             totalAllSize.addAndGet(thisFileProcessedSize - thisFileSize);
         }
         importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize,
-                totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason);
+                totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason,lost);
     }
 
     private void logMySQLFail(String fn){

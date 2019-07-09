@@ -3,6 +3,7 @@ package edu.pitt.medschool.model.dto;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.time.LocalDateTime;
 
 public class ImportLogExample {
     /**
@@ -513,52 +514,52 @@ public class ImportLogExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andTimestampEqualTo(Date value) {
+		public Criteria andTimestampEqualTo(LocalDateTime value) {
 			addCriterion("timestamp =", value, "timestamp");
 			return (Criteria) this;
 		}
 
-		public Criteria andTimestampNotEqualTo(Date value) {
+		public Criteria andTimestampNotEqualTo(LocalDateTime value) {
 			addCriterion("timestamp <>", value, "timestamp");
 			return (Criteria) this;
 		}
 
-		public Criteria andTimestampGreaterThan(Date value) {
+		public Criteria andTimestampGreaterThan(LocalDateTime value) {
 			addCriterion("timestamp >", value, "timestamp");
 			return (Criteria) this;
 		}
 
-		public Criteria andTimestampGreaterThanOrEqualTo(Date value) {
+		public Criteria andTimestampGreaterThanOrEqualTo(LocalDateTime value) {
 			addCriterion("timestamp >=", value, "timestamp");
 			return (Criteria) this;
 		}
 
-		public Criteria andTimestampLessThan(Date value) {
+		public Criteria andTimestampLessThan(LocalDateTime value) {
 			addCriterion("timestamp <", value, "timestamp");
 			return (Criteria) this;
 		}
 
-		public Criteria andTimestampLessThanOrEqualTo(Date value) {
+		public Criteria andTimestampLessThanOrEqualTo(LocalDateTime value) {
 			addCriterion("timestamp <=", value, "timestamp");
 			return (Criteria) this;
 		}
 
-		public Criteria andTimestampIn(List<Date> values) {
+		public Criteria andTimestampIn(List<LocalDateTime> values) {
 			addCriterion("timestamp in", values, "timestamp");
 			return (Criteria) this;
 		}
 
-		public Criteria andTimestampNotIn(List<Date> values) {
+		public Criteria andTimestampNotIn(List<LocalDateTime> values) {
 			addCriterion("timestamp not in", values, "timestamp");
 			return (Criteria) this;
 		}
 
-		public Criteria andTimestampBetween(Date value1, Date value2) {
+		public Criteria andTimestampBetween(LocalDateTime value1, LocalDateTime value2) {
 			addCriterion("timestamp between", value1, value2, "timestamp");
 			return (Criteria) this;
 		}
 
-		public Criteria andTimestampNotBetween(Date value1, Date value2) {
+		public Criteria andTimestampNotBetween(LocalDateTime value1, LocalDateTime value2) {
 			addCriterion("timestamp not between", value1, value2, "timestamp");
 			return (Criteria) this;
 		}
@@ -800,6 +801,126 @@ public class ImportLogExample {
 
 		public Criteria andThisFileSizeNotBetween(Long value1, Long value2) {
 			addCriterion("this_file_size not between", value1, value2, "thisFileSize");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostIsNull() {
+			addCriterion("lost is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostIsNotNull() {
+			addCriterion("lost is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostEqualTo(Boolean value) {
+			addCriterion("lost =", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostNotEqualTo(Boolean value) {
+			addCriterion("lost <>", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostGreaterThan(Boolean value) {
+			addCriterion("lost >", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostGreaterThanOrEqualTo(Boolean value) {
+			addCriterion("lost >=", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostLessThan(Boolean value) {
+			addCriterion("lost <", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostLessThanOrEqualTo(Boolean value) {
+			addCriterion("lost <=", value, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostIn(List<Boolean> values) {
+			addCriterion("lost in", values, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostNotIn(List<Boolean> values) {
+			addCriterion("lost not in", values, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostBetween(Boolean value1, Boolean value2) {
+			addCriterion("lost between", value1, value2, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andLostNotBetween(Boolean value1, Boolean value2) {
+			addCriterion("lost not between", value1, value2, "lost");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartIsNull() {
+			addCriterion("missing_part is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartIsNotNull() {
+			addCriterion("missing_part is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartEqualTo(Boolean value) {
+			addCriterion("missing_part =", value, "missingPart");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartNotEqualTo(Boolean value) {
+			addCriterion("missing_part <>", value, "missingPart");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartGreaterThan(Boolean value) {
+			addCriterion("missing_part >", value, "missingPart");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartGreaterThanOrEqualTo(Boolean value) {
+			addCriterion("missing_part >=", value, "missingPart");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartLessThan(Boolean value) {
+			addCriterion("missing_part <", value, "missingPart");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartLessThanOrEqualTo(Boolean value) {
+			addCriterion("missing_part <=", value, "missingPart");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartIn(List<Boolean> values) {
+			addCriterion("missing_part in", values, "missingPart");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartNotIn(List<Boolean> values) {
+			addCriterion("missing_part not in", values, "missingPart");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartBetween(Boolean value1, Boolean value2) {
+			addCriterion("missing_part between", value1, value2, "missingPart");
+			return (Criteria) this;
+		}
+
+		public Criteria andMissingPartNotBetween(Boolean value1, Boolean value2) {
+			addCriterion("missing_part not between", value1, value2, "missingPart");
 			return (Criteria) this;
 		}
 
