@@ -722,6 +722,7 @@ public class AnalysisService {
         downsample.setOrigin(0);
         ResultTable[] res = new ResultTable[1];
         String versionCondition = versionDao.getVersionCondition(files);
+        logger.info("vc: ",versionCondition);
 
         try {
             columns.add(parseAggregationGroupColumnsString(eegChart.getColumns()));

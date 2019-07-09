@@ -684,6 +684,7 @@ public class ImportCsvService {
             // Import fail
             long procedSize = (long) impStr[1];
             logFailureFiles(fileFullPath, (String) impStr[0], thisFileSize, procedSize, false,false);
+
             FileLockUtil.release(fileFullPath);
             processingSet.remove(pFile);
             logger.error((String) impStr[0]);

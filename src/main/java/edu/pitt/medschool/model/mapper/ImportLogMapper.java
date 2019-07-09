@@ -47,13 +47,13 @@ public interface ImportLogMapper {
 	 * @mbg.generated
 	 */
 	@Insert({ "insert into import_log (id, uuid, ", "batch_id, filename, ", "status, timestamp, ",
-			"all_percent, this_percent, ", "all_file_size, this_file_size, ", "lost, missing_part, reason)",
+			"all_percent, this_percent, ", "all_file_size, this_file_size, ", "lost, reason)",
 			"values (#{id,jdbcType=INTEGER}, #{uuid,jdbcType=VARCHAR}, ",
 			"#{batchId,jdbcType=VARCHAR}, #{filename,jdbcType=VARCHAR}, ",
 			"#{status,jdbcType=VARCHAR}, #{timestamp,jdbcType=TIMESTAMP}, ",
 			"#{allPercent,jdbcType=DOUBLE}, #{thisPercent,jdbcType=DOUBLE}, ",
 			"#{allFileSize,jdbcType=BIGINT}, #{thisFileSize,jdbcType=BIGINT}, ",
-			"#{lost,jdbcType=BIT}, #{missingPart,jdbcType=BIT}, #{reason,jdbcType=LONGVARCHAR})" })
+			"#{lost,jdbcType=BIT}, #{reason,jdbcType=LONGVARCHAR})" })
 	int insert(ImportLog record);
 
 	/**
@@ -79,7 +79,6 @@ public interface ImportLogMapper {
 			@Result(column = "all_file_size", property = "allFileSize", jdbcType = JdbcType.BIGINT),
 			@Result(column = "this_file_size", property = "thisFileSize", jdbcType = JdbcType.BIGINT),
 			@Result(column = "lost", property = "lost", jdbcType = JdbcType.BIT),
-			@Result(column = "missing_part", property = "missingPart", jdbcType = JdbcType.BIT),
 			@Result(column = "reason", property = "reason", jdbcType = JdbcType.LONGVARCHAR) })
 	List<ImportLog> selectByExampleWithBLOBsWithRowbounds(ImportLogExample example, RowBounds rowBounds);
 
@@ -99,7 +98,6 @@ public interface ImportLogMapper {
 			@Result(column = "all_file_size", property = "allFileSize", jdbcType = JdbcType.BIGINT),
 			@Result(column = "this_file_size", property = "thisFileSize", jdbcType = JdbcType.BIGINT),
 			@Result(column = "lost", property = "lost", jdbcType = JdbcType.BIT),
-			@Result(column = "missing_part", property = "missingPart", jdbcType = JdbcType.BIT),
 			@Result(column = "reason", property = "reason", jdbcType = JdbcType.LONGVARCHAR) })
 	List<ImportLog> selectByExampleWithBLOBs(ImportLogExample example);
 
@@ -118,8 +116,7 @@ public interface ImportLogMapper {
 			@Result(column = "this_percent", property = "thisPercent", jdbcType = JdbcType.DOUBLE),
 			@Result(column = "all_file_size", property = "allFileSize", jdbcType = JdbcType.BIGINT),
 			@Result(column = "this_file_size", property = "thisFileSize", jdbcType = JdbcType.BIGINT),
-			@Result(column = "lost", property = "lost", jdbcType = JdbcType.BIT),
-			@Result(column = "missing_part", property = "missingPart", jdbcType = JdbcType.BIT) })
+			@Result(column = "lost", property = "lost", jdbcType = JdbcType.BIT) })
 	List<ImportLog> selectByExampleWithRowbounds(ImportLogExample example, RowBounds rowBounds);
 
 	/**
@@ -137,8 +134,7 @@ public interface ImportLogMapper {
 			@Result(column = "this_percent", property = "thisPercent", jdbcType = JdbcType.DOUBLE),
 			@Result(column = "all_file_size", property = "allFileSize", jdbcType = JdbcType.BIGINT),
 			@Result(column = "this_file_size", property = "thisFileSize", jdbcType = JdbcType.BIGINT),
-			@Result(column = "lost", property = "lost", jdbcType = JdbcType.BIT),
-			@Result(column = "missing_part", property = "missingPart", jdbcType = JdbcType.BIT) })
+			@Result(column = "lost", property = "lost", jdbcType = JdbcType.BIT) })
 	List<ImportLog> selectByExample(ImportLogExample example);
 
 	/**
@@ -146,8 +142,7 @@ public interface ImportLogMapper {
 	 * @mbg.generated
 	 */
 	@Select({ "select", "id, uuid, batch_id, filename, status, timestamp, all_percent, this_percent, ",
-			"all_file_size, this_file_size, lost, missing_part, reason", "from import_log",
-			"where id = #{id,jdbcType=INTEGER}" })
+			"all_file_size, this_file_size, lost, reason", "from import_log", "where id = #{id,jdbcType=INTEGER}" })
 	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
 			@Result(column = "uuid", property = "uuid", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "batch_id", property = "batchId", jdbcType = JdbcType.VARCHAR),
@@ -159,7 +154,6 @@ public interface ImportLogMapper {
 			@Result(column = "all_file_size", property = "allFileSize", jdbcType = JdbcType.BIGINT),
 			@Result(column = "this_file_size", property = "thisFileSize", jdbcType = JdbcType.BIGINT),
 			@Result(column = "lost", property = "lost", jdbcType = JdbcType.BIT),
-			@Result(column = "missing_part", property = "missingPart", jdbcType = JdbcType.BIT),
 			@Result(column = "reason", property = "reason", jdbcType = JdbcType.LONGVARCHAR) })
 	ImportLog selectByPrimaryKey(Integer id);
 
@@ -200,8 +194,7 @@ public interface ImportLogMapper {
 			"timestamp = #{timestamp,jdbcType=TIMESTAMP},", "all_percent = #{allPercent,jdbcType=DOUBLE},",
 			"this_percent = #{thisPercent,jdbcType=DOUBLE},", "all_file_size = #{allFileSize,jdbcType=BIGINT},",
 			"this_file_size = #{thisFileSize,jdbcType=BIGINT},", "lost = #{lost,jdbcType=BIT},",
-			"missing_part = #{missingPart,jdbcType=BIT},", "reason = #{reason,jdbcType=LONGVARCHAR}",
-			"where id = #{id,jdbcType=INTEGER}" })
+			"reason = #{reason,jdbcType=LONGVARCHAR}", "where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKeyWithBLOBs(ImportLog record);
 
 	/**
@@ -212,7 +205,7 @@ public interface ImportLogMapper {
 			"filename = #{filename,jdbcType=VARCHAR},", "status = #{status,jdbcType=VARCHAR},",
 			"timestamp = #{timestamp,jdbcType=TIMESTAMP},", "all_percent = #{allPercent,jdbcType=DOUBLE},",
 			"this_percent = #{thisPercent,jdbcType=DOUBLE},", "all_file_size = #{allFileSize,jdbcType=BIGINT},",
-			"this_file_size = #{thisFileSize,jdbcType=BIGINT},", "lost = #{lost,jdbcType=BIT},",
-			"missing_part = #{missingPart,jdbcType=BIT}", "where id = #{id,jdbcType=INTEGER}" })
+			"this_file_size = #{thisFileSize,jdbcType=BIGINT},", "lost = #{lost,jdbcType=BIT}",
+			"where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(ImportLog record);
 }

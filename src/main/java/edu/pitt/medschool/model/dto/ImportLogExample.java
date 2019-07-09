@@ -864,66 +864,6 @@ public class ImportLogExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMissingPartIsNull() {
-			addCriterion("missing_part is null");
-			return (Criteria) this;
-		}
-
-		public Criteria andMissingPartIsNotNull() {
-			addCriterion("missing_part is not null");
-			return (Criteria) this;
-		}
-
-		public Criteria andMissingPartEqualTo(Boolean value) {
-			addCriterion("missing_part =", value, "missingPart");
-			return (Criteria) this;
-		}
-
-		public Criteria andMissingPartNotEqualTo(Boolean value) {
-			addCriterion("missing_part <>", value, "missingPart");
-			return (Criteria) this;
-		}
-
-		public Criteria andMissingPartGreaterThan(Boolean value) {
-			addCriterion("missing_part >", value, "missingPart");
-			return (Criteria) this;
-		}
-
-		public Criteria andMissingPartGreaterThanOrEqualTo(Boolean value) {
-			addCriterion("missing_part >=", value, "missingPart");
-			return (Criteria) this;
-		}
-
-		public Criteria andMissingPartLessThan(Boolean value) {
-			addCriterion("missing_part <", value, "missingPart");
-			return (Criteria) this;
-		}
-
-		public Criteria andMissingPartLessThanOrEqualTo(Boolean value) {
-			addCriterion("missing_part <=", value, "missingPart");
-			return (Criteria) this;
-		}
-
-		public Criteria andMissingPartIn(List<Boolean> values) {
-			addCriterion("missing_part in", values, "missingPart");
-			return (Criteria) this;
-		}
-
-		public Criteria andMissingPartNotIn(List<Boolean> values) {
-			addCriterion("missing_part not in", values, "missingPart");
-			return (Criteria) this;
-		}
-
-		public Criteria andMissingPartBetween(Boolean value1, Boolean value2) {
-			addCriterion("missing_part between", value1, value2, "missingPart");
-			return (Criteria) this;
-		}
-
-		public Criteria andMissingPartNotBetween(Boolean value1, Boolean value2) {
-			addCriterion("missing_part not between", value1, value2, "missingPart");
-			return (Criteria) this;
-		}
-
 		public Criteria andUuidLikeInsensitive(String value) {
 			addCriterion("upper(uuid) like", value.toUpperCase(), "uuid");
 			return (Criteria) this;

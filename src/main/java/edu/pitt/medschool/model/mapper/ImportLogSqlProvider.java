@@ -72,9 +72,6 @@ public class ImportLogSqlProvider {
 		if (record.getLost() != null) {
 			sql.VALUES("lost", "#{lost,jdbcType=BIT}");
 		}
-		if (record.getMissingPart() != null) {
-			sql.VALUES("missing_part", "#{missingPart,jdbcType=BIT}");
-		}
 		if (record.getReason() != null) {
 			sql.VALUES("reason", "#{reason,jdbcType=LONGVARCHAR}");
 		}
@@ -102,7 +99,6 @@ public class ImportLogSqlProvider {
 		sql.SELECT("all_file_size");
 		sql.SELECT("this_file_size");
 		sql.SELECT("lost");
-		sql.SELECT("missing_part");
 		sql.SELECT("reason");
 		sql.FROM("import_log");
 		applyWhere(sql, example, false);
@@ -133,7 +129,6 @@ public class ImportLogSqlProvider {
 		sql.SELECT("all_file_size");
 		sql.SELECT("this_file_size");
 		sql.SELECT("lost");
-		sql.SELECT("missing_part");
 		sql.FROM("import_log");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -184,9 +179,6 @@ public class ImportLogSqlProvider {
 		if (record.getLost() != null) {
 			sql.SET("lost = #{record.lost,jdbcType=BIT}");
 		}
-		if (record.getMissingPart() != null) {
-			sql.SET("missing_part = #{record.missingPart,jdbcType=BIT}");
-		}
 		if (record.getReason() != null) {
 			sql.SET("reason = #{record.reason,jdbcType=LONGVARCHAR}");
 		}
@@ -212,7 +204,6 @@ public class ImportLogSqlProvider {
 		sql.SET("all_file_size = #{record.allFileSize,jdbcType=BIGINT}");
 		sql.SET("this_file_size = #{record.thisFileSize,jdbcType=BIGINT}");
 		sql.SET("lost = #{record.lost,jdbcType=BIT}");
-		sql.SET("missing_part = #{record.missingPart,jdbcType=BIT}");
 		sql.SET("reason = #{record.reason,jdbcType=LONGVARCHAR}");
 		ImportLogExample example = (ImportLogExample) parameter.get("example");
 		applyWhere(sql, example, true);
@@ -237,7 +228,6 @@ public class ImportLogSqlProvider {
 		sql.SET("all_file_size = #{record.allFileSize,jdbcType=BIGINT}");
 		sql.SET("this_file_size = #{record.thisFileSize,jdbcType=BIGINT}");
 		sql.SET("lost = #{record.lost,jdbcType=BIT}");
-		sql.SET("missing_part = #{record.missingPart,jdbcType=BIT}");
 		ImportLogExample example = (ImportLogExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -279,9 +269,6 @@ public class ImportLogSqlProvider {
 		}
 		if (record.getLost() != null) {
 			sql.SET("lost = #{lost,jdbcType=BIT}");
-		}
-		if (record.getMissingPart() != null) {
-			sql.SET("missing_part = #{missingPart,jdbcType=BIT}");
 		}
 		if (record.getReason() != null) {
 			sql.SET("reason = #{reason,jdbcType=LONGVARCHAR}");
