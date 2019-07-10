@@ -33,8 +33,6 @@ public class ExportMedicalQueryBuilder {
     private boolean isDownSampleFirst;
     private boolean isAr;
     private List<List<String>> columnNames;
-    private int exportTotalDuration; // In 's'
-    private int exportStartOffsets; // In 's'
     private int downsampleInterval; // In 's'
 
     // Prebuilt final query string and related
@@ -91,9 +89,6 @@ public class ExportMedicalQueryBuilder {
 
          // If no available data then stop building
          if (this.validTimeSpanIds.isEmpty()) return;
-         if (this.exportTotalDuration > 0) {
-             this.queryEndTime = startTime.plusSeconds(this.exportTotalDuration);
-         }
          this.queryStartTime = startTime;
          this.queryEndTime = this.lastAvailData;
          this.expectStartTime = this.medicalTime.minus(ds.getBeforeMedicine(),ChronoUnit.SECONDS);
@@ -132,10 +127,8 @@ public class ExportMedicalQueryBuilder {
     }
 
     private void populateDownsampleData(MedicalDownsample ds) {
-        this.exportStartOffsets = 0;
         this.downsampleInterval = ds.getPeriod();
         this.isDownSampleFirst = ds.getDownsampleFirst();
-        this.exportTotalDuration = ds.getAfterMedicine()+ds.getBeforeMedicine();
     }
 
     // Find first, last data and if ArType matches

@@ -177,10 +177,6 @@ public class AnalysisService {
             patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
         }
 
-        //get version condition
-        List<PatientTimeLine> files = validateCsvService.getPatientTimeLinesByVersion("realpsc",usersService.getVersionByUserName(job.getUsername()));
-        String versionCondition = versionDao.getVersionCondition(files);
-
         // Get columns data
         List<DownsampleGroup> groups = downsampleGroupDao.selectAllDownsampleGroup(queryId);
         int labelCount = groups.size();
@@ -280,6 +276,13 @@ public class AnalysisService {
                         return;
                     }
 
+                    // get version condition
+                    List<PatientTimeLine> files = validateCsvService.getPatientTimeLinesByVersionID("realpsc",usersService.getVersionByUserName(job.getUsername()),patientId);
+                    String versionCondition = versionDao.getVersionCondition(files);
+                    if(files.isEmpty()){
+                        outputWriter.writeMetaFile(String.format("  PID <%s> is not available in this version.%n", patientId));
+                        continue;
+                    }
                     // First get the group by time offset
                     ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
                             "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') and "+versionCondition+" GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
@@ -401,8 +404,6 @@ public class AnalysisService {
         logger.info(job.getUsername());
         int version = usersService.getVersionByUserName(job.getUsername());
         logger.info(String.valueOf(version));
-        List<PatientTimeLine> files = validateCsvService.getPatientTimeLinesByVersion("realpsc",version);
-        String versionCondition = versionDao.getVersionCondition(files);
 
         // medicalRecordList save all medical records of all selected patients
         List<Medication> medicalRecordList = new ArrayList<Medication>();
@@ -419,6 +420,8 @@ public class AnalysisService {
             InfluxDB influxDB = generateIdbClient(false);
             Set<String> patients = new HashSet<String>();
             for (Medication medication : medicalRecordList_first) {
+                List<PatientTimeLine> files = validateCsvService.getPatientTimeLinesByVersionID("realpsc",version,medication.getId());
+                String versionCondition = versionDao.getVersionCondition(files);
                 String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,medication.getId(),job.getAr(),versionCondition);
                 if (Instant.parse(startTime).compareTo(medication.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant()) < 0) {
                     patients.add(medication.getId());
@@ -526,13 +529,21 @@ public class AnalysisService {
                         return;
                     }
 
+                    // set version condition
+                    List<PatientTimeLine> files = validateCsvService.getPatientTimeLinesByVersionID("realpsc",version, onerecord.getId());
+                    String versionCondition = versionDao.getVersionCondition(files);
+                    if(files.isEmpty()){
+                        outputWriter.writeMetaFile(String.format("  PID <%s> <%s> don't have enough data to export.%n", onerecord.getId(),onerecord.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant()));
+                        continue;
+                    }
+
                     // First get the group by time offset
                     ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
                             "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') and "+versionCondition+" GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
                             onerecord.getId(), job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
                     if (testOffset.length != 1) {
                         outputWriter.writeMetaFile(
-                                String.format("  PID <%s> don't have enough data to export.%n", onerecord.getId()));
+                                String.format("  PID <%s> <%s> don't have enough data to export.%n", onerecord.getId(),onerecord.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant()));
                         continue;
                     }
                     // Then fetch meta data regrading file segments and build the query string

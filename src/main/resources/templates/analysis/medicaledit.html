@@ -99,14 +99,13 @@
                                     <div class="col-sm-4 col-md-4">
                                         <label>Time before medicine</label>
                                         <div class="input-group mb-3">
-                                            <input type="number" min="0" step="1" class="form-control" id="before" th:value="${medicalquery.beforemedicine}" placeholder="Leave empty to start at beginning">
+                                            <input type="number" min="0" step="1" class="form-control" id="before" th:value="${medicalquery.beforemedicine}" required>
                                             <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Time Unit" id="before_unit" data-minimum-results-for-search="Infinity">
                                                     <option disabled="disabled" th:selected="${medicalquery.beforemedicineUnit} == ''" value="">Select Time Unit</option>
                                                     <option th:selected="${medicalquery.beforemedicineUnit} == 1" value="1">Seconds</option>
                                                     <option th:selected="${medicalquery.beforemedicineUnit} == 60" value="60">Minutes</option>
                                                     <option th:selected="${medicalquery.beforemedicineUnit} == 3600" value="3600">Hours</option>
-                                                    <option th:selected="${medicalquery.beforemedicineUnit} == 86400" value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -114,15 +113,13 @@
                                     <div class="col-sm-4 col-md-4">
                                         <label>Time after medicine</label>
                                         <div class="input-group mb-3">
-                                            <input type="number" min="0" step="1" class="form-control" id="after" th:value="${medicalquery.aftermedicine}"
-                                                placeholder="Leave empty for the whole measure process">
+                                            <input type="number" min="0" step="1" class="form-control" id="after" th:value="${medicalquery.aftermedicine}" required>
                                             <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Time Unit" id="after_unit" data-minimum-results-for-search="Infinity">
                                                     <option disabled="disabled" th:selected="${medicalquery.aftermedicineUnit} == ''" value="">Select Time Unit</option>
                                                     <option th:selected="${medicalquery.aftermedicineUnit} == 1" value="1">Seconds</option>
                                                     <option th:selected="${medicalquery.aftermedicineUnit} == 60" value="60">Minutes</option>
                                                     <option th:selected="${medicalquery.aftermedicineUnit} == 3600" value="3600">Hours</option>
-                                                    <option th:selected="${medicalquery.aftermedicineUnit} == 86400" value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
