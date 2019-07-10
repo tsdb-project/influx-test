@@ -153,12 +153,18 @@ $(document).ready(function() {
 
     $("#saveButton").click(function() {
         if ($('#parameter-form')[0].checkValidity()) {
+            var duration = $("#duration").val() * $("#duration_unit").val();
+            if (duration > 5*3600){
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'The duration is too large, the system will set it as 5 hours');
+                duration = 5*3600;
+            }
             var form = {
                 "id": $("#id").val(),
                 "alias": $("#alias").val(),
                 "period": $("#period").val() * $("#period_unit").val(),
                 "origin": $("#origin").val() * $("#origin_unit").val(),
-                "duration": $("#duration").val() * $("#duration_unit").val(),
+                "duration": duration,
                 "downsampleFirst": $('#downsample_first label.active input').val() == "true" ? true : false
             };
             if ($("#minBinRowUnit").val() == '%') {
@@ -196,7 +202,9 @@ $(document).ready(function() {
                 'contentType': "application/json",
                 'dataType': 'json',
                 'success': function(data) {
-                    window.location.href = '/analysis/edit/' + $("#id").val();
+                    setTimeout(function () {
+                        window.location.href = '/analysis/edit/' + $("#id").val()
+                    },1000);
                 },
                 'error': function() {}
             });

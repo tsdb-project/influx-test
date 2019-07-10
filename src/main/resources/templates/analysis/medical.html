@@ -84,14 +84,13 @@
                                     <div class="col-sm-4 col-md-4">
                                         <label>Time before Medicine</label>
                                         <div class="input-group mb-3">
-                                            <input type="number" min="0" step="1" class="form-control" id="beforemedicine" placeholder="Leave empty to start at beginning">
+                                            <input type="number" min="0" step="1" class="form-control" id="beforemedicine" required>
                                             <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Time Unit" id="beforemedicine_unit" data-minimum-results-for-search="Infinity">
                                                     <option disabled="disabled" selected="selected" value="">Select Time Unit</option>
                                                     <option value="1">Seconds</option>
                                                     <option value="60">Minutes</option>
                                                     <option value="3600">Hours</option>
-                                                    <option value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -99,14 +98,13 @@
                                     <div class="col-sm-4 col-md-4">
                                         <label>Time after Medicine</label>
                                         <div class="input-group mb-3">
-                                            <input type="number" min="0" step="1" class="form-control" id="aftermedicine" placeholder="Leave empty for the whole measure process">
+                                            <input type="number" min="0" step="1" class="form-control" id="aftermedicine" required>
                                             <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Time Unit" id="aftermedicine_unit" data-minimum-results-for-search="Infinity">
                                                     <option disabled="disabled" selected="selected" value="">Select Time Unit</option>
                                                     <option value="1">Seconds</option>
                                                     <option value="60">Minutes</option>
                                                     <option value="3600">Hours</option>
-                                                    <option value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -154,6 +152,7 @@
     <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
     <script src="/vendors/bower_components/datatables.net/js/moment.min.js"></script>
     <script src="/vendors/bower_components/datatables.net/js/datetime-moment.js"></script>
+    <script src="/vendors/bower_components/remarkable-bootstrap-notify/dist/bootstrap-notify.min.js"></script>
     <!-- App functions and actions -->
     <script src="/js/navigation.js"></script>
     <script src="/js/app.min.js"></script>

@@ -82,7 +82,6 @@
                                                     <option th:selected="${query.periodUnit} == 1" value="1">Seconds</option>
                                                     <option th:selected="${query.periodUnit} == 60" value="60">Minutes</option>
                                                     <option th:selected="${query.periodUnit} == 3600" value="3600">Hours</option>
-                                                    <option th:selected="${query.periodUnit} == 86400" value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -97,7 +96,6 @@
                                                     <option th:selected="${query.originUnit} == 1" value="1">Seconds</option>
                                                     <option th:selected="${query.originUnit} == 60" value="60">Minutes</option>
                                                     <option th:selected="${query.originUnit} == 3600" value="3600">Hours</option>
-                                                    <option th:selected="${query.originUnit} == 86400" value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -106,14 +104,13 @@
                                         <label>Duration</label>
                                         <div class="input-group mb-3">
                                             <input type="number" min="0" step="1" class="form-control" id="duration" th:value="${query.duration}"
-                                                placeholder="Leave empty for the whole measure process">
+                                                placeholder="Leave empty for 5 hours data">
                                             <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Time Unit" id="duration_unit" data-minimum-results-for-search="Infinity">
                                                     <option disabled="disabled" th:selected="${query.durationUnit} == ''" value="">Select Time Unit</option>
                                                     <option th:selected="${query.durationUnit} == 1" value="1">Seconds</option>
                                                     <option th:selected="${query.durationUnit} == 60" value="60">Minutes</option>
                                                     <option th:selected="${query.durationUnit} == 3600" value="3600">Hours</option>
-                                                    <option th:selected="${query.durationUnit} == 86400" value="86400">Days</option>
                                                 </select>
                                             </div>
                                         </div>

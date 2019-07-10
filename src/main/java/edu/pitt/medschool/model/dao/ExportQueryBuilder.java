@@ -95,11 +95,11 @@ public class ExportQueryBuilder {
             return;
         }
         if (this.exportTotalDuration > 0) {
-            this.queryEndTime = this.firstAvailData.plusSeconds(this.exportTotalDuration);
+            this.queryEndTime = this.queryStartTime.plusSeconds(this.exportTotalDuration);
         }
         if (this.exportStartOffset > 0) {
             this.queryStartTime = this.queryStartTime.plusSeconds(this.exportStartOffset);
-            this.queryEndTime = this.lastAvailData.plusSeconds(this.exportStartOffset);
+            this.queryEndTime = this.queryEndTime.plusSeconds(this.exportStartOffset);
         }
         calcOffsetInSeconds(fakeStartTime);
         this.globalTimeLimitWhere = String.format(Template.timeCondition, this.queryStartTime.toString(),

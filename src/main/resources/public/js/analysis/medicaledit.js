@@ -156,13 +156,21 @@ $(document).ready(function() {
 
     $("#saveButton").click(function() {
         if ($('#parameter-form')[0].checkValidity()) {
+            var before = $("#before").val() * $("#before_unit").val();
+            var after = $("#after").val() * $("#after_unit").val();
+            if(before >5*3600 || after>5*3600){
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'The range is too large, the system will set the large one as 5 hours');
+                before = Math.min(before,5*3600);
+                after = Math.min(after,5*3600);
+            }
             var form = {
                 "id": $("#id").val(),
                 "alias": $("#alias").val(),
                 "period": $("#period").val() * $("#period_unit").val(),
                 "medicine":$("#medicine").val(), 
-                "beforeMedicine": $("#before").val() * $("#before_unit").val(),
-                "afterMedicine": $("#after").val() * $("#after_unit").val(),
+                "beforeMedicine": before,
+                "afterMedicine": after,
                 "downsampleFirst": $('#downsample_first label.active input').val() == "true" ? true : false,
                 "onlyFirst":$('#onlyfirst label.active input').val() == "true" ? true : false,
                 "dataBeforeMedicine":$('#eegbefore label.active input').val() == "true" ? true : false
@@ -202,7 +210,9 @@ $(document).ready(function() {
                 'contentType': "application/json",
                 'dataType': 'json',
                 'success': function(data) {
-                    window.location.href = '/analysis/medicaledit/' + $("#id").val();
+                    setTimeout(function () {
+                        window.location.href = '/analysis/medicaledit/' + $("#id").val()
+                    },1000);
                 },
                 'error': function() {}
             });
