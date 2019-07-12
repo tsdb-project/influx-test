@@ -83,7 +83,8 @@ $(document).ready(function() {
                     "<button class=\"btn btn-danger btn-sm\" data-toggle=\"modal\" data-target=\"#delete-group-modal\" data-id=\"" +
                     data + "\"><i class=\"zmdi zmdi-close\"></i>Delete</a></th>";
             }
-        }]
+        }],
+
     });
 
     $("#uploadPatientList").change(function() {
@@ -153,18 +154,12 @@ $(document).ready(function() {
 
     $("#saveButton").click(function() {
         if ($('#parameter-form')[0].checkValidity()) {
-            var duration = $("#duration").val() * $("#duration_unit").val();
-            if (duration > 5*3600){
-                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
-                    'The duration is too large, the system will set it as 5 hours');
-                duration = 5*3600;
-            }
             var form = {
                 "id": $("#id").val(),
                 "alias": $("#alias").val(),
                 "period": $("#period").val() * $("#period_unit").val(),
                 "origin": $("#origin").val() * $("#origin_unit").val(),
-                "duration": duration,
+                "duration": $("#duration").val() * $("#duration_unit").val(),
                 "downsampleFirst": $('#downsample_first label.active input').val() == "true" ? true : false
             };
             if ($("#minBinRowUnit").val() == '%') {
@@ -202,9 +197,7 @@ $(document).ready(function() {
                 'contentType': "application/json",
                 'dataType': 'json',
                 'success': function(data) {
-                    setTimeout(function () {
-                        window.location.href = '/analysis/edit/' + $("#id").val()
-                    },1000);
+                    window.location.href = '/analysis/edit/' + $("#id").val();
                 },
                 'error': function() {}
             });
@@ -555,6 +548,16 @@ $(document).ready(function() {
         } else {
             console.log("invalid form");
             return true;
+        }
+    });
+
+    groupTable.on('draw',function () {
+        if(groupTable.rows().data().length>=5){
+            $("#create").attr('disabled', '');
+            $('#warning').attr('hidden',false)
+        }else {
+            $("#create").removeAttr("disabled");
+            $('#warning').attr("hidden",true)
         }
     });
 
