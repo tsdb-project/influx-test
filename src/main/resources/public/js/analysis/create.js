@@ -1,59 +1,13 @@
 $(document).ready(function() {
-    function notify(from, align, icon, type, animIn, animOut, msg) {
-        $.notify({
-            icon : icon,
-            title : '',
-            message : msg,
-            url : ''
-        }, {
-            element : 'body',
-            type : type,
-            allow_dismiss : false,
-            placement : {
-                from : from,
-                align : align
-            },
-            offset : {
-                x : 20,
-                y : 20
-            },
-            spacing : 10,
-            z_index : 1000000000,
-            delay : 1500,
-            timer : 750,
-            url_target : '_blank',
-            mouse_over : false,
-            animate : {
-                enter : animIn,
-                exit : animOut
-            },
-            template : '<div data-notify="container" class="alert alert-dismissible alert-{0} alert--notify" role="alert">'
-                + '<span data-notify="icon"></span> ' + '<span data-notify="title">{1}</span> '
-                + '<span data-notify="message">{2}</span>' + '<div class="progress" data-notify="progressbar">'
-                + '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" '
-                + 'aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div></div>'
-                + '<a href="{3}" target="{4}" data-notify="url"></a>'
-                + '<button type="button" aria-hidden="true" data-notify="dismiss" class="alert--notify__close">Close</button>' + '</div>'
-        });
-    }
+
     $("#createButton").click(function() {
 
         if ($('#parameter-form')[0].checkValidity()) {
-            var duration = $("#duration").val() * $("#duration_unit").val();
-            console.log(duration);
-            if(duration===0){
-                duration=5*3600;
-            }
-            if(duration>5*3600){
-                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
-                    'The duration is too large, the system will set it as 5 hours');
-                duration = 5*3600;
-            }
             var form = {
                 "alias": $("#alias").val(),
                 "period": $("#period").val() * $("#period_unit").val(),
                 "origin": $("#origin").val() * $("#origin_unit").val(),
-                "duration": duration
+                "duration": $("#duration").val() * $("#duration_unit").val()
             };
             $.ajax({
                 'url': "/analysis/query",
@@ -62,9 +16,7 @@ $(document).ready(function() {
                 'contentType': "application/json",
                 'dataType': 'json',
                 'success': function(data) {
-                    setTimeout(function () {
-                        window.location.href = '/analysis/edit/' + data.data.id
-                    },1000);
+                    window.location.href = '/analysis/edit/' + data.data.id;
                 },
                 'error': function() {
                 }
