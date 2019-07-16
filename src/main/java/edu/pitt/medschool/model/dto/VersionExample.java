@@ -773,6 +773,306 @@ public class VersionExample {
 			return (Criteria) this;
 		}
 
+		public Criteria andPuhPatientsIsNull() {
+			addCriterion("PUH_patients is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andPuhPatientsIsNotNull() {
+			addCriterion("PUH_patients is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andPuhPatientsEqualTo(Integer value) {
+			addCriterion("PUH_patients =", value, "puhPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andPuhPatientsNotEqualTo(Integer value) {
+			addCriterion("PUH_patients <>", value, "puhPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andPuhPatientsGreaterThan(Integer value) {
+			addCriterion("PUH_patients >", value, "puhPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andPuhPatientsGreaterThanOrEqualTo(Integer value) {
+			addCriterion("PUH_patients >=", value, "puhPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andPuhPatientsLessThan(Integer value) {
+			addCriterion("PUH_patients <", value, "puhPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andPuhPatientsLessThanOrEqualTo(Integer value) {
+			addCriterion("PUH_patients <=", value, "puhPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andPuhPatientsIn(List<Integer> values) {
+			addCriterion("PUH_patients in", values, "puhPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andPuhPatientsNotIn(List<Integer> values) {
+			addCriterion("PUH_patients not in", values, "puhPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andPuhPatientsBetween(Integer value1, Integer value2) {
+			addCriterion("PUH_patients between", value1, value2, "puhPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andPuhPatientsNotBetween(Integer value1, Integer value2) {
+			addCriterion("PUH_patients not between", value1, value2, "puhPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsIsNull() {
+			addCriterion("UAB_patients is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsIsNotNull() {
+			addCriterion("UAB_patients is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsEqualTo(Integer value) {
+			addCriterion("UAB_patients =", value, "uabPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsNotEqualTo(Integer value) {
+			addCriterion("UAB_patients <>", value, "uabPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsGreaterThan(Integer value) {
+			addCriterion("UAB_patients >", value, "uabPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsGreaterThanOrEqualTo(Integer value) {
+			addCriterion("UAB_patients >=", value, "uabPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsLessThan(Integer value) {
+			addCriterion("UAB_patients <", value, "uabPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsLessThanOrEqualTo(Integer value) {
+			addCriterion("UAB_patients <=", value, "uabPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsIn(List<Integer> values) {
+			addCriterion("UAB_patients in", values, "uabPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsNotIn(List<Integer> values) {
+			addCriterion("UAB_patients not in", values, "uabPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsBetween(Integer value1, Integer value2) {
+			addCriterion("UAB_patients between", value1, value2, "uabPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andUabPatientsNotBetween(Integer value1, Integer value2) {
+			addCriterion("UAB_patients not between", value1, value2, "uabPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsIsNull() {
+			addCriterion("TBI_patients is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsIsNotNull() {
+			addCriterion("TBI_patients is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsEqualTo(Integer value) {
+			addCriterion("TBI_patients =", value, "tbiPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsNotEqualTo(Integer value) {
+			addCriterion("TBI_patients <>", value, "tbiPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsGreaterThan(Integer value) {
+			addCriterion("TBI_patients >", value, "tbiPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsGreaterThanOrEqualTo(Integer value) {
+			addCriterion("TBI_patients >=", value, "tbiPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsLessThan(Integer value) {
+			addCriterion("TBI_patients <", value, "tbiPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsLessThanOrEqualTo(Integer value) {
+			addCriterion("TBI_patients <=", value, "tbiPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsIn(List<Integer> values) {
+			addCriterion("TBI_patients in", values, "tbiPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsNotIn(List<Integer> values) {
+			addCriterion("TBI_patients not in", values, "tbiPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsBetween(Integer value1, Integer value2) {
+			addCriterion("TBI_patients between", value1, value2, "tbiPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andTbiPatientsNotBetween(Integer value1, Integer value2) {
+			addCriterion("TBI_patients not between", value1, value2, "tbiPatients");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvIsNull() {
+			addCriterion("patinets_with_csv is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvIsNotNull() {
+			addCriterion("patinets_with_csv is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvEqualTo(Integer value) {
+			addCriterion("patinets_with_csv =", value, "patinetsWithCsv");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvNotEqualTo(Integer value) {
+			addCriterion("patinets_with_csv <>", value, "patinetsWithCsv");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvGreaterThan(Integer value) {
+			addCriterion("patinets_with_csv >", value, "patinetsWithCsv");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvGreaterThanOrEqualTo(Integer value) {
+			addCriterion("patinets_with_csv >=", value, "patinetsWithCsv");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvLessThan(Integer value) {
+			addCriterion("patinets_with_csv <", value, "patinetsWithCsv");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvLessThanOrEqualTo(Integer value) {
+			addCriterion("patinets_with_csv <=", value, "patinetsWithCsv");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvIn(List<Integer> values) {
+			addCriterion("patinets_with_csv in", values, "patinetsWithCsv");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvNotIn(List<Integer> values) {
+			addCriterion("patinets_with_csv not in", values, "patinetsWithCsv");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvBetween(Integer value1, Integer value2) {
+			addCriterion("patinets_with_csv between", value1, value2, "patinetsWithCsv");
+			return (Criteria) this;
+		}
+
+		public Criteria andPatinetsWithCsvNotBetween(Integer value1, Integer value2) {
+			addCriterion("patinets_with_csv not between", value1, value2, "patinetsWithCsv");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthIsNull() {
+			addCriterion("total_length is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthIsNotNull() {
+			addCriterion("total_length is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthEqualTo(Integer value) {
+			addCriterion("total_length =", value, "totalLength");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthNotEqualTo(Integer value) {
+			addCriterion("total_length <>", value, "totalLength");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthGreaterThan(Integer value) {
+			addCriterion("total_length >", value, "totalLength");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthGreaterThanOrEqualTo(Integer value) {
+			addCriterion("total_length >=", value, "totalLength");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthLessThan(Integer value) {
+			addCriterion("total_length <", value, "totalLength");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthLessThanOrEqualTo(Integer value) {
+			addCriterion("total_length <=", value, "totalLength");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthIn(List<Integer> values) {
+			addCriterion("total_length in", values, "totalLength");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthNotIn(List<Integer> values) {
+			addCriterion("total_length not in", values, "totalLength");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthBetween(Integer value1, Integer value2) {
+			addCriterion("total_length between", value1, value2, "totalLength");
+			return (Criteria) this;
+		}
+
+		public Criteria andTotalLengthNotBetween(Integer value1, Integer value2) {
+			addCriterion("total_length not between", value1, value2, "totalLength");
+			return (Criteria) this;
+		}
+
 		public Criteria andCommentLikeInsensitive(String value) {
 			addCriterion("upper(comment) like", value.toUpperCase(), "comment");
 			return (Criteria) this;

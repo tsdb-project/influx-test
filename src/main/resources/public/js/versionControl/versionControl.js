@@ -64,9 +64,28 @@ $(document).ready(function () {
         },{
             data:'createDate'
         },{
-            data:'patientNum'
+            data:'puhPatients'
+        },{
+            data:'uabPatients'
+        },{
+            data:'tbiPatients'
         },{
             data:'csvFileNum'
+        },{
+            data:null,
+            render:function (data) {
+                var total = data.totalLength;
+                var nd = parseInt(total/(24*60*60));
+                total = total%(24*60*60);
+                var nh = parseInt(total/(60*60));
+                total = total%(60*60);
+                var nm = parseInt(total/(60));
+                total = total%(60);
+                var ns = total;
+                return nd+"days,"+nh+"hours,"+nm+"minutes,"+ns+"seconds"
+            }
+        },{
+            data:'patinetsWithCsv'
         },{
             data:'medicationNum'
         },{

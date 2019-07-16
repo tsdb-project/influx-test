@@ -57,6 +57,14 @@ public class VersionControlController {
         return response;
     }
 
+    @RequestMapping("versionControl/getLastVersion")
+    @ResponseBody
+    public RestfulResponse getLastVersion(){
+        RestfulResponse response = new RestfulResponse(1,"success");
+        response.setData(versionControlService.getLastVersion());
+        return response;
+    }
+
     @RequestMapping(value = "versionControl/cancelDelete", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> cancelChange(@RequestBody(required = true) List<CsvFile> csvFileList) throws Exception {

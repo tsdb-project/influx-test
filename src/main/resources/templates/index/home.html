@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
 <link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
 <link rel="stylesheet" href="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.css">
+<link rel="stylesheet" href="/vendors/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
 <link rel="icon" type="image/ico" href="/img/favicon.ico">
 
 <!-- App styles -->
@@ -22,6 +23,45 @@ img {
 img-block {
 	height: 300px;
 	border: solid;
+}
+
+/* fontawesome */
+[class*="fontawesome-"]:before {
+    font-family: 'FontAwesome', sans-serif;
+}
+.left {
+    float: left;
+}
+.clear {
+    clear: both;
+}
+
+.buysblock {
+    background: rgb(38,168,226);
+}
+.commentsblock {
+    background: rgb(39,183,121);
+}
+
+.metroblock {
+    padding: 0em 1em 1em 1em;
+    color: #fff;
+    font-family: 'Open Sans', sans-serif;
+    margin: 1em;
+}
+
+.metroblock h1, .metroblock h2, .metroblock .icon {
+    color:#fff;
+    font-weight: 300;
+    margin: 0;
+    padding: 0;
+}
+.metroblock h1, .metroblock .icon {
+    font-size: 6em;
+    text-align: center;
+}
+.metroblock .icon {
+    margin-right: .2em;
 }
 </style>
 
@@ -39,20 +79,34 @@ img-block {
         <div class="card">
             <div class="card-body">
                 <h1>Welcome to Brain Flux!</h1>
-                <div class="row">
-                    <div class="img-block col-sm-12 col-md-6">
-                        <!--<img src="/img/home1.png">-->
-                        <p><center>for home pic 1</center></p>
-                    </div>
-                    <div class="img-block col-sm-12 col-md-6">
-                        <!--<img src="/img/home2.jpg">-->
-                        <p><center>for home pic 2</center></p>
-                    </div>
-                </div>
                 <br>
                 <blockquote class="blockquote">
                     <div>BrainFlux is a data analysis system designed to process human brain signals. It aims at high performance on ad-hoc queries while dealing with multi-terabytes of data.</div>
                 </blockquote>
+                <br>
+                <br>
+                <h2>Latest database size: </h2>
+                <div class="metroblock buysblock col-md-6 ">
+                    <span class="icon fontawesome-briefcase left"></span>
+                    <h1 id="csv"></h1>
+                    <div class="clear"></div>
+                    <h2>csv files</h2>
+                </div>
+
+                <div class="metroblock commentsblock col-md-6 ">
+                    <span class="icon fontawesome-comments left"></span>
+                    <h1 id="length"></h1>
+                    <div class="clear"></div>
+                    <h2>Days of data</h2>
+                </div>
+
+                <div class="metroblock buysblock col-md-6 ">
+                    <span class="icon fontawesome-comments left"></span>
+                    <h1 id="patient"></h1>
+                    <div class="clear"></div>
+                    <h2>Patients</h2>
+                </div>
+
             </div>
         </div>
         <div th:insert="fragments/footer :: footer"></div>
@@ -68,10 +122,12 @@ img-block {
     <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
     <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+    <script src="/vendors/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
 
     <!-- App functions and actions -->
     <!--<script src="/js/home/home.js"></script>-->
     <script src="/js/navigation.js"></script>
     <script src="/js/app.min.js"></script>
+    <script src="/js/home/home.js"></script>
 </body>
 </html>

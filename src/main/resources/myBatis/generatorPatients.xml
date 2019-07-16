@@ -36,24 +36,6 @@
             <property name="enableSubPackages" value="true" />
         </javaClientGenerator>
 
-        <table tableName="patient" catalog="upmc">
-            <property name="ignoreQualifiersAtRuntime" value="true" />
-        </table>
-        <table tableName="csv_log" catalog="upmc">
-            <property name="ignoreQualifiersAtRuntime" value="true" />
-        </table>
-        <table tableName="csv_file" catalog="upmc">
-            <property name="ignoreQualifiersAtRuntime" value="true" />
-        </table>
-        <table tableName="accounts" catalog="upmc">
-            <property name="ignoreQualifiersAtRuntime" value="true" />
-        </table>
-        <table tableName="csv_file_new" catalog="upmc">
-            <property name="ignoreQualifiersAtRuntime" value="true" />
-        </table>
-        <table tableName="medication">
-            <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
-        </table>
         <table tableName="version">
             <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
         </table>
