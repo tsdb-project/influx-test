@@ -76,7 +76,7 @@ public class VersionControlService {
         version.setPuhPatients(patientDao.getPuhPatientNumber(currentVersion));
         version.setUabPatients(patientDao.getUabPatientNumber(currentVersion));
         version.setTbiPatients(patientDao.getTbiPatientNumber(currentVersion));
-        version.setPatinetsWithCsv(csvFileDao.getPatientNumber(currentVersion));
+        version.setPatientsWithCsv(csvFileDao.getPatientNumber(currentVersion));
         version.setTotalLength(csvFileDao.getTotalLength(currentVersion));
         versionDao.setNewVersion(version);
     }
