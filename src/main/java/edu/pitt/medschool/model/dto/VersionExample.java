@@ -953,63 +953,63 @@ public class VersionExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvIsNull() {
-			addCriterion("patinets_with_csv is null");
+		public Criteria andPatientsWithCsvIsNull() {
+			addCriterion("patients_with_csv is null");
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvIsNotNull() {
-			addCriterion("patinets_with_csv is not null");
+		public Criteria andPatientsWithCsvIsNotNull() {
+			addCriterion("patients_with_csv is not null");
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvEqualTo(Integer value) {
-			addCriterion("patinets_with_csv =", value, "patinetsWithCsv");
+		public Criteria andPatientsWithCsvEqualTo(Integer value) {
+			addCriterion("patients_with_csv =", value, "patientsWithCsv");
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvNotEqualTo(Integer value) {
-			addCriterion("patinets_with_csv <>", value, "patinetsWithCsv");
+		public Criteria andPatientsWithCsvNotEqualTo(Integer value) {
+			addCriterion("patients_with_csv <>", value, "patientsWithCsv");
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvGreaterThan(Integer value) {
-			addCriterion("patinets_with_csv >", value, "patinetsWithCsv");
+		public Criteria andPatientsWithCsvGreaterThan(Integer value) {
+			addCriterion("patients_with_csv >", value, "patientsWithCsv");
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvGreaterThanOrEqualTo(Integer value) {
-			addCriterion("patinets_with_csv >=", value, "patinetsWithCsv");
+		public Criteria andPatientsWithCsvGreaterThanOrEqualTo(Integer value) {
+			addCriterion("patients_with_csv >=", value, "patientsWithCsv");
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvLessThan(Integer value) {
-			addCriterion("patinets_with_csv <", value, "patinetsWithCsv");
+		public Criteria andPatientsWithCsvLessThan(Integer value) {
+			addCriterion("patients_with_csv <", value, "patientsWithCsv");
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvLessThanOrEqualTo(Integer value) {
-			addCriterion("patinets_with_csv <=", value, "patinetsWithCsv");
+		public Criteria andPatientsWithCsvLessThanOrEqualTo(Integer value) {
+			addCriterion("patients_with_csv <=", value, "patientsWithCsv");
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvIn(List<Integer> values) {
-			addCriterion("patinets_with_csv in", values, "patinetsWithCsv");
+		public Criteria andPatientsWithCsvIn(List<Integer> values) {
+			addCriterion("patients_with_csv in", values, "patientsWithCsv");
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvNotIn(List<Integer> values) {
-			addCriterion("patinets_with_csv not in", values, "patinetsWithCsv");
+		public Criteria andPatientsWithCsvNotIn(List<Integer> values) {
+			addCriterion("patients_with_csv not in", values, "patientsWithCsv");
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvBetween(Integer value1, Integer value2) {
-			addCriterion("patinets_with_csv between", value1, value2, "patinetsWithCsv");
+		public Criteria andPatientsWithCsvBetween(Integer value1, Integer value2) {
+			addCriterion("patients_with_csv between", value1, value2, "patientsWithCsv");
 			return (Criteria) this;
 		}
 
-		public Criteria andPatinetsWithCsvNotBetween(Integer value1, Integer value2) {
-			addCriterion("patinets_with_csv not between", value1, value2, "patinetsWithCsv");
+		public Criteria andPatientsWithCsvNotBetween(Integer value1, Integer value2) {
+			addCriterion("patients_with_csv not between", value1, value2, "patientsWithCsv");
 			return (Criteria) this;
 		}
 

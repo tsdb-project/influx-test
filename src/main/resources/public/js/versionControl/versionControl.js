@@ -85,7 +85,7 @@ $(document).ready(function () {
                 return nd+"days,"+nh+"hours,"+nm+"minutes,"+ns+"seconds"
             }
         },{
-            data:'patinetsWithCsv'
+            data:'patientsWithCsv'
         },{
             data:'medicationNum'
         },{

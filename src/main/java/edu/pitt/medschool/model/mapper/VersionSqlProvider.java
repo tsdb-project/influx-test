@@ -78,8 +78,8 @@ public class VersionSqlProvider {
 		if (record.getTbiPatients() != null) {
 			sql.VALUES("TBI_patients", "#{tbiPatients,jdbcType=INTEGER}");
 		}
-		if (record.getPatinetsWithCsv() != null) {
-			sql.VALUES("patinets_with_csv", "#{patinetsWithCsv,jdbcType=INTEGER}");
+		if (record.getPatientsWithCsv() != null) {
+			sql.VALUES("patients_with_csv", "#{patientsWithCsv,jdbcType=INTEGER}");
 		}
 		if (record.getTotalLength() != null) {
 			sql.VALUES("total_length", "#{totalLength,jdbcType=INTEGER}");
@@ -110,7 +110,7 @@ public class VersionSqlProvider {
 		sql.SELECT("PUH_patients");
 		sql.SELECT("UAB_patients");
 		sql.SELECT("TBI_patients");
-		sql.SELECT("patinets_with_csv");
+		sql.SELECT("patients_with_csv");
 		sql.SELECT("total_length");
 		sql.FROM("version");
 		applyWhere(sql, example, false);
@@ -168,8 +168,8 @@ public class VersionSqlProvider {
 		if (record.getTbiPatients() != null) {
 			sql.SET("TBI_patients = #{record.tbiPatients,jdbcType=INTEGER}");
 		}
-		if (record.getPatinetsWithCsv() != null) {
-			sql.SET("patinets_with_csv = #{record.patinetsWithCsv,jdbcType=INTEGER}");
+		if (record.getPatientsWithCsv() != null) {
+			sql.SET("patients_with_csv = #{record.patientsWithCsv,jdbcType=INTEGER}");
 		}
 		if (record.getTotalLength() != null) {
 			sql.SET("total_length = #{record.totalLength,jdbcType=INTEGER}");
@@ -198,7 +198,7 @@ public class VersionSqlProvider {
 		sql.SET("PUH_patients = #{record.puhPatients,jdbcType=INTEGER}");
 		sql.SET("UAB_patients = #{record.uabPatients,jdbcType=INTEGER}");
 		sql.SET("TBI_patients = #{record.tbiPatients,jdbcType=INTEGER}");
-		sql.SET("patinets_with_csv = #{record.patinetsWithCsv,jdbcType=INTEGER}");
+		sql.SET("patients_with_csv = #{record.patientsWithCsv,jdbcType=INTEGER}");
 		sql.SET("total_length = #{record.totalLength,jdbcType=INTEGER}");
 		VersionExample example = (VersionExample) parameter.get("example");
 		applyWhere(sql, example, true);
@@ -248,8 +248,8 @@ public class VersionSqlProvider {
 		if (record.getTbiPatients() != null) {
 			sql.SET("TBI_patients = #{tbiPatients,jdbcType=INTEGER}");
 		}
-		if (record.getPatinetsWithCsv() != null) {
-			sql.SET("patinets_with_csv = #{patinetsWithCsv,jdbcType=INTEGER}");
+		if (record.getPatientsWithCsv() != null) {
+			sql.SET("patients_with_csv = #{patientsWithCsv,jdbcType=INTEGER}");
 		}
 		if (record.getTotalLength() != null) {
 			sql.SET("total_length = #{totalLength,jdbcType=INTEGER}");
