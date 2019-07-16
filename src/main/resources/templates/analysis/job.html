@@ -63,7 +63,7 @@
                                     <th>ID</th>
                                     <th>Alias</th>
                                     <th>Start Time</th>
-                                    <th>Results</th>
+                                    <th>download</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -74,6 +74,28 @@
                     </div>
                 </div>
             </div>
+
+            <div class="modal fade" id="download-modal" tabindex="-1">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                Please select the data form you want to download
+                            </h5>
+                        </div>
+                        <div class="modal-body">
+                            <p>complete version: all the data are written in one csv file </p>
+                            <p>split version: data are splitted by patient id  </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-info" id="complete-version-button">Complete Version</button>
+                            <button type="button" class="btn btn-info" id="split-version-button">split Version</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div th:insert="fragments/footer :: footer"></div>
         </div>
     </section>

@@ -667,6 +667,10 @@ public class AnalysisService {
             eo.close(validPatientNumber);
         }
         FileZip.zip(outputDir.getAbsolutePath(), InfluxappConfig.ARCHIVE_DIRECTORY + "/output_" + job.getId() + ".zip", "");
+
+        //split file zip
+        FileZip.zip(outputDir.getAbsolutePath() + "_split", InfluxappConfig.ARCHIVE_DIRECTORY + "/output_split_" + job.getId() + ".zip", "");
+
         job.setFinished(true);
         ExportWithBLOBs updateJob = new ExportWithBLOBs();
         updateJob.setId(job.getId());
@@ -690,6 +694,10 @@ public class AnalysisService {
             eo.close(validPatientNumber);
         }
         FileZip.zip(outputDir.getAbsolutePath(), InfluxappConfig.ARCHIVE_DIRECTORY + "/output_" + job.getId() + ".zip", "");
+
+        //split file zip
+        FileZip.zip(outputDir.getAbsolutePath() + "_split", InfluxappConfig.ARCHIVE_DIRECTORY + "/output_split_" + job.getId() + ".zip", "");
+
         job.setFinished(true);
         ExportWithBLOBs updateJob = new ExportWithBLOBs();
         updateJob.setId(job.getId());

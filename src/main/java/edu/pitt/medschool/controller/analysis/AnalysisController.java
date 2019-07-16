@@ -632,7 +632,11 @@ public class AnalysisController {
         response.setContentType("application/zip");
         Path p = Paths.get(".", path);
         response.setContentLengthLong(Files.size(p));
-        response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "output_" + id + ".zip"));
+        if(path.contains("split")){
+            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "output_split_" + id + ".zip"));
+        }else{
+            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "output_" + id + ".zip"));
+        }
         InputStream inputStream = Files.newInputStream(p, StandardOpenOption.READ);
         return outputStream -> {
             int nRead;
