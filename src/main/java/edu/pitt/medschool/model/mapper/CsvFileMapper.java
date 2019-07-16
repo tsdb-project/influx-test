@@ -225,4 +225,6 @@ public interface CsvFileMapper {
 			"from csv_file c, patient p where p.version<='${version}' and p.version != 0 and c.start_version !=0 and c.start_version<='${version}' and c.end_version>'${version}' and c.pid = p.id and p.id='${pid}' and c.machine= '${machine}' and c.status <> 1 and p.arrestdate is not null" })
 	List<TimeLine> getPatientTimeLinesByVersionID(@Param("version") int version, @Param("machine") String machine,@Param("pid") String pid);
 
+	@Select({"select count(distinct pid) from csv_file c where c.start_version<='${version}' and c.start_version !=0 and c.end_version>'${version}'"})
+    Long getDistinctPids(@Param("version") int version);
 }

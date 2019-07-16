@@ -37,6 +37,7 @@ public class CsvFileDao {
         return csvFileMapper.insertSelective(csvFile);
     }
 
+    // get patients time line without version condition
     public List<PatientTimeLine> getPatientTimeLines(String machine) {
         List<TimeLine> array = csvFileMapper.getPatientTimeLines(machine);
         List<PatientTimeLine> patientTimeLines = new ArrayList<PatientTimeLine>();
@@ -47,6 +48,8 @@ public class CsvFileDao {
         return patientTimeLines;
     }
 
+
+    //for admin to get latest version and unpublished data
     public List<PatientTimeLine> getLatestPatientTimeLinesByVersion(int version,String machineId){
         List<TimeLine> array = csvFileMapper.getLatestPatientTimeLines(version,machineId);
         List<PatientTimeLine> patientTimeLines = new ArrayList<PatientTimeLine>();
@@ -56,6 +59,8 @@ public class CsvFileDao {
         return patientTimeLines;
     }
 
+
+    //// for user to select different version
     public List<PatientTimeLine> getPatientTimeLinesByVersion(int version,String machineId){
         List<TimeLine> array = csvFileMapper.getPatientTimeLinesByVersion(version,machineId);
         List<PatientTimeLine> patientTimeLines = new ArrayList<PatientTimeLine>();
@@ -336,5 +341,18 @@ public class CsvFileDao {
         Criteria criteria = csvFileExample.createCriteria();
         criteria.andFilenameEqualTo(fileName);
         return csvFileMapper.selectByExample(csvFileExample);
+    }
+
+    public Long getPatientNumber(int currentVersion) {
+        return csvFileMapper.getDistinctPids(currentVersion);
+    }
+
+    public Long getTotalLength(int currentVersion) {
+        List<PatientTimeLine> timeLines = getPatientTimeLinesByVersion(currentVersion,"realpsc");
+        Long total_time=0L;
+        for(PatientTimeLine p:timeLines){
+            total_time= total_time+ p.getRelativeEndTime()-p.getRelativeStartTime();
+        }
+        return total_time;
     }
 }

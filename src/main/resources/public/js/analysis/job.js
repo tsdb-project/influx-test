@@ -73,8 +73,8 @@ $(document).ready(function() {
             data: null,
             render: function(data) {
                 if (data.finished) {
-                    return "<th><button role=\"button\" class=\"btn btn-success btn-sm\" data-type=\"download\" data-id=\"" +
-                    data.id + "\"><i class=\"zmdi zmdi-download\"></i> Download</button><th>"
+                    return "<th><button role=\"button\" class=\"btn btn-success btn-sm\" data-toggle=\"modal\" data-target=\"#download-modal\" " +
+                        "data-type=\"download\" data-id = \"" + data.id + "\"><i class=\"zmdi zmdi-download\"></i> Download</button><th>"
                 } else {
                     return "<th><button role=\"button\" class=\"btn btn-info btn-sm\" data-type=\"progress\" data-id=\"" +
                     data.id + "\"><i class=\"zmdi zmdi-settings zmdi-hc-spin\"></i> Check Progress</button><th>"
@@ -83,14 +83,25 @@ $(document).ready(function() {
         }]
     });
 
+    var currentPid;
+
     $('#job-table').on('click', 'button', function(event) {
-        var id = event.target.dataset.id;
         var status = event.target.dataset.type;
         if (status == 'download') {
-            window.location = '/download?path=archive/output_' + id + '.zip&id=' + id;
-        } else if (status == 'progress') {
-            alert("checking");
+            currentPid = event.target.dataset.id;
+        }else if (status == 'progress' ) {
+            alert("current job is still in progress");
         }
+    });
+
+    $('#complete-version-button').click(function () {
+        window.location = '/download?path=archive/output_' + currentPid + '.zip&id=' + currentPid;
+        $('#download-modal').modal('hide');
+    });
+
+    $('#split-version-button').click(function () {
+        window.location = '/download?path=archive/output_split_' + currentPid + '.zip&id=' + currentPid;
+        $('#download-modal').modal('hide');
     });
 
     setInterval( function () {
