@@ -73,6 +73,11 @@ public class VersionControlService {
         version.setMedicationNum(medicationDao.getMedicationNumber(currentVersion));
         version.setPatientIncrease(patientDao.getPatientIncrease(currentVersion));
         version.setPatientNum(patientDao.getPatientNumber(currentVersion));
+        version.setPuhPatients(patientDao.getPuhPatientNumber(currentVersion));
+        version.setUabPatients(patientDao.getUabPatientNumber(currentVersion));
+        version.setTbiPatients(patientDao.getTbiPatientNumber(currentVersion));
+        version.setPatinetsWithCsv(csvFileDao.getPatientNumber(currentVersion));
+        version.setTotalLength(csvFileDao.getTotalLength(currentVersion));
         versionDao.setNewVersion(version);
     }
 
@@ -110,6 +115,11 @@ public class VersionControlService {
 
     public List<Version> getAllVersions() {
         return versionDao.getAllVersions();
+    }
+
+    public Version getLastVersion(){
+        int id = versionDao.getLatestVersion();
+        return  versionDao.selectById(id);
     }
 
     //get one version
