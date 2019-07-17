@@ -253,10 +253,12 @@ public class ImportCsvService {
      * @param paths List of files
      */
     public void AddArrayFiles(String[] paths) {
+
         if (processingSet.isEmpty()) {
             newBatch();
         }
         for (String aPath : paths) {
+            System.out.println(aPath);
             this.internalAddOne(aPath, true);
         }
         this.startImport();
@@ -667,6 +669,11 @@ public class ImportCsvService {
                 // add data to csv_log
                 versionControlService.setLog(csvFile, "Pending");
 
+                //Move file to other folder
+                //moveAndDelete(fileFullPath,true);
+
+
+
             } catch (Exception e) {
                 logger.error(String.format("Filename '%s' failed to write to MySQL:%n%s", fileName,
                         Util.stackTraceErrorToString(e)));
@@ -740,6 +747,7 @@ public class ImportCsvService {
         }
         importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize,
                 totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason,lost);
+        //moveAndDelete(fn,false);
     }
 
     private void logMySQLFail(String fn){
@@ -772,6 +780,33 @@ public class ImportCsvService {
         idb.query(new Query(String.format("CREATE DATABASE \"%s\"", dbName), dbName));
 
         return idb;
+    }
+
+    private void moveAndDelete(String path, Boolean success){
+        System.out.println(path);
+        try {
+            File afile = new File(path);
+            String kind = afile.getName().substring(0,3);
+            String destnation;
+            if(success){
+                destnation = "d:/eegdata/"+kind+"/"+ afile.getName();
+            }else {
+                destnation = "d:/eegdata/failed/"+afile.getName();
+            }
+            if (afile.renameTo(new File(destnation))) {
+                System.out.println("File is moved successful!");
+            } else {
+                System.out.println("File is failed to move!");
+            }
+            String txtpath = path.replace(".csv",".txt");
+            System.out.println(txtpath);
+            File txt = new File(txtpath);
+            if(txt.exists()){
+                txt.delete();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

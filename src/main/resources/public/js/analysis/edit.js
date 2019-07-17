@@ -551,14 +551,4 @@ $(document).ready(function() {
         }
     });
 
-    groupTable.on('draw',function () {
-        if(groupTable.rows().data().length>=5){
-            $("#create").attr('disabled', '');
-            $('#warning').attr('hidden',false)
-        }else {
-            $("#create").removeAttr("disabled");
-            $('#warning').attr("hidden",true)
-        }
-    });
-
 });
