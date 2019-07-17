@@ -126,4 +126,30 @@ public class Util {
         return sw.toString();
     }
 
+    public static List<FileBean> filesInFolderTxt(String directory) {
+        File folder = new File(directory);
+
+        if (!directory.endsWith("/")) {
+            directory += "/";
+        }
+
+        File[] listOfFiles = folder.listFiles();
+        List<FileBean> fileBeans = new ArrayList<>();
+
+        if (listOfFiles != null) {
+            for (File listOfFile : listOfFiles) {
+                if (listOfFile.isFile() && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals("txt")
+                        && !listOfFile.getName().startsWith(".")) {
+                    FileBean fileBean = new FileBean();
+                    fileBean.setName(listOfFile.getName());
+                    fileBean.setDirectory(directory);
+                    long length = FileUtils.sizeOf(listOfFile);
+                    fileBean.setBytes(length);
+                    fileBean.setSize(FileUtils.byteCountToDisplaySize(length));
+                    fileBeans.add(fileBean);
+                }
+            }
+        }
+        return fileBeans;
+    }
 }
