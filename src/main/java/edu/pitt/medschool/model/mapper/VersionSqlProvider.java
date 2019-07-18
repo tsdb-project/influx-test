@@ -84,6 +84,9 @@ public class VersionSqlProvider {
 		if (record.getTotalLength() != null) {
 			sql.VALUES("total_length", "#{totalLength,jdbcType=INTEGER}");
 		}
+		if (record.getDbSize() != null) {
+			sql.VALUES("db_size", "#{dbSize,jdbcType=INTEGER}");
+		}
 		return sql.toString();
 	}
 
@@ -112,6 +115,7 @@ public class VersionSqlProvider {
 		sql.SELECT("TBI_patients");
 		sql.SELECT("patients_with_csv");
 		sql.SELECT("total_length");
+		sql.SELECT("db_size");
 		sql.FROM("version");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -174,6 +178,9 @@ public class VersionSqlProvider {
 		if (record.getTotalLength() != null) {
 			sql.SET("total_length = #{record.totalLength,jdbcType=INTEGER}");
 		}
+		if (record.getDbSize() != null) {
+			sql.SET("db_size = #{record.dbSize,jdbcType=INTEGER}");
+		}
 		applyWhere(sql, example, true);
 		return sql.toString();
 	}
@@ -200,6 +207,7 @@ public class VersionSqlProvider {
 		sql.SET("TBI_patients = #{record.tbiPatients,jdbcType=INTEGER}");
 		sql.SET("patients_with_csv = #{record.patientsWithCsv,jdbcType=INTEGER}");
 		sql.SET("total_length = #{record.totalLength,jdbcType=INTEGER}");
+		sql.SET("db_size = #{record.dbSize,jdbcType=INTEGER}");
 		VersionExample example = (VersionExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -253,6 +261,9 @@ public class VersionSqlProvider {
 		}
 		if (record.getTotalLength() != null) {
 			sql.SET("total_length = #{totalLength,jdbcType=INTEGER}");
+		}
+		if (record.getDbSize() != null) {
+			sql.SET("db_size = #{dbSize,jdbcType=INTEGER}");
 		}
 		sql.WHERE("version_id = #{versionId,jdbcType=INTEGER}");
 		return sql.toString();

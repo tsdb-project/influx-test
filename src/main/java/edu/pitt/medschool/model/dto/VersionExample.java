@@ -1073,6 +1073,66 @@ public class VersionExample {
 			return (Criteria) this;
 		}
 
+		public Criteria andDbSizeIsNull() {
+			addCriterion("db_size is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andDbSizeIsNotNull() {
+			addCriterion("db_size is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andDbSizeEqualTo(Integer value) {
+			addCriterion("db_size =", value, "dbSize");
+			return (Criteria) this;
+		}
+
+		public Criteria andDbSizeNotEqualTo(Integer value) {
+			addCriterion("db_size <>", value, "dbSize");
+			return (Criteria) this;
+		}
+
+		public Criteria andDbSizeGreaterThan(Integer value) {
+			addCriterion("db_size >", value, "dbSize");
+			return (Criteria) this;
+		}
+
+		public Criteria andDbSizeGreaterThanOrEqualTo(Integer value) {
+			addCriterion("db_size >=", value, "dbSize");
+			return (Criteria) this;
+		}
+
+		public Criteria andDbSizeLessThan(Integer value) {
+			addCriterion("db_size <", value, "dbSize");
+			return (Criteria) this;
+		}
+
+		public Criteria andDbSizeLessThanOrEqualTo(Integer value) {
+			addCriterion("db_size <=", value, "dbSize");
+			return (Criteria) this;
+		}
+
+		public Criteria andDbSizeIn(List<Integer> values) {
+			addCriterion("db_size in", values, "dbSize");
+			return (Criteria) this;
+		}
+
+		public Criteria andDbSizeNotIn(List<Integer> values) {
+			addCriterion("db_size not in", values, "dbSize");
+			return (Criteria) this;
+		}
+
+		public Criteria andDbSizeBetween(Integer value1, Integer value2) {
+			addCriterion("db_size between", value1, value2, "dbSize");
+			return (Criteria) this;
+		}
+
+		public Criteria andDbSizeNotBetween(Integer value1, Integer value2) {
+			addCriterion("db_size not between", value1, value2, "dbSize");
+			return (Criteria) this;
+		}
+
 		public Criteria andCommentLikeInsensitive(String value) {
 			addCriterion("upper(comment) like", value.toUpperCase(), "comment");
 			return (Criteria) this;

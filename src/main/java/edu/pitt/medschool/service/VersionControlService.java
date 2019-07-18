@@ -78,6 +78,7 @@ public class VersionControlService {
         version.setTbiPatients(patientDao.getTbiPatientNumber(currentVersion));
         version.setPatientsWithCsv(csvFileDao.getPatientNumber(currentVersion));
         version.setTotalLength(csvFileDao.getTotalLength(currentVersion));
+        version.setDbSize(csvFileDao.getDbSize());
         versionDao.setNewVersion(version);
     }
 

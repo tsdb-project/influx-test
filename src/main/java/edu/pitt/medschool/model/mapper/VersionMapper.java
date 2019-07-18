@@ -51,7 +51,7 @@ public interface VersionMapper {
 	@SelectKey(statement = "SELECT LAST_INSERT_ID()", keyProperty = "versionId", before = false, resultType = Integer.class)
 	@Insert({ "insert into version (version_id, create_date, ", "patient_num, csv_file_num, ",
 			"medication_num, patient_increase, ", "medication_increase, csv_increase, ", "csv_delete, comment, ",
-			"PUH_patients, UAB_patients, ", "TBI_patients, patients_with_csv, ", "total_length)",
+			"PUH_patients, UAB_patients, ", "TBI_patients, patients_with_csv, ", "total_length, db_size)",
 			"values (#{versionId,jdbcType=INTEGER}, #{createDate,jdbcType=TIMESTAMP}, ",
 			"#{patientNum,jdbcType=INTEGER}, #{csvFileNum,jdbcType=INTEGER}, ",
 			"#{medicationNum,jdbcType=INTEGER}, #{patientIncrease,jdbcType=INTEGER}, ",
@@ -59,7 +59,7 @@ public interface VersionMapper {
 			"#{csvDelete,jdbcType=INTEGER}, #{comment,jdbcType=VARCHAR}, ",
 			"#{puhPatients,jdbcType=INTEGER}, #{uabPatients,jdbcType=INTEGER}, ",
 			"#{tbiPatients,jdbcType=INTEGER}, #{patientsWithCsv,jdbcType=INTEGER}, ",
-			"#{totalLength,jdbcType=INTEGER})" })
+			"#{totalLength,jdbcType=INTEGER}, #{dbSize,jdbcType=INTEGER})" })
 	int insert(Version record);
 
 	/**
@@ -89,7 +89,8 @@ public interface VersionMapper {
 			@Result(column = "UAB_patients", property = "uabPatients", jdbcType = JdbcType.INTEGER),
 			@Result(column = "TBI_patients", property = "tbiPatients", jdbcType = JdbcType.INTEGER),
 			@Result(column = "patients_with_csv", property = "patientsWithCsv", jdbcType = JdbcType.INTEGER),
-			@Result(column = "total_length", property = "totalLength", jdbcType = JdbcType.INTEGER) })
+			@Result(column = "total_length", property = "totalLength", jdbcType = JdbcType.INTEGER),
+			@Result(column = "db_size", property = "dbSize", jdbcType = JdbcType.INTEGER) })
 	List<Version> selectByExampleWithRowbounds(VersionExample example, RowBounds rowBounds);
 
 	/**
@@ -111,7 +112,8 @@ public interface VersionMapper {
 			@Result(column = "UAB_patients", property = "uabPatients", jdbcType = JdbcType.INTEGER),
 			@Result(column = "TBI_patients", property = "tbiPatients", jdbcType = JdbcType.INTEGER),
 			@Result(column = "patients_with_csv", property = "patientsWithCsv", jdbcType = JdbcType.INTEGER),
-			@Result(column = "total_length", property = "totalLength", jdbcType = JdbcType.INTEGER) })
+			@Result(column = "total_length", property = "totalLength", jdbcType = JdbcType.INTEGER),
+			@Result(column = "db_size", property = "dbSize", jdbcType = JdbcType.INTEGER) })
 	List<Version> selectByExample(VersionExample example);
 
 	/**
@@ -120,7 +122,7 @@ public interface VersionMapper {
 	 */
 	@Select({ "select", "version_id, create_date, patient_num, csv_file_num, medication_num, patient_increase, ",
 			"medication_increase, csv_increase, csv_delete, comment, PUH_patients, UAB_patients, ",
-			"TBI_patients, patients_with_csv, total_length", "from version",
+			"TBI_patients, patients_with_csv, total_length, db_size", "from version",
 			"where version_id = #{versionId,jdbcType=INTEGER}" })
 	@Results({ @Result(column = "version_id", property = "versionId", jdbcType = JdbcType.INTEGER, id = true),
 			@Result(column = "create_date", property = "createDate", jdbcType = JdbcType.TIMESTAMP),
@@ -136,7 +138,8 @@ public interface VersionMapper {
 			@Result(column = "UAB_patients", property = "uabPatients", jdbcType = JdbcType.INTEGER),
 			@Result(column = "TBI_patients", property = "tbiPatients", jdbcType = JdbcType.INTEGER),
 			@Result(column = "patients_with_csv", property = "patientsWithCsv", jdbcType = JdbcType.INTEGER),
-			@Result(column = "total_length", property = "totalLength", jdbcType = JdbcType.INTEGER) })
+			@Result(column = "total_length", property = "totalLength", jdbcType = JdbcType.INTEGER),
+			@Result(column = "db_size", property = "dbSize", jdbcType = JdbcType.INTEGER) })
 	Version selectByPrimaryKey(Integer versionId);
 
 	/**
@@ -173,7 +176,8 @@ public interface VersionMapper {
 			"comment = #{comment,jdbcType=VARCHAR},", "PUH_patients = #{puhPatients,jdbcType=INTEGER},",
 			"UAB_patients = #{uabPatients,jdbcType=INTEGER},", "TBI_patients = #{tbiPatients,jdbcType=INTEGER},",
 			"patients_with_csv = #{patientsWithCsv,jdbcType=INTEGER},",
-			"total_length = #{totalLength,jdbcType=INTEGER}", "where version_id = #{versionId,jdbcType=INTEGER}" })
+			"total_length = #{totalLength,jdbcType=INTEGER},", "db_size = #{dbSize,jdbcType=INTEGER}",
+			"where version_id = #{versionId,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(Version record);
 
 	@Select("SELECT IFNULL(MAX(version_id),0) FROM version")
