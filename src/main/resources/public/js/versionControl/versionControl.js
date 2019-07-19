@@ -98,6 +98,11 @@ $(document).ready(function () {
             data:'csvDelete'
         },{
             data:null,
+            render:function (data) {
+                return data.dbSize+"GB"
+            }
+        },{
+            data:null,
             render : function(data) {
                 return '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-id="' + data.versionId + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
             }
