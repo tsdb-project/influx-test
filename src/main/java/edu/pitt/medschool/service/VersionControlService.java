@@ -78,6 +78,7 @@ public class VersionControlService {
         version.setTbiPatients(patientDao.getTbiPatientNumber(currentVersion));
         version.setPatientsWithCsv(csvFileDao.getPatientNumber(currentVersion));
         version.setTotalLength(csvFileDao.getTotalLength(currentVersion));
+        version.setDbSize(csvFileDao.getDbSize());
         versionDao.setNewVersion(version);
     }
 
@@ -119,6 +120,14 @@ public class VersionControlService {
 
     public Version getLastVersion(){
         int id = versionDao.getLatestVersion();
+        if(id==0){
+            Version version = new Version();
+            version.setDbSize(0L);
+            version.setTotalLength(0L);
+            version.setPatientsWithCsv(0L);
+            version.setCsvFileNum(0L);
+            return version;
+        }
         return  versionDao.selectById(id);
     }
 

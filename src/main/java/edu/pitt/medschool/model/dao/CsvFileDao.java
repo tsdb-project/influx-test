@@ -1,10 +1,12 @@
 package edu.pitt.medschool.model.dao;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -354,5 +356,12 @@ public class CsvFileDao {
             total_time= total_time+ p.getRelativeEndTime()-p.getRelativeStartTime();
         }
         return total_time;
+    }
+
+    public Long getDbSize() {
+        // change this path to the path on mac
+        File file = new File("/Volumes/INFLUX_RAID/influx_runtime/data/data");
+        long size = FileUtils.sizeOfDirectory(file)/1024/1024/1024;
+        return size;
     }
 }
