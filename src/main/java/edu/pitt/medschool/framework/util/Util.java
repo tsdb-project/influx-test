@@ -80,7 +80,7 @@ public class Util {
         return file_list.toArray(new String[0]);
     }
 
-    public static List<FileBean> filesInFolder(String directory) {
+    public static List<FileBean> filesInFolder(String directory , String fileType) {
         File folder = new File(directory);
 
         if (!directory.endsWith("/")) {
@@ -92,7 +92,7 @@ public class Util {
 
         if (listOfFiles != null) {
             for (File listOfFile : listOfFiles) {
-                if (listOfFile.isFile() && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals("csv")
+                if (listOfFile.isFile() && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals(fileType)
                         && !listOfFile.getName().startsWith(".")) {
                     FileBean fileBean = new FileBean();
                     fileBean.setName(listOfFile.getName());
@@ -126,30 +126,30 @@ public class Util {
         return sw.toString();
     }
 
-    public static List<FileBean> filesInFolderTxt(String directory) {
-        File folder = new File(directory);
-
-        if (!directory.endsWith("/")) {
-            directory += "/";
-        }
-
-        File[] listOfFiles = folder.listFiles();
-        List<FileBean> fileBeans = new ArrayList<>();
-
-        if (listOfFiles != null) {
-            for (File listOfFile : listOfFiles) {
-                if (listOfFile.isFile() && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals("txt")
-                        && !listOfFile.getName().startsWith(".")) {
-                    FileBean fileBean = new FileBean();
-                    fileBean.setName(listOfFile.getName());
-                    fileBean.setDirectory(directory);
-                    long length = FileUtils.sizeOf(listOfFile);
-                    fileBean.setBytes(length);
-                    fileBean.setSize(FileUtils.byteCountToDisplaySize(length));
-                    fileBeans.add(fileBean);
-                }
-            }
-        }
-        return fileBeans;
-    }
+//    public static List<FileBean> filesInFolderTxt(String directory) {
+//        File folder = new File(directory);
+//
+//        if (!directory.endsWith("/")) {
+//            directory += "/";
+//        }
+//
+//        File[] listOfFiles = folder.listFiles();
+//        List<FileBean> fileBeans = new ArrayList<>();
+//
+//        if (listOfFiles != null) {
+//            for (File listOfFile : listOfFiles) {
+//                if (listOfFile.isFile() && FilenameUtils.getExtension(listOfFile.getName()).toLowerCase().equals("txt")
+//                        && !listOfFile.getName().startsWith(".")) {
+//                    FileBean fileBean = new FileBean();
+//                    fileBean.setName(listOfFile.getName());
+//                    fileBean.setDirectory(directory);
+//                    long length = FileUtils.sizeOf(listOfFile);
+//                    fileBean.setBytes(length);
+//                    fileBean.setSize(FileUtils.byteCountToDisplaySize(length));
+//                    fileBeans.add(fileBean);
+//                }
+//            }
+//        }
+//        return fileBeans;
+//    }
 }

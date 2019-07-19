@@ -109,7 +109,7 @@ public class DataController {
             directory = dirString;
         }
 
-        List<FileBean> files = Util.filesInFolder(directory);
+        List<FileBean> files = Util.filesInFolder(directory,"csv");
         map.put("data", files);
 
         if (files == null) {
@@ -164,7 +164,7 @@ public class DataController {
 //        for (int i = 0; i < allAR.length; i++) {
 //            allAR[i] = dir.getFiles().get(i);
 //        }
-//        convertToCsvServies.AddArrayFiles(allAR);
+//        convertToCsvServies.covertAndSend(allAR);
 //        return map;
 //    }
 
