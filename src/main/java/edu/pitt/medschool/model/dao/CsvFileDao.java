@@ -360,7 +360,7 @@ public class CsvFileDao {
 
     public Long getDbSize() {
         // change this path to the path on mac
-        File file = new File("C:/Users/cheke/.influxdb/data");
+        File file = new File("/Volumes/INFLUX_RAID/influx_runtime/data/data");
         long size = FileUtils.sizeOfDirectory(file)/1024/1024/1024;
         return size;
     }
