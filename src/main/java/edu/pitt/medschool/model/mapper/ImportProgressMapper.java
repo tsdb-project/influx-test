@@ -240,6 +240,7 @@ public interface ImportProgressMapper {
         "FROM import_progress ",
         "WHERE uuid = #{uuid}",
         "GROUP BY batch_id",
+		"HAVING finished=FALSE",
         "ORDER BY end_time DESC;"
     })
     @ResultType(ActivityVO.class)

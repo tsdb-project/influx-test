@@ -36,9 +36,9 @@
                         <!--<li id="status">-->
                         <!--<a href="/data/status">Status</a>-->
                         <!--</li>-->
-                        <li id="patients">
-                            <a href="/data/patients">Manage Database</a>
-                        </li>
+                        <!--<li id="patients">-->
+                            <!--<a href="/data/patients">Manage Database</a>-->
+                        <!--</li>-->
                     </ul>
                 </li>
                 <!-- Menu Filter out patients -->
@@ -59,8 +59,8 @@
                 <!-- Menu Export-->
                 <li class="navigation__sub" id="analysis">
                     <a href="">
-                        <i class="zmdi zmdi-spinner"></i>
-                        Summarization
+                        <i class="zmdi zmdi-case-download"></i>
+                        Export
                     </a>
                     <ul>
                         <li id="builder">
@@ -72,16 +72,27 @@
                         <li id="job">
                             <a href="/analysis/job">Export Jobs</a>
                         </li>
-                        <li id="chart" sec:authorize="hasRole('ADMIN')">
-                            <a href="/analysis/chart">View Charts</a>
-                        </li>
                         <li id="userchart" sec:authorize="hasRole('USER')">
                             <a href="/analysis/userchart">View Charts</a>
                         </li>
-                        <li id="wrongpatients" sec:authorize="hasRole('ADMIN')">
+                        <!-- <li id="export">
+                            <a href="/analysis/export">Export</a>
+                        </li> -->
+                    </ul>
+                </li>
+                <li class="navigation__sub" id="management" sec:authorize="hasRole('ADMIN')">
+                    <a href="">
+                        <i class="zmdi zmdi-spinner"></i>
+                        Database Management
+                    </a>
+                    <ul>
+                        <li id="chart">
+                            <a href="/analysis/chart">View Charts</a>
+                        </li>
+                        <li id="wrongpatients">
                             <a href="/analysis/wrongpatients">Detect wrong data</a>
                         </li>
-                        <li id="confirmChanges" sec:authorize="hasRole('ADMIN')">
+                        <li id="confirmChanges">
                             <a href="/confirmChanges">Commit or cancel changes</a>
                         </li>
                         <!-- <li id="export">
