@@ -127,7 +127,7 @@ public class AnalysisController {
     @RequestMapping("analysis/chart")
     @ResponseBody
     public Model chartPage(Model model) {
-        model.addAttribute("nav", "analysis");
+        model.addAttribute("nav", "management");
         model.addAttribute("subnav", "chart");
         return model;
     }
@@ -144,7 +144,7 @@ public class AnalysisController {
     @RequestMapping("analysis/wrongpatients")
     @ResponseBody
     public  Model wrongPatinetsPage(Model model){
-        model.addAttribute("nav","analysis");
+        model.addAttribute("nav","management");
         model.addAttribute("subnav","wrongpatients");
         return model;
     }
