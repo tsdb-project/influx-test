@@ -9,6 +9,8 @@ public class ExportVO {
     private String alias;
     private String machine;
     private Boolean finished;
+    private Integer finishedPatient;
+    private Integer allPatient;
 
     public Integer getId() {
         return id;
@@ -58,4 +60,19 @@ public class ExportVO {
         this.finished = finished;
     }
 
+    public Integer getFinishedPatient() {
+        return finishedPatient;
+    }
+
+    public void setFinishedPatient(Integer finishedPatient) {
+        this.finishedPatient = finishedPatient;
+    }
+
+    public Integer getAllPatient() {
+        return allPatient;
+    }
+
+    public void setAllPatient(Integer allPatient) {
+        this.allPatient = allPatient;
+    }
 }
