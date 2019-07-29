@@ -23,6 +23,8 @@ $(document).ready(
                 }, {
                     data : 'batchId',
                     orderable : false
+                },{
+                    data:'startTime'
                 } ],
                 dom : 'tip'
             });

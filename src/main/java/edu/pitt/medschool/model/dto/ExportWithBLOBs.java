@@ -90,6 +90,10 @@ public class ExportWithBLOBs extends Export {
 						: this.getMedical().equals(other.getMedical()))
 				&& (this.getUsername() == null ? other.getUsername() == null
 						: this.getUsername().equals(other.getUsername()))
+				&& (this.getFinishedPatient() == null ? other.getFinishedPatient() == null
+						: this.getFinishedPatient().equals(other.getFinishedPatient()))
+				&& (this.getAllPatient() == null ? other.getAllPatient() == null
+						: this.getAllPatient().equals(other.getAllPatient()))
 				&& (this.getPatientList() == null ? other.getPatientList() == null
 						: this.getPatientList().equals(other.getPatientList()))
 				&& (this.getQueryJson() == null ? other.getQueryJson() == null
@@ -119,6 +123,8 @@ public class ExportWithBLOBs extends Export {
 		result = prime * result + ((getDeleted() == null) ? 0 : getDeleted().hashCode());
 		result = prime * result + ((getMedical() == null) ? 0 : getMedical().hashCode());
 		result = prime * result + ((getUsername() == null) ? 0 : getUsername().hashCode());
+		result = prime * result + ((getFinishedPatient() == null) ? 0 : getFinishedPatient().hashCode());
+		result = prime * result + ((getAllPatient() == null) ? 0 : getAllPatient().hashCode());
 		result = prime * result + ((getPatientList() == null) ? 0 : getPatientList().hashCode());
 		result = prime * result + ((getQueryJson() == null) ? 0 : getQueryJson().hashCode());
 		return result;

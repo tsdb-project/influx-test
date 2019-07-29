@@ -47,7 +47,8 @@ img-block {
     padding: 0em 1em 1em 1em;
     color: #fff;
     font-family: 'Open Sans', sans-serif;
-    margin: 1em;
+    margin: 0.5em;
+    white-space: nowrap;
 }
 
 .metroblock h1, .metroblock h2, .metroblock .icon {
@@ -85,35 +86,74 @@ img-block {
                 </blockquote>
                 <br>
                 <br>
-                <h2>Latest database size: </h2>
+                <h2>Current database: </h2>
 
-                <div class="metroblock commentsblock col-md-6 ">
-                    <span class="icon fontawesome-comments left"></span>
-                    <h1 id="patient"></h1>
-                    <div class="clear"></div>
-                    <h2>Patients</h2>
+                <div class="row">
+                    <div class="metroblock commentsblock col-md-5 ">
+                        <span class="icon fontawesome-comments left"></span>
+                        <h1 id="patient"></h1>
+                        <div class="clear"></div>
+                        <h2>Patients with EEG data</h2>
+                    </div>
+                    <div class="metroblock buysblock col-md-5 ">
+                        <span class="icon fontawesome-comments left"></span>
+                        <h1 id="length"></h1>
+                        <div class="clear"></div>
+                        <h2>Hours of data</h2>
+                    </div>
                 </div>
 
-                <div class="metroblock buysblock col-md-6 ">
-                    <span class="icon fontawesome-briefcase left"></span>
-                    <h1 id="csv"></h1>
-                    <div class="clear"></div>
-                    <h2>csv files</h2>
+                <div class="row">
+                    <div class="metroblock commentsblock col-md-5 ">
+                        <span class="icon fontawesome-comments left"></span>
+                        <h1 id="allpatients"></h1>
+                        <div class="clear"></div>
+                        <h2>Patients with metadata</h2>
+                    </div>
+
+                    <div class="metroblock buysblock col-md-5 ">
+                        <span class="icon fontawesome-briefcase left"></span>
+                        <h1 id="csv"></h1>
+                        <div class="clear"></div>
+                        <h2>Number of recordings</h2>
+                    </div>
                 </div>
 
-                <div class="metroblock commentsblock col-md-6 ">
-                    <span class="icon fontawesome-comments left"></span>
-                    <h1 id="length"></h1>
-                    <div class="clear"></div>
-                    <h2>Days of data</h2>
+                <div class="row">
+                    <div class="metroblock commentsblock col-md-5 ">
+                        <span class="icon fontawesome-comments left"></span>
+                        <h1 id="size"></h1>
+                        <div class="clear"></div>
+                        <h2>GB of data</h2>
+                    </div>
+
+                    <div class="metroblock buysblock col-md-5 ">
+                        <span class="icon fontawesome-comments left"></span>
+                        <h1>12078</h1>
+                        <div class="clear"></div>
+                        <h2>Number of features</h2>
+                    </div>
                 </div>
 
-                <div class="metroblock buysblock col-md-6 ">
-                    <span class="icon fontawesome-comments left"></span>
-                    <h1 id="size"></h1>
-                    <div class="clear"></div>
-                    <h2>GB of data</h2>
+                <div class="row">
+                    <div class="metroblock commentsblock col-md-5 ">
+                        <span class="icon fontawesome-comments left"></span>
+                        <h1 id="version"></h1>
+                        <div class="clear"></div>
+                        <h2>Current version</h2>
+                    </div>
+
+                    <div class="metroblock buysblock col-md-5 ">
+                        <span class="icon fontawesome-comments left"></span>
+                        <h1 id="date"></h1>
+                        <div class="clear"></div>
+                        <h2>Date of last update</h2>
+                    </div>
+
                 </div>
+
+
+
 
             </div>
         </div>

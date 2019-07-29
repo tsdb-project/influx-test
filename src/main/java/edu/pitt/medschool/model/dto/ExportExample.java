@@ -1104,6 +1104,126 @@ public class ExportExample {
 			return (Criteria) this;
 		}
 
+		public Criteria andFinishedPatientIsNull() {
+			addCriterion("finished_patient is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andFinishedPatientIsNotNull() {
+			addCriterion("finished_patient is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andFinishedPatientEqualTo(Integer value) {
+			addCriterion("finished_patient =", value, "finishedPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andFinishedPatientNotEqualTo(Integer value) {
+			addCriterion("finished_patient <>", value, "finishedPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andFinishedPatientGreaterThan(Integer value) {
+			addCriterion("finished_patient >", value, "finishedPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andFinishedPatientGreaterThanOrEqualTo(Integer value) {
+			addCriterion("finished_patient >=", value, "finishedPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andFinishedPatientLessThan(Integer value) {
+			addCriterion("finished_patient <", value, "finishedPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andFinishedPatientLessThanOrEqualTo(Integer value) {
+			addCriterion("finished_patient <=", value, "finishedPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andFinishedPatientIn(List<Integer> values) {
+			addCriterion("finished_patient in", values, "finishedPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andFinishedPatientNotIn(List<Integer> values) {
+			addCriterion("finished_patient not in", values, "finishedPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andFinishedPatientBetween(Integer value1, Integer value2) {
+			addCriterion("finished_patient between", value1, value2, "finishedPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andFinishedPatientNotBetween(Integer value1, Integer value2) {
+			addCriterion("finished_patient not between", value1, value2, "finishedPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientIsNull() {
+			addCriterion("all_patient is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientIsNotNull() {
+			addCriterion("all_patient is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientEqualTo(Integer value) {
+			addCriterion("all_patient =", value, "allPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientNotEqualTo(Integer value) {
+			addCriterion("all_patient <>", value, "allPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientGreaterThan(Integer value) {
+			addCriterion("all_patient >", value, "allPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientGreaterThanOrEqualTo(Integer value) {
+			addCriterion("all_patient >=", value, "allPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientLessThan(Integer value) {
+			addCriterion("all_patient <", value, "allPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientLessThanOrEqualTo(Integer value) {
+			addCriterion("all_patient <=", value, "allPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientIn(List<Integer> values) {
+			addCriterion("all_patient in", values, "allPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientNotIn(List<Integer> values) {
+			addCriterion("all_patient not in", values, "allPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientBetween(Integer value1, Integer value2) {
+			addCriterion("all_patient between", value1, value2, "allPatient");
+			return (Criteria) this;
+		}
+
+		public Criteria andAllPatientNotBetween(Integer value1, Integer value2) {
+			addCriterion("all_patient not between", value1, value2, "allPatient");
+			return (Criteria) this;
+		}
+
 		public Criteria andMachineLikeInsensitive(String value) {
 			addCriterion("upper(machine) like", value.toUpperCase(), "machine");
 			return (Criteria) this;

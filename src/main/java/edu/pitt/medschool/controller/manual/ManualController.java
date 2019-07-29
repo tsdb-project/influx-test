@@ -29,7 +29,7 @@ public class ManualController {
     @RequestMapping("manual/VersionControl")
     public ModelAndView VersionControl(ModelAndView modelAndView){
         modelAndView.addObject("nav", "manual");
-        modelAndView.addObject("subnav", "Version control");
+        modelAndView.addObject("subnav", "VersionControlManual");
         modelAndView.setViewName("manual/version control");
         return modelAndView;
     }

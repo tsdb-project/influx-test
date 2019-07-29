@@ -34,8 +34,8 @@ public class VersionControlController {
 
     @RequestMapping("confirmChanges")
     public ModelAndView toConfirmChanges(ModelAndView modelAndView){
-        modelAndView.addObject("nav", "confirmChanges");
-        modelAndView.addObject("subnav", "");
+        modelAndView.addObject("nav", "management");
+        modelAndView.addObject("subnav", "confirmChanges");
         modelAndView.setViewName("versionControl/confirmChanges");
         return modelAndView;
     }
