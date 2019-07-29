@@ -70,6 +70,11 @@ $(document).ready(function() {
                 return localeDateString(data.createTime)
             }
         }, {
+            data:null,
+            render: function(data){
+                return (data.finishedPatient/data.allPatient).toFixed(4)*100+"%";
+            }
+        },{
             data: null,
             render: function(data) {
                 if (data.finished) {

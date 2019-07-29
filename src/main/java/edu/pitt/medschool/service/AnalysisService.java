@@ -177,6 +177,10 @@ public class AnalysisService {
             patientIDs = Arrays.stream(pList.split(",")).map(String::toUpperCase).collect(Collectors.toList());
         }
 
+        // detect the number of patients and save it
+        exportDao.updatePatientNum(job.getId(),patientIDs.size());
+
+
         // Get columns data
         List<DownsampleGroup> groups = downsampleGroupDao.selectAllDownsampleGroup(queryId);
         int labelCount = groups.size();
@@ -263,6 +267,7 @@ public class AnalysisService {
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
         Map<String, Integer> errorCount = new HashMap<>();
         AtomicInteger validPatientCounter = new AtomicInteger(0);
+        AtomicInteger finishedPatientCounter = new AtomicInteger(0);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         Runnable queryTask = () -> {
@@ -281,6 +286,8 @@ public class AnalysisService {
                     String versionCondition = versionDao.getVersionCondition(files);
                     if(files.isEmpty()){
                         outputWriter.writeMetaFile(String.format("  PID <%s> is not available in this version.%n", patientId));
+                        finishedPatientCounter.getAndIncrement();
+                        exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                         continue;
                     }
                     // First get the group by time offset
@@ -289,6 +296,8 @@ public class AnalysisService {
                             patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
                     if (testOffset.length != 1) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> don't have enough data to export.%n", patientId));
+                        finishedPatientCounter.getAndIncrement();
+                        exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                         continue;
                     }
                     // Then fetch meta data regrading file segments and build the query string
@@ -302,6 +311,8 @@ public class AnalysisService {
                     logger.info(finalQueryString);
                     if (finalQueryString.isEmpty()) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> no available data.%n", patientId));
+                        finishedPatientCounter.getAndIncrement();
+                        exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                         continue;
                     }
                     logger.debug("Query for <{}>: {}", patientId, finalQueryString);
@@ -310,11 +321,15 @@ public class AnalysisService {
 
                     if (res.length != 1) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> incorrect result from database.%n", patientId));
+                        finishedPatientCounter.getAndIncrement();
+                        exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                         continue;
                     }
 
                     outputWriter.writeForOnePatient(patientId, res[0], eq, dtsb);
                     validPatientCounter.getAndIncrement();
+                    finishedPatientCounter.getAndIncrement();
+                    exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
 
                 } catch (Exception ee) {
                     // All exception will be logged (disregarded) and corresponding PID will be tried again
@@ -334,8 +349,11 @@ public class AnalysisService {
                         outputWriter.writeMetaFile(
                                 String.format("  PID <%s> failed multiple times, possible program error.%n", patientId));
                         idQueue.remove(patientId);
+                        finishedPatientCounter.getAndIncrement();
+                        exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                     }
                 }
+
             }
             influxDB.close();
         };
@@ -443,6 +461,7 @@ public class AnalysisService {
         }
 
         logger.info("medicalRecordList:" + Integer.toString(medicalRecordList.size()));
+        exportDao.updatePatientNum(job.getId(),medicalRecordList.size());
 
         ExportMedicalOutput outputWriter;
         try {
@@ -515,6 +534,7 @@ public class AnalysisService {
         BlockingQueue<Medication> idQueue = new LinkedBlockingQueue<>(medicalRecordList);
         Map<Medication, Integer> errorCount = new HashMap<>();
         AtomicInteger validPatientCounter = new AtomicInteger(0);
+        AtomicInteger finishedPatientCounter = new AtomicInteger(0);
 
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         Runnable queryTask = () -> {
@@ -534,6 +554,8 @@ public class AnalysisService {
                     String versionCondition = versionDao.getVersionCondition(files);
                     if(files.isEmpty()){
                         outputWriter.writeMetaFile(String.format("  PID <%s> <%s> don't have enough data to export.%n", onerecord.getId(),onerecord.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant()));
+                        finishedPatientCounter.getAndIncrement();
+                        exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                         continue;
                     }
 
@@ -544,6 +566,8 @@ public class AnalysisService {
                     if (testOffset.length != 1) {
                         outputWriter.writeMetaFile(
                                 String.format("  PID <%s> <%s> don't have enough data to export.%n", onerecord.getId(),onerecord.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant()));
+                        finishedPatientCounter.getAndIncrement();
+                        exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                         continue;
                     }
                     // Then fetch meta data regrading file segments and build the query string
@@ -563,6 +587,8 @@ public class AnalysisService {
                     if (finalQueryStrings.isEmpty()) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> <%s> no available data.%n", onerecord.getId(),
                                 onerecord.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant()));
+                        finishedPatientCounter.getAndIncrement();
+                        exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                         continue;
                     }
                     logger.debug("Query for <{}>: {}", onerecord.getId(), finalQueryStrings);
@@ -571,11 +597,15 @@ public class AnalysisService {
                     if (res.length != 1) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> <%s> empty result from database.%n",
                                 onerecord.getId(), onerecord.getChartDate().atZone(nycTz).withZoneSameInstant(utcTz).toInstant()));
+                        finishedPatientCounter.getAndIncrement();
+                        exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                         continue;
                     }
                     // write into csv file
                     outputWriter.writeForOnePatient(onerecord.getId(), res[0], eq, dtsb, onerecord);
                     validPatientCounter.getAndIncrement();
+                    finishedPatientCounter.getAndIncrement();
+                    exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
 
                 } catch (Exception ee) {
                     // All exception will be logged (disregarded) and corresponding PID will be tried again
@@ -595,8 +625,11 @@ public class AnalysisService {
                         outputWriter.writeMetaFile(String.format("  PID <%s> failed multiple times, possible program error.%n",
                                 onerecord.getId()));
                         idQueue.remove(onerecord);
+                        finishedPatientCounter.getAndIncrement();
+                        exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                     }
                 }
+
             }
             influxDB.close();
         };

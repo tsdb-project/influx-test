@@ -61,4 +61,18 @@ public class ExportDao {
         return updateByPrimaryKeySelective(e);
     }
 
+    public int updatePatientNum(Integer id, Integer size){
+        ExportWithBLOBs e = new ExportWithBLOBs();
+        e.setId(id);
+        e.setAllPatient(size);
+        return updateByPrimaryKeySelective(e);
+    }
+
+    public int updatePatientFinishedNum(Integer id,Integer size){
+        ExportWithBLOBs e = new ExportWithBLOBs();
+        e.setId(id);
+        e.setFinishedPatient(size);
+        return updateByPrimaryKeySelective(e);
+    }
+
 }
