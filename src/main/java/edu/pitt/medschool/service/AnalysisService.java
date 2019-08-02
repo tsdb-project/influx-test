@@ -858,6 +858,10 @@ public class AnalysisService {
         return downsampleDao.deleteByPrimaryKey(id);
     }
 
+    public int deleteMedicalByPrimaryKey(int id){
+        return medicalDownsampleDao.deleteByPrimaryKey(id);
+    }
+
     public List<DownsampleGroup> selectAllAggregationGroupByQueryId(Integer queryId) {
         return downsampleGroupDao.selectAllAggregationGroupByQueryId(queryId);
     }

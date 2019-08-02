@@ -100,8 +100,6 @@ public class AnalysisController {
     private Model analysisGenerateModel(Model model) {
         model.addAttribute("nav", "analysis");
         model.addAttribute("subnav", "builder");
-        List<Downsample> downsamples = analysisService.selectAll();
-        model.addAttribute("downsamples", downsamples);
         return model;
     }
 
@@ -261,7 +259,9 @@ public class AnalysisController {
 
     @RequestMapping("analysis/medical")
     public Model medical(Model model) {
-        return analysisGenerateModel(model);
+        model.addAttribute("nav", "analysis");
+        model.addAttribute("subnav", "medicalbuilder");
+        return model;
     }
 
     @RequestMapping(value = { "analysis/edit/{id}", "analysis/edit" }, method = RequestMethod.GET)
@@ -393,6 +393,19 @@ public class AnalysisController {
             map.put("res", new RestfulResponse(0, "deletion failed"));
         }
         map.put("data", null);
+        return map;
+    }
+
+    @RequestMapping(value = "analysis/medicalquery", method = RequestMethod.DELETE)
+    @ResponseBody
+    public Map<String,Object> delete(@RequestBody(required = true) MedicalDownsample medicalDownsample) throws Exception{
+        Map<String,Object> map = new HashMap<>();
+        if (analysisService.deleteMedicalByPrimaryKey(medicalDownsample.getId())==1) {
+            map.put("res", new RestfulResponse(1,"success"));
+        } else {
+            map.put("res", new RestfulResponse(0,"deletion failed"));
+        }
+        map.put("data",null);
         return map;
     }
 

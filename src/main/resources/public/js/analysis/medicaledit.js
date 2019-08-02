@@ -234,7 +234,7 @@ $(document).ready(function() {
             'contentType': "application/json",
             'dataType': 'json',
             'success': function(data) {
-                window.location.href = '/analysis/builder';
+                window.location.href = '/analysis/medicalbuilder';
             },
             'error': function() {}
         });
