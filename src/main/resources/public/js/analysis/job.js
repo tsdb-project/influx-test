@@ -72,7 +72,7 @@ $(document).ready(function() {
         }, {
             data:null,
             render: function(data){
-                return (data.finishedPatient/data.allPatient).toFixed(4)*100+"%";
+                return parseFloat((data.finishedPatient/data.allPatient).toPrecision(4))*100+"%";
             }
         },{
             data: null,

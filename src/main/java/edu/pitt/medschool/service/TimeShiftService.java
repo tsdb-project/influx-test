@@ -126,7 +126,7 @@ public class TimeShiftService {
     }
 
     private List<CsvFile> findCorrespondingFiles(HashMap<String,Long> driftMap, String directory){
-        List<FileBean> files = Util.filesInFolder(directory);
+        List<FileBean> files = Util.filesInFolder(directory,"csv");
         List<CsvFile> foundFiles = new ArrayList<>();
 
         for(FileBean file: files){

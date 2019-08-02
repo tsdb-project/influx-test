@@ -29,9 +29,9 @@ public class AutoImportService {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                if(! Util.filesInFolder(dir).isEmpty() && ! Util.filesInFolderTxt(dir).isEmpty()){
-                    List<FileBean> csvs = Util.filesInFolder(dir);
-                    List<FileBean> txts = Util.filesInFolderTxt(dir);
+                if(! Util.filesInFolder(dir , "csv").isEmpty() && ! Util.filesInFolder(dir,"txt").isEmpty()){
+                    List<FileBean> csvs = Util.filesInFolder(dir , "csv");
+                    List<FileBean> txts = Util.filesInFolder(dir,"txt");
                     List<FileBean> importList = new ArrayList<>();
                     for(FileBean f: txts){
                         String name = f.getName().toLowerCase().replace(".txt","");
