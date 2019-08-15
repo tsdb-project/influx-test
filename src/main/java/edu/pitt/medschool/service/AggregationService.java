@@ -62,8 +62,8 @@ public class AggregationService {
         int paraCount = determineParaNumber();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
-            FileUtils.forceMkdir(new File("d:/eegdata/"+this.dir+"/"));
-            this.bufferedWriter = new BufferedWriter(new FileWriter("d:/eegdata/"+this.dir+"/"+this.dir+".txt"));
+            FileUtils.forceMkdir(new File("/tsdb/output/"+this.dir+"/"));
+            this.bufferedWriter = new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+this.dir+".txt"));
         }catch (IOException e){
             e.printStackTrace();
             return;
@@ -95,7 +95,7 @@ public class AggregationService {
                 try{
                     ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, query);
                     // write result into csv
-                    CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter("d:/eegdata/"+this.dir+"/"+pid+".csv")));
+                    CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+pid+".csv")));
                     writer.writeNext(head);
                     writeOnePatinet(res[0],pid,writer);
                     writer.close();
