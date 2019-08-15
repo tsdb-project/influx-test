@@ -16,7 +16,7 @@ public class AppUtilTest {
         List<String> s = Arrays.asList(Util.getAllSpecificFileInDirectory("src/main/resources/myBatis", "xml"));
         assertEquals(s.size(), 4);
 
-        List<FileBean> b = Util.filesInFolder("src/main/resources");
+        List<FileBean> b = Util.filesInFolder("src/main/resources","csv");
         assertEquals(b.size(), 0);
     }
 

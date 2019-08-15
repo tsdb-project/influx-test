@@ -7,6 +7,7 @@ import java.util.TimeZone;
 
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.service.AggregationService;
 import edu.pitt.medschool.service.AutoImportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,8 @@ import edu.pitt.medschool.framework.util.TimeUtil;
 public class Application implements ApplicationRunner {
     @Autowired
     AutoImportService autoImportService;
+    @Autowired
+    AggregationService aggregationService;
 
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
@@ -38,6 +41,7 @@ public class Application implements ApplicationRunner {
         logger.info("NonOptionArgs: {}", args.getNonOptionArgs());
         logger.info("OptionNames: {}", args.getOptionNames());
         //autoImportService.initImport();
+        aggregationService.aggregate("1m");
 
         for (String name : args.getOptionNames()) {
             logger.info("arg->" + name + "=" + args.getOptionValues(name));
