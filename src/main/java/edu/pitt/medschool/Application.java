@@ -41,7 +41,7 @@ public class Application implements ApplicationRunner {
         logger.info("NonOptionArgs: {}", args.getNonOptionArgs());
         logger.info("OptionNames: {}", args.getOptionNames());
         //autoImportService.initImport();
-        aggregationService.aggregate("1h");
+        aggregationService.aggregate("1m");
 
         for (String name : args.getOptionNames()) {
             logger.info("arg->" + name + "=" + args.getOptionValues(name));
