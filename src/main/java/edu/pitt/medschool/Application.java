@@ -40,8 +40,7 @@ public class Application implements ApplicationRunner {
         logger.info("Application started with command-line arguments: {}", Arrays.toString(args.getSourceArgs()));
         logger.info("NonOptionArgs: {}", args.getNonOptionArgs());
         logger.info("OptionNames: {}", args.getOptionNames());
-        //autoImportService.initImport();
-        aggregationService.aggregate("1m");
+
 
         for (String name : args.getOptionNames()) {
             logger.info("arg->" + name + "=" + args.getOptionValues(name));
@@ -63,6 +62,8 @@ public class Application implements ApplicationRunner {
                 logger.error(Util.stackTraceErrorToString(se));
             }
         }
+        //autoImportService.initImport();
+        aggregationService.aggregate("1m");
 
     }
 }
