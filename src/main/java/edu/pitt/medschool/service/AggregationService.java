@@ -9,6 +9,7 @@ import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.formula.functions.Now;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Query;
@@ -16,6 +17,7 @@ import org.influxdb.dto.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -30,6 +32,9 @@ import static edu.pitt.medschool.framework.influxdb.InfluxUtil.generateIdbClient
 
 @Service
 public class AggregationService {
+    @Value("${load}")
+    private double loadFactor;
+
     private BufferedWriter bufferedWriter;
     private String dir;
     @Autowired
@@ -46,6 +51,7 @@ public class AggregationService {
     public void aggregate(String time) {
         System.out.println("start aggregation");
         this.dir = time+"_aggregation";
+        // add this job into the export table
         ExportWithBLOBs export = new ExportWithBLOBs();
         export.setAr(true);
         List<String> patientIDs;
@@ -55,27 +61,26 @@ public class AggregationService {
         export.setQueryId(83);
         exportDao.insertExportJob(export);
         int jobid = export.getId();
+        // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
+
+        // get all 6037 columns
         List<String> columns = getColumns();
-        String selection = getSelection(columns);
+
+        // get selection condition from 6037 columns, now each file is splited into 9 parts
+        List<String> selection = getSelection(columns);
         int paraCount = determineParaNumber();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
             FileUtils.forceMkdir(new File("/tsdb/output/"+this.dir+"/"));
             this.bufferedWriter = new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+this.dir+".txt"));
+            this.bufferedWriter.write("Cores: "+paraCount);
         }catch (IOException e){
             e.printStackTrace();
             return;
         }
-        String[] head = new String[18113];
-        head[0] = "pid";
-        head[1] = "time";
-        for(int i=0;i<6037;i++){
-            head[i*3+2] = "mean("+columns.get(i)+")";
-            head[i*3+3] = "max("+columns.get(i)+")";
-            head[i*3+4] = "min("+columns.get(i)+")";
-        }
+
 
         LocalDateTime start_Time = LocalDateTime.now();
         Runnable queryTask = () -> {
@@ -88,23 +93,36 @@ public class AggregationService {
                 QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
                 String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                 String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
-
-                String query = String.format("select %s from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s)", selection, pid,endTime,startTime,time);
+                List<String> queries = new ArrayList<>();
+                for(int count=0;count<selection.size();count++){
+                    queries.add(String.format("select %s from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s)", selection.get(count), pid,endTime,startTime,time));
+                }
                 //System.out.println(query);
                 // run query
                 try{
-                    ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, query);
-                    // write result into csv
-                    CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+pid+".csv")));
-                    writer.writeNext(head);
-                    writeOnePatinet(res[0],pid,writer);
-                    writer.close();
+                    FileUtils.forceMkdir(new File("/tsdb/output/"+this.dir+"/"+pid+"/"));
+                    for(int count=0;count<selection.size();count++){
+                        ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, queries.get(count));
+                        // write result into csv
+                        CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+pid+"/"+pid+"_"+ (count + 1) +".csv")));
+                        String[] head = selection.get(count).split(",");
+                        String[] info = {"pid","time"};
+                        writer.writeNext(ArrayUtils.addAll(info,head));
+                        writeOnePart(res[0],pid,writer);
+                        writer.flush();
+                        writer.close();
+
+                    }
+                    finishedPatientCounter.getAndIncrement();
+                    exportDao.updatePatientFinishedNum(jobid,finishedPatientCounter.get());
+
                 }catch (Exception e){
+                    logger.info(pid);
+                    recordError(pid);
                     e.printStackTrace();
                 }
 
-                finishedPatientCounter.getAndIncrement();
-                exportDao.updatePatientFinishedNum(jobid,finishedPatientCounter.get());
+
 
             }
             influxDB.close();
@@ -123,7 +141,9 @@ public class AggregationService {
             try{
                 LocalDateTime end_Time = LocalDateTime.now();
                 this.bufferedWriter.write(String.valueOf(Duration.between(start_Time,end_Time)));
+                this.bufferedWriter.flush();
                 this.bufferedWriter.close();
+                System.out.println("Job finished");
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -148,23 +168,32 @@ public class AggregationService {
         }
         return columns;
     }
-    private String getSelection(List<String> columns){
-        String res="";
-        for(String col : columns){
-            String onepart = String.format("mean(\"%s\"),max(\"%s\"),min(\"%s\"),", col,col,col);
-            res +=onepart;
+    private List<String> getSelection(List<String> columns){
+        List<String> res= new ArrayList<>();
+        String onepart = "";
+        for(int count=0;count<8;count++){
+            for(int j=count*671;j<(count+1)*671;j++){
+                onepart+=String.format("mean(\"%s\"),max(\"%s\"),min(\"%s\"),", columns.get(j),columns.get(j),columns.get(j));
+            }
+            res.add(onepart.substring(0,onepart.length()-1));
+            onepart="";
         }
-        res = res.substring(0,res.length()-1);
+        for(int j=8*671;j<columns.size();j++){
+            onepart+= String.format("mean(\"%s\"),max(\"%s\"),min(\"%s\"),", columns.get(j),columns.get(j),columns.get(j));
+        }
+        res.add(onepart.substring(0,onepart.length()-1));
         return res;
     }
 
-    private void writeOnePatinet(ResultTable res, String pid,CSVWriter writer){
+
+    private void writeOnePart(ResultTable res, String pid,CSVWriter writer){
         int len = res.getRowCount();
-        String[] oneRow = new String[18113];
+        int col = res.getColCount();
+        String[] oneRow = new String[col+1];
         for(int i=0;i<len;i++){
             oneRow[0] = pid;
             List<Object> row = res.getDatalistByRow(i);
-            for(int j=0;j<18112;j++){
+            for(int j=0;j<col;j++){
                 if(row.get(j)==null){
                     oneRow[j+1]="NA";
                 }else {
@@ -180,7 +209,15 @@ public class AggregationService {
     }
 
     private int determineParaNumber() {
-        int paraCount = (int) Math.round(0.4*InfluxappConfig.AvailableCores);
+        int paraCount = (int) Math.round(loadFactor*InfluxappConfig.AvailableCores);
         return paraCount > 0 ? paraCount : 1;
+    }
+
+    private void recordError(String pid){
+        try{
+            this.bufferedWriter.write("Failed PID: "+pid);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 }
