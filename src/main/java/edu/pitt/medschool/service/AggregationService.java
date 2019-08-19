@@ -64,6 +64,7 @@ public class AggregationService {
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
+
         // get all 6037 columns
         List<String> columns = getColumns();
 
@@ -76,6 +77,7 @@ public class AggregationService {
             this.bufferedWriter = new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+this.dir+".txt"));
             this.bufferedWriter.write("Cores: "+paraCount);
             this.bufferedWriter.newLine();
+            this.bufferedWriter.flush();
         }catch (IOException e){
             e.printStackTrace();
             return;
@@ -114,6 +116,7 @@ public class AggregationService {
                     }
                     this.bufferedWriter.write("Success: "+pid);
                     this.bufferedWriter.newLine();
+                    this.bufferedWriter.flush();
                     finishedPatientCounter.getAndIncrement();
                     exportDao.updatePatientFinishedNum(jobid,finishedPatientCounter.get());
 
@@ -218,6 +221,7 @@ public class AggregationService {
         try{
             this.bufferedWriter.write("Failed PID: "+pid);
             this.bufferedWriter.newLine();
+            this.bufferedWriter.flush();
         }catch (IOException e){
             e.printStackTrace();
         }
