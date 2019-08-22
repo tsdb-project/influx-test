@@ -64,23 +64,28 @@ public class AggregationService {
         String pathname = "/tsdb/output/"+this.dir+"/"+this.dir+".txt";
         File filename = new File(pathname);
         if(filename.exists()){
-            InputStreamReader reader = new InputStreamReader(
-                    new FileInputStream(filename));
-            BufferedReader br = new BufferedReader(reader);
-            HashSet<String> finishedPid = new HashSet<>();
-            String line = "";
-            line = br.readLine();
-            while (line != null) {
-                line = br.readLine();
-                String[] record = line.split(":");
-                if(record[0].equals("Success")){
-                    finishedPid.add(record[1]);
+            try{
+                InputStreamReader reader = new InputStreamReader(
+                        new FileInputStream(filename));
+                BufferedReader br = new BufferedReader(reader);
+                HashSet<String> finishedPid = new HashSet<>();
+                String line = br.readLine();
+                while (line != null) {
+                    String[] record = line.split(":");
+                    if(record[0].equals("Success")){
+                        finishedPid.add(record[1]);
+                    }
+                    line = br.readLine();
                 }
+                HashSet<String> allPid = new HashSet<>(patientIDs);
+                allPid.removeAll(finishedPid);
+                patients = new ArrayList<>(allPid);
+                System.out.println(allPid);
+            }catch (IOException e){
+                e.printStackTrace();
             }
-            HashSet<String> allPid = new HashSet<>(patientIDs);
-            allPid.removeAll(finishedPid);
-            patients = new ArrayList<>(allPid);
-            System.out.println(allPid);
+
+
         }else{
             patients = patientIDs;
         }

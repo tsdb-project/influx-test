@@ -1,6 +1,7 @@
 package edu.pitt.medschool;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
@@ -33,7 +34,7 @@ public class Application implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) {
+    public void run(ApplicationArguments args) throws IOException {
         TimeZone.setDefault(TimeUtil.nycTimeZone);
         logger.warn("BrainFlux start time: " + new Date());
 
