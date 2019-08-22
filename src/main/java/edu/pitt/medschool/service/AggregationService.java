@@ -73,14 +73,15 @@ public class AggregationService {
                 while (line != null) {
                     String[] record = line.split(":");
                     if(record[0].equals("Success")){
-                        finishedPid.add(record[1]);
+                        finishedPid.add(record[1].trim());
                     }
                     line = br.readLine();
                 }
                 HashSet<String> allPid = new HashSet<>(patientIDs);
                 allPid.removeAll(finishedPid);
                 patients = new ArrayList<>(allPid);
-                System.out.println(allPid);
+                System.out.println(finishedPid.size());
+                System.out.println(allPid.size());
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -105,95 +106,95 @@ public class AggregationService {
         // get selection condition from 6037 columns, now each file is splited into 9 parts
         List<String> selection = getSelection(columns);
         int paraCount = determineParaNumber();
-//        ExecutorService scheduler = generateNewThreadPool(paraCount);
-//        try{
-//            FileUtils.forceMkdir(new File("/tsdb/output/"+this.dir+"/"));
-//            this.bufferedWriter = new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+this.dir+".txt"));
-//            this.bufferedWriter.write("Cores: "+paraCount);
-//            this.bufferedWriter.newLine();
-//            this.bufferedWriter.flush();
-//        }catch (IOException e){
-//            e.printStackTrace();
-//            return;
-//        }
-//
-//
-//        LocalDateTime start_Time = LocalDateTime.now();
-//        Runnable queryTask = () -> {
-//            String pid;
-//            InfluxDB influxDB = generateIdbClient(false);
-//
-//            while ((pid=idQueue.poll())!=null){
-//                // generate query
-//                QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
-//                QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
-//                String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
-//                String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
-//                List<String> queries = new ArrayList<>();
-//                for(int count=0;count<selection.size();count++){
-//                    queries.add(String.format("select %s from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s)", selection.get(count), pid,endTime,startTime,time));
-//                }
-//                //System.out.println(query);
-//                // run query
-//                try{
-//                    FileUtils.forceMkdir(new File("/tsdb/output/"+this.dir+"/"+pid+"/"));
-//                    File file = new File("/tsdb/output/"+this.dir+"/"+pid+"/");
-//                    File[] dirs = file.listFiles();
-//                    if(dirs != null){
-//                        for(File s: dirs){
-//                            s.delete();
-//                        }
-//                    }
-//
-//                    for(int count=0;count<selection.size();count++){
-//                        ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, queries.get(count));
-//                        // write result into csv
-//                        CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+pid+"/"+pid+"_"+ (count + 1) +".csv")));
-//                        String[] head = selection.get(count).split(",");
-//                        String[] info = {"pid","time"};
-//                        writer.writeNext(ArrayUtils.addAll(info,head));
-//                        writeOnePart(res[0],pid,writer);
-//                        writer.flush();
-//                        writer.close();
-//                    }
-//                    this.bufferedWriter.write("Success: "+pid);
-//                    this.bufferedWriter.newLine();
-//                    this.bufferedWriter.flush();
-//                    finishedPatientCounter.getAndIncrement();
-//                    exportDao.updatePatientFinishedNum(jobid,finishedPatientCounter.get());
-//
-//                }catch (Exception e){
-//                    logger.info(pid);
-//                    recordError(pid);
-//                    e.printStackTrace();
-//                }
-//
-//
-//
-//            }
-//            influxDB.close();
-//        };
-//
-//        for (int i = 0; i < paraCount; ++i) {
-//            scheduler.submit(queryTask);
-//        }
-//        scheduler.shutdown();
-//        try {
-//            scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-//        } catch (InterruptedException e) {
-//            logger.error(Util.stackTraceErrorToString(e));
-//        }
-//        finally {
-//            try{
-//                LocalDateTime end_Time = LocalDateTime.now();
-//                this.bufferedWriter.write(String.valueOf(Duration.between(start_Time,end_Time)));
-//                this.bufferedWriter.flush();
-//                this.bufferedWriter.close();
-//                System.out.println("Job finished");
-//            }catch (IOException e){
-//                e.printStackTrace();
-//            }
-//        }
+        ExecutorService scheduler = generateNewThreadPool(paraCount);
+        try{
+            FileUtils.forceMkdir(new File("/tsdb/output/"+this.dir+"/"));
+            this.bufferedWriter = new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+this.dir+".txt"));
+            this.bufferedWriter.write("Cores: "+paraCount);
+            this.bufferedWriter.newLine();
+            this.bufferedWriter.flush();
+        }catch (IOException e){
+            e.printStackTrace();
+            return;
+        }
+
+
+        LocalDateTime start_Time = LocalDateTime.now();
+        Runnable queryTask = () -> {
+            String pid;
+            InfluxDB influxDB = generateIdbClient(false);
+
+            while ((pid=idQueue.poll())!=null){
+                // generate query
+                QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
+                QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
+                String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+                String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+                List<String> queries = new ArrayList<>();
+                for(int count=0;count<selection.size();count++){
+                    queries.add(String.format("select %s from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s)", selection.get(count), pid,endTime,startTime,time));
+                }
+                //System.out.println(query);
+                // run query
+                try{
+                    FileUtils.forceMkdir(new File("/tsdb/output/"+this.dir+"/"+pid+"/"));
+                    File file = new File("/tsdb/output/"+this.dir+"/"+pid+"/");
+                    File[] dirs = file.listFiles();
+                    if(dirs != null){
+                        for(File s: dirs){
+                            s.delete();
+                        }
+                    }
+
+                    for(int count=0;count<selection.size();count++){
+                        ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, queries.get(count));
+                        // write result into csv
+                        CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+pid+"/"+pid+"_"+ (count + 1) +".csv")));
+                        String[] head = selection.get(count).split(",");
+                        String[] info = {"pid","time"};
+                        writer.writeNext(ArrayUtils.addAll(info,head));
+                        writeOnePart(res[0],pid,writer);
+                        writer.flush();
+                        writer.close();
+                    }
+                    this.bufferedWriter.write("Success: "+pid);
+                    this.bufferedWriter.newLine();
+                    this.bufferedWriter.flush();
+                    finishedPatientCounter.getAndIncrement();
+                    exportDao.updatePatientFinishedNum(jobid,finishedPatientCounter.get());
+
+                }catch (Exception e){
+                    logger.info(pid);
+                    recordError(pid);
+                    e.printStackTrace();
+                }
+
+
+
+            }
+            influxDB.close();
+        };
+
+        for (int i = 0; i < paraCount; ++i) {
+            scheduler.submit(queryTask);
+        }
+        scheduler.shutdown();
+        try {
+            scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.error(Util.stackTraceErrorToString(e));
+        }
+        finally {
+            try{
+                LocalDateTime end_Time = LocalDateTime.now();
+                this.bufferedWriter.write(String.valueOf(Duration.between(start_Time,end_Time)));
+                this.bufferedWriter.flush();
+                this.bufferedWriter.close();
+                System.out.println("Job finished");
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
 
     }
 
