@@ -58,35 +58,41 @@ public class AggregationService {
         export.setAr(true);
         List<String> patientIDs;
         patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
-        export.setAllPatient(patientIDs.size());
+        List<String> patients = new ArrayList<>();
+
+        //get finished pids
+        String pathname = "/tsdb/output/"+this.dir+"/"+this.dir+".txt";
+        File filename = new File(pathname);
+        if(filename.exists()){
+            InputStreamReader reader = new InputStreamReader(
+                    new FileInputStream(filename));
+            BufferedReader br = new BufferedReader(reader);
+            HashSet<String> finishedPid = new HashSet<>();
+            String line = "";
+            line = br.readLine();
+            while (line != null) {
+                line = br.readLine();
+                String[] record = line.split(":");
+                if(record[0].equals("Success")){
+                    finishedPid.add(record[1]);
+                }
+            }
+            HashSet<String> allPid = new HashSet<>(patientIDs);
+            allPid.removeAll(finishedPid);
+            patients = new ArrayList<>(allPid);
+            System.out.println(allPid);
+        }else{
+            patients = patientIDs;
+        }
+        export.setAllPatient(patients.size());
         export.setMachine("realpsc");
         export.setQueryId(83);
         exportDao.insertExportJob(export);
         int jobid = export.getId();
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
-
-        //get finished pids
-        String pathname = "/tsdb/output/1m_aggregation/1m_aggregation.txt";
-        File filename = new File(pathname);
-        InputStreamReader reader = new InputStreamReader(
-                new FileInputStream(filename));
-        BufferedReader br = new BufferedReader(reader);
-        HashSet<String> finishedPid = new HashSet<>();
-        String line = "";
-        line = br.readLine();
-        while (line != null) {
-            line = br.readLine();
-            String[] record = line.split(":");
-            if(record[0].equals("Success")){
-                finishedPid.add(record[1]);
-            }
-        }
-        HashSet<String> allPid = new HashSet<>(patientIDs);
-        allPid.removeAll(finishedPid);
-        List<String> patients = new ArrayList<>(allPid);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
-        System.out.println(allPid);
+
 
         // get all 6037 columns
         List<String> columns = getColumns();
