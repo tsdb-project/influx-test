@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.expression.Sets;
 
 import java.io.*;
 import java.time.Duration;
@@ -72,16 +71,16 @@ public class AggregationService {
                 String line = br.readLine();
                 while (line != null) {
                     String[] record = line.split(":");
-                    if(record[0].equals("Success")){
+                    if(record[0].equals("Failed PID")){
                         finishedPid.add(record[1].trim());
                     }
                     line = br.readLine();
                 }
-                HashSet<String> allPid = new HashSet<>(patientIDs);
-                allPid.removeAll(finishedPid);
-                patients = new ArrayList<>(allPid);
+//                HashSet<String> allPid = new HashSet<>(patientIDs);
+//                allPid.removeAll(finishedPid);
+                patients = new ArrayList<>(finishedPid);
                 System.out.println(finishedPid.size());
-                System.out.println(allPid.size());
+                //System.out.println(finishedPid.size());
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -109,7 +108,7 @@ public class AggregationService {
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
             FileUtils.forceMkdir(new File("/tsdb/output/"+this.dir+"/"));
-            this.bufferedWriter = new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+this.dir+".txt"));
+            this.bufferedWriter = new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+this.dir+".txt",true));
             this.bufferedWriter.write("Cores: "+paraCount);
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
