@@ -90,14 +90,13 @@ public class AggregationService2 {
         }
         export.setAllPatient(patients.size());
         export.setMachine("realpsc");
-        export.setQueryId(90);
+        export.setQueryId(83);
         exportDao.insertExportJob(export);
         int jobid = export.getId();
 
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
-        BlockingQueue<String> idQueue = new LinkedBlockingQueue<>();
-        idQueue.add("PUH-2015-015");
+        BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
 
         // get all 6037 columns
         List<String> columns = getColumns();
