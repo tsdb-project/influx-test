@@ -4,9 +4,11 @@ import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
+import edu.pitt.medschool.model.dao.AggregationDao;
 import edu.pitt.medschool.model.dao.ExportDao;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.VersionDao;
+import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -45,6 +47,8 @@ public class AggregationService {
     ValidateCsvService validateCsvService;
     @Autowired
     VersionDao versionDao;
+    @Autowired
+    AggregationDao aggregationDao;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -236,4 +240,8 @@ public class AggregationService {
 
         return dbname;
     }
+
+//    public List<AggregationDatabase> selectAllAvailableDBs() {
+//        return aggregationDao.selectAllAvailableDBs();
+//    }
 }
