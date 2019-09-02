@@ -1,16 +1,15 @@
 package edu.pitt.medschool.service;
 
-import com.opencsv.CSVWriter;
 import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
-import edu.pitt.medschool.framework.util.TimeUtil;
 import edu.pitt.medschool.framework.util.Util;
-import edu.pitt.medschool.model.dao.*;
+import edu.pitt.medschool.model.dao.ExportDao;
+import edu.pitt.medschool.model.dao.ImportedFileDao;
+import edu.pitt.medschool.model.dao.VersionDao;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.poi.ss.formula.functions.Now;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
@@ -49,9 +48,11 @@ public class AggregationService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public void aggregate(String time) throws IOException {
+
+    public void startAgg(String time){
         System.out.println("start aggregation");
-        this.dir = time+"_aggregation";
+        this.dir = time+"_new_agg";
+
         // add this job into the export table
         ExportWithBLOBs export = new ExportWithBLOBs();
         export.setAr(true);
@@ -71,21 +72,19 @@ public class AggregationService {
                 String line = br.readLine();
                 while (line != null) {
                     String[] record = line.split(":");
-                    if(record[0].equals("Failed PID")){
+                    if(record[0].equals("Success")){
                         finishedPid.add(record[1].trim());
                     }
                     line = br.readLine();
                 }
-//                HashSet<String> allPid = new HashSet<>(patientIDs);
-//                allPid.removeAll(finishedPid);
-                patients = new ArrayList<>(finishedPid);
+                HashSet<String> allPid = new HashSet<>(patientIDs);
+                allPid.removeAll(finishedPid);
+                patients = new ArrayList<>(allPid);
                 System.out.println(finishedPid.size());
-                //System.out.println(finishedPid.size());
+                System.out.println(allPid.size());
             }catch (IOException e){
                 e.printStackTrace();
             }
-
-
         }else{
             patients = patientIDs;
         }
@@ -94,10 +93,10 @@ public class AggregationService {
         export.setQueryId(83);
         exportDao.insertExportJob(export);
         int jobid = export.getId();
+
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
-
 
         // get all 6037 columns
         List<String> columns = getColumns();
@@ -112,11 +111,13 @@ public class AggregationService {
             this.bufferedWriter.write("Cores: "+paraCount);
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
+            InfluxDB influxDB = generateIdbClient(false);
+            influxDB.query(new Query("create database aggdata"));
+            influxDB.close();
         }catch (IOException e){
             e.printStackTrace();
             return;
         }
-
 
         LocalDateTime start_Time = LocalDateTime.now();
         Runnable queryTask = () -> {
@@ -131,30 +132,16 @@ public class AggregationService {
                 String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                 List<String> queries = new ArrayList<>();
                 for(int count=0;count<selection.size();count++){
-                    queries.add(String.format("select %s from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s)", selection.get(count), pid,endTime,startTime,time));
+                    queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
                 }
+
+                System.out.println(queries.get(0));
+
                 //System.out.println(query);
                 // run query
                 try{
-                    FileUtils.forceMkdir(new File("/tsdb/output/"+this.dir+"/"+pid+"/"));
-                    File file = new File("/tsdb/output/"+this.dir+"/"+pid+"/");
-                    File[] dirs = file.listFiles();
-                    if(dirs != null){
-                        for(File s: dirs){
-                            s.delete();
-                        }
-                    }
-
                     for(int count=0;count<selection.size();count++){
-                        ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, queries.get(count));
-                        // write result into csv
-                        CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+pid+"/"+pid+"_"+ (count + 1) +".csv")));
-                        String[] head = selection.get(count).split(",");
-                        String[] info = {"pid","time"};
-                        writer.writeNext(ArrayUtils.addAll(info,head));
-                        writeOnePart(res[0],pid,writer);
-                        writer.flush();
-                        writer.close();
+                        QueryResult rs = influxDB.query(new Query(queries.get(count),"data"));
                     }
                     this.bufferedWriter.write("Success: "+pid);
                     this.bufferedWriter.newLine();
@@ -167,9 +154,6 @@ public class AggregationService {
                     recordError(pid);
                     e.printStackTrace();
                 }
-
-
-
             }
             influxDB.close();
         };
@@ -186,7 +170,8 @@ public class AggregationService {
         finally {
             try{
                 LocalDateTime end_Time = LocalDateTime.now();
-                this.bufferedWriter.write(String.valueOf(Duration.between(start_Time,end_Time)));
+                this.bufferedWriter.write(String.valueOf(Duration.between(start_Time,end_Time)).replace("PT","Run Time: "));
+                this.bufferedWriter.newLine();
                 this.bufferedWriter.flush();
                 this.bufferedWriter.close();
                 System.out.println("Job finished");
@@ -195,10 +180,7 @@ public class AggregationService {
             }
         }
 
-    }
 
-    private ExecutorService generateNewThreadPool(int i) {
-        return Executors.newFixedThreadPool(i);
     }
 
     private List<String> getColumns(){
@@ -214,48 +196,26 @@ public class AggregationService {
         }
         return columns;
     }
+
     private List<String> getSelection(List<String> columns){
         List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
         for(int count=0;count<15;count++){
             for(int j=count*380;j<(count+1)*380;j++){
-                onepart.append(String.format("mean(\"%s\"),max(\"%s\"),min(\"%s\"),", columns.get(j), columns.get(j), columns.get(j)));
+                onepart.append(String.format("mean(\"%s\") as mean_%s , max(\"%s\") as max_%s , min(\"%s\") as min_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
             }
             res.add(onepart.substring(0,onepart.length()-1));
             onepart = new StringBuilder();
         }
         for(int j=15*380;j<columns.size();j++){
-            onepart.append(String.format("mean(\"%s\"),max(\"%s\"),min(\"%s\"),", columns.get(j), columns.get(j), columns.get(j)));
+            onepart.append(String.format("mean(\"%s\") as mean_%s , max(\"%s\") as max_%s , min(\"%s\") as min_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
         }
         res.add(onepart.substring(0,onepart.length()-1));
         return res;
     }
 
-
-    private void writeOnePart(ResultTable res, String pid,CSVWriter writer){
-        int len = res.getRowCount();
-        int col = res.getColCount();
-        String[] oneRow = new String[col+1];
-        for(int i=0;i<len;i++){
-            oneRow[0] = pid;
-            List<Object> row = res.getDatalistByRow(i);
-            for(int j=0;j<col;j++){
-                if(row.get(j)==null){
-                    oneRow[j+1]="NA";
-                }else {
-                    oneRow[j+1] = String.valueOf(row.get(j));
-                }
-            }
-
-            //System.out.println(oneRow[0]+oneRow[1]+oneRow[2]+oneRow[3]);
-            synchronized (this){
-                writer.writeNext(oneRow);
-            }
-        }
-    }
-
     private int determineParaNumber() {
-        int paraCount = (int) Math.round(loadFactor*InfluxappConfig.AvailableCores);
+        int paraCount = (int) Math.round(loadFactor* InfluxappConfig.AvailableCores);
         return paraCount > 0 ? paraCount : 1;
     }
 
@@ -267,5 +227,15 @@ public class AggregationService {
         }catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    private ExecutorService generateNewThreadPool(int i) {
+        return Executors.newFixedThreadPool(i);
+    }
+
+    public String seletDatabase(String query){
+        String dbname="";
+
+        return dbname;
     }
 }
