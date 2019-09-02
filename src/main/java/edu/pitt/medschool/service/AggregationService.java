@@ -134,9 +134,7 @@ public class AggregationService {
                 for(int count=0;count<selection.size();count++){
                     queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
                 }
-
-                System.out.println(queries.get(0));
-
+                
                 //System.out.println(query);
                 // run query
                 try{
