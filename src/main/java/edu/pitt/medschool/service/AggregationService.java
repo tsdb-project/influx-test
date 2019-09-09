@@ -185,7 +185,7 @@ public class AggregationService {
 
     }
 
-    private List<String> getColumns(){
+    public List<String> getColumns(){
         List<String> columns = new ArrayList<>();
         int[][] x = {{1,1},{2,2},{3,3},{4,42},{43,81},{82,120},{121,159},{160,171},{172,176},{177,191},{192,230},{231,269},{270,270}};
         int[][] y = {{1,3},{1,24},{1,1},{1,40},{1,5},{1,1},{1,97},{1,1},{1,34},{1,1},{1,1},{1,5},{1,1}};
