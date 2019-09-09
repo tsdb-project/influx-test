@@ -1203,6 +1203,66 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
+		public Criteria andArtypeIsNull() {
+			addCriterion("arType is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeIsNotNull() {
+			addCriterion("arType is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeEqualTo(Byte value) {
+			addCriterion("arType =", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeNotEqualTo(Byte value) {
+			addCriterion("arType <>", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeGreaterThan(Byte value) {
+			addCriterion("arType >", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeGreaterThanOrEqualTo(Byte value) {
+			addCriterion("arType >=", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeLessThan(Byte value) {
+			addCriterion("arType <", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeLessThanOrEqualTo(Byte value) {
+			addCriterion("arType <=", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeIn(List<Byte> values) {
+			addCriterion("arType in", values, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeNotIn(List<Byte> values) {
+			addCriterion("arType not in", values, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeBetween(Byte value1, Byte value2) {
+			addCriterion("arType between", value1, value2, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeNotBetween(Byte value1, Byte value2) {
+			addCriterion("arType not between", value1, value2, "artype");
+			return (Criteria) this;
+		}
+
 		public Criteria andDbNameLikeInsensitive(String value) {
 			addCriterion("upper(db_name) like", value.toUpperCase(), "dbName");
 			return (Criteria) this;
