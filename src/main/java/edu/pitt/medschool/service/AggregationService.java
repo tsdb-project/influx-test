@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -77,11 +78,13 @@ public class AggregationService {
 
         List<String> patientIDs;
         if(job.getPidList().isEmpty()){
+            //todo new way to get all pids from csv_file table
             patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
         }else {
             patientIDs = Arrays.asList(job.getPidList().split(","));
         }
 
+        // todo update total
         List<String> patients = new ArrayList<>();
 
         // recover job after break down
@@ -278,6 +281,7 @@ public class AggregationService {
     public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {
         database.setVersion(versionDao.getLatestVersion());
         database.setStatus("processing");
+        database.setCreateTime(LocalDateTime.now(ZoneId.of("America/New_York")));
         return aggregationDao.setNewDB(database) != 0;
     }
 
