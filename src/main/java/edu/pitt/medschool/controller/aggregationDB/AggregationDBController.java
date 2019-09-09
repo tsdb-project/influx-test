@@ -9,11 +9,8 @@ import edu.pitt.medschool.service.AggregationService;
 import edu.pitt.medschool.service.ColumnService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import retrofit2.http.POST;
 
 import java.util.List;
 
@@ -23,7 +20,7 @@ public class AggregationDBController {
 
     @Autowired
     AggregationService aggregationService;
-    
+
 //    @Autowired
 //    ColumnService columnService;
 
@@ -51,11 +48,12 @@ public class AggregationDBController {
 
 
     // insert a new agg db into aggregation database table
-    @GetMapping("/newDB")
+    @PostMapping("/newDB")
     @ResponseBody
     public RestfulResponse exportQuery(@RequestBody(required = true) AggregationDatabaseWithBLOBs job, RestfulResponse response) {
         if (aggregationService.completeJobAndInsert(job)) {
-            if (aggregationService.addOneAggregationJob(job.getId())) {
+//            if (aggregationService.addOneAggregationJob(job.getId())) {
+                if (true) {
                 response.setCode(1);
                 response.setMsg("Successfully added job.");
             } else {

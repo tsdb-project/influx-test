@@ -270,6 +270,22 @@ $(document).ready(function() {
     }];
 
     /*
+    * get database information
+    * */
+
+    function getDatabases(){
+        $.ajax({
+            'url': "/aggregation/getDBs",
+            'type': 'get',
+            'success': function(data) {
+                databaseData = data.data;
+                console.log(databaseData);
+            },
+            'error': function() {}
+        });
+    }
+
+    /*
     * aggregation methods
     * */
 
@@ -450,20 +466,6 @@ $(document).ready(function() {
         aggFinalMethod = aggMethod;
     });
 
-    /*
-    * get database information
-    * */
-
-    function getDatabases(){
-        // $.ajax({
-        //     'url': "/aggregation/getDBs",
-        //     'type': 'get',
-        //     'success': function(data) {
-        //         databaseData = data.data
-        //     },
-        //     'error': function() {}
-        // });
-    }
 
     $.fn.dataTable.moment('M/D/YYYY, hh:mm:ss a');
     var table = $('#databaseTable').DataTable({
@@ -542,40 +544,40 @@ $(document).ready(function() {
     * Enable / disable database auto update
     * */
 
-    $("#enable-user-button").click(function() {
-        var id = $(this).attr('data-id');
-        var enable = true;
-        // $.ajax({
-        //     'url': "/aggregation/toggle_enable/" + id,
-        //     'type': 'patch',
-        //     'data': JSON.stringify(enable),
-        //     'contentType': "application/json",
-        //     'dataType': 'json',
-        //     'success': function(data) {
-        //         getDatabases()
-        //         table.ajax.reload();
-        //     },
-        //     'error': function() {}
-        // });
-    });
+    // $("#enable-user-button").click(function() {
+    //     var id = $(this).attr('data-id');
+    //     var enable = true;
+    //     $.ajax({
+    //         'url': "/aggregation/toggle_enable/" + id,
+    //         'type': 'patch',
+    //         'data': JSON.stringify(enable),
+    //         'contentType': "application/json",
+    //         'dataType': 'json',
+    //         'success': function(data) {
+    //             getDatabases();
+    //             table.ajax.reload();
+    //         },
+    //         'error': function() {}
+    //     });
+    // });
 
 
-    $("#disable-user-button").click(function() {
-        var id = $(this).attr('data-id');
-        var enable = false;
-        // $.ajax({
-        //     'url': "/aggregation/toggle_enable/" + id,
-        //     'type': 'patch',
-        //     'data': JSON.stringify(enable),
-        //     'contentType': "application/json",
-        //     'dataType': 'json',
-        //     'success': function(data) {
-        //         getDatabases()
-        //         table.ajax.reload();
-        //     },
-        //     'error': function() {}
-        // });
-    });
+    // $("#disable-user-button").click(function() {
+    //     var id = $(this).attr('data-id');
+    //     var enable = false;
+    //     $.ajax({
+    //         'url': "/aggregation/toggle_enable/" + id,
+    //         'type': 'patch',
+    //         'data': JSON.stringify(enable),
+    //         'contentType': "application/json",
+    //         'dataType': 'json',
+    //         'success': function(data) {
+    //             getDatabases()
+    //             table.ajax.reload();
+    //         },
+    //         'error': function() {}
+    //     });
+    // });
 
     /*
     *  update patient modal
@@ -632,43 +634,49 @@ $(document).ready(function() {
     $("#createButton").click(function () {
         $("#createButton").attr('disabled', 'disabled');
         var newDB = {
-            DBname: $("#alias").val(),
-            aggregationLevel: $('#period').val() * $('#period_unit').val(),
-            ar:$('#ar label.active input').val() == "true",
-            columnList:columnsFinalList == null ? "ALL": columnsFinalList,
-            patientList: patientsFinalList== null ? "ALL" : patientsFinalList,
+            db_name: $("#alias").val(),
+            aggregate_time: $('#period').val() * $('#period_unit').val(),
+            arType:$('#ar label.active input').val() == "true",
+            columns:columnsFinalList == null ? "ALL": columnsFinalList,
+            pid_list: patientsFinalList== null ? "ALL" : patientsFinalList,
             origin: $("#origin").val() * $("#origin_unit").val(),
             duration: $("#duration").val() * $("#duration_unit").val(),
-            Max:aggFinalMethod == null ? true : aggFinalMethod.Max,
-            Min:aggFinalMethod == null ? true : aggFinalMethod.Min,
-            Mean:aggFinalMethod == null ? true : aggFinalMethod.Mean,
-            Median:aggFinalMethod == null ? true : aggFinalMethod.Median,
-            Std:aggFinalMethod == null ? true : aggFinalMethod.Std,
-            FQ:aggFinalMethod == null ? true : aggFinalMethod.FQ,
-            TQ:aggFinalMethod == null ? true : aggFinalMethod.TQ,
-            Sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
-            lastUpdate:Date.now(),
-            autoUpdate:true
+            max:aggFinalMethod == null ? true : aggFinalMethod.Max,
+            min:aggFinalMethod == null ? true : aggFinalMethod.Min,
+            mean:aggFinalMethod == null ? true : aggFinalMethod.Mean,
+            median:aggFinalMethod == null ? true : aggFinalMethod.Median,
+            Sd:aggFinalMethod == null ? true : aggFinalMethod.Std,
+            q1:aggFinalMethod == null ? true : aggFinalMethod.FQ,
+            q3:aggFinalMethod == null ? true : aggFinalMethod.TQ,
+            sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
+            create_time:Date.now(),
+            auto_update:true
         };
 
         console.log(newDB);
-        // $.ajax({
-        //     url: "/aggregation/createDB/",
-        //     type: 'post',
-        //     data: JSON.stringify(form),
-        //     contentType: "application/json",
-        //     dataType: 'json',
-        //     success: function () {
-        //         getDatabases();
-        //         table.ajax.reload();
-        //         notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
-        //             'Successfully create database setting.');
-        //     },
-        //     error: function () {
-        //         notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
-        //             'Failed to submit this job, please try again.');
-        //     }
-        // });
+        $.ajax({
+            url: "/aggregation/newDB/",
+            type: 'post',
+            data: JSON.stringify(newDB),
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (response) {
+                console.log(response);
+                if(response.code == 1){
+                    getDatabases();
+                    table.ajax.reload();
+                    notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
+                        'Successfully create database setting.');
+                }else{
+                    notify("top", "center", null, "failed", "animated bounceIn", "animated fadeOut",
+                        ' Create database setting failed.');
+                }
+            },
+            error: function () {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Failed to submit this job, please try again.');
+            }
+        });
     });
 
     /*
