@@ -87,6 +87,9 @@ public class AggregationDatabaseSqlProvider {
 		if (record.getAutoUpdate() != null) {
 			sql.VALUES("auto_update", "#{autoUpdate,jdbcType=TINYINT}");
 		}
+		if (record.getArtype() != null) {
+			sql.VALUES("arType", "#{artype,jdbcType=TINYINT}");
+		}
 		if (record.getPidList() != null) {
 			sql.VALUES("pid_list", "#{pidList,jdbcType=LONGVARCHAR}");
 		}
@@ -123,6 +126,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SELECT("total");
 		sql.SELECT("finished");
 		sql.SELECT("auto_update");
+		sql.SELECT("arType");
 		sql.SELECT("pid_list");
 		sql.SELECT("columns");
 		sql.FROM("aggregation_database");
@@ -160,6 +164,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SELECT("total");
 		sql.SELECT("finished");
 		sql.SELECT("auto_update");
+		sql.SELECT("arType");
 		sql.FROM("aggregation_database");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -228,6 +233,9 @@ public class AggregationDatabaseSqlProvider {
 		if (record.getAutoUpdate() != null) {
 			sql.SET("auto_update = #{record.autoUpdate,jdbcType=TINYINT}");
 		}
+		if (record.getArtype() != null) {
+			sql.SET("arType = #{record.artype,jdbcType=TINYINT}");
+		}
 		if (record.getPidList() != null) {
 			sql.SET("pid_list = #{record.pidList,jdbcType=LONGVARCHAR}");
 		}
@@ -262,6 +270,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SET("total = #{record.total,jdbcType=INTEGER}");
 		sql.SET("finished = #{record.finished,jdbcType=INTEGER}");
 		sql.SET("auto_update = #{record.autoUpdate,jdbcType=TINYINT}");
+		sql.SET("arType = #{record.artype,jdbcType=TINYINT}");
 		sql.SET("pid_list = #{record.pidList,jdbcType=LONGVARCHAR}");
 		sql.SET("columns = #{record.columns,jdbcType=LONGVARCHAR}");
 		AggregationDatabaseExample example = (AggregationDatabaseExample) parameter.get("example");
@@ -293,6 +302,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SET("total = #{record.total,jdbcType=INTEGER}");
 		sql.SET("finished = #{record.finished,jdbcType=INTEGER}");
 		sql.SET("auto_update = #{record.autoUpdate,jdbcType=TINYINT}");
+		sql.SET("arType = #{record.artype,jdbcType=TINYINT}");
 		AggregationDatabaseExample example = (AggregationDatabaseExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -352,6 +362,9 @@ public class AggregationDatabaseSqlProvider {
 		}
 		if (record.getAutoUpdate() != null) {
 			sql.SET("auto_update = #{autoUpdate,jdbcType=TINYINT}");
+		}
+		if (record.getArtype() != null) {
+			sql.SET("arType = #{artype,jdbcType=TINYINT}");
 		}
 		if (record.getPidList() != null) {
 			sql.SET("pid_list = #{pidList,jdbcType=LONGVARCHAR}");

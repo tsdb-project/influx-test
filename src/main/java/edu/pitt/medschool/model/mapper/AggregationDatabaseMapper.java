@@ -49,14 +49,15 @@ public interface AggregationDatabaseMapper {
 	 * @mbg.generated
 	 */
 	@Insert({ "insert into aggregation_database (db_name, version, ", "aggregate_time, create_time, ",
-			"mean, max, min, ", "sd, median, q1, ", "q3, sum, status, ", "total, finished, ", "auto_update, pid_list, ",
-			"columns)", "values (#{dbName,jdbcType=VARCHAR}, #{version,jdbcType=INTEGER}, ",
+			"mean, max, min, ", "sd, median, q1, ", "q3, sum, status, ", "total, finished, ", "auto_update, arType, ",
+			"pid_list, columns)", "values (#{dbName,jdbcType=VARCHAR}, #{version,jdbcType=INTEGER}, ",
 			"#{aggregateTime,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, ",
 			"#{mean,jdbcType=TINYINT}, #{max,jdbcType=TINYINT}, #{min,jdbcType=TINYINT}, ",
 			"#{sd,jdbcType=TINYINT}, #{median,jdbcType=TINYINT}, #{q1,jdbcType=TINYINT}, ",
 			"#{q3,jdbcType=TINYINT}, #{sum,jdbcType=TINYINT}, #{status,jdbcType=VARCHAR}, ",
 			"#{total,jdbcType=INTEGER}, #{finished,jdbcType=INTEGER}, ",
-			"#{autoUpdate,jdbcType=TINYINT}, #{pidList,jdbcType=LONGVARCHAR}, ", "#{columns,jdbcType=LONGVARCHAR})" })
+			"#{autoUpdate,jdbcType=TINYINT}, #{artype,jdbcType=TINYINT}, ",
+			"#{pidList,jdbcType=LONGVARCHAR}, #{columns,jdbcType=LONGVARCHAR})" })
 	@SelectKey(statement = "SELECT LAST_INSERT_ID()", keyProperty = "id", before = false, resultType = Integer.class)
 	int insert(AggregationDatabaseWithBLOBs record);
 
@@ -90,6 +91,7 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
 			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT),
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.TINYINT),
 			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "columns", property = "columns", jdbcType = JdbcType.LONGVARCHAR) })
 	List<AggregationDatabaseWithBLOBs> selectByExampleWithBLOBsWithRowbounds(AggregationDatabaseExample example,
@@ -117,6 +119,7 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
 			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT),
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.TINYINT),
 			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "columns", property = "columns", jdbcType = JdbcType.LONGVARCHAR) })
 	List<AggregationDatabaseWithBLOBs> selectByExampleWithBLOBs(AggregationDatabaseExample example);
@@ -142,7 +145,8 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "status", property = "status", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
-			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT) })
+			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT),
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.TINYINT) })
 	List<AggregationDatabase> selectByExampleWithRowbounds(AggregationDatabaseExample example, RowBounds rowBounds);
 
 	/**
@@ -166,7 +170,8 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "status", property = "status", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
-			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT) })
+			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT),
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.TINYINT) })
 	List<AggregationDatabase> selectByExample(AggregationDatabaseExample example);
 
 	/**
@@ -174,7 +179,7 @@ public interface AggregationDatabaseMapper {
 	 * @mbg.generated
 	 */
 	@Select({ "select", "id, db_name, version, aggregate_time, create_time, mean, max, min, sd, median, ",
-			"q1, q3, sum, status, total, finished, auto_update, pid_list, columns", "from aggregation_database",
+			"q1, q3, sum, status, total, finished, auto_update, arType, pid_list, columns", "from aggregation_database",
 			"where id = #{id,jdbcType=INTEGER}" })
 	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
 			@Result(column = "db_name", property = "dbName", jdbcType = JdbcType.VARCHAR),
@@ -193,6 +198,7 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
 			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT),
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.TINYINT),
 			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "columns", property = "columns", jdbcType = JdbcType.LONGVARCHAR) })
 	AggregationDatabaseWithBLOBs selectByPrimaryKey(Integer id);
@@ -239,8 +245,9 @@ public interface AggregationDatabaseMapper {
 			"median = #{median,jdbcType=TINYINT},", "q1 = #{q1,jdbcType=TINYINT},", "q3 = #{q3,jdbcType=TINYINT},",
 			"sum = #{sum,jdbcType=TINYINT},", "status = #{status,jdbcType=VARCHAR},",
 			"total = #{total,jdbcType=INTEGER},", "finished = #{finished,jdbcType=INTEGER},",
-			"auto_update = #{autoUpdate,jdbcType=TINYINT},", "pid_list = #{pidList,jdbcType=LONGVARCHAR},",
-			"columns = #{columns,jdbcType=LONGVARCHAR}", "where id = #{id,jdbcType=INTEGER}" })
+			"auto_update = #{autoUpdate,jdbcType=TINYINT},", "arType = #{artype,jdbcType=TINYINT},",
+			"pid_list = #{pidList,jdbcType=LONGVARCHAR},", "columns = #{columns,jdbcType=LONGVARCHAR}",
+			"where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKeyWithBLOBs(AggregationDatabaseWithBLOBs record);
 
 	/**
@@ -254,6 +261,7 @@ public interface AggregationDatabaseMapper {
 			"median = #{median,jdbcType=TINYINT},", "q1 = #{q1,jdbcType=TINYINT},", "q3 = #{q3,jdbcType=TINYINT},",
 			"sum = #{sum,jdbcType=TINYINT},", "status = #{status,jdbcType=VARCHAR},",
 			"total = #{total,jdbcType=INTEGER},", "finished = #{finished,jdbcType=INTEGER},",
-			"auto_update = #{autoUpdate,jdbcType=TINYINT}", "where id = #{id,jdbcType=INTEGER}" })
+			"auto_update = #{autoUpdate,jdbcType=TINYINT},", "arType = #{artype,jdbcType=TINYINT}",
+			"where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(AggregationDatabase record);
 }

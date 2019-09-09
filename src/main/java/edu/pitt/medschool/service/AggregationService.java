@@ -1,17 +1,15 @@
 package edu.pitt.medschool.service;
 
 import edu.pitt.medschool.config.InfluxappConfig;
-import edu.pitt.medschool.framework.influxdb.InfluxUtil;
-import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.AggregationDao;
 import edu.pitt.medschool.model.dao.ExportDao;
 import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.VersionDao;
 import edu.pitt.medschool.model.dto.AggregationDatabase;
+import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
@@ -25,6 +23,7 @@ import java.io.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.*;
@@ -52,20 +51,42 @@ public class AggregationService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private final LinkedBlockingQueue<AggregationDatabaseWithBLOBs> jobQueue = new LinkedBlockingQueue<>();
+    private final ScheduledFuture<?> jobCheckerThread;
 
-    public void startAgg(String time){
+    @Autowired
+    public AggregationService() {
+        this.jobCheckerThread = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            Thread.currentThread().setName("JobCheckerThread");
+            AggregationDatabaseWithBLOBs target = null;
+            while ((target = this.jobQueue.poll()) != null) {
+                logger.info("Start to process job #<{}>", target.getId());
+                startAgg(target);
+                logger.info("Finished one job #<{}>", target.getId());
+            }
+        }, 10, 20, TimeUnit.SECONDS);
+    }
+
+
+    // todo add version condition into aggregation query
+    private void startAgg(AggregationDatabaseWithBLOBs job){
         System.out.println("start aggregation");
-        this.dir = time+"_new_agg";
+        String time = getAggTime(job.getAggregateTime());
+        final String DIR = "aggregationDBLog";
 
-        // add this job into the export table
-        ExportWithBLOBs export = new ExportWithBLOBs();
-        export.setAr(true);
+
         List<String> patientIDs;
-        patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
+        if(job.getPidList().isEmpty()){
+            patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
+        }else {
+            patientIDs = Arrays.asList(job.getPidList().split(","));
+        }
+
         List<String> patients = new ArrayList<>();
 
+        // recover job after break down
         //get finished pids
-        String pathname = "/tsdb/output/"+this.dir+"/"+this.dir+".txt";
+        String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+"_"+job.getVersion()+".txt";
         File filename = new File(pathname);
         if(filename.exists()){
             try{
@@ -84,19 +105,14 @@ public class AggregationService {
                 HashSet<String> allPid = new HashSet<>(patientIDs);
                 allPid.removeAll(finishedPid);
                 patients = new ArrayList<>(allPid);
-                System.out.println(finishedPid.size());
-                System.out.println(allPid.size());
+//                System.out.println(finishedPid.size());
+//                System.out.println(allPid.size());
             }catch (IOException e){
                 e.printStackTrace();
             }
         }else{
             patients = patientIDs;
         }
-        export.setAllPatient(patients.size());
-        export.setMachine("realpsc");
-        export.setQueryId(83);
-        exportDao.insertExportJob(export);
-        int jobid = export.getId();
 
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
@@ -110,8 +126,7 @@ public class AggregationService {
         int paraCount = determineParaNumber();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
-            FileUtils.forceMkdir(new File("/tsdb/output/"+this.dir+"/"));
-            this.bufferedWriter = new BufferedWriter(new FileWriter("/tsdb/output/"+this.dir+"/"+this.dir+".txt",true));
+            this.bufferedWriter = new BufferedWriter(new FileWriter(pathname,true));
             this.bufferedWriter.write("Cores: "+paraCount);
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
@@ -136,7 +151,7 @@ public class AggregationService {
                 String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                 List<String> queries = new ArrayList<>();
                 for(int count=0;count<selection.size();count++){
-                    queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
+                    queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName()+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
                 }
                 
                 //System.out.println(query);
@@ -149,11 +164,12 @@ public class AggregationService {
                     this.bufferedWriter.newLine();
                     this.bufferedWriter.flush();
                     finishedPatientCounter.getAndIncrement();
-                    exportDao.updatePatientFinishedNum(jobid,finishedPatientCounter.get());
+                    aggregationDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
 
                 }catch (Exception e){
                     logger.info(pid);
                     recordError(pid);
+                    finishedPatientCounter.getAndIncrement();
                     e.printStackTrace();
                 }
             }
@@ -177,12 +193,26 @@ public class AggregationService {
                 this.bufferedWriter.flush();
                 this.bufferedWriter.close();
                 System.out.println("Job finished");
+                aggregationDao.updateStatus(job.getId(),"Success");
             }catch (IOException e){
                 e.printStackTrace();
             }
         }
 
 
+    }
+
+
+    private String getAggTime(Integer aggregateTime) {
+        int h = 3600;
+        int m = 60;
+        if(aggregateTime%h==0){
+            return aggregateTime/h+"h";
+        }
+        if(aggregateTime%m==0){
+            return aggregateTime/m+"m";
+        }
+        return aggregateTime+"s";
     }
 
     public List<String> getColumns(){
@@ -202,14 +232,14 @@ public class AggregationService {
     private List<String> getSelection(List<String> columns){
         List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
-        for(int count=0;count<15;count++){
-            for(int j=count*380;j<(count+1)*380;j++){
+        for(int count=0;count<42;count++){
+            for(int j=count*144;j<(count+1)*144;j++){
                 onepart.append(String.format("mean(\"%s\") as mean_%s , max(\"%s\") as max_%s , min(\"%s\") as min_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
             }
             res.add(onepart.substring(0,onepart.length()-1));
             onepart = new StringBuilder();
         }
-        for(int j=15*380;j<columns.size();j++){
+        for(int j=41*144;j<columns.size();j++){
             onepart.append(String.format("mean(\"%s\") as mean_%s , max(\"%s\") as max_%s , min(\"%s\") as min_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
         }
         res.add(onepart.substring(0,onepart.length()-1));
@@ -235,13 +265,35 @@ public class AggregationService {
         return Executors.newFixedThreadPool(i);
     }
 
-    public String seletDatabase(String query){
+    public String databaseNavigator(String query){
         String dbname="";
 
         return dbname;
     }
 
-//    public List<AggregationDatabase> selectAllAvailableDBs() {
-//        return aggregationDao.selectAllAvailableDBs();
-//    }
+    public List<AggregationDatabase> selectAllAvailableDBs() {
+        return aggregationDao.selectAllAvailableDBs();
+    }
+
+    public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {
+        database.setVersion(versionDao.getLatestVersion());
+        database.setStatus("processing");
+        return aggregationDao.setNewDB(database) != 0;
+    }
+
+    public List<AggregationDatabase> selectAllOnGoing() {
+        return aggregationDao.selectOngoing();
+    }
+
+    public boolean addOneAggregationJob(Integer jobId) {
+        AggregationDatabaseWithBLOBs databaseWithBLOBs = aggregationDao.selectByPrimaryKey(jobId);
+        try {
+            return this.jobQueue.add(databaseWithBLOBs);
+        } catch (Exception e) {
+            logger.error("Add job failed.", e);
+            return false;
+        }
+    }
+
+
 }
