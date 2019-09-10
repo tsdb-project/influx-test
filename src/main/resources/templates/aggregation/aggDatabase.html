@@ -66,6 +66,30 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-4 col-md-4">
+                                        <label>Downsample Interval</label>
+                                        <div class="input-group mb-3">
+                                            <input type="number" min="0" step="1" class="form-control" id="period"
+                                                   placeholder="Leave empty for no downsampling">
+                                            <div class="input-group-append">
+                                                <select class="select2" data-placeholder="Time Unit" id="period_unit"
+                                                        data-minimum-results-for-search="Infinity">
+                                                    <option disabled="disabled" selected="selected" value="">Select Time
+                                                        Unit
+                                                    </option>
+                                                    <option value="1">Seconds</option>
+                                                    <option value="60">Minutes</option>
+                                                    <option value="3600">Hours</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12">
+                                <div class="row">
+                                    <div class="col-sm-4 col-md-4">
                                         <div class="form-group">
                                             <label>Aggregation Method </label>
                                             <label>&nbsp</label>
@@ -90,83 +114,23 @@
                                             <!--</select>-->
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-12 col-md-12">
-                                <div class="row">
                                     <div class="col-sm-4 col-md-4">
-                                        <label>Downsample Interval</label>
-                                        <div class="input-group mb-3">
-                                            <input type="number" min="0" step="1" class="form-control" id="period"
-                                                   placeholder="Leave empty for no downsampling">
-                                            <div class="input-group-append">
-                                                <select class="select2" data-placeholder="Time Unit" id="period_unit"
-                                                        data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled" selected="selected" value="">Select Time
-                                                        Unit
-                                                    </option>
-                                                    <option value="1">Seconds</option>
-                                                    <option value="60">Minutes</option>
-                                                    <option value="3600">Hours</option>
-                                                </select>
-                                            </div>
-                                        </div>
+                                        <label>Update patients list</label>
+                                        <input type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal"
+                                               data-target="#upload-patient-modal" id="patientListButton"
+                                               value="Update">
                                     </div>
                                     <div class="col-sm-4 col-md-4">
-                                        <label>Starting Time</label>
-                                        <div class="input-group mb-3">
-                                            <input type="number" min="0" step="1" class="form-control" id="origin"
-                                                   placeholder="Leave empty to start at beginning">
-                                            <div class="input-group-append">
-                                                <select class="select2" data-placeholder="Time Unit" id="origin_unit"
-                                                        data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled" selected="selected" value="">Select Time
-                                                        Unit
-                                                    </option>
-                                                    <option value="1">Seconds</option>
-                                                    <option value="60">Minutes</option>
-                                                    <option value="3600">Hours</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4 col-md-4">
-                                        <label>Duration</label>
-                                        <div class="input-group mb-3">
-                                            <input type="number" min="0" step="1" class="form-control" id="duration"
-                                                   placeholder="Leave empty for the whole measure process">
-                                            <div class="input-group-append">
-                                                <select class="select2" data-placeholder="Time Unit" id="duration_unit"
-                                                        data-minimum-results-for-search="Infinity">
-                                                    <option disabled="disabled" selected="selected" value="">Select Time
-                                                        Unit
-                                                    </option>
-                                                    <option value="1">Seconds</option>
-                                                    <option value="60">Minutes</option>
-                                                    <option value="3600">Hours</option>
-                                                </select>
-                                            </div>
-                                        </div>
+                                        <label>Choose features</label>
+                                        <input type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal"
+                                               data-target="#edit-group-modal" id="columnButton"
+                                               value="Choose">
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-6 col-md-4">
-                                <label>&nbsp</label>
-                                <input type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal"
-                                       data-target="#upload-patient-modal" id="patientListButton"
-                                       value="update patients list">
-                            </div>
-                            <div class="col-sm-6 col-md-4">
-                                <label>&nbsp</label>
-                                <input type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal"
-                                       data-target="#edit-group-modal" id="columnButton"
-                                       value="Choose features">
-                            </div>
-                            <div class="col-sm-4 col-md-2">
+                            <div class="col-sm-4 col-md-4">
                                 <label>&nbsp</label>
                                 <input type="submit" class="btn btn-primary btn-lg btn-block"
                                        id="createButton" autocomplete="off" value="Create">
@@ -187,11 +151,9 @@
                             <tr>
                                 <th>Id</th>
                                 <th>Name</th>
-                                <th>Aggregation level</th>
+                                <th>Aggregation Time</th>
                                 <th>Aggregation Methods</th>
                                 <th>AR/NOAR</th>
-                                <th>Number of Available columns</th>
-                                <th>Number of Available patients</th>
                                 <th>Create Time</th>
                                 <th>Details</th>
                                 <th>Auto Update</th>
@@ -273,7 +235,7 @@
                                 <div class="col-sm-4 col-md-4">
                                     <label>&nbsp</label>
                                     <input type="button" class="btn btn-light btn-lg btn-block" id="TQBtn"
-                                           value="75%Btn">
+                                           value="75%ile">
                                 </div>
                             </div>
                             <div class="row">
@@ -305,7 +267,6 @@
                             <h5 class="modal-title pull-left">Upload patient list</h5>
                         </div>
                         <div class="modal-body">
-                            <p>if you don't update txt of patient list, the default option is aggregaton of all patients. </p>
                             <div class="row">
                                 <div class="col-sm-12 col-md-12">
                                     <label>Upload Patient List (Use all patients if not uploading)</label>
