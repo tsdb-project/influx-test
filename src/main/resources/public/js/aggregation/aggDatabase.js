@@ -41,6 +41,26 @@ $(document).ready(function() {
     };
 
     /*
+    * get database information
+    * */
+    var databaseData = null;
+
+    function getDatabases(){
+        $.ajax({
+            'url': "/aggregation/getDBs",
+            'type': 'get',
+            'contentType':"application/json",
+            'dataType':"json",
+            'async': false,
+            'success': function(data) {
+                databaseData = data.data;
+            },
+            'error': function() {}
+        });
+    }
+    getDatabases();
+
+    /*
     * initialize the data
     * */
 
@@ -243,48 +263,6 @@ $(document).ready(function() {
       columnsFinalList = columnsList;
     });
 
-
-    /*
-    * test data
-    * */
-
-    var databaseData = [{
-        id:1,
-        DBname: "test",
-        aggregationLevel: "1m",
-        ar:true,
-        columnList:["I1_1"],
-        patientList:["PUH-2019-015"],
-        origin: 0,
-        duration: 0,
-        max:aggMethod.Max,
-        min:aggMethod.Min,
-        mean:aggMethod.Mean,
-        median:true,
-        std:true,
-        fq:aggMethod.FQ,
-        tq:aggMethod.TQ,
-        sum:aggMethod.Sum,
-        lastUpdate:Date.now(),
-        autoUpdate:true
-    }];
-
-    /*
-    * get database information
-    * */
-
-    function getDatabases(){
-        $.ajax({
-            'url': "/aggregation/getDBs",
-            'type': 'get',
-            'success': function(data) {
-                databaseData = data.data;
-                console.log(databaseData);
-            },
-            'error': function() {}
-        });
-    }
-
     /*
     * aggregation methods
     * */
@@ -479,9 +457,35 @@ $(document).ready(function() {
         columns : [ {
             data : 'id'
         }, {
-            data : 'DBname'
+            data : 'dbName'
         }, {
-            data : 'aggregationLevel'
+            data : null,
+            render : function(data) {
+                var time = data.aggregateTime;
+                var string = "";
+                var h = 3600;
+                var m = 60;
+                if(time % h==0){
+                    return time/h+"h";
+                }else {
+                    if(Math.floor(time / h ) > 0){
+                        string += Math.floor(time / h ) + "h"
+                    }
+                    time %= h;
+
+                }
+                if(time % m==0){
+                    return time/m+"m";
+                }else{
+                    if(Math.floor(time / m ) > 0){
+                        string += Math.floor(time / m ) + "m"
+                    }
+                    time %= m;
+                }
+                string += time + "s";
+
+                return string;
+            }
         }, {
             data : null,
             render : function(data) {
@@ -490,48 +494,38 @@ $(document).ready(function() {
                 if (data.min){string += "Min "}
                 if (data.mean){string += "Mean "}
                 if (data.median){string += "Median "}
-                if (data.std){string += "Std "}
-                if (data.fq){string += "25%ile "}
-                if (data.tq){string += "75%ile "}
+                if (data.sd){string += "Std "}
+                if (data.q1){string += "25%ile "}
+                if (data.q3){string += "75%ile "}
                 if (data.sum){string += "Sum"}
                 return string;
             }
         },{
             data : null,
             render : function(data) {
-                return data.ar ? "AR" : "NOAR";
+                return data.artype ? "AR" : "NOAR";
             }
         }, {
             data : null,
             render : function(data) {
-                return data.columnList.length;
+                return localeDateString(data.createTime)
             }
         }, {
             data : null,
-            render : function(data) {
-                return data.patientList.length;
-            }
-        }, {
-            data : null,
-            render : function(data) {
-                return localeDateString(data.lastUpdate)
-            }
-        }, {
-            data : null,
-            render : function(data) {
+            render : function(data, type, row, meta) {
                 html = '<div class="btn-demo">';
-                html += '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#DB-details-modal" data-id="' + data.id + '"><i class="zmdi zmdi-edit"></i> Details</button>'
+                html += '<button class="btn btn-info btn-sm" data-toggle="modal"  id = "showDetaildBtn" data-target="#DB-details-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i> Details</button>'
                 html += '</div>';
                 return html
             }
         },{
             data : null,
-            render : function(data) {
+            render : function(data, type, row, meta) {
                 html = '<div class="btn-demo">';
                 if (data.autoUpdate) {
-                    html += '<button class="btn btn-light btn-sm" data-toggle="modal" data-target="#toggle-disable-modal" data-id="' + data.id + '"><i class="zmdi zmdi-block"></i> Disable</button>'
+                    html += '<button class="btn btn-light btn-sm" data-toggle="modal" data-target="#toggle-disable-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-block"></i> Disable</button>'
                 } else {
-                    html += '<button class="btn btn-light btn-sm" data-toggle="modal" data-target="#toggle-enable-modal" data-id="' + data.id + '"><i class="zmdi zmdi-arrow-right"></i> Enable</button>'
+                    html += '<button class="btn btn-light btn-sm" data-toggle="modal" data-target="#toggle-enable-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-arrow-right"></i> Enable</button>'
                 }
                 html += '</div>';
                 return html
@@ -599,7 +593,6 @@ $(document).ready(function() {
                     notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
                         'Successfully uploaded patient list.');
                     patientList = result.data;
-                    console.log(patientList);
                 } else {
                     notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
                         'Failed to upload patient list.');
@@ -634,13 +627,11 @@ $(document).ready(function() {
     $("#createButton").click(function () {
         $("#createButton").attr('disabled', 'disabled');
         var newDB = {
-            db_name: $("#alias").val(),
-            aggregate_time: $('#period').val() * $('#period_unit').val(),
-            arType:$('#ar label.active input').val() == "true",
-            columns:columnsFinalList == null ? "ALL": columnsFinalList,
-            pid_list: patientsFinalList== null ? "ALL" : patientsFinalList,
-            origin: $("#origin").val() * $("#origin_unit").val(),
-            duration: $("#duration").val() * $("#duration_unit").val(),
+            dbName: $("#alias").val(),
+            aggregateTime: $('#period').val() * $('#period_unit').val(),
+            artype:$('#ar label.active input').val() == "true",
+            columns:columnsFinalList == null ? null: columnsFinalList.toString(),
+            pidList: patientsFinalList == null ? null: patientsFinalList.toString(),
             max:aggFinalMethod == null ? true : aggFinalMethod.Max,
             min:aggFinalMethod == null ? true : aggFinalMethod.Min,
             mean:aggFinalMethod == null ? true : aggFinalMethod.Mean,
@@ -649,11 +640,11 @@ $(document).ready(function() {
             q1:aggFinalMethod == null ? true : aggFinalMethod.FQ,
             q3:aggFinalMethod == null ? true : aggFinalMethod.TQ,
             sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
-            create_time:Date.now(),
-            auto_update:true
+            total:1,
+            finished:0,
+            autoUpdate:true
         };
 
-        console.log(newDB);
         $.ajax({
             url: "/aggregation/newDB/",
             type: 'post',
@@ -661,10 +652,7 @@ $(document).ready(function() {
             contentType: "application/json",
             dataType: 'json',
             success: function (response) {
-                console.log(response);
                 if(response.code == 1){
-                    getDatabases();
-                    table.ajax.reload();
                     notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
                         'Successfully create database setting.');
                 }else{
@@ -683,69 +671,88 @@ $(document).ready(function() {
     * Show details modal
     * */
 
+
     $('#DB-details-modal').on('show.bs.modal', function(event) {
         var button = $(event.relatedTarget);
-        var id = button.data('id')-1;
+        var id = button.data('row');
         var plist = databaseData[id].patientList;
-        var clist = databaseData[id].columnList;
+        var clist = databaseData[id].columns;
 
         $('#patients').empty();
-        plist.forEach(function (value) {
-            $('#patients').append('<option value="' + value + '">&nbsp&nbsp&nbsp&nbsp' + value + '</option>');
-        });
+        if (plist == null){
+            $('#patients').append("<option >ALL</option>");
+        }else{
+            plist.forEach(function (value) {
+                $('#patients').append('<option value="' + value + '">&nbsp&nbsp&nbsp&nbsp' + value + '</option>');
+            });
+        }
+
 
         $('#columns').empty();
-        clist.forEach(function (value) {
-            $('#columns').append('<option value="' + value + '">&nbsp&nbsp&nbsp&nbsp' + value + '</option>');
-        })
+        if(clist == null){
+            $('#columns').append("<option>ALL</option>");
+        }else {
+            clist.forEach(function (value) {
+                $('#columns').append('<option value="' + value + '">&nbsp&nbsp&nbsp&nbsp' + value + '</option>');
+            })
+        }
 
     });
 
     /*
     * update the progress
     * */
-    $("#finished").show();
 
-    // var update = setInterval(function() {
-    //     $.ajax({
-    //         'url' : "/aggregation/progress",
-    //         'success' : function(data) {
-    //             var progressHtml = "";
-    //             for (i = 0; i < data.progress.length; i++) {
-    //                 var progress = (data.progress[i].percent * 100).toFixed(2);
-    //                 var color = "";
-    //                 if (data.progress[i].status == "STATUS_FINISHED") {
-    //                     color = " bg-success";
-    //                 } else if (data.progress[i].status == "STATUS_FAIL") {
-    //                     color = " bg-danger";
-    //                 }
-    //                 progressHtml += "<div class=\"progress\"><div class=\"progress-bar" + color + "\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
-    //                     + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.progress[i].filename + ' - ' + progress + "%</small><br><br>";
-    //             }
-    //
-    //             var totalPercent = (data.total * 100).toFixed(2);
-    //             $("#totalProgress").attr("style", "width: " + totalPercent + "%");
-    //             $("#totalProgress").attr("aria-valuenow", "" + totalPercent);
-    //             $("#totalPercent").html(totalPercent + "%");
-    //
-    //             $("#databasesProgress").html(progressHtml);
-    //
-    //             if (totalPercent == 100.00) {
-    //                 clearInterval(update);
-    //                 if (data.progress.length == 0) {
-    //                     $("#running").hide();
-    //                     $("#finished").show();
-    //                 }
-    //             } else {
-    //                 $("#running").show();
-    //                 $("#finished").hide();
-    //             }
-    //         },
-    //         'error' : function() {
-    //             clearInterval(update);
-    //         }
-    //     });
-    // }, 2000);
+    var update = setInterval(function() {
+        $.ajax({
+            'url' : "/aggregation/process",
+            'success' : function(data) {
+                if(data.data.length > 0){
+                    var progressHtml = "";
+                    var finishedOverall = 0;
+                    var totalOverall = 0;
+
+                    for (i = 0; i < data.data.length; i++) {
+                        var progress = (data.data[i].finished / data.data[i].total * 100).toFixed(2);
+                        finishedOverall += data.data[i].finished;
+                        totalOverall += data.data[i].total;
+                        var color = "";
+                        if (data.data[i].status == "success") {
+                            color = " bg-success";
+                        } else if (data.data[i].status == "failed") {
+                            color = " bg-danger";
+                        }
+                        progressHtml += "<div class=\"progress\"><div class=\"progress-bar" + color + "\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
+                            + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.data[i].dbName + ' - ' + progress + "%</small><br><br>";
+                    }
+
+                    var totalPercent = (finishedOverall / totalOverall * 100).toFixed(2);
+                    $("#totalProgress").attr("style", "width: " + totalPercent + "%");
+                    $("#totalProgress").attr("aria-valuenow", "" + totalPercent);
+                    $("#totalPercent").html(totalPercent + "%");
+
+                    $("#databasesProgress").html(progressHtml);
+
+                    if (totalPercent == 100.00) {
+                        clearInterval(update);
+                        if (data.progress.length == 0) {
+                            $("#running").hide();
+                            $("#finished").show();
+                        }
+                    } else {
+                        $("#running").show();
+                        $("#finished").hide();
+                    }
+                }else{
+                    $("#running").hide();
+                    $("#finished").show();
+                }
+            },
+            'error' : function() {
+                clearInterval(update);
+            }
+        });
+    }, 5000);
 
     function localeDateString(date) {
         var options = {
