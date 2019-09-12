@@ -235,7 +235,7 @@ public class AggregationService {
     private List<String> getSelection(List<String> columns){
         List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
-        for(int count=0;count<42;count++){
+        for(int count=0;count<41;count++){
             for(int j=count*144;j<(count+1)*144;j++){
                 onepart.append(String.format("mean(\"%s\") as mean_%s , max(\"%s\") as max_%s , min(\"%s\") as min_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
             }
