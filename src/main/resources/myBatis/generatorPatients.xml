@@ -36,7 +36,7 @@
             <property name="enableSubPackages" value="true" />
         </javaClientGenerator>
 
-        <table tableName="version">
+        <table tableName="aggregation_database">
             <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
         </table>
         
