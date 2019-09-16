@@ -77,7 +77,9 @@ public class AggregationService {
 
 
         List<String> patientIDs;
-        if(job.getPidList().isEmpty()){
+        String plist = job.getPidList();
+        
+        if(plist == null || plist.isEmpty()){
             //todo new way to get all pids from csv_file table
             patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
         }else {
