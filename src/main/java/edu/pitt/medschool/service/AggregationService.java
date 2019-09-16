@@ -117,6 +117,7 @@ public class AggregationService {
             patients = patientIDs;
         }
 
+        
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
