@@ -78,11 +78,13 @@ public class AggregationService {
 
         List<String> patientIDs;
         if(job.getPidList().isEmpty()){
+            //todo new way to get all pids from csv_file table
             patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
         }else {
             patientIDs = Arrays.asList(job.getPidList().split(","));
         }
 
+        // todo update total
         List<String> patients = new ArrayList<>();
 
         // recover job after break down
@@ -115,6 +117,9 @@ public class AggregationService {
             patients = patientIDs;
         }
 
+        // update the total number of patients of this job
+        aggregationDao.updateTotalnumber(job.getId(),patients.size());
+        
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
