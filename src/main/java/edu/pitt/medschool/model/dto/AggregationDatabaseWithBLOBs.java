@@ -87,6 +87,7 @@ public class AggregationDatabaseWithBLOBs extends AggregationDatabase {
 						: this.getFinished().equals(other.getFinished()))
 				&& (this.getAutoUpdate() == null ? other.getAutoUpdate() == null
 						: this.getAutoUpdate().equals(other.getAutoUpdate()))
+				&& (this.getArtype() == null ? other.getArtype() == null : this.getArtype().equals(other.getArtype()))
 				&& (this.getPidList() == null ? other.getPidList() == null
 						: this.getPidList().equals(other.getPidList()))
 				&& (this.getColumns() == null ? other.getColumns() == null
@@ -118,6 +119,7 @@ public class AggregationDatabaseWithBLOBs extends AggregationDatabase {
 		result = prime * result + ((getTotal() == null) ? 0 : getTotal().hashCode());
 		result = prime * result + ((getFinished() == null) ? 0 : getFinished().hashCode());
 		result = prime * result + ((getAutoUpdate() == null) ? 0 : getAutoUpdate().hashCode());
+		result = prime * result + ((getArtype() == null) ? 0 : getArtype().hashCode());
 		result = prime * result + ((getPidList() == null) ? 0 : getPidList().hashCode());
 		result = prime * result + ((getColumns() == null) ? 0 : getColumns().hashCode());
 		return result;

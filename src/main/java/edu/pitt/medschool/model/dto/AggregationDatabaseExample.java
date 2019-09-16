@@ -483,52 +483,52 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanEqualTo(Byte value) {
+		public Criteria andMeanEqualTo(Boolean value) {
 			addCriterion("mean =", value, "mean");
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanNotEqualTo(Byte value) {
+		public Criteria andMeanNotEqualTo(Boolean value) {
 			addCriterion("mean <>", value, "mean");
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanGreaterThan(Byte value) {
+		public Criteria andMeanGreaterThan(Boolean value) {
 			addCriterion("mean >", value, "mean");
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanGreaterThanOrEqualTo(Byte value) {
+		public Criteria andMeanGreaterThanOrEqualTo(Boolean value) {
 			addCriterion("mean >=", value, "mean");
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanLessThan(Byte value) {
+		public Criteria andMeanLessThan(Boolean value) {
 			addCriterion("mean <", value, "mean");
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanLessThanOrEqualTo(Byte value) {
+		public Criteria andMeanLessThanOrEqualTo(Boolean value) {
 			addCriterion("mean <=", value, "mean");
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanIn(List<Byte> values) {
+		public Criteria andMeanIn(List<Boolean> values) {
 			addCriterion("mean in", values, "mean");
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanNotIn(List<Byte> values) {
+		public Criteria andMeanNotIn(List<Boolean> values) {
 			addCriterion("mean not in", values, "mean");
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanBetween(Byte value1, Byte value2) {
+		public Criteria andMeanBetween(Boolean value1, Boolean value2) {
 			addCriterion("mean between", value1, value2, "mean");
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanNotBetween(Byte value1, Byte value2) {
+		public Criteria andMeanNotBetween(Boolean value1, Boolean value2) {
 			addCriterion("mean not between", value1, value2, "mean");
 			return (Criteria) this;
 		}
@@ -543,52 +543,52 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxEqualTo(Byte value) {
+		public Criteria andMaxEqualTo(Boolean value) {
 			addCriterion("max =", value, "max");
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxNotEqualTo(Byte value) {
+		public Criteria andMaxNotEqualTo(Boolean value) {
 			addCriterion("max <>", value, "max");
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxGreaterThan(Byte value) {
+		public Criteria andMaxGreaterThan(Boolean value) {
 			addCriterion("max >", value, "max");
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxGreaterThanOrEqualTo(Byte value) {
+		public Criteria andMaxGreaterThanOrEqualTo(Boolean value) {
 			addCriterion("max >=", value, "max");
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxLessThan(Byte value) {
+		public Criteria andMaxLessThan(Boolean value) {
 			addCriterion("max <", value, "max");
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxLessThanOrEqualTo(Byte value) {
+		public Criteria andMaxLessThanOrEqualTo(Boolean value) {
 			addCriterion("max <=", value, "max");
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxIn(List<Byte> values) {
+		public Criteria andMaxIn(List<Boolean> values) {
 			addCriterion("max in", values, "max");
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxNotIn(List<Byte> values) {
+		public Criteria andMaxNotIn(List<Boolean> values) {
 			addCriterion("max not in", values, "max");
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxBetween(Byte value1, Byte value2) {
+		public Criteria andMaxBetween(Boolean value1, Boolean value2) {
 			addCriterion("max between", value1, value2, "max");
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxNotBetween(Byte value1, Byte value2) {
+		public Criteria andMaxNotBetween(Boolean value1, Boolean value2) {
 			addCriterion("max not between", value1, value2, "max");
 			return (Criteria) this;
 		}
@@ -603,52 +603,52 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMinEqualTo(Byte value) {
+		public Criteria andMinEqualTo(Boolean value) {
 			addCriterion("min =", value, "min");
 			return (Criteria) this;
 		}
 
-		public Criteria andMinNotEqualTo(Byte value) {
+		public Criteria andMinNotEqualTo(Boolean value) {
 			addCriterion("min <>", value, "min");
 			return (Criteria) this;
 		}
 
-		public Criteria andMinGreaterThan(Byte value) {
+		public Criteria andMinGreaterThan(Boolean value) {
 			addCriterion("min >", value, "min");
 			return (Criteria) this;
 		}
 
-		public Criteria andMinGreaterThanOrEqualTo(Byte value) {
+		public Criteria andMinGreaterThanOrEqualTo(Boolean value) {
 			addCriterion("min >=", value, "min");
 			return (Criteria) this;
 		}
 
-		public Criteria andMinLessThan(Byte value) {
+		public Criteria andMinLessThan(Boolean value) {
 			addCriterion("min <", value, "min");
 			return (Criteria) this;
 		}
 
-		public Criteria andMinLessThanOrEqualTo(Byte value) {
+		public Criteria andMinLessThanOrEqualTo(Boolean value) {
 			addCriterion("min <=", value, "min");
 			return (Criteria) this;
 		}
 
-		public Criteria andMinIn(List<Byte> values) {
+		public Criteria andMinIn(List<Boolean> values) {
 			addCriterion("min in", values, "min");
 			return (Criteria) this;
 		}
 
-		public Criteria andMinNotIn(List<Byte> values) {
+		public Criteria andMinNotIn(List<Boolean> values) {
 			addCriterion("min not in", values, "min");
 			return (Criteria) this;
 		}
 
-		public Criteria andMinBetween(Byte value1, Byte value2) {
+		public Criteria andMinBetween(Boolean value1, Boolean value2) {
 			addCriterion("min between", value1, value2, "min");
 			return (Criteria) this;
 		}
 
-		public Criteria andMinNotBetween(Byte value1, Byte value2) {
+		public Criteria andMinNotBetween(Boolean value1, Boolean value2) {
 			addCriterion("min not between", value1, value2, "min");
 			return (Criteria) this;
 		}
@@ -663,52 +663,52 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andSdEqualTo(Byte value) {
+		public Criteria andSdEqualTo(Boolean value) {
 			addCriterion("sd =", value, "sd");
 			return (Criteria) this;
 		}
 
-		public Criteria andSdNotEqualTo(Byte value) {
+		public Criteria andSdNotEqualTo(Boolean value) {
 			addCriterion("sd <>", value, "sd");
 			return (Criteria) this;
 		}
 
-		public Criteria andSdGreaterThan(Byte value) {
+		public Criteria andSdGreaterThan(Boolean value) {
 			addCriterion("sd >", value, "sd");
 			return (Criteria) this;
 		}
 
-		public Criteria andSdGreaterThanOrEqualTo(Byte value) {
+		public Criteria andSdGreaterThanOrEqualTo(Boolean value) {
 			addCriterion("sd >=", value, "sd");
 			return (Criteria) this;
 		}
 
-		public Criteria andSdLessThan(Byte value) {
+		public Criteria andSdLessThan(Boolean value) {
 			addCriterion("sd <", value, "sd");
 			return (Criteria) this;
 		}
 
-		public Criteria andSdLessThanOrEqualTo(Byte value) {
+		public Criteria andSdLessThanOrEqualTo(Boolean value) {
 			addCriterion("sd <=", value, "sd");
 			return (Criteria) this;
 		}
 
-		public Criteria andSdIn(List<Byte> values) {
+		public Criteria andSdIn(List<Boolean> values) {
 			addCriterion("sd in", values, "sd");
 			return (Criteria) this;
 		}
 
-		public Criteria andSdNotIn(List<Byte> values) {
+		public Criteria andSdNotIn(List<Boolean> values) {
 			addCriterion("sd not in", values, "sd");
 			return (Criteria) this;
 		}
 
-		public Criteria andSdBetween(Byte value1, Byte value2) {
+		public Criteria andSdBetween(Boolean value1, Boolean value2) {
 			addCriterion("sd between", value1, value2, "sd");
 			return (Criteria) this;
 		}
 
-		public Criteria andSdNotBetween(Byte value1, Byte value2) {
+		public Criteria andSdNotBetween(Boolean value1, Boolean value2) {
 			addCriterion("sd not between", value1, value2, "sd");
 			return (Criteria) this;
 		}
@@ -723,52 +723,52 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianEqualTo(Byte value) {
+		public Criteria andMedianEqualTo(Boolean value) {
 			addCriterion("median =", value, "median");
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianNotEqualTo(Byte value) {
+		public Criteria andMedianNotEqualTo(Boolean value) {
 			addCriterion("median <>", value, "median");
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianGreaterThan(Byte value) {
+		public Criteria andMedianGreaterThan(Boolean value) {
 			addCriterion("median >", value, "median");
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianGreaterThanOrEqualTo(Byte value) {
+		public Criteria andMedianGreaterThanOrEqualTo(Boolean value) {
 			addCriterion("median >=", value, "median");
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianLessThan(Byte value) {
+		public Criteria andMedianLessThan(Boolean value) {
 			addCriterion("median <", value, "median");
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianLessThanOrEqualTo(Byte value) {
+		public Criteria andMedianLessThanOrEqualTo(Boolean value) {
 			addCriterion("median <=", value, "median");
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianIn(List<Byte> values) {
+		public Criteria andMedianIn(List<Boolean> values) {
 			addCriterion("median in", values, "median");
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianNotIn(List<Byte> values) {
+		public Criteria andMedianNotIn(List<Boolean> values) {
 			addCriterion("median not in", values, "median");
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianBetween(Byte value1, Byte value2) {
+		public Criteria andMedianBetween(Boolean value1, Boolean value2) {
 			addCriterion("median between", value1, value2, "median");
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianNotBetween(Byte value1, Byte value2) {
+		public Criteria andMedianNotBetween(Boolean value1, Boolean value2) {
 			addCriterion("median not between", value1, value2, "median");
 			return (Criteria) this;
 		}
@@ -783,52 +783,52 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1EqualTo(Byte value) {
+		public Criteria andQ1EqualTo(Boolean value) {
 			addCriterion("q1 =", value, "q1");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1NotEqualTo(Byte value) {
+		public Criteria andQ1NotEqualTo(Boolean value) {
 			addCriterion("q1 <>", value, "q1");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1GreaterThan(Byte value) {
+		public Criteria andQ1GreaterThan(Boolean value) {
 			addCriterion("q1 >", value, "q1");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1GreaterThanOrEqualTo(Byte value) {
+		public Criteria andQ1GreaterThanOrEqualTo(Boolean value) {
 			addCriterion("q1 >=", value, "q1");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1LessThan(Byte value) {
+		public Criteria andQ1LessThan(Boolean value) {
 			addCriterion("q1 <", value, "q1");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1LessThanOrEqualTo(Byte value) {
+		public Criteria andQ1LessThanOrEqualTo(Boolean value) {
 			addCriterion("q1 <=", value, "q1");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1In(List<Byte> values) {
+		public Criteria andQ1In(List<Boolean> values) {
 			addCriterion("q1 in", values, "q1");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1NotIn(List<Byte> values) {
+		public Criteria andQ1NotIn(List<Boolean> values) {
 			addCriterion("q1 not in", values, "q1");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1Between(Byte value1, Byte value2) {
+		public Criteria andQ1Between(Boolean value1, Boolean value2) {
 			addCriterion("q1 between", value1, value2, "q1");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1NotBetween(Byte value1, Byte value2) {
+		public Criteria andQ1NotBetween(Boolean value1, Boolean value2) {
 			addCriterion("q1 not between", value1, value2, "q1");
 			return (Criteria) this;
 		}
@@ -843,52 +843,52 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3EqualTo(Byte value) {
+		public Criteria andQ3EqualTo(Boolean value) {
 			addCriterion("q3 =", value, "q3");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3NotEqualTo(Byte value) {
+		public Criteria andQ3NotEqualTo(Boolean value) {
 			addCriterion("q3 <>", value, "q3");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3GreaterThan(Byte value) {
+		public Criteria andQ3GreaterThan(Boolean value) {
 			addCriterion("q3 >", value, "q3");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3GreaterThanOrEqualTo(Byte value) {
+		public Criteria andQ3GreaterThanOrEqualTo(Boolean value) {
 			addCriterion("q3 >=", value, "q3");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3LessThan(Byte value) {
+		public Criteria andQ3LessThan(Boolean value) {
 			addCriterion("q3 <", value, "q3");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3LessThanOrEqualTo(Byte value) {
+		public Criteria andQ3LessThanOrEqualTo(Boolean value) {
 			addCriterion("q3 <=", value, "q3");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3In(List<Byte> values) {
+		public Criteria andQ3In(List<Boolean> values) {
 			addCriterion("q3 in", values, "q3");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3NotIn(List<Byte> values) {
+		public Criteria andQ3NotIn(List<Boolean> values) {
 			addCriterion("q3 not in", values, "q3");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3Between(Byte value1, Byte value2) {
+		public Criteria andQ3Between(Boolean value1, Boolean value2) {
 			addCriterion("q3 between", value1, value2, "q3");
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3NotBetween(Byte value1, Byte value2) {
+		public Criteria andQ3NotBetween(Boolean value1, Boolean value2) {
 			addCriterion("q3 not between", value1, value2, "q3");
 			return (Criteria) this;
 		}
@@ -903,52 +903,52 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andSumEqualTo(Byte value) {
+		public Criteria andSumEqualTo(Boolean value) {
 			addCriterion("sum =", value, "sum");
 			return (Criteria) this;
 		}
 
-		public Criteria andSumNotEqualTo(Byte value) {
+		public Criteria andSumNotEqualTo(Boolean value) {
 			addCriterion("sum <>", value, "sum");
 			return (Criteria) this;
 		}
 
-		public Criteria andSumGreaterThan(Byte value) {
+		public Criteria andSumGreaterThan(Boolean value) {
 			addCriterion("sum >", value, "sum");
 			return (Criteria) this;
 		}
 
-		public Criteria andSumGreaterThanOrEqualTo(Byte value) {
+		public Criteria andSumGreaterThanOrEqualTo(Boolean value) {
 			addCriterion("sum >=", value, "sum");
 			return (Criteria) this;
 		}
 
-		public Criteria andSumLessThan(Byte value) {
+		public Criteria andSumLessThan(Boolean value) {
 			addCriterion("sum <", value, "sum");
 			return (Criteria) this;
 		}
 
-		public Criteria andSumLessThanOrEqualTo(Byte value) {
+		public Criteria andSumLessThanOrEqualTo(Boolean value) {
 			addCriterion("sum <=", value, "sum");
 			return (Criteria) this;
 		}
 
-		public Criteria andSumIn(List<Byte> values) {
+		public Criteria andSumIn(List<Boolean> values) {
 			addCriterion("sum in", values, "sum");
 			return (Criteria) this;
 		}
 
-		public Criteria andSumNotIn(List<Byte> values) {
+		public Criteria andSumNotIn(List<Boolean> values) {
 			addCriterion("sum not in", values, "sum");
 			return (Criteria) this;
 		}
 
-		public Criteria andSumBetween(Byte value1, Byte value2) {
+		public Criteria andSumBetween(Boolean value1, Boolean value2) {
 			addCriterion("sum between", value1, value2, "sum");
 			return (Criteria) this;
 		}
 
-		public Criteria andSumNotBetween(Byte value1, Byte value2) {
+		public Criteria andSumNotBetween(Boolean value1, Boolean value2) {
 			addCriterion("sum not between", value1, value2, "sum");
 			return (Criteria) this;
 		}
@@ -1153,53 +1153,113 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andAutoUpdateEqualTo(Byte value) {
+		public Criteria andAutoUpdateEqualTo(Boolean value) {
 			addCriterion("auto_update =", value, "autoUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andAutoUpdateNotEqualTo(Byte value) {
+		public Criteria andAutoUpdateNotEqualTo(Boolean value) {
 			addCriterion("auto_update <>", value, "autoUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andAutoUpdateGreaterThan(Byte value) {
+		public Criteria andAutoUpdateGreaterThan(Boolean value) {
 			addCriterion("auto_update >", value, "autoUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andAutoUpdateGreaterThanOrEqualTo(Byte value) {
+		public Criteria andAutoUpdateGreaterThanOrEqualTo(Boolean value) {
 			addCriterion("auto_update >=", value, "autoUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andAutoUpdateLessThan(Byte value) {
+		public Criteria andAutoUpdateLessThan(Boolean value) {
 			addCriterion("auto_update <", value, "autoUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andAutoUpdateLessThanOrEqualTo(Byte value) {
+		public Criteria andAutoUpdateLessThanOrEqualTo(Boolean value) {
 			addCriterion("auto_update <=", value, "autoUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andAutoUpdateIn(List<Byte> values) {
+		public Criteria andAutoUpdateIn(List<Boolean> values) {
 			addCriterion("auto_update in", values, "autoUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andAutoUpdateNotIn(List<Byte> values) {
+		public Criteria andAutoUpdateNotIn(List<Boolean> values) {
 			addCriterion("auto_update not in", values, "autoUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andAutoUpdateBetween(Byte value1, Byte value2) {
+		public Criteria andAutoUpdateBetween(Boolean value1, Boolean value2) {
 			addCriterion("auto_update between", value1, value2, "autoUpdate");
 			return (Criteria) this;
 		}
 
-		public Criteria andAutoUpdateNotBetween(Byte value1, Byte value2) {
+		public Criteria andAutoUpdateNotBetween(Boolean value1, Boolean value2) {
 			addCriterion("auto_update not between", value1, value2, "autoUpdate");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeIsNull() {
+			addCriterion("arType is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeIsNotNull() {
+			addCriterion("arType is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeEqualTo(Boolean value) {
+			addCriterion("arType =", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeNotEqualTo(Boolean value) {
+			addCriterion("arType <>", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeGreaterThan(Boolean value) {
+			addCriterion("arType >", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeGreaterThanOrEqualTo(Boolean value) {
+			addCriterion("arType >=", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeLessThan(Boolean value) {
+			addCriterion("arType <", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeLessThanOrEqualTo(Boolean value) {
+			addCriterion("arType <=", value, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeIn(List<Boolean> values) {
+			addCriterion("arType in", values, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeNotIn(List<Boolean> values) {
+			addCriterion("arType not in", values, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeBetween(Boolean value1, Boolean value2) {
+			addCriterion("arType between", value1, value2, "artype");
+			return (Criteria) this;
+		}
+
+		public Criteria andArtypeNotBetween(Boolean value1, Boolean value2) {
+			addCriterion("arType not between", value1, value2, "artype");
 			return (Criteria) this;
 		}
 

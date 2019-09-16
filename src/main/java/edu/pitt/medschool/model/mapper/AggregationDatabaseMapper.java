@@ -49,14 +49,16 @@ public interface AggregationDatabaseMapper {
 	 * @mbg.generated
 	 */
 	@Insert({ "insert into aggregation_database (db_name, version, ", "aggregate_time, create_time, ",
-			"mean, max, min, ", "sd, median, q1, ", "q3, sum, status, ", "total, finished, ", "auto_update, pid_list, ",
-			"columns)", "values (#{dbName,jdbcType=VARCHAR}, #{version,jdbcType=INTEGER}, ",
+			"mean, max, min, ", "sd, median, q1, ", "q3, sum, status, ", "total, finished, ",
+			"auto_update, arType, pid_list, ", "columns)",
+			"values (#{dbName,jdbcType=VARCHAR}, #{version,jdbcType=INTEGER}, ",
 			"#{aggregateTime,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, ",
-			"#{mean,jdbcType=TINYINT}, #{max,jdbcType=TINYINT}, #{min,jdbcType=TINYINT}, ",
-			"#{sd,jdbcType=TINYINT}, #{median,jdbcType=TINYINT}, #{q1,jdbcType=TINYINT}, ",
-			"#{q3,jdbcType=TINYINT}, #{sum,jdbcType=TINYINT}, #{status,jdbcType=VARCHAR}, ",
+			"#{mean,jdbcType=BIT}, #{max,jdbcType=BIT}, #{min,jdbcType=BIT}, ",
+			"#{sd,jdbcType=BIT}, #{median,jdbcType=BIT}, #{q1,jdbcType=BIT}, ",
+			"#{q3,jdbcType=BIT}, #{sum,jdbcType=BIT}, #{status,jdbcType=VARCHAR}, ",
 			"#{total,jdbcType=INTEGER}, #{finished,jdbcType=INTEGER}, ",
-			"#{autoUpdate,jdbcType=TINYINT}, #{pidList,jdbcType=LONGVARCHAR}, ", "#{columns,jdbcType=LONGVARCHAR})" })
+			"#{autoUpdate,jdbcType=BIT}, #{artype,jdbcType=BIT}, #{pidList,jdbcType=LONGVARCHAR}, ",
+			"#{columns,jdbcType=LONGVARCHAR})" })
 	@SelectKey(statement = "SELECT LAST_INSERT_ID()", keyProperty = "id", before = false, resultType = Integer.class)
 	int insert(AggregationDatabaseWithBLOBs record);
 
@@ -78,18 +80,19 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "version", property = "version", jdbcType = JdbcType.INTEGER),
 			@Result(column = "aggregate_time", property = "aggregateTime", jdbcType = JdbcType.INTEGER),
 			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
-			@Result(column = "mean", property = "mean", jdbcType = JdbcType.TINYINT),
-			@Result(column = "max", property = "max", jdbcType = JdbcType.TINYINT),
-			@Result(column = "min", property = "min", jdbcType = JdbcType.TINYINT),
-			@Result(column = "sd", property = "sd", jdbcType = JdbcType.TINYINT),
-			@Result(column = "median", property = "median", jdbcType = JdbcType.TINYINT),
-			@Result(column = "q1", property = "q1", jdbcType = JdbcType.TINYINT),
-			@Result(column = "q3", property = "q3", jdbcType = JdbcType.TINYINT),
-			@Result(column = "sum", property = "sum", jdbcType = JdbcType.TINYINT),
+			@Result(column = "mean", property = "mean", jdbcType = JdbcType.BIT),
+			@Result(column = "max", property = "max", jdbcType = JdbcType.BIT),
+			@Result(column = "min", property = "min", jdbcType = JdbcType.BIT),
+			@Result(column = "sd", property = "sd", jdbcType = JdbcType.BIT),
+			@Result(column = "median", property = "median", jdbcType = JdbcType.BIT),
+			@Result(column = "q1", property = "q1", jdbcType = JdbcType.BIT),
+			@Result(column = "q3", property = "q3", jdbcType = JdbcType.BIT),
+			@Result(column = "sum", property = "sum", jdbcType = JdbcType.BIT),
 			@Result(column = "status", property = "status", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
-			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT),
+			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.BIT),
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT),
 			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "columns", property = "columns", jdbcType = JdbcType.LONGVARCHAR) })
 	List<AggregationDatabaseWithBLOBs> selectByExampleWithBLOBsWithRowbounds(AggregationDatabaseExample example,
@@ -105,18 +108,19 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "version", property = "version", jdbcType = JdbcType.INTEGER),
 			@Result(column = "aggregate_time", property = "aggregateTime", jdbcType = JdbcType.INTEGER),
 			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
-			@Result(column = "mean", property = "mean", jdbcType = JdbcType.TINYINT),
-			@Result(column = "max", property = "max", jdbcType = JdbcType.TINYINT),
-			@Result(column = "min", property = "min", jdbcType = JdbcType.TINYINT),
-			@Result(column = "sd", property = "sd", jdbcType = JdbcType.TINYINT),
-			@Result(column = "median", property = "median", jdbcType = JdbcType.TINYINT),
-			@Result(column = "q1", property = "q1", jdbcType = JdbcType.TINYINT),
-			@Result(column = "q3", property = "q3", jdbcType = JdbcType.TINYINT),
-			@Result(column = "sum", property = "sum", jdbcType = JdbcType.TINYINT),
+			@Result(column = "mean", property = "mean", jdbcType = JdbcType.BIT),
+			@Result(column = "max", property = "max", jdbcType = JdbcType.BIT),
+			@Result(column = "min", property = "min", jdbcType = JdbcType.BIT),
+			@Result(column = "sd", property = "sd", jdbcType = JdbcType.BIT),
+			@Result(column = "median", property = "median", jdbcType = JdbcType.BIT),
+			@Result(column = "q1", property = "q1", jdbcType = JdbcType.BIT),
+			@Result(column = "q3", property = "q3", jdbcType = JdbcType.BIT),
+			@Result(column = "sum", property = "sum", jdbcType = JdbcType.BIT),
 			@Result(column = "status", property = "status", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
-			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT),
+			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.BIT),
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT),
 			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "columns", property = "columns", jdbcType = JdbcType.LONGVARCHAR) })
 	List<AggregationDatabaseWithBLOBs> selectByExampleWithBLOBs(AggregationDatabaseExample example);
@@ -131,18 +135,19 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "version", property = "version", jdbcType = JdbcType.INTEGER),
 			@Result(column = "aggregate_time", property = "aggregateTime", jdbcType = JdbcType.INTEGER),
 			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
-			@Result(column = "mean", property = "mean", jdbcType = JdbcType.TINYINT),
-			@Result(column = "max", property = "max", jdbcType = JdbcType.TINYINT),
-			@Result(column = "min", property = "min", jdbcType = JdbcType.TINYINT),
-			@Result(column = "sd", property = "sd", jdbcType = JdbcType.TINYINT),
-			@Result(column = "median", property = "median", jdbcType = JdbcType.TINYINT),
-			@Result(column = "q1", property = "q1", jdbcType = JdbcType.TINYINT),
-			@Result(column = "q3", property = "q3", jdbcType = JdbcType.TINYINT),
-			@Result(column = "sum", property = "sum", jdbcType = JdbcType.TINYINT),
+			@Result(column = "mean", property = "mean", jdbcType = JdbcType.BIT),
+			@Result(column = "max", property = "max", jdbcType = JdbcType.BIT),
+			@Result(column = "min", property = "min", jdbcType = JdbcType.BIT),
+			@Result(column = "sd", property = "sd", jdbcType = JdbcType.BIT),
+			@Result(column = "median", property = "median", jdbcType = JdbcType.BIT),
+			@Result(column = "q1", property = "q1", jdbcType = JdbcType.BIT),
+			@Result(column = "q3", property = "q3", jdbcType = JdbcType.BIT),
+			@Result(column = "sum", property = "sum", jdbcType = JdbcType.BIT),
 			@Result(column = "status", property = "status", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
-			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT) })
+			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.BIT),
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT) })
 	List<AggregationDatabase> selectByExampleWithRowbounds(AggregationDatabaseExample example, RowBounds rowBounds);
 
 	/**
@@ -155,18 +160,19 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "version", property = "version", jdbcType = JdbcType.INTEGER),
 			@Result(column = "aggregate_time", property = "aggregateTime", jdbcType = JdbcType.INTEGER),
 			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
-			@Result(column = "mean", property = "mean", jdbcType = JdbcType.TINYINT),
-			@Result(column = "max", property = "max", jdbcType = JdbcType.TINYINT),
-			@Result(column = "min", property = "min", jdbcType = JdbcType.TINYINT),
-			@Result(column = "sd", property = "sd", jdbcType = JdbcType.TINYINT),
-			@Result(column = "median", property = "median", jdbcType = JdbcType.TINYINT),
-			@Result(column = "q1", property = "q1", jdbcType = JdbcType.TINYINT),
-			@Result(column = "q3", property = "q3", jdbcType = JdbcType.TINYINT),
-			@Result(column = "sum", property = "sum", jdbcType = JdbcType.TINYINT),
+			@Result(column = "mean", property = "mean", jdbcType = JdbcType.BIT),
+			@Result(column = "max", property = "max", jdbcType = JdbcType.BIT),
+			@Result(column = "min", property = "min", jdbcType = JdbcType.BIT),
+			@Result(column = "sd", property = "sd", jdbcType = JdbcType.BIT),
+			@Result(column = "median", property = "median", jdbcType = JdbcType.BIT),
+			@Result(column = "q1", property = "q1", jdbcType = JdbcType.BIT),
+			@Result(column = "q3", property = "q3", jdbcType = JdbcType.BIT),
+			@Result(column = "sum", property = "sum", jdbcType = JdbcType.BIT),
 			@Result(column = "status", property = "status", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
-			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT) })
+			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.BIT),
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT) })
 	List<AggregationDatabase> selectByExample(AggregationDatabaseExample example);
 
 	/**
@@ -174,25 +180,26 @@ public interface AggregationDatabaseMapper {
 	 * @mbg.generated
 	 */
 	@Select({ "select", "id, db_name, version, aggregate_time, create_time, mean, max, min, sd, median, ",
-			"q1, q3, sum, status, total, finished, auto_update, pid_list, columns", "from aggregation_database",
+			"q1, q3, sum, status, total, finished, auto_update, arType, pid_list, columns", "from aggregation_database",
 			"where id = #{id,jdbcType=INTEGER}" })
 	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
 			@Result(column = "db_name", property = "dbName", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "version", property = "version", jdbcType = JdbcType.INTEGER),
 			@Result(column = "aggregate_time", property = "aggregateTime", jdbcType = JdbcType.INTEGER),
 			@Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP),
-			@Result(column = "mean", property = "mean", jdbcType = JdbcType.TINYINT),
-			@Result(column = "max", property = "max", jdbcType = JdbcType.TINYINT),
-			@Result(column = "min", property = "min", jdbcType = JdbcType.TINYINT),
-			@Result(column = "sd", property = "sd", jdbcType = JdbcType.TINYINT),
-			@Result(column = "median", property = "median", jdbcType = JdbcType.TINYINT),
-			@Result(column = "q1", property = "q1", jdbcType = JdbcType.TINYINT),
-			@Result(column = "q3", property = "q3", jdbcType = JdbcType.TINYINT),
-			@Result(column = "sum", property = "sum", jdbcType = JdbcType.TINYINT),
+			@Result(column = "mean", property = "mean", jdbcType = JdbcType.BIT),
+			@Result(column = "max", property = "max", jdbcType = JdbcType.BIT),
+			@Result(column = "min", property = "min", jdbcType = JdbcType.BIT),
+			@Result(column = "sd", property = "sd", jdbcType = JdbcType.BIT),
+			@Result(column = "median", property = "median", jdbcType = JdbcType.BIT),
+			@Result(column = "q1", property = "q1", jdbcType = JdbcType.BIT),
+			@Result(column = "q3", property = "q3", jdbcType = JdbcType.BIT),
+			@Result(column = "sum", property = "sum", jdbcType = JdbcType.BIT),
 			@Result(column = "status", property = "status", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
-			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.TINYINT),
+			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.BIT),
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT),
 			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "columns", property = "columns", jdbcType = JdbcType.LONGVARCHAR) })
 	AggregationDatabaseWithBLOBs selectByPrimaryKey(Integer id);
@@ -234,12 +241,12 @@ public interface AggregationDatabaseMapper {
 	 */
 	@Update({ "update aggregation_database", "set db_name = #{dbName,jdbcType=VARCHAR},",
 			"version = #{version,jdbcType=INTEGER},", "aggregate_time = #{aggregateTime,jdbcType=INTEGER},",
-			"create_time = #{createTime,jdbcType=TIMESTAMP},", "mean = #{mean,jdbcType=TINYINT},",
-			"max = #{max,jdbcType=TINYINT},", "min = #{min,jdbcType=TINYINT},", "sd = #{sd,jdbcType=TINYINT},",
-			"median = #{median,jdbcType=TINYINT},", "q1 = #{q1,jdbcType=TINYINT},", "q3 = #{q3,jdbcType=TINYINT},",
-			"sum = #{sum,jdbcType=TINYINT},", "status = #{status,jdbcType=VARCHAR},",
-			"total = #{total,jdbcType=INTEGER},", "finished = #{finished,jdbcType=INTEGER},",
-			"auto_update = #{autoUpdate,jdbcType=TINYINT},", "pid_list = #{pidList,jdbcType=LONGVARCHAR},",
+			"create_time = #{createTime,jdbcType=TIMESTAMP},", "mean = #{mean,jdbcType=BIT},",
+			"max = #{max,jdbcType=BIT},", "min = #{min,jdbcType=BIT},", "sd = #{sd,jdbcType=BIT},",
+			"median = #{median,jdbcType=BIT},", "q1 = #{q1,jdbcType=BIT},", "q3 = #{q3,jdbcType=BIT},",
+			"sum = #{sum,jdbcType=BIT},", "status = #{status,jdbcType=VARCHAR},", "total = #{total,jdbcType=INTEGER},",
+			"finished = #{finished,jdbcType=INTEGER},", "auto_update = #{autoUpdate,jdbcType=BIT},",
+			"arType = #{artype,jdbcType=BIT},", "pid_list = #{pidList,jdbcType=LONGVARCHAR},",
 			"columns = #{columns,jdbcType=LONGVARCHAR}", "where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKeyWithBLOBs(AggregationDatabaseWithBLOBs record);
 
@@ -249,11 +256,11 @@ public interface AggregationDatabaseMapper {
 	 */
 	@Update({ "update aggregation_database", "set db_name = #{dbName,jdbcType=VARCHAR},",
 			"version = #{version,jdbcType=INTEGER},", "aggregate_time = #{aggregateTime,jdbcType=INTEGER},",
-			"create_time = #{createTime,jdbcType=TIMESTAMP},", "mean = #{mean,jdbcType=TINYINT},",
-			"max = #{max,jdbcType=TINYINT},", "min = #{min,jdbcType=TINYINT},", "sd = #{sd,jdbcType=TINYINT},",
-			"median = #{median,jdbcType=TINYINT},", "q1 = #{q1,jdbcType=TINYINT},", "q3 = #{q3,jdbcType=TINYINT},",
-			"sum = #{sum,jdbcType=TINYINT},", "status = #{status,jdbcType=VARCHAR},",
-			"total = #{total,jdbcType=INTEGER},", "finished = #{finished,jdbcType=INTEGER},",
-			"auto_update = #{autoUpdate,jdbcType=TINYINT}", "where id = #{id,jdbcType=INTEGER}" })
+			"create_time = #{createTime,jdbcType=TIMESTAMP},", "mean = #{mean,jdbcType=BIT},",
+			"max = #{max,jdbcType=BIT},", "min = #{min,jdbcType=BIT},", "sd = #{sd,jdbcType=BIT},",
+			"median = #{median,jdbcType=BIT},", "q1 = #{q1,jdbcType=BIT},", "q3 = #{q3,jdbcType=BIT},",
+			"sum = #{sum,jdbcType=BIT},", "status = #{status,jdbcType=VARCHAR},", "total = #{total,jdbcType=INTEGER},",
+			"finished = #{finished,jdbcType=INTEGER},", "auto_update = #{autoUpdate,jdbcType=BIT},",
+			"arType = #{artype,jdbcType=BIT}", "where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(AggregationDatabase record);
 }

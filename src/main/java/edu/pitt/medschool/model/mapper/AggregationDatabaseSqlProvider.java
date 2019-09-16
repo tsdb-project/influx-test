@@ -52,28 +52,28 @@ public class AggregationDatabaseSqlProvider {
 			sql.VALUES("create_time", "#{createTime,jdbcType=TIMESTAMP}");
 		}
 		if (record.getMean() != null) {
-			sql.VALUES("mean", "#{mean,jdbcType=TINYINT}");
+			sql.VALUES("mean", "#{mean,jdbcType=BIT}");
 		}
 		if (record.getMax() != null) {
-			sql.VALUES("max", "#{max,jdbcType=TINYINT}");
+			sql.VALUES("max", "#{max,jdbcType=BIT}");
 		}
 		if (record.getMin() != null) {
-			sql.VALUES("min", "#{min,jdbcType=TINYINT}");
+			sql.VALUES("min", "#{min,jdbcType=BIT}");
 		}
 		if (record.getSd() != null) {
-			sql.VALUES("sd", "#{sd,jdbcType=TINYINT}");
+			sql.VALUES("sd", "#{sd,jdbcType=BIT}");
 		}
 		if (record.getMedian() != null) {
-			sql.VALUES("median", "#{median,jdbcType=TINYINT}");
+			sql.VALUES("median", "#{median,jdbcType=BIT}");
 		}
 		if (record.getQ1() != null) {
-			sql.VALUES("q1", "#{q1,jdbcType=TINYINT}");
+			sql.VALUES("q1", "#{q1,jdbcType=BIT}");
 		}
 		if (record.getQ3() != null) {
-			sql.VALUES("q3", "#{q3,jdbcType=TINYINT}");
+			sql.VALUES("q3", "#{q3,jdbcType=BIT}");
 		}
 		if (record.getSum() != null) {
-			sql.VALUES("sum", "#{sum,jdbcType=TINYINT}");
+			sql.VALUES("sum", "#{sum,jdbcType=BIT}");
 		}
 		if (record.getStatus() != null) {
 			sql.VALUES("status", "#{status,jdbcType=VARCHAR}");
@@ -85,7 +85,10 @@ public class AggregationDatabaseSqlProvider {
 			sql.VALUES("finished", "#{finished,jdbcType=INTEGER}");
 		}
 		if (record.getAutoUpdate() != null) {
-			sql.VALUES("auto_update", "#{autoUpdate,jdbcType=TINYINT}");
+			sql.VALUES("auto_update", "#{autoUpdate,jdbcType=BIT}");
+		}
+		if (record.getArtype() != null) {
+			sql.VALUES("arType", "#{artype,jdbcType=BIT}");
 		}
 		if (record.getPidList() != null) {
 			sql.VALUES("pid_list", "#{pidList,jdbcType=LONGVARCHAR}");
@@ -123,6 +126,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SELECT("total");
 		sql.SELECT("finished");
 		sql.SELECT("auto_update");
+		sql.SELECT("arType");
 		sql.SELECT("pid_list");
 		sql.SELECT("columns");
 		sql.FROM("aggregation_database");
@@ -160,6 +164,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SELECT("total");
 		sql.SELECT("finished");
 		sql.SELECT("auto_update");
+		sql.SELECT("arType");
 		sql.FROM("aggregation_database");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -193,28 +198,28 @@ public class AggregationDatabaseSqlProvider {
 			sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
 		}
 		if (record.getMean() != null) {
-			sql.SET("mean = #{record.mean,jdbcType=TINYINT}");
+			sql.SET("mean = #{record.mean,jdbcType=BIT}");
 		}
 		if (record.getMax() != null) {
-			sql.SET("max = #{record.max,jdbcType=TINYINT}");
+			sql.SET("max = #{record.max,jdbcType=BIT}");
 		}
 		if (record.getMin() != null) {
-			sql.SET("min = #{record.min,jdbcType=TINYINT}");
+			sql.SET("min = #{record.min,jdbcType=BIT}");
 		}
 		if (record.getSd() != null) {
-			sql.SET("sd = #{record.sd,jdbcType=TINYINT}");
+			sql.SET("sd = #{record.sd,jdbcType=BIT}");
 		}
 		if (record.getMedian() != null) {
-			sql.SET("median = #{record.median,jdbcType=TINYINT}");
+			sql.SET("median = #{record.median,jdbcType=BIT}");
 		}
 		if (record.getQ1() != null) {
-			sql.SET("q1 = #{record.q1,jdbcType=TINYINT}");
+			sql.SET("q1 = #{record.q1,jdbcType=BIT}");
 		}
 		if (record.getQ3() != null) {
-			sql.SET("q3 = #{record.q3,jdbcType=TINYINT}");
+			sql.SET("q3 = #{record.q3,jdbcType=BIT}");
 		}
 		if (record.getSum() != null) {
-			sql.SET("sum = #{record.sum,jdbcType=TINYINT}");
+			sql.SET("sum = #{record.sum,jdbcType=BIT}");
 		}
 		if (record.getStatus() != null) {
 			sql.SET("status = #{record.status,jdbcType=VARCHAR}");
@@ -226,7 +231,10 @@ public class AggregationDatabaseSqlProvider {
 			sql.SET("finished = #{record.finished,jdbcType=INTEGER}");
 		}
 		if (record.getAutoUpdate() != null) {
-			sql.SET("auto_update = #{record.autoUpdate,jdbcType=TINYINT}");
+			sql.SET("auto_update = #{record.autoUpdate,jdbcType=BIT}");
+		}
+		if (record.getArtype() != null) {
+			sql.SET("arType = #{record.artype,jdbcType=BIT}");
 		}
 		if (record.getPidList() != null) {
 			sql.SET("pid_list = #{record.pidList,jdbcType=LONGVARCHAR}");
@@ -250,18 +258,19 @@ public class AggregationDatabaseSqlProvider {
 		sql.SET("version = #{record.version,jdbcType=INTEGER}");
 		sql.SET("aggregate_time = #{record.aggregateTime,jdbcType=INTEGER}");
 		sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
-		sql.SET("mean = #{record.mean,jdbcType=TINYINT}");
-		sql.SET("max = #{record.max,jdbcType=TINYINT}");
-		sql.SET("min = #{record.min,jdbcType=TINYINT}");
-		sql.SET("sd = #{record.sd,jdbcType=TINYINT}");
-		sql.SET("median = #{record.median,jdbcType=TINYINT}");
-		sql.SET("q1 = #{record.q1,jdbcType=TINYINT}");
-		sql.SET("q3 = #{record.q3,jdbcType=TINYINT}");
-		sql.SET("sum = #{record.sum,jdbcType=TINYINT}");
+		sql.SET("mean = #{record.mean,jdbcType=BIT}");
+		sql.SET("max = #{record.max,jdbcType=BIT}");
+		sql.SET("min = #{record.min,jdbcType=BIT}");
+		sql.SET("sd = #{record.sd,jdbcType=BIT}");
+		sql.SET("median = #{record.median,jdbcType=BIT}");
+		sql.SET("q1 = #{record.q1,jdbcType=BIT}");
+		sql.SET("q3 = #{record.q3,jdbcType=BIT}");
+		sql.SET("sum = #{record.sum,jdbcType=BIT}");
 		sql.SET("status = #{record.status,jdbcType=VARCHAR}");
 		sql.SET("total = #{record.total,jdbcType=INTEGER}");
 		sql.SET("finished = #{record.finished,jdbcType=INTEGER}");
-		sql.SET("auto_update = #{record.autoUpdate,jdbcType=TINYINT}");
+		sql.SET("auto_update = #{record.autoUpdate,jdbcType=BIT}");
+		sql.SET("arType = #{record.artype,jdbcType=BIT}");
 		sql.SET("pid_list = #{record.pidList,jdbcType=LONGVARCHAR}");
 		sql.SET("columns = #{record.columns,jdbcType=LONGVARCHAR}");
 		AggregationDatabaseExample example = (AggregationDatabaseExample) parameter.get("example");
@@ -281,18 +290,19 @@ public class AggregationDatabaseSqlProvider {
 		sql.SET("version = #{record.version,jdbcType=INTEGER}");
 		sql.SET("aggregate_time = #{record.aggregateTime,jdbcType=INTEGER}");
 		sql.SET("create_time = #{record.createTime,jdbcType=TIMESTAMP}");
-		sql.SET("mean = #{record.mean,jdbcType=TINYINT}");
-		sql.SET("max = #{record.max,jdbcType=TINYINT}");
-		sql.SET("min = #{record.min,jdbcType=TINYINT}");
-		sql.SET("sd = #{record.sd,jdbcType=TINYINT}");
-		sql.SET("median = #{record.median,jdbcType=TINYINT}");
-		sql.SET("q1 = #{record.q1,jdbcType=TINYINT}");
-		sql.SET("q3 = #{record.q3,jdbcType=TINYINT}");
-		sql.SET("sum = #{record.sum,jdbcType=TINYINT}");
+		sql.SET("mean = #{record.mean,jdbcType=BIT}");
+		sql.SET("max = #{record.max,jdbcType=BIT}");
+		sql.SET("min = #{record.min,jdbcType=BIT}");
+		sql.SET("sd = #{record.sd,jdbcType=BIT}");
+		sql.SET("median = #{record.median,jdbcType=BIT}");
+		sql.SET("q1 = #{record.q1,jdbcType=BIT}");
+		sql.SET("q3 = #{record.q3,jdbcType=BIT}");
+		sql.SET("sum = #{record.sum,jdbcType=BIT}");
 		sql.SET("status = #{record.status,jdbcType=VARCHAR}");
 		sql.SET("total = #{record.total,jdbcType=INTEGER}");
 		sql.SET("finished = #{record.finished,jdbcType=INTEGER}");
-		sql.SET("auto_update = #{record.autoUpdate,jdbcType=TINYINT}");
+		sql.SET("auto_update = #{record.autoUpdate,jdbcType=BIT}");
+		sql.SET("arType = #{record.artype,jdbcType=BIT}");
 		AggregationDatabaseExample example = (AggregationDatabaseExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -318,28 +328,28 @@ public class AggregationDatabaseSqlProvider {
 			sql.SET("create_time = #{createTime,jdbcType=TIMESTAMP}");
 		}
 		if (record.getMean() != null) {
-			sql.SET("mean = #{mean,jdbcType=TINYINT}");
+			sql.SET("mean = #{mean,jdbcType=BIT}");
 		}
 		if (record.getMax() != null) {
-			sql.SET("max = #{max,jdbcType=TINYINT}");
+			sql.SET("max = #{max,jdbcType=BIT}");
 		}
 		if (record.getMin() != null) {
-			sql.SET("min = #{min,jdbcType=TINYINT}");
+			sql.SET("min = #{min,jdbcType=BIT}");
 		}
 		if (record.getSd() != null) {
-			sql.SET("sd = #{sd,jdbcType=TINYINT}");
+			sql.SET("sd = #{sd,jdbcType=BIT}");
 		}
 		if (record.getMedian() != null) {
-			sql.SET("median = #{median,jdbcType=TINYINT}");
+			sql.SET("median = #{median,jdbcType=BIT}");
 		}
 		if (record.getQ1() != null) {
-			sql.SET("q1 = #{q1,jdbcType=TINYINT}");
+			sql.SET("q1 = #{q1,jdbcType=BIT}");
 		}
 		if (record.getQ3() != null) {
-			sql.SET("q3 = #{q3,jdbcType=TINYINT}");
+			sql.SET("q3 = #{q3,jdbcType=BIT}");
 		}
 		if (record.getSum() != null) {
-			sql.SET("sum = #{sum,jdbcType=TINYINT}");
+			sql.SET("sum = #{sum,jdbcType=BIT}");
 		}
 		if (record.getStatus() != null) {
 			sql.SET("status = #{status,jdbcType=VARCHAR}");
@@ -351,7 +361,10 @@ public class AggregationDatabaseSqlProvider {
 			sql.SET("finished = #{finished,jdbcType=INTEGER}");
 		}
 		if (record.getAutoUpdate() != null) {
-			sql.SET("auto_update = #{autoUpdate,jdbcType=TINYINT}");
+			sql.SET("auto_update = #{autoUpdate,jdbcType=BIT}");
+		}
+		if (record.getArtype() != null) {
+			sql.SET("arType = #{artype,jdbcType=BIT}");
 		}
 		if (record.getPidList() != null) {
 			sql.SET("pid_list = #{pidList,jdbcType=LONGVARCHAR}");
