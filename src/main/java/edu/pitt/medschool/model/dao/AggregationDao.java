@@ -54,7 +54,7 @@ public class AggregationDao {
     public int updateTotalnumber(int id,int size) {
         AggregationDatabaseWithBLOBs e = new AggregationDatabaseWithBLOBs();
         e.setId(id);
-        e.setFinished(size);
+        e.setTotal(size);
         return aggregationDatabaseMapper.updateByPrimaryKeySelective(e);
     }
 
