@@ -89,7 +89,7 @@ public class AggregationService {
 
         // recover job after break down
         //get finished pids
-        String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+"_"+job.getVersion()+".txt";
+        String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+"_V"+job.getVersion()+".txt";
         File filename = new File(pathname);
         if(filename.exists()){
             try{
