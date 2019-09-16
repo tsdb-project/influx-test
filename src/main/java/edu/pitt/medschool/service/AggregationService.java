@@ -132,7 +132,8 @@ public class AggregationService {
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
             InfluxDB influxDB = generateIdbClient(false);
-            influxDB.query(new Query("create database aggdata"));
+            String command = "create database " + job.getDbName().replace(" ","_")+"_V"+job.getVersion();
+            influxDB.query(new Query(command));
             influxDB.close();
         }catch (IOException e){
             e.printStackTrace();
@@ -152,10 +153,9 @@ public class AggregationService {
                 String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                 List<String> queries = new ArrayList<>();
                 for(int count=0;count<selection.size();count++){
-                    queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName()+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
+                    queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
                 }
-                
-                //System.out.println(query);
+
                 // run query
                 try{
                     for(int count=0;count<selection.size();count++){
@@ -233,7 +233,7 @@ public class AggregationService {
     private List<String> getSelection(List<String> columns){
         List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
-        for(int count=0;count<42;count++){
+        for(int count=0;count<41;count++){
             for(int j=count*144;j<(count+1)*144;j++){
                 onepart.append(String.format("mean(\"%s\") as mean_%s , max(\"%s\") as max_%s , min(\"%s\") as min_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
             }
@@ -290,6 +290,7 @@ public class AggregationService {
     public boolean addOneAggregationJob(Integer jobId) {
         AggregationDatabaseWithBLOBs databaseWithBLOBs = aggregationDao.selectByPrimaryKey(jobId);
         try {
+            System.out.println("successfully added to the job Queue!");
             return this.jobQueue.add(databaseWithBLOBs);
         } catch (Exception e) {
             logger.error("Add job failed.", e);

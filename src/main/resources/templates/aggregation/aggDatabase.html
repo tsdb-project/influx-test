@@ -97,21 +97,6 @@
                                                    data-toggle="modal"
                                                    data-target="#agg-method-modal" id="aggMethodButtton"
                                                    value="Aggregation Method">
-                                            <!--<select class="select2"-->
-                                            <!--data-placeholder="Select Aggregation Method for database"-->
-                                            <!--id="aggregation" required>-->
-                                            <!--<option disabled="disabled" selected="selected" value="">Select-->
-                                            <!--Aggregation Method-->
-                                            <!--</option>-->
-                                            <!--<option value="mean">Mean</option>-->
-                                            <!--<option value="median">Median</option>-->
-                                            <!--<option value="min">Min</option>-->
-                                            <!--<option value="max">Max</option>-->
-                                            <!--<option value="sum">Sum</option>-->
-                                            <!--<option value="stddev">Standard Deviation</option>-->
-                                            <!--<option value="25">25 Percentile</option>-->
-                                            <!--<option value="75">75 Percentile</option>-->
-                                            <!--</select>-->
                                         </div>
                                     </div>
                                     <div class="col-sm-4 col-md-4">
@@ -120,6 +105,17 @@
                                                data-target="#upload-patient-modal" id="patientListButton"
                                                value="Update">
                                     </div>
+                                    <!--<div class="col-sm-4 col-md-4"></div>-->
+                                    <!--<div class="col-sm-4 col-md-4">-->
+                                        <!--<label>Choose database you want to export from</label>-->
+                                        <!--<select class="custom-select" multiple-->
+                                                <!--data-placeholder="Select database" id="databases"-->
+                                                <!--size="15">-->
+                                            <!--<option th:value="${database}"-->
+                                                    <!--th:each="database : ${databases}"-->
+                                                    <!--th:text="${database}"></option>-->
+                                        <!--</select>-->
+                                    <!--</div>-->
                                     <div class="col-sm-4 col-md-4">
                                         <label>Choose features</label>
                                         <input type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal"

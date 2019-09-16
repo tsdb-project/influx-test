@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import retrofit2.http.POST;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -32,7 +33,13 @@ public class AggregationDBController {
         model.addAttribute("subnav", "aggDatabase");
 //        List<String> trends = columnService.selectAllMeasures();
         List<String> trends = aggregationService.getColumns();
+//        List<AggregationDatabase> availableDatabases = aggregationService.selectAllAvailableDBs();
+//        List<String> DBNames = new ArrayList<>();
+//        for (AggregationDatabase database: availableDatabases){
+//            DBNames.add(database.getDbName());
+//        }
         model.addAttribute("measures", trends);
+//        model.addAttribute("databases",DBNames);
         return model;
     }
 
@@ -52,8 +59,7 @@ public class AggregationDBController {
     @ResponseBody
     public RestfulResponse exportQuery(@RequestBody(required = true) AggregationDatabaseWithBLOBs job, RestfulResponse response) {
         if (aggregationService.completeJobAndInsert(job)) {
-//            if (aggregationService.addOneAggregationJob(job.getId())) {
-                if (true) {
+            if (aggregationService.addOneAggregationJob(job.getId())) {
                 response.setCode(1);
                 response.setMsg("Successfully added job.");
             } else {
