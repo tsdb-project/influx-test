@@ -51,6 +51,13 @@ public class AggregationDao {
         return aggregationDatabaseMapper.updateByPrimaryKeySelective(e);
     }
 
+    public int updateTotalnumber(int id,int size) {
+        AggregationDatabaseWithBLOBs e = new AggregationDatabaseWithBLOBs();
+        e.setId(id);
+        e.setFinished(size);
+        return aggregationDatabaseMapper.updateByPrimaryKeySelective(e);
+    }
+
     //todo: add version to db name
     //public String getInfluxDBName()
 }

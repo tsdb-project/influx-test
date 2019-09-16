@@ -117,6 +117,8 @@ public class AggregationService {
             patients = patientIDs;
         }
 
+        // update the total number of patients of this job
+        aggregationDao.updateTotalnumber(job.getId(),patients.size());
         
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
