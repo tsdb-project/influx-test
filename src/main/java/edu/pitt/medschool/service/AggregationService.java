@@ -91,8 +91,7 @@ public class AggregationService {
 
         // recover job after break down
         //get finished pids
-        //String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+"_V"+job.getVersion()+".txt";
-        String pathname = "/tsdb/output/"+DIR+"/aggdata.txt";
+        String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+"_V"+job.getVersion()+".txt";
         File filename = new File(pathname);
         if(filename.exists()){
             try{
@@ -122,10 +121,6 @@ public class AggregationService {
 
         // update the total number of patients of this job
         aggregationDao.updateTotalnumber(job.getId(),patients.size());
-        System.out.println("*********************************************");
-        for(String x: patients){
-            System.out.println(x);
-        }
         
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
@@ -143,10 +138,10 @@ public class AggregationService {
             this.bufferedWriter.write("Cores: "+paraCount);
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
-//            InfluxDB influxDB = generateIdbClient(false);
-//            String command = "create database " + job.getDbName().replace(" ","_")+"_V"+job.getVersion();
-//            influxDB.query(new Query(command));
-//            influxDB.close();
+            InfluxDB influxDB = generateIdbClient(false);
+            String command = "create database " + job.getDbName().replace(" ","_")+"_V"+job.getVersion();
+            influxDB.query(new Query(command));
+            influxDB.close();
         }catch (IOException e){
             e.printStackTrace();
             return;
@@ -159,14 +154,14 @@ public class AggregationService {
 
             while ((pid=idQueue.poll())!=null){
                 // generate query
-                QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
-                QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
+                QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
+                QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
                 String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                 String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                 List<String> queries = new ArrayList<>();
                 for(int count=0;count<selection.size();count++){
-                    //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
-                    queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
+                    queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
+                    //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
                 }
 
                 // run query
@@ -248,13 +243,13 @@ public class AggregationService {
         StringBuilder onepart = new StringBuilder();
         for(int count=0;count<41;count++){
             for(int j=count*144;j<(count+1)*144;j++){
-                onepart.append(String.format("mean(\"%s\") as mean_%s , max(\"%s\") as max_%s , min(\"%s\") as min_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
+                onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
             }
             res.add(onepart.substring(0,onepart.length()-1));
             onepart = new StringBuilder();
         }
         for(int j=41*144;j<columns.size();j++){
-            onepart.append(String.format("mean(\"%s\") as mean_%s , max(\"%s\") as max_%s , min(\"%s\") as min_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
+            onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
         }
         res.add(onepart.substring(0,onepart.length()-1));
         return res;
