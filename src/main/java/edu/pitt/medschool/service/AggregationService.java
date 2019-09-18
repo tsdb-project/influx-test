@@ -91,7 +91,8 @@ public class AggregationService {
 
         // recover job after break down
         //get finished pids
-        String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+"_V"+job.getVersion()+".txt";
+        //String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+"_V"+job.getVersion()+".txt";
+        String pathname = "/tsdb/output/"+DIR+"/aggdata.txt";
         File filename = new File(pathname);
         if(filename.exists()){
             try{
@@ -121,6 +122,10 @@ public class AggregationService {
 
         // update the total number of patients of this job
         aggregationDao.updateTotalnumber(job.getId(),patients.size());
+        System.out.println("*********************************************");
+        for(String x: patients){
+            System.out.println(x);
+        }
         
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
@@ -138,10 +143,10 @@ public class AggregationService {
             this.bufferedWriter.write("Cores: "+paraCount);
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
-            InfluxDB influxDB = generateIdbClient(false);
-            String command = "create database " + job.getDbName().replace(" ","_")+"_V"+job.getVersion();
-            influxDB.query(new Query(command));
-            influxDB.close();
+//            InfluxDB influxDB = generateIdbClient(false);
+//            String command = "create database " + job.getDbName().replace(" ","_")+"_V"+job.getVersion();
+//            influxDB.query(new Query(command));
+//            influxDB.close();
         }catch (IOException e){
             e.printStackTrace();
             return;
@@ -160,7 +165,8 @@ public class AggregationService {
                 String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                 List<String> queries = new ArrayList<>();
                 for(int count=0;count<selection.size();count++){
-                    queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
+                    //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
+                    queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
                 }
 
                 // run query
