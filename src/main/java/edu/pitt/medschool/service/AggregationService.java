@@ -154,8 +154,8 @@ public class AggregationService {
 
             while ((pid=idQueue.poll())!=null){
                 // generate query
-                QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
-                QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
+                QueryResult res1 = influxDB.query(new Query(String.format("select first(\"min_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
+                QueryResult res2 = influxDB.query(new Query(String.format("select last(\"min_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
                 String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                 String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                 List<String> queries = new ArrayList<>();
