@@ -150,7 +150,6 @@ public class AggregationService {
         Runnable queryTask = () -> {
             String pid;
             InfluxDB influxDB = generateIdbClient(false);
-
             while ((pid=idQueue.poll())!=null){
                 try{
                     // generate query
