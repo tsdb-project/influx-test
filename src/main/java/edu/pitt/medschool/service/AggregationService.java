@@ -8,8 +8,6 @@ import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.VersionDao;
 import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
-import edu.pitt.medschool.model.dto.ExportWithBLOBs;
-import org.apache.commons.io.FileUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
@@ -39,6 +37,7 @@ public class AggregationService {
 
     private BufferedWriter bufferedWriter;
     private String dir;
+
     @Autowired
     ExportDao exportDao;
     @Autowired
@@ -153,19 +152,18 @@ public class AggregationService {
             InfluxDB influxDB = generateIdbClient(false);
 
             while ((pid=idQueue.poll())!=null){
-                // generate query
-                QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
-                QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
-                String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
-                String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
-                List<String> queries = new ArrayList<>();
-                for(int count=0;count<selection.size();count++){
-                    queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
-                    //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
-                }
-
-                // run query
                 try{
+                    // generate query
+                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
+                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
+                    String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+                    String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+                    List<String> queries = new ArrayList<>();
+                    for(int count=0;count<selection.size();count++){
+                        queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
+                        //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
+                    }
+                    // run query
                     for(int count=0;count<selection.size();count++){
                         QueryResult rs = influxDB.query(new Query(queries.get(count),"aggdata"));
                     }
