@@ -245,14 +245,14 @@ public class AggregationService {
         for(int count=0;count<41;count++){
             for(int j=count*144;j<(count+1)*144;j++){
                 //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
-                onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s , mean(\"%s\") as mean_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
+                onepart.append(String.format("sum(\"%s\") as sum_%s , median(\"%s\") as median_%s , mean(\"%s\") as mean_%s, percentile(\"%s\",25) as p25_%s, percentile(\"%s\",75) as p75_%s, stddev(\"%s\") as std_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
             }
             res.add(onepart.substring(0,onepart.length()-1));
             onepart = new StringBuilder();
         }
         for(int j=41*144;j<columns.size();j++){
             //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
-            onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s , mean(\"%s\") as mean_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
+            onepart.append(String.format("sum(\"%s\") as sum_%s , median(\"%s\") as median_%s , mean(\"%s\") as mean_%s, percentile(\"%s\",25) as p25_%s, percentile(\"%s\",75) as p75_%s, stddev(\"%s\") as std_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
         }
         res.add(onepart.substring(0,onepart.length()-1));
         return res;
