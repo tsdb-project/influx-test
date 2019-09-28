@@ -91,7 +91,7 @@ public class AggregationService {
 
         // recover job after break down
         //get finished pids
-        String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+"_V"+job.getVersion()+".txt";
+        String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+".txt";
         File filename = new File(pathname);
         if(filename.exists()){
             try{
@@ -130,7 +130,7 @@ public class AggregationService {
         List<String> columns = getColumns();
 
         // get selection condition from 6037 columns, now each file is splited into 9 parts
-        List<String> selection = getSelection(columns);
+        List<String> selection = getSelection(columns,job);
         int paraCount = determineParaNumber();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
@@ -156,7 +156,8 @@ public class AggregationService {
                     // generate query
 //                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
 //                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
-                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
+                    String i11 = job.getFromDb().equals("data")?"I1_1":"max_I1_1";
+                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getFromDb()));
                     //QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     // only do 72 hours
@@ -166,14 +167,13 @@ public class AggregationService {
                     for(int count=0;count<selection.size();count++){
                         //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
 //                        queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
-                        queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "sixty_minute_summary_V1",pid, pid,endTime,startTime,time));
+                        queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName(),pid, pid,endTime,startTime,time));
                     }
-                    System.out.println("****************************************************************");
-                    System.out.println(queries.get(0));
+
                     // run query
                     for(int count=0;count<selection.size();count++){
                         //QueryResult rs = influxDB.query(new Query(queries.get(count),"aggdata"));
-                        QueryResult rs = influxDB.query(new Query(queries.get(count),"data"));
+                        QueryResult rs = influxDB.query(new Query(queries.get(count),job.getFromDb()));
                     }
                     this.bufferedWriter.write("Success: "+pid);
                     this.bufferedWriter.newLine();
@@ -183,7 +183,7 @@ public class AggregationService {
 
                 }catch (Exception e){
                     logger.info(pid);
-                    recordError(pid);
+                    recordError(pid,e);
                     finishedPatientCounter.getAndIncrement();
                     aggregationDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                     e.printStackTrace();
@@ -245,22 +245,22 @@ public class AggregationService {
         return columns;
     }
 
-    private List<String> getSelection(List<String> columns){
+    private List<String> getSelection(List<String> columns,AggregationDatabaseWithBLOBs job){
         List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
         for(int count=0;count<41;count++){
             for(int j=count*144;j<(count+1)*144;j++){
                 //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
-                onepart.append(String.format("sum(\"%s\") as sum_%s , median(\"%s\") as median_%s , mean(\"%s\") as mean_%s, percentile(\"%s\",25) as p25_%s, percentile(\"%s\",75) as p75_%s, stddev(\"%s\") as std_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
+                onepart.append(getAggregations(job,columns.get(j)));
             }
-            res.add(onepart.substring(0,onepart.length()-1));
+            res.add(onepart.substring(0,onepart.length()-2));
             onepart = new StringBuilder();
         }
         for(int j=41*144;j<columns.size();j++){
             //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
-            onepart.append(String.format("sum(\"%s\") as sum_%s , median(\"%s\") as median_%s , mean(\"%s\") as mean_%s, percentile(\"%s\",25) as p25_%s, percentile(\"%s\",75) as p75_%s, stddev(\"%s\") as std_%s,", columns.get(j), columns.get(j), columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j),columns.get(j)));
+            onepart.append(getAggregations(job,columns.get(j)));
         }
-        res.add(onepart.substring(0,onepart.length()-1));
+        res.add(onepart.substring(0,onepart.length()-2));
         return res;
     }
 
@@ -269,9 +269,9 @@ public class AggregationService {
         return paraCount > 0 ? paraCount : 1;
     }
 
-    private void recordError(String pid){
+    private void recordError(String pid,Exception ex){
         try{
-            this.bufferedWriter.write("Failed PID: "+pid);
+            this.bufferedWriter.write("Failed PID: "+pid +ex.getMessage());
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
         }catch (IOException e){
@@ -296,6 +296,7 @@ public class AggregationService {
     public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {
         database.setVersion(versionDao.getLatestVersion());
         database.setStatus("processing");
+        database.setDbName(database.getDbName()+"_V"+database.getVersion());
         database.setCreateTime(LocalDateTime.now(ZoneId.of("America/New_York")));
         return aggregationDao.setNewDB(database) != 0;
     }
@@ -315,5 +316,81 @@ public class AggregationService {
         }
     }
 
+    public void checkIntegrity(){
+        String path = "tsdb/output/Inegrity/aggdataInt.txt";
+        try{
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path,true));
+            List<String> pids = importedFileDao.selectAllImportedPidOnMachine("realpsc");
+            InfluxDB influxDB = generateIdbClient(false);
+            for(int i=0;i<pids.size();i++){
+                String query = String.format("show field keys on aggdata from %s",pids.get(i));
+                QueryResult rs = influxDB.query(new Query(query,"aggdata"));
+                String keys = rs.getResults().get(0).getSeries().get(0).toString();
+                writer.write(keys);
+                writer.newLine();
+                writer.flush();
+            }
+            influxDB.close();
+            writer.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 
+    public String getAggregations(AggregationDatabaseWithBLOBs job,String col){
+        StringBuilder builder = new StringBuilder();
+        if(job.getFromDb().equals("data")){
+            if(job.getMax()){
+                builder.append(String.format("max(\"%s\") as max_%s, ",col,col));
+            }
+            if(job.getMin()){
+                builder.append(String.format("min(\"%s\") as min_%s, ",col,col));
+            }
+            if(job.getMedian()){
+                builder.append(String.format("median(\"%s\") as median_%s, ",col,col));
+            }
+            if(job.getQ1()){
+                builder.append(String.format("percentile(\"%s\",25) as p25_%s, ",col,col));
+            }
+            if(job.getQ3()){
+                builder.append(String.format("percentile(\"%s\",75) as p75_%s, ",col,col));
+            }
+            if(job.getSd()){
+                builder.append(String.format("stddev(\"%s\") as std_%s, ",col,col));
+            }
+            if(job.getSum()){
+                builder.append(String.format("sum(\"%s\") as sum_%s, ",col,col));
+            }
+            if(job.getMean()){
+                builder.append(String.format("mean(\"%s\") as mean_%s, ",col,col));
+            }
+        }else {
+            if(job.getMax()){
+                builder.append(String.format("max(\"%s\") as max_%s, ","max_"+col,col));
+            }
+            if(job.getMin()){
+                builder.append(String.format("min(\"%s\") as min_%s, ","min_"+col,col));
+            }
+            if(job.getMedian()){
+                builder.append(String.format("median(\"%s\") as median_%s, ","median_"+col,col));
+            }
+            if(job.getQ1()){
+                builder.append(String.format("percentile(\"%s\",25) as p25_%s, ","p25_"+col,col));
+            }
+            if(job.getQ3()){
+                builder.append(String.format("percentile(\"%s\",75) as p75_%s, ","p75_"+col,col));
+            }
+            if(job.getSd()){
+                builder.append(String.format("stddev(\"%s\") as std_%s, ","mean_"+col,col));
+            }
+            if(job.getSum()){
+                builder.append(String.format("sum(\"%s\") as sum_%s, ",col,col));
+            }
+            if(job.getMean()){
+                builder.append(String.format("mean(\"%s\") as mean_%s, ",col,col));
+            }
+        }
+        String finalq = builder.toString();
+        return finalq;
+    }
 }

@@ -90,6 +90,9 @@ public class AggregationDatabaseSqlProvider {
 		if (record.getArtype() != null) {
 			sql.VALUES("arType", "#{artype,jdbcType=BIT}");
 		}
+		if (record.getFromDb() != null) {
+			sql.VALUES("from_db", "#{fromDb,jdbcType=VARCHAR}");
+		}
 		if (record.getPidList() != null) {
 			sql.VALUES("pid_list", "#{pidList,jdbcType=LONGVARCHAR}");
 		}
@@ -127,6 +130,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SELECT("finished");
 		sql.SELECT("auto_update");
 		sql.SELECT("arType");
+		sql.SELECT("from_db");
 		sql.SELECT("pid_list");
 		sql.SELECT("columns");
 		sql.FROM("aggregation_database");
@@ -165,6 +169,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SELECT("finished");
 		sql.SELECT("auto_update");
 		sql.SELECT("arType");
+		sql.SELECT("from_db");
 		sql.FROM("aggregation_database");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -236,6 +241,9 @@ public class AggregationDatabaseSqlProvider {
 		if (record.getArtype() != null) {
 			sql.SET("arType = #{record.artype,jdbcType=BIT}");
 		}
+		if (record.getFromDb() != null) {
+			sql.SET("from_db = #{record.fromDb,jdbcType=VARCHAR}");
+		}
 		if (record.getPidList() != null) {
 			sql.SET("pid_list = #{record.pidList,jdbcType=LONGVARCHAR}");
 		}
@@ -271,6 +279,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SET("finished = #{record.finished,jdbcType=INTEGER}");
 		sql.SET("auto_update = #{record.autoUpdate,jdbcType=BIT}");
 		sql.SET("arType = #{record.artype,jdbcType=BIT}");
+		sql.SET("from_db = #{record.fromDb,jdbcType=VARCHAR}");
 		sql.SET("pid_list = #{record.pidList,jdbcType=LONGVARCHAR}");
 		sql.SET("columns = #{record.columns,jdbcType=LONGVARCHAR}");
 		AggregationDatabaseExample example = (AggregationDatabaseExample) parameter.get("example");
@@ -303,6 +312,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SET("finished = #{record.finished,jdbcType=INTEGER}");
 		sql.SET("auto_update = #{record.autoUpdate,jdbcType=BIT}");
 		sql.SET("arType = #{record.artype,jdbcType=BIT}");
+		sql.SET("from_db = #{record.fromDb,jdbcType=VARCHAR}");
 		AggregationDatabaseExample example = (AggregationDatabaseExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -365,6 +375,9 @@ public class AggregationDatabaseSqlProvider {
 		}
 		if (record.getArtype() != null) {
 			sql.SET("arType = #{artype,jdbcType=BIT}");
+		}
+		if (record.getFromDb() != null) {
+			sql.SET("from_db = #{fromDb,jdbcType=VARCHAR}");
 		}
 		if (record.getPidList() != null) {
 			sql.SET("pid_list = #{pidList,jdbcType=LONGVARCHAR}");
