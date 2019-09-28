@@ -156,15 +156,18 @@ public class AggregationService {
 //                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
 //                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
                     QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
-                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
+                    //QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
-                    String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+                    // only do 72 hours
+                    String endTime = LocalDateTime.parse(startTime).plusDays(3).toString();
                     List<String> queries = new ArrayList<>();
                     for(int count=0;count<selection.size();count++){
                         //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
 //                        queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
                         queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "sixty_minute_summary_V1",pid, pid,endTime,startTime,time));
                     }
+                    System.out.println("****************************************************************");
+                    System.out.println(queries.get(0));
                     // run query
                     for(int count=0;count<selection.size();count++){
                         //QueryResult rs = influxDB.query(new Query(queries.get(count),"aggdata"));
