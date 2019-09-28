@@ -73,7 +73,7 @@ public class AggregationDBController {
         return response;
     }
 
-    // check porcess
+    // check process
     @GetMapping("/process")
     @ResponseBody
     public RestfulResponse getOngoing(){

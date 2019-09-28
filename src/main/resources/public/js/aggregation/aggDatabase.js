@@ -671,11 +671,10 @@ $(document).ready(function() {
     /*
     * Integrity check
     **/
-    $("#createButton").click(function () {
+    $("#integrityCheckButton").click(function () {
         $.ajax({
             url: "/aggregation/checkIntegrity/",
-            type: 'post',
-            data: JSON.stringify(newDB),
+            type: 'get',
             contentType: "application/json",
             dataType: 'json',
             success: function (response) {
