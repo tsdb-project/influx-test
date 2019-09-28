@@ -105,17 +105,6 @@
                                                data-target="#upload-patient-modal" id="patientListButton"
                                                value="Update">
                                     </div>
-                                    <!--<div class="col-sm-4 col-md-4"></div>-->
-                                    <!--<div class="col-sm-4 col-md-4">-->
-                                        <!--<label>Choose database you want to export from</label>-->
-                                        <!--<select class="custom-select" multiple-->
-                                                <!--data-placeholder="Select database" id="databases"-->
-                                                <!--size="15">-->
-                                            <!--<option th:value="${database}"-->
-                                                    <!--th:each="database : ${databases}"-->
-                                                    <!--th:text="${database}"></option>-->
-                                        <!--</select>-->
-                                    <!--</div>-->
                                     <div class="col-sm-4 col-md-4">
                                         <label>Choose features</label>
                                         <input type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal"
@@ -126,10 +115,27 @@
                             </div>
                         </div>
                         <div class="row">
+                            <div class="col-sm-12 col-md-12" >
+                                <label>Choose database you want to export from</label>
+                                <select class="custom-select" style="height: 100px"
+                                        data-placeholder="Select database" id="databases"
+                                        size="15">
+                                    <option th:value="${database}"
+                                            th:each="database : ${databases}"
+                                            th:text="${database}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-sm-4 col-md-4">
                                 <label>&nbsp</label>
                                 <input type="submit" class="btn btn-primary btn-lg btn-block"
                                        id="createButton" autocomplete="off" value="Create">
+                            </div>
+                            <div class="col-sm-4 col-md-4">
+                                <label>&nbsp</label>
+                                <input type="submit" class="btn btn-primary btn-lg btn-block"
+                                       id="integrityCheckButton" autocomplete="off" value="integrity Check">
                             </div>
                         </div>
                     </form>
