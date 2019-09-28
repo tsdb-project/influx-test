@@ -636,7 +636,7 @@ $(document).ready(function() {
             min:aggFinalMethod == null ? true : aggFinalMethod.Min,
             mean:aggFinalMethod == null ? true : aggFinalMethod.Mean,
             median:aggFinalMethod == null ? true : aggFinalMethod.Median,
-            Sd:aggFinalMethod == null ? true : aggFinalMethod.Std,
+            sd:aggFinalMethod == null ? true : aggFinalMethod.Std,
             q1:aggFinalMethod == null ? true : aggFinalMethod.FQ,
             q3:aggFinalMethod == null ? true : aggFinalMethod.TQ,
             sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
