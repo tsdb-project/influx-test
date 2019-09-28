@@ -82,4 +82,12 @@ public class AggregationDBController {
         return response;
     }
 
+    @GetMapping("/checkIntegrity")
+    @ResponseBody
+    public RestfulResponse checkIntegrity(){
+        RestfulResponse response = new RestfulResponse(1,"");
+        aggregationService.checkIntegrity();
+        return response;
+    }
+
 }

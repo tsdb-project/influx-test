@@ -50,15 +50,15 @@ public interface AggregationDatabaseMapper {
 	 */
 	@Insert({ "insert into aggregation_database (db_name, version, ", "aggregate_time, create_time, ",
 			"mean, max, min, ", "sd, median, q1, ", "q3, sum, status, ", "total, finished, ",
-			"auto_update, arType, pid_list, ", "columns)",
+			"auto_update, arType, from_db, ", "pid_list, columns)",
 			"values (#{dbName,jdbcType=VARCHAR}, #{version,jdbcType=INTEGER}, ",
 			"#{aggregateTime,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, ",
 			"#{mean,jdbcType=BIT}, #{max,jdbcType=BIT}, #{min,jdbcType=BIT}, ",
 			"#{sd,jdbcType=BIT}, #{median,jdbcType=BIT}, #{q1,jdbcType=BIT}, ",
 			"#{q3,jdbcType=BIT}, #{sum,jdbcType=BIT}, #{status,jdbcType=VARCHAR}, ",
 			"#{total,jdbcType=INTEGER}, #{finished,jdbcType=INTEGER}, ",
-			"#{autoUpdate,jdbcType=BIT}, #{artype,jdbcType=BIT}, #{pidList,jdbcType=LONGVARCHAR}, ",
-			"#{columns,jdbcType=LONGVARCHAR})" })
+			"#{autoUpdate,jdbcType=BIT}, #{artype,jdbcType=BIT}, #{fromDb,jdbcType=VARCHAR}, ",
+			"#{pidList,jdbcType=LONGVARCHAR}, #{columns,jdbcType=LONGVARCHAR})" })
 	@SelectKey(statement = "SELECT LAST_INSERT_ID()", keyProperty = "id", before = false, resultType = Integer.class)
 	int insert(AggregationDatabaseWithBLOBs record);
 
@@ -93,6 +93,7 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
 			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.BIT),
 			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT),
+			@Result(column = "from_db", property = "fromDb", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "columns", property = "columns", jdbcType = JdbcType.LONGVARCHAR) })
 	List<AggregationDatabaseWithBLOBs> selectByExampleWithBLOBsWithRowbounds(AggregationDatabaseExample example,
@@ -121,6 +122,7 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
 			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.BIT),
 			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT),
+			@Result(column = "from_db", property = "fromDb", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "columns", property = "columns", jdbcType = JdbcType.LONGVARCHAR) })
 	List<AggregationDatabaseWithBLOBs> selectByExampleWithBLOBs(AggregationDatabaseExample example);
@@ -147,7 +149,8 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
 			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.BIT),
-			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT) })
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT),
+			@Result(column = "from_db", property = "fromDb", jdbcType = JdbcType.VARCHAR) })
 	List<AggregationDatabase> selectByExampleWithRowbounds(AggregationDatabaseExample example, RowBounds rowBounds);
 
 	/**
@@ -172,7 +175,8 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "total", property = "total", jdbcType = JdbcType.INTEGER),
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
 			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.BIT),
-			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT) })
+			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT),
+			@Result(column = "from_db", property = "fromDb", jdbcType = JdbcType.VARCHAR) })
 	List<AggregationDatabase> selectByExample(AggregationDatabaseExample example);
 
 	/**
@@ -180,8 +184,8 @@ public interface AggregationDatabaseMapper {
 	 * @mbg.generated
 	 */
 	@Select({ "select", "id, db_name, version, aggregate_time, create_time, mean, max, min, sd, median, ",
-			"q1, q3, sum, status, total, finished, auto_update, arType, pid_list, columns", "from aggregation_database",
-			"where id = #{id,jdbcType=INTEGER}" })
+			"q1, q3, sum, status, total, finished, auto_update, arType, from_db, pid_list, ", "columns",
+			"from aggregation_database", "where id = #{id,jdbcType=INTEGER}" })
 	@Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
 			@Result(column = "db_name", property = "dbName", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "version", property = "version", jdbcType = JdbcType.INTEGER),
@@ -200,6 +204,7 @@ public interface AggregationDatabaseMapper {
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
 			@Result(column = "auto_update", property = "autoUpdate", jdbcType = JdbcType.BIT),
 			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT),
+			@Result(column = "from_db", property = "fromDb", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "columns", property = "columns", jdbcType = JdbcType.LONGVARCHAR) })
 	AggregationDatabaseWithBLOBs selectByPrimaryKey(Integer id);
@@ -246,8 +251,9 @@ public interface AggregationDatabaseMapper {
 			"median = #{median,jdbcType=BIT},", "q1 = #{q1,jdbcType=BIT},", "q3 = #{q3,jdbcType=BIT},",
 			"sum = #{sum,jdbcType=BIT},", "status = #{status,jdbcType=VARCHAR},", "total = #{total,jdbcType=INTEGER},",
 			"finished = #{finished,jdbcType=INTEGER},", "auto_update = #{autoUpdate,jdbcType=BIT},",
-			"arType = #{artype,jdbcType=BIT},", "pid_list = #{pidList,jdbcType=LONGVARCHAR},",
-			"columns = #{columns,jdbcType=LONGVARCHAR}", "where id = #{id,jdbcType=INTEGER}" })
+			"arType = #{artype,jdbcType=BIT},", "from_db = #{fromDb,jdbcType=VARCHAR},",
+			"pid_list = #{pidList,jdbcType=LONGVARCHAR},", "columns = #{columns,jdbcType=LONGVARCHAR}",
+			"where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKeyWithBLOBs(AggregationDatabaseWithBLOBs record);
 
 	/**
@@ -261,6 +267,7 @@ public interface AggregationDatabaseMapper {
 			"median = #{median,jdbcType=BIT},", "q1 = #{q1,jdbcType=BIT},", "q3 = #{q3,jdbcType=BIT},",
 			"sum = #{sum,jdbcType=BIT},", "status = #{status,jdbcType=VARCHAR},", "total = #{total,jdbcType=INTEGER},",
 			"finished = #{finished,jdbcType=INTEGER},", "auto_update = #{autoUpdate,jdbcType=BIT},",
-			"arType = #{artype,jdbcType=BIT}", "where id = #{id,jdbcType=INTEGER}" })
+			"arType = #{artype,jdbcType=BIT},", "from_db = #{fromDb,jdbcType=VARCHAR}",
+			"where id = #{id,jdbcType=INTEGER}" })
 	int updateByPrimaryKey(AggregationDatabase record);
 }
