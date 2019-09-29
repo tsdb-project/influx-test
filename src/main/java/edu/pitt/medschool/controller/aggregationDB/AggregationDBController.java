@@ -57,14 +57,14 @@ public class AggregationDBController {
     @ResponseBody
     public RestfulResponse exportQuery(@RequestBody(required = true) AggregationDatabaseWithBLOBs job, RestfulResponse response) {
         if (aggregationService.completeJobAndInsert(job)) {
-            int jobid = 0;
-            if(job.getId()==null){
-                String dbname = aggregationService.getDbName(job);
-                jobid = aggregationService.getJobId(dbname);
-            }else {
-                jobid = job.getId();
-            }
-            if (aggregationService.addOneAggregationJob(jobid)) {
+//            int jobid = 0;
+//            if(job.getId()==null){
+//                String dbname = aggregationService.getDbName(job);
+//                jobid = aggregationService.getJobId(dbname);
+//            }else {
+//                jobid = job.getId();
+//            }
+            if (aggregationService.addOneAggregationJob(job.getId())) {
                 response.setCode(1);
                 response.setMsg("Successfully added job.");
             } else {
