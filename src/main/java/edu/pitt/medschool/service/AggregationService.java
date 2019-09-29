@@ -461,12 +461,12 @@ public class AggregationService {
         return finalq;
     }
 
-    public String getDbName(AggregationDatabaseWithBLOBs database) {
-        String dbname = database.getDbName()+"_V"+versionDao.getLatestVersion();
-        return dbname;
-    }
-
-    public int getJobId(String dbname) {
-        return aggregationDao.selectJobIdByName(dbname);
-    }
+//    public String getDbName(AggregationDatabaseWithBLOBs database) {
+//        String dbname = database.getDbName()+"_V"+versionDao.getLatestVersion();
+//        return dbname;
+//    }
+//
+//    public int getJobId(String dbname) {
+//        return aggregationDao.selectJobIdByName(dbname);
+//    }
 }
