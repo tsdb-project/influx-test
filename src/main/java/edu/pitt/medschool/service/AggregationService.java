@@ -385,18 +385,19 @@ public class AggregationService {
                 count++;
             }
             for(int i=0;i<pids.size();i++){
-                String query = String.format("show field keys on \"data\" from \"%s\"",pids.get(i));
+                String query = String.format("show field keys from \"%s\"",pids.get(i));
                 QueryResult rs = influxDB.query(new Query(query,"data"));
                 QueryResult rs2 = influxDB.query(new Query(query,job.getDbName()));
                 int keys = rs.getResults().get(0).getSeries().get(0).getValues().size();
                 int keys2 = rs2.getResults().get(0).getSeries().get(0).getValues().size();
-                if((keys-1)*count != keys2){
+                if((keys-1)*count != keys2 || keys2!= 6035*count || keys2!=6037*count){
                     writer.write(pids.get(i)+":"+keys+","+keys2);
                     writer.newLine();
                     writer.flush();
                 }
             }
             influxDB.close();
+            writer.write("finished");
             writer.close();
         }catch (IOException e){
             e.printStackTrace();
