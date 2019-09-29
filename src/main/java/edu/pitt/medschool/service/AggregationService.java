@@ -459,8 +459,4 @@ public class AggregationService {
         String finalq = builder.toString();
         return finalq;
     }
-
-    public AggregationDatabaseWithBLOBs getJob(int id) {
-       return aggregationDao.selectByPrimaryKey(id);
-    }
 }

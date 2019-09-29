@@ -80,11 +80,11 @@ public class AggregationDBController {
         return response;
     }
 
-    @GetMapping("/checkIntegrity/{id}")
+    @PostMapping("/checkIntegrity")
     @ResponseBody
-    public RestfulResponse checkIntegrity(@PathVariable(value = "id",required = true) int id){
+    public RestfulResponse checkIntegrity(@RequestBody(required = true) AggregationDatabaseWithBLOBs job){
         RestfulResponse response = new RestfulResponse(1,"");
-        aggregationService.checkIntegrity(aggregationService.getJob(id));
+        aggregationService.checkIntegrity(job);
         return response;
     }
 
