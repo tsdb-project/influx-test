@@ -58,6 +58,17 @@ public class AggregationDao {
         return aggregationDatabaseMapper.updateByPrimaryKeySelective(e);
     }
 
+    public List<AggregationDatabase> selectByname(String dbname) {
+        AggregationDatabaseExample example = new AggregationDatabaseExample();
+        AggregationDatabaseExample.Criteria criteria = example.createCriteria();
+        criteria.andDbNameEqualTo(dbname);
+        return aggregationDatabaseMapper.selectByExample(example);
+    }
+
+    public int updateAggretaionMethods(AggregationDatabaseWithBLOBs db) {
+        return aggregationDatabaseMapper.updateByPrimaryKeySelective(db);
+    }
+
     //todo: add version to db name
     //public String getInfluxDBName()
 }
