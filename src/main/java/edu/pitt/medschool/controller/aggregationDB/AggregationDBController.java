@@ -56,8 +56,11 @@ public class AggregationDBController {
     @PostMapping("/newDB")
     @ResponseBody
     public RestfulResponse exportQuery(@RequestBody(required = true) AggregationDatabaseWithBLOBs job, RestfulResponse response) {
+        String dbname = aggregationService.getDbName(job);
+        int jobid = aggregationService.getJobId(dbname);
         if (aggregationService.completeJobAndInsert(job)) {
-            if (aggregationService.addOneAggregationJob(job.getId())) {
+
+            if (aggregationService.addOneAggregationJob(job.getId()==null?jobid:job.getId())) {
                 response.setCode(1);
                 response.setMsg("Successfully added job.");
             } else {

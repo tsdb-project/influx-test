@@ -461,4 +461,14 @@ public class AggregationService {
         String finalq = builder.toString();
         return finalq;
     }
+
+    public String getDbName(AggregationDatabaseWithBLOBs database) {
+        database.setVersion(versionDao.getLatestVersion());
+        String dbname = database.getDbName()+"_V"+database.getVersion();
+        return dbname;
+    }
+
+    public int getJobId(String dbname) {
+        return aggregationDao.selectJobIdByName(dbname);
+    }
 }
