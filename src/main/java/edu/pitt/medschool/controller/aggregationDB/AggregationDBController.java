@@ -6,11 +6,9 @@ import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
 import edu.pitt.medschool.service.AggregationService;
-import edu.pitt.medschool.service.ColumnService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import retrofit2.http.POST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,11 +80,11 @@ public class AggregationDBController {
         return response;
     }
 
-    @GetMapping("/checkIntegrity")
+    @GetMapping("/checkIntegrity/{id}")
     @ResponseBody
-    public RestfulResponse checkIntegrity(){
+    public RestfulResponse checkIntegrity(@PathVariable(value = "id",required = true) int id){
         RestfulResponse response = new RestfulResponse(1,"");
-        aggregationService.checkIntegrity();
+        aggregationService.checkIntegrity(aggregationService.getJob(id));
         return response;
     }
 

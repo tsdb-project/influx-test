@@ -353,28 +353,48 @@ public class AggregationService {
         }
     }
 
-    public void checkIntegrity(){
-        String path = "/tsdb/output/Integrity/aggdataInt.txt";
+    public void checkIntegrity(AggregationDatabaseWithBLOBs job){
+        String path = "/tsdb/output/Integrity/"+job.getDbName()+".txt";
         try{
             BufferedWriter writer = new BufferedWriter(new FileWriter(path,true));
-//            List<String> pids = importedFileDao.selectAllImportedPidOnMachine("realpsc");
-            List<String> pids = new ArrayList<>();
-            pids.add("PUH-2013-050");
-            pids.add("PUH-2013-119");
-            pids.add("PUH-2013-122");
-            pids.add("PUH-2013-154");
-            pids.add("PUH-2013-174");
-            pids.add("PUH-2015-009");
-            pids.add("PUH-2017-243");
-            pids.add("PUH-2017-315");
+            List<String> pids = importedFileDao.selectAllImportedPidOnMachine("realpsc");
             InfluxDB influxDB = generateIdbClient(false);
+            int count = 0;
+            if(job.getMean()){
+                count++;
+            }
+            if(job.getSum()){
+                count++;
+            }
+            if(job.getMax()){
+                count++;
+            }
+            if(job.getMedian()){
+                count++;
+            }
+            if(job.getQ1()){
+                count++;
+            }
+            if(job.getQ3()){
+                count++;
+            }
+            if(job.getSd()){
+                count++;
+            }
+            if(job.getMin()){
+                count++;
+            }
             for(int i=0;i<pids.size();i++){
                 String query = String.format("show field keys on \"data\" from \"%s\"",pids.get(i));
                 QueryResult rs = influxDB.query(new Query(query,"data"));
+                QueryResult rs2 = influxDB.query(new Query(query,job.getDbName()));
                 int keys = rs.getResults().get(0).getSeries().get(0).getValues().size();
-                writer.write(String.valueOf(keys));
-                writer.newLine();
-                writer.flush();
+                int keys2 = rs2.getResults().get(0).getSeries().get(0).getValues().size();
+                if((keys-1)*count != keys2){
+                    writer.write(pids.get(i)+":"+keys+","+keys2);
+                    writer.newLine();
+                    writer.flush();
+                }
             }
             influxDB.close();
             writer.close();
@@ -438,5 +458,9 @@ public class AggregationService {
         }
         String finalq = builder.toString();
         return finalq;
+    }
+
+    public AggregationDatabaseWithBLOBs getJob(int id) {
+       return aggregationDao.selectByPrimaryKey(id);
     }
 }
