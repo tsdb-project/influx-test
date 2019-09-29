@@ -463,8 +463,7 @@ public class AggregationService {
     }
 
     public String getDbName(AggregationDatabaseWithBLOBs database) {
-        database.setVersion(versionDao.getLatestVersion());
-        String dbname = database.getDbName()+"_V"+database.getVersion();
+        String dbname = database.getDbName()+"_V"+versionDao.getLatestVersion();
         return dbname;
     }
 
