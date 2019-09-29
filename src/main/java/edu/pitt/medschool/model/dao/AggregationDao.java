@@ -7,6 +7,7 @@ import edu.pitt.medschool.model.mapper.AggregationDatabaseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import javax.script.ScriptEngine;
 import java.util.List;
 
 @Repository
@@ -67,6 +68,13 @@ public class AggregationDao {
 
     public int updateAggretaionMethods(AggregationDatabaseWithBLOBs db) {
         return aggregationDatabaseMapper.updateByPrimaryKeySelective(db);
+    }
+
+    public int selectJobIdByName(String dbname) {
+        AggregationDatabaseExample example = new AggregationDatabaseExample();
+        AggregationDatabaseExample.Criteria criteria = example.createCriteria();
+        criteria.andDbNameEqualTo(dbname);
+        return aggregationDatabaseMapper.selectByExample(example).get(0).getId();
     }
 
     //todo: add version to db name
