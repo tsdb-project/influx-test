@@ -83,6 +83,7 @@ public class AggregationDBController {
     @PostMapping("/checkIntegrity")
     @ResponseBody
     public RestfulResponse checkIntegrity(@RequestBody(required = true) AggregationDatabaseWithBLOBs job){
+        System.out.println(job.getDbName());
         RestfulResponse response = new RestfulResponse(1,"");
         aggregationService.checkIntegrity(job);
         return response;
