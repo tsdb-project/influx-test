@@ -294,12 +294,10 @@ public class AggregationService {
     }
 
     public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {
-        database.setVersion(versionDao.getLatestVersion());
         String dbname = database.getDbName()+"_V"+database.getVersion();
         List<AggregationDatabase> databaseList = aggregationDao.selectByname(dbname);
         if(!databaseList.isEmpty()){
             AggregationDatabaseWithBLOBs db = new AggregationDatabaseWithBLOBs();
-            db.setStatus("processing");
             db.setId(databaseList.get(0).getId());
             db.setDbName(dbname);
             if(database.getMean()){
@@ -330,6 +328,7 @@ public class AggregationService {
             db.setCreateTime(LocalDateTime.now());
             return aggregationDao.updateAggretaionMethods(db) !=0;
         }else {
+            database.setVersion(versionDao.getLatestVersion());
             database.setStatus("processing");
             database.setDbName(database.getDbName()+"_V"+database.getVersion());
             database.setCreateTime(LocalDateTime.now(ZoneId.of("America/New_York")));
