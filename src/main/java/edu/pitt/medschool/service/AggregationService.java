@@ -390,7 +390,7 @@ public class AggregationService {
                 QueryResult rs2 = influxDB.query(new Query(query,job.getDbName()));
                 int keys = rs.getResults().get(0).getSeries().get(0).getValues().size();
                 int keys2 = rs2.getResults().get(0).getSeries().get(0).getValues().size();
-                if((keys-1)*count != keys2 || keys2!= 6035*count || keys2!=6037*count){
+                if((keys-1)*count != keys2 && keys2!= 6035*count && keys2!=6037*count){
                     writer.write(pids.get(i)+":"+keys+","+keys2);
                     writer.newLine();
                     writer.flush();
