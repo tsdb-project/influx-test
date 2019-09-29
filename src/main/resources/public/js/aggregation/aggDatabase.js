@@ -640,6 +640,7 @@ $(document).ready(function() {
             q1:aggFinalMethod == null ? true : aggFinalMethod.FQ,
             q3:aggFinalMethod == null ? true : aggFinalMethod.TQ,
             sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
+            fromDb:$("#databases").val(),
             total:1,
             finished:0,
             autoUpdate:true
@@ -663,6 +664,26 @@ $(document).ready(function() {
             error: function () {
                 notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
                     'Failed to submit this job, please try again.');
+            }
+        });
+    });
+
+    /*
+    * Integrity check
+    **/
+    $("#integrityCheckButton").click(function () {
+        $.ajax({
+            url: "/aggregation/checkIntegrity/",
+            type: 'get',
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (response) {
+                notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
+                'Integrity check complete');
+            },
+            error: function () {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Integrity check Failed.');
             }
         });
     });

@@ -354,16 +354,25 @@ public class AggregationService {
     }
 
     public void checkIntegrity(){
-        String path = "tsdb/output/Inegrity/aggdataInt.txt";
+        String path = "/tsdb/output/Integrity/aggdataInt.txt";
         try{
             BufferedWriter writer = new BufferedWriter(new FileWriter(path,true));
-            List<String> pids = importedFileDao.selectAllImportedPidOnMachine("realpsc");
+//            List<String> pids = importedFileDao.selectAllImportedPidOnMachine("realpsc");
+            List<String> pids = new ArrayList<>();
+            pids.add("PUH-2013-050");
+            pids.add("PUH-2013-119");
+            pids.add("PUH-2013-122");
+            pids.add("PUH-2013-154");
+            pids.add("PUH-2013-174");
+            pids.add("PUH-2015-009");
+            pids.add("PUH-2017-243");
+            pids.add("PUH-2017-315");
             InfluxDB influxDB = generateIdbClient(false);
             for(int i=0;i<pids.size();i++){
-                String query = String.format("show field keys on aggdata from %s",pids.get(i));
-                QueryResult rs = influxDB.query(new Query(query,"aggdata"));
-                String keys = rs.getResults().get(0).getSeries().get(0).toString();
-                writer.write(keys);
+                String query = String.format("show field keys on \"data\" from \"%s\"",pids.get(i));
+                QueryResult rs = influxDB.query(new Query(query,"data"));
+                int keys = rs.getResults().get(0).getSeries().get(0).getValues().size();
+                writer.write(String.valueOf(keys));
                 writer.newLine();
                 writer.flush();
             }
