@@ -534,7 +534,7 @@ $(document).ready(function() {
             data : null,
             render : function(data, type, row, meta) {
                 html = '<div class="btn-demo">';
-                html += '<button class="btn btn-light btn-sm"  id="integrityCheckBtn" data-row="' + meta.row + '"><i class="zmdi zmdi-arrow-right"></i> Check</button>';
+                html += '<button class="btn btn-light btn-sm integrityCheckBtn"  data-row="' + meta.row + '"><i class="zmdi zmdi-arrow-right"></i> Check</button>';
                 html += '</div>';
                 return html
             }
@@ -585,13 +585,13 @@ $(document).ready(function() {
     * Integrity check
     * */
 
-    $("#integrityCheckBtn").click(function() {
+    $(".integrityCheckBtn").click(function() {
         var id = $(this).attr('data-row');
         console.log(databaseData[id]);
         $.ajax({
             'url': "/aggregation/checkIntegrity/",
             'type': 'POST',
-            'data': databaseData[id],
+            'data': JSON.stringify(databaseData[id]),
             'contentType': "application/json",
             dataType: 'json',
             success: function (response) {

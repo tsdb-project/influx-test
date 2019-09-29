@@ -385,7 +385,7 @@ public class AggregationService {
                 count++;
             }
             for(int i=0;i<pids.size();i++){
-                String query = String.format("show field keys on \"data\" from \"%s\"",pids.get(i));
+                String query = String.format("show field keys from \"%s\"",pids.get(i));
                 QueryResult rs = influxDB.query(new Query(query,"data"));
                 QueryResult rs2 = influxDB.query(new Query(query,job.getDbName()));
                 int keys = rs.getResults().get(0).getSeries().get(0).getValues().size();
