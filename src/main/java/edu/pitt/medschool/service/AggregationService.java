@@ -248,15 +248,15 @@ public class AggregationService {
     private List<String> getSelection(List<String> columns,AggregationDatabaseWithBLOBs job){
         List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
-        for(int count=0;count<41;count++){
-            for(int j=count*144;j<(count+1)*144;j++){
+        for(int count=0;count<15;count++){
+            for(int j=count*380;j<(count+1)*380;j++){
                 //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
                 onepart.append(getAggregations(job,columns.get(j)));
             }
             res.add(onepart.substring(0,onepart.length()-2));
             onepart = new StringBuilder();
         }
-        for(int j=41*144;j<columns.size();j++){
+        for(int j=15*380;j<columns.size();j++){
             //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
             onepart.append(getAggregations(job,columns.get(j)));
         }
