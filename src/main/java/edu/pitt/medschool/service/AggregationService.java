@@ -160,7 +160,7 @@ public class AggregationService {
                     QueryResult res1 = influxDB.query(new Query(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getFromDb()));
                     //QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
-                    // only do 72 hours
+                    // only do 6 hours
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
                     String endTime = LocalDateTime.parse(startTime,df).plusHours(6).withMinute(0).withSecond(0).withNano(0).toString()+"Z";
                     System.out.println(startTime);
