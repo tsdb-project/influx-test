@@ -66,6 +66,10 @@ public class ImportedFileDao {
         return importedFileMapper.selectAllImportedPidOnMachine(machineId);
     }
 
+    public List<String> selectAllImportedPidWithoutTBI(String machineId){
+        return importedFileMapper.selectAllImportedPidWithoutTBI(machineId);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public int deletePatientDataByFile(CsvFile file) throws Exception {
         ImportedFileExample importedFileExample = new ImportedFileExample();

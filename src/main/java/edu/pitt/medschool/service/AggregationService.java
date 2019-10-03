@@ -81,7 +81,7 @@ public class AggregationService {
         
         if(plist == null || plist.isEmpty()){
             //todo new way to get all pids from csv_file table
-            patientIDs = importedFileDao.selectAllImportedPidOnMachine("realpsc");
+            patientIDs = importedFileDao.selectAllImportedPidWithoutTBI("realpsc");
         }else {
             patientIDs = Arrays.asList(job.getPidList().split(","));
         }
@@ -162,7 +162,7 @@ public class AggregationService {
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     // only do 72 hours
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-                    String endTime = LocalDateTime.parse(startTime,df).plusDays(3).toString()+"Z";
+                    String endTime = LocalDateTime.parse(startTime,df).plusHours(6).toString()+"Z";
                     List<String> queries = new ArrayList<>();
                     for(int count=0;count<selection.size();count++){
                         //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
