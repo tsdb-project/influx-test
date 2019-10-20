@@ -1,4 +1,3 @@
-@@ -0,0 +1,2429 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -16,7 +15,7 @@
     <link rel="stylesheet" href="/vendors/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
     <link rel="stylesheet" href="/vendors/bower_components/trumbowyg/dist/ui/trumbowyg.min.css">
     <link rel="icon" type="image/ico" href="/img/favicon.ico">
-
+	
     <!-- App styles -->
     <link rel="stylesheet" href="/css/app.min.css">
     <style>
@@ -24,6 +23,10 @@
             text-align: center;
         }
     </style>
+    <style>
+        .pdfobject-container { height: 40rem; border: 1rem solid rgba(0,0,0,.1); }
+    </style>
+    
 </head>
 
 <body data-ma-theme="blue">
@@ -36,7 +39,12 @@
         <div class="content__inner">
             <!-- PUT THE MAIN CONTENT HERE -->
             <div class="card">
-                <div class="card-body" style="margin: 0 150px">
+                <div class="card-body" style="margin: 0 100px">
+                    <div id="pdfEEG"></div>
+					If this browser does not support PDFs, please download the PDF to view it: 
+					<a href="/pdf/pdfEEG.pdf">Download PDF</a>
+					
+                    <p>---------------------------</p>
                     <div class='typora-export os-windows'>
                         <div id='write' class='is-node'><h3><a name='header-n0' class='md-header-anchor '></a>EEG Data
                             Codebook</h3><h5><a name='header-n2' class='md-header-anchor '></a>0. General Info</h5><h5>
@@ -2422,6 +2430,7 @@
 <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
 <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+<script src="/js/pdfobject.js"></script>
 
 <!-- App functions and actions -->
 <script src="/js/navigation.js"></script>
