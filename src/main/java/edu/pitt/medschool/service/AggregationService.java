@@ -236,10 +236,8 @@ public class AggregationService {
 
     public List<String> getColumns(){
         List<String> columns = new ArrayList<>();
-//        int[][] x = {{1,1},{2,2},{3,3},{4,42},{43,81},{82,120},{121,159},{160,171},{172,176},{177,191},{192,230},{231,269},{270,270}};
-//        int[][] y = {{1,3},{1,24},{1,1},{1,40},{1,5},{1,1},{1,97},{1,1},{1,34},{1,1},{1,1},{1,5},{1,1}};
-        int[][] x = {{2,2}};
-        int[][] y = {{23,24}};
+        int[][] x = {{1,1},{2,2},{3,3},{4,42},{43,81},{82,120},{121,159},{160,171},{172,176},{177,191},{192,230},{231,269},{270,270}};
+        int[][] y = {{1,3},{1,24},{1,1},{1,40},{1,5},{1,1},{1,97},{1,1},{1,34},{1,1},{1,1},{1,5},{1,1}};
         for(int k=0;k<x.length;k++){
             for(int i=x[k][0];i<=x[k][1];i++){
                 for(int j=y[k][0];j<=y[k][1];j++){
@@ -253,19 +251,16 @@ public class AggregationService {
     private List<String> getSelection(List<String> columns,AggregationDatabaseWithBLOBs job){
         List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
-//        for(int count=0;count<15;count++){
-//            for(int j=count*380;j<(count+1)*380;j++){
-//                //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
-//                onepart.append(getAggregations(job,columns.get(j)));
-//            }
-//            res.add(onepart.substring(0,onepart.length()-2));
-//            onepart = new StringBuilder();
-//        }
-//        for(int j=15*380;j<columns.size();j++){
-//            //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
-//            onepart.append(getAggregations(job,columns.get(j)));
-//        }
-        for(int j=0;j<columns.size();j++){
+        for(int count=0;count<15;count++){
+            for(int j=count*380;j<(count+1)*380;j++){
+                //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
+                onepart.append(getAggregations(job,columns.get(j)));
+            }
+            res.add(onepart.substring(0,onepart.length()-2));
+            onepart = new StringBuilder();
+        }
+        for(int j=15*380;j<columns.size();j++){
+            //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
             onepart.append(getAggregations(job,columns.get(j)));
         }
         res.add(onepart.substring(0,onepart.length()-2));
