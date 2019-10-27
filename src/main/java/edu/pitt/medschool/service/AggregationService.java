@@ -93,31 +93,31 @@ public class AggregationService {
         //get finished pids
         String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+".txt";
         File filename = new File(pathname);
-        if(filename.exists()){
-            try{
-                InputStreamReader reader = new InputStreamReader(
-                        new FileInputStream(filename));
-                BufferedReader br = new BufferedReader(reader);
-                HashSet<String> finishedPid = new HashSet<>();
-                String line = br.readLine();
-                while (line != null) {
-                    String[] record = line.split(":");
-                    if(record[0].equals("Success")){
-                        finishedPid.add(record[1].trim());
-                    }
-                    line = br.readLine();
-                }
-                HashSet<String> allPid = new HashSet<>(patientIDs);
-                allPid.removeAll(finishedPid);
-                patients = new ArrayList<>(allPid);
-//                System.out.println(finishedPid.size());
-//                System.out.println(allPid.size());
-            }catch (IOException e){
-                e.printStackTrace();
-            }
-        }else{
+//        if(filename.exists()){
+//            try{
+//                InputStreamReader reader = new InputStreamReader(
+//                        new FileInputStream(filename));
+//                BufferedReader br = new BufferedReader(reader);
+//                HashSet<String> finishedPid = new HashSet<>();
+//                String line = br.readLine();
+//                while (line != null) {
+//                    String[] record = line.split(":");
+//                    if(record[0].equals("Success")){
+//                        finishedPid.add(record[1].trim());
+//                    }
+//                    line = br.readLine();
+//                }
+//                HashSet<String> allPid = new HashSet<>(patientIDs);
+//                allPid.removeAll(finishedPid);
+//                patients = new ArrayList<>(allPid);
+////                System.out.println(finishedPid.size());
+////                System.out.println(allPid.size());
+//            }catch (IOException e){
+//                e.printStackTrace();
+//            }
+//        }else{
             patients = patientIDs;
-        }
+//        }
 
         // update the total number of patients of this job
         aggregationDao.updateTotalnumber(job.getId(),patients.size());
@@ -131,7 +131,7 @@ public class AggregationService {
 
         // get selection condition from 6037 columns, now each file is splited into 9 parts
         List<String> selection = getSelection(columns,job);
-        int paraCount = determineParaNumber();
+        int paraCount = job.getThreads();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
             this.bufferedWriter = new BufferedWriter(new FileWriter(pathname,true));
@@ -163,8 +163,8 @@ public class AggregationService {
                     // only do 7 hours
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
                     String endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
-                    System.out.println(startTime);
-                    System.out.println(endTime);
+//                    System.out.println(startTime);
+//                    System.out.println(endTime);
                     List<String> queries = new ArrayList<>();
                     for(int count=0;count<selection.size();count++){
                         //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
@@ -176,6 +176,7 @@ public class AggregationService {
                     for(int count=0;count<selection.size();count++){
                         //QueryResult rs = influxDB.query(new Query(queries.get(count),"aggdata"));
                         QueryResult rs = influxDB.query(new Query(queries.get(count),job.getFromDb()));
+                        System.out.println(queries.get(count));
                     }
                     this.bufferedWriter.write("Success: "+pid);
                     this.bufferedWriter.newLine();
@@ -212,6 +213,7 @@ public class AggregationService {
                 this.bufferedWriter.close();
                 System.out.println("Job finished");
                 aggregationDao.updateStatus(job.getId(),"Success");
+                aggregationDao.updateTimeCost(job.getId(),String.valueOf(Duration.between(start_Time,end_Time)));
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -250,15 +252,17 @@ public class AggregationService {
     private List<String> getSelection(List<String> columns,AggregationDatabaseWithBLOBs job){
         List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
-        for(int count=0;count<15;count++){
-            for(int j=count*380;j<(count+1)*380;j++){
+        int parts = job.getParts();
+        int onePartLength = columns.size()/parts;
+        for(int count=0;count<parts;count++){
+            for(int j=count*onePartLength;j<(count+1)*onePartLength;j++){
                 //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
                 onepart.append(getAggregations(job,columns.get(j)));
             }
             res.add(onepart.substring(0,onepart.length()-2));
             onepart = new StringBuilder();
         }
-        for(int j=15*380;j<columns.size();j++){
+        for(int j=parts*onePartLength;j<columns.size();j++){
             //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
             onepart.append(getAggregations(job,columns.get(j)));
         }
@@ -296,46 +300,48 @@ public class AggregationService {
     }
 
     public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {
-        String dbname = database.getDbName()+"_V"+database.getVersion();
-        List<AggregationDatabase> databaseList = aggregationDao.selectByname(dbname);
-        if(!databaseList.isEmpty()){
-            AggregationDatabaseWithBLOBs db = new AggregationDatabaseWithBLOBs();
-            db.setId(databaseList.get(0).getId());
-            db.setDbName(dbname);
-            if(database.getMean()){
-                db.setMean(true);
-            }
-            if(database.getSum()){
-                db.setSum(true);
-            }
-            if(database.getMax()){
-                db.setMax(true);
-            }
-            if(database.getMedian()){
-                db.setMedian(true);
-            }
-            if(database.getQ1()){
-                db.setQ1(true);
-            }
-            if(database.getQ3()){
-                db.setQ3(true);
-            }
-            if(database.getSd()){
-                db.setSd(true);
-            }
-            if(database.getMin()){
-                db.setMin(true);
-            }
-            db.setFinished(0);
-            db.setCreateTime(LocalDateTime.now());
-            return aggregationDao.updateAggretaionMethods(db) !=0;
-        }else {
+//        String dbname = database.getDbName()+"_V"+database.getVersion();
+//        List<AggregationDatabase> databaseList = aggregationDao.selectByname(dbname);
+//        if(!databaseList.isEmpty()){
+//            AggregationDatabaseWithBLOBs db = new AggregationDatabaseWithBLOBs();
+//            db.setId(databaseList.get(0).getId());
+//            db.setDbName(dbname);
+//            if(database.getMean()){
+//                db.setMean(true);
+//            }
+//            if(database.getSum()){
+//                db.setSum(true);
+//            }
+//            if(database.getMax()){
+//                db.setMax(true);
+//            }
+//            if(database.getMedian()){
+//                db.setMedian(true);
+//            }
+//            if(database.getQ1()){
+//                db.setQ1(true);
+//            }
+//            if(database.getQ3()){
+//                db.setQ3(true);
+//            }
+//            if(database.getSd()){
+//                db.setSd(true);
+//            }
+//            if(database.getMin()){
+//                db.setMin(true);
+//            }
+//            db.setFinished(0);
+//            db.setCreateTime(LocalDateTime.now());
+//            db.setThreads(database.getThreads());
+//            db.setParts(database.getParts());
+//            return aggregationDao.updateAggretaionMethods(db) !=0;
+//        }else {
             database.setVersion(versionDao.getLatestVersion());
             database.setStatus("processing");
             database.setDbName(database.getDbName()+"_V"+database.getVersion());
             database.setCreateTime(LocalDateTime.now(ZoneId.of("America/New_York")));
             return aggregationDao.setNewDB(database) != 0;
-        }
+//        }
 
 
     }
