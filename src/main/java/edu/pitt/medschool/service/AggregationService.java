@@ -156,8 +156,14 @@ public class AggregationService {
                     // generate query
 //                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
 //                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
-                    String i11 = job.getFromDb().equals("data")?"I1_1":"max_I1_1";
-                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getFromDb()));
+
+                    //to generate the first 6h
+//                    String i11 = job.getFromDb().equals("data")?"I1_1":"max_I1_1";
+//                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getFromDb()));
+
+                    // for following 6h
+                    String i11 = "std_I1_1";
+                    QueryResult res1 = influxDB.query(new Query(String.format("select last(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getDbName()));
                     //QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     // only do 7 hours
