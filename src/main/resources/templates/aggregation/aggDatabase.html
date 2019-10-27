@@ -56,11 +56,11 @@
                                         <div class="btn-group btn-group-toggle input-group mb-2" data-toggle="buttons"
                                              id="ar">
                                             <label class="btn active col-sm-6 col-md-6">
-                                                <input type="radio" value="true" autocomplete="off" name="ar">
+                                                <input type="radio" value="true" autocomplete="off" name="ar" required>
                                                 AR Data
                                             </label>
                                             <label class="btn col-sm-6 col-md-6">
-                                                <input type="radio" value="false" autocomplete="off" name="ar">
+                                                <input type="radio" value="false" autocomplete="off" name="ar" required>
                                                 Non-AR Data
                                             </label>
                                         </div>
@@ -72,7 +72,7 @@
                                                    placeholder="Leave empty for no downsampling">
                                             <div class="input-group-append">
                                                 <select class="select2" data-placeholder="Time Unit" id="period_unit"
-                                                        data-minimum-results-for-search="Infinity">
+                                                        data-minimum-results-for-search="Infinity" required>
                                                     <option disabled="disabled" selected="selected" value="">Select Time
                                                         Unit
                                                     </option>
@@ -96,18 +96,20 @@
                                             <input type="button" class="btn btn-primary btn-lg btn-block"
                                                    data-toggle="modal"
                                                    data-target="#agg-method-modal" id="aggMethodButtton"
-                                                   value="Aggregation Method">
+                                                   value="Aggregation Method" required>
                                         </div>
                                     </div>
                                     <div class="col-sm-4 col-md-4">
                                         <label>Update patients list</label>
-                                        <input type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal"
+                                        <input type="button" class="btn btn-primary btn-lg btn-block"
+                                               data-toggle="modal"
                                                data-target="#upload-patient-modal" id="patientListButton"
                                                value="Update">
                                     </div>
                                     <div class="col-sm-4 col-md-4">
                                         <label>Choose features</label>
-                                        <input type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal"
+                                        <input type="button" class="btn btn-primary btn-lg btn-block"
+                                               data-toggle="modal"
                                                data-target="#edit-group-modal" id="columnButton"
                                                value="Choose">
                                     </div>
@@ -115,11 +117,11 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-12 col-md-12" >
+                            <div class="col-sm-12 col-md-12">
                                 <label>Choose database you want to export from</label>
                                 <select class="custom-select" style="height: 100px"
                                         data-placeholder="Select database" id="databases"
-                                        size="15">
+                                        size="15" required>
                                     <option th:value="${database}"
                                             th:each="database : ${databases}"
                                             th:text="${database}"></option>
@@ -128,14 +130,30 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-4 col-md-4">
+                                <label>number of threads</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="threads"
+                                           placeholder="Input the number of threads you want to use" required>
+                                    <i class="form-group__bar"></i>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-md-4">
+                                <label>number of parts</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="parts"
+                                           placeholder="Input the number of parts you want to use" required>
+                                    <i class="form-group__bar"></i>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-md-4">
                                 <label>&nbsp</label>
                                 <input type="submit" class="btn btn-primary btn-lg btn-block"
                                        id="createButton" value="Create">
                             </div>
                             <!--<div class="col-sm-4 col-md-4">-->
-                                <!--<label>&nbsp</label>-->
-                                <!--<input type="button" class="btn btn-primary btn-lg btn-block"-->
-                                       <!--id="integrityCheckButton"  value="integrity Check">-->
+                            <!--<label>&nbsp</label>-->
+                            <!--<input type="button" class="btn btn-primary btn-lg btn-block"-->
+                            <!--id="integrityCheckButton"  value="integrity Check">-->
                             <!--</div>-->
                         </div>
                     </form>
@@ -157,6 +175,9 @@
                                 <th>Aggregation Methods</th>
                                 <th>AR/NOAR</th>
                                 <th>Create Time</th>
+                                <th>time used</th>
+                                <th>thread</th>
+                                <th>parts</th>
                                 <th>Details</th>
                                 <th>Auto Update</th>
                                 <th>Integrity Check</th>
@@ -208,7 +229,8 @@
                             <h5 class="modal-title pull-left">select statistics used for aggregation</h5>
                         </div>
                         <div class="modal-body">
-                            <p>selected features will have blue color.if you don't select any of following feature, the default option is updating all. </p>
+                            <p>selected features will have blue color.if you don't select any of following feature, the
+                                default option is updating all. </p>
                             <div class="row">
                                 <div class="col-sm-4 col-md-4">
                                     <label>&nbsp</label>
@@ -373,7 +395,7 @@
                                                             <!--current selection.</i>-->
                                                     <!--</p>-->
                                                     <!--&lt;!&ndash; <button type="button" class="btn btn-danger col-sm-12 col-md-12" id="clearButton">-->
-                                                        <!--<i class="zmdi zmdi-close"></i>-->
+                                                    <!--<i class="zmdi zmdi-close"></i>-->
                                                     <!--</button> &ndash;&gt;-->
                                                 <!--</div>-->
                                             <!--</div>-->
@@ -426,7 +448,8 @@
                             <h5 class="modal-title pull-left">Select Aggregation columns</h5>
                         </div>
                         <div class="modal-body">
-                            <p>if you don't select columns in the following list, the default option is aggregaton across all columns. </p>
+                            <p>if you don't select columns in the following list, the default option is aggregaton
+                                across all columns. </p>
                             <form role="form" id="aggregation-form">
                                 <div class="row">
                                     <div class="row">
@@ -502,7 +525,8 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                            <input type="button" class="btn btn-primary" data-dismiss="modal" id="saveColumns" value="Save" >
+                            <input type="button" class="btn btn-primary" data-dismiss="modal" id="saveColumns"
+                                   value="Save">
                         </div>
                     </div>
                 </div>
