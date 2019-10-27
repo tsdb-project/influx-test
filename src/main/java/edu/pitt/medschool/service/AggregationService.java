@@ -131,7 +131,7 @@ public class AggregationService {
 
         // get selection condition from 6037 columns, now each file is splited into 9 parts
         List<String> selection = getSelection(columns,job);
-        int paraCount = determineParaNumber();
+        int paraCount = job.getThreads();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
             this.bufferedWriter = new BufferedWriter(new FileWriter(pathname,true));
@@ -213,6 +213,7 @@ public class AggregationService {
                 this.bufferedWriter.close();
                 System.out.println("Job finished");
                 aggregationDao.updateStatus(job.getId(),"Success");
+                aggregationDao.updateTimeCost(job.getId(),String.valueOf(Duration.between(start_Time,end_Time)));
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -251,15 +252,17 @@ public class AggregationService {
     private List<String> getSelection(List<String> columns,AggregationDatabaseWithBLOBs job){
         List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
-        for(int count=0;count<15;count++){
-            for(int j=count*380;j<(count+1)*380;j++){
+        int parts = job.getParts();
+        int onePartLength = 6037/parts;
+        for(int count=0;count<parts;count++){
+            for(int j=count*onePartLength;j<(count+1)*onePartLength;j++){
                 //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
                 onepart.append(getAggregations(job,columns.get(j)));
             }
             res.add(onepart.substring(0,onepart.length()-2));
             onepart = new StringBuilder();
         }
-        for(int j=15*380;j<columns.size();j++){
+        for(int j=parts*onePartLength;j<columns.size();j++){
             //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
             onepart.append(getAggregations(job,columns.get(j)));
         }
@@ -297,46 +300,48 @@ public class AggregationService {
     }
 
     public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {
-        String dbname = database.getDbName()+"_V"+database.getVersion();
-        List<AggregationDatabase> databaseList = aggregationDao.selectByname(dbname);
-        if(!databaseList.isEmpty()){
-            AggregationDatabaseWithBLOBs db = new AggregationDatabaseWithBLOBs();
-            db.setId(databaseList.get(0).getId());
-            db.setDbName(dbname);
-            if(database.getMean()){
-                db.setMean(true);
-            }
-            if(database.getSum()){
-                db.setSum(true);
-            }
-            if(database.getMax()){
-                db.setMax(true);
-            }
-            if(database.getMedian()){
-                db.setMedian(true);
-            }
-            if(database.getQ1()){
-                db.setQ1(true);
-            }
-            if(database.getQ3()){
-                db.setQ3(true);
-            }
-            if(database.getSd()){
-                db.setSd(true);
-            }
-            if(database.getMin()){
-                db.setMin(true);
-            }
-            db.setFinished(0);
-            db.setCreateTime(LocalDateTime.now());
-            return aggregationDao.updateAggretaionMethods(db) !=0;
-        }else {
+//        String dbname = database.getDbName()+"_V"+database.getVersion();
+//        List<AggregationDatabase> databaseList = aggregationDao.selectByname(dbname);
+//        if(!databaseList.isEmpty()){
+//            AggregationDatabaseWithBLOBs db = new AggregationDatabaseWithBLOBs();
+//            db.setId(databaseList.get(0).getId());
+//            db.setDbName(dbname);
+//            if(database.getMean()){
+//                db.setMean(true);
+//            }
+//            if(database.getSum()){
+//                db.setSum(true);
+//            }
+//            if(database.getMax()){
+//                db.setMax(true);
+//            }
+//            if(database.getMedian()){
+//                db.setMedian(true);
+//            }
+//            if(database.getQ1()){
+//                db.setQ1(true);
+//            }
+//            if(database.getQ3()){
+//                db.setQ3(true);
+//            }
+//            if(database.getSd()){
+//                db.setSd(true);
+//            }
+//            if(database.getMin()){
+//                db.setMin(true);
+//            }
+//            db.setFinished(0);
+//            db.setCreateTime(LocalDateTime.now());
+//            db.setThreads(database.getThreads());
+//            db.setParts(database.getParts());
+//            return aggregationDao.updateAggretaionMethods(db) !=0;
+//        }else {
             database.setVersion(versionDao.getLatestVersion());
             database.setStatus("processing");
             database.setDbName(database.getDbName()+"_V"+database.getVersion());
             database.setCreateTime(LocalDateTime.now(ZoneId.of("America/New_York")));
             return aggregationDao.setNewDB(database) != 0;
-        }
+//        }
 
 
     }
