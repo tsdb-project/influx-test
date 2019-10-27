@@ -487,12 +487,6 @@ $(document).ready(function() {
                 return string;
             }
         }, {
-            data : 'timeCost'
-        },{
-            data : 'threads'
-        }, {
-            data : 'parts'
-        },{
             data : null,
             render : function(data) {
                 string = "";
@@ -517,6 +511,12 @@ $(document).ready(function() {
                 return localeDateString(data.createTime)
             }
         }, {
+            data : 'timeCost'
+        },{
+            data : 'threads'
+        }, {
+            data : 'parts'
+        },{
             data : null,
             render : function(data, type, row, meta) {
                 html = '<div class="btn-demo">';
@@ -685,7 +685,7 @@ $(document).ready(function() {
             finished:0,
             autoUpdate:true
         };
-
+        console.log(newDB);
         $.ajax({
             url: "/aggregation/newDB/",
             type: 'post',

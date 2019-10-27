@@ -139,7 +139,7 @@ public class AggregationService {
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
 //            InfluxDB influxDB = generateIdbClient(false);
-//            String command = "create database " + job.getDbName().replace(" ","_")+"_V"+job.getVersion();
+//            String command = "create database " + job.getDbName();
 //            influxDB.query(new Query(command));
 //            influxDB.close();
         }catch (IOException e){
