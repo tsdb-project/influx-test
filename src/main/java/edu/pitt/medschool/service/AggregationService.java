@@ -253,7 +253,7 @@ public class AggregationService {
         List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
         int parts = job.getParts();
-        int onePartLength = 6037/parts;
+        int onePartLength = columns.size()/parts;
         for(int count=0;count<parts;count++){
             for(int j=count*onePartLength;j<(count+1)*onePartLength;j++){
                 //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
