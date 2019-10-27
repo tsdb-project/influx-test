@@ -93,31 +93,31 @@ public class AggregationService {
         //get finished pids
         String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+".txt";
         File filename = new File(pathname);
-        if(filename.exists()){
-            try{
-                InputStreamReader reader = new InputStreamReader(
-                        new FileInputStream(filename));
-                BufferedReader br = new BufferedReader(reader);
-                HashSet<String> finishedPid = new HashSet<>();
-                String line = br.readLine();
-                while (line != null) {
-                    String[] record = line.split(":");
-                    if(record[0].equals("Success")){
-                        finishedPid.add(record[1].trim());
-                    }
-                    line = br.readLine();
-                }
-                HashSet<String> allPid = new HashSet<>(patientIDs);
-                allPid.removeAll(finishedPid);
-                patients = new ArrayList<>(allPid);
-//                System.out.println(finishedPid.size());
-//                System.out.println(allPid.size());
-            }catch (IOException e){
-                e.printStackTrace();
-            }
-        }else{
+//        if(filename.exists()){
+//            try{
+//                InputStreamReader reader = new InputStreamReader(
+//                        new FileInputStream(filename));
+//                BufferedReader br = new BufferedReader(reader);
+//                HashSet<String> finishedPid = new HashSet<>();
+//                String line = br.readLine();
+//                while (line != null) {
+//                    String[] record = line.split(":");
+//                    if(record[0].equals("Success")){
+//                        finishedPid.add(record[1].trim());
+//                    }
+//                    line = br.readLine();
+//                }
+//                HashSet<String> allPid = new HashSet<>(patientIDs);
+//                allPid.removeAll(finishedPid);
+//                patients = new ArrayList<>(allPid);
+////                System.out.println(finishedPid.size());
+////                System.out.println(allPid.size());
+//            }catch (IOException e){
+//                e.printStackTrace();
+//            }
+//        }else{
             patients = patientIDs;
-        }
+//        }
 
         // update the total number of patients of this job
         aggregationDao.updateTotalnumber(job.getId(),patients.size());
