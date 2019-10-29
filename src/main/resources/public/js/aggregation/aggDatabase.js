@@ -679,8 +679,8 @@ $(document).ready(function() {
             q3:aggFinalMethod == null ? true : aggFinalMethod.TQ,
             sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
             fromDb:$("#databases").val(),
-            threads: $("#threads").val(),
-            parts: $("#parts").val(),
+            threads: 14,
+            parts: 15,
             total:1,
             finished:0,
             autoUpdate:true
