@@ -93,31 +93,31 @@ public class AggregationService {
         //get finished pids
         String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+".txt";
         File filename = new File(pathname);
-//        if(filename.exists()){
-//            try{
-//                InputStreamReader reader = new InputStreamReader(
-//                        new FileInputStream(filename));
-//                BufferedReader br = new BufferedReader(reader);
-//                HashSet<String> finishedPid = new HashSet<>();
-//                String line = br.readLine();
-//                while (line != null) {
-//                    String[] record = line.split(":");
-//                    if(record[0].equals("Success")){
-//                        finishedPid.add(record[1].trim());
-//                    }
-//                    line = br.readLine();
-//                }
-//                HashSet<String> allPid = new HashSet<>(patientIDs);
-//                allPid.removeAll(finishedPid);
-//                patients = new ArrayList<>(allPid);
-////                System.out.println(finishedPid.size());
-////                System.out.println(allPid.size());
-//            }catch (IOException e){
-//                e.printStackTrace();
-//            }
-//        }else{
+        if(filename.exists()){
+            try{
+                InputStreamReader reader = new InputStreamReader(
+                        new FileInputStream(filename));
+                BufferedReader br = new BufferedReader(reader);
+                HashSet<String> finishedPid = new HashSet<>();
+                String line = br.readLine();
+                while (line != null) {
+                    String[] record = line.split(":");
+                    if(record[0].equals("Success")){
+                        finishedPid.add(record[1].trim());
+                    }
+                    line = br.readLine();
+                }
+                HashSet<String> allPid = new HashSet<>(patientIDs);
+                allPid.removeAll(finishedPid);
+                patients = new ArrayList<>(allPid);
+//                System.out.println(finishedPid.size());
+//                System.out.println(allPid.size());
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }else{
             patients = patientIDs;
-//        }
+        }
 
         // update the total number of patients of this job
         aggregationDao.updateTotalnumber(job.getId(),patients.size());
@@ -158,12 +158,10 @@ public class AggregationService {
 //                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
 
                     //to generate the first 6h
-//                    String i11 = job.getFromDb().equals("data")?"I1_1":"max_I1_1";
-//                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getFromDb()));
+                    String i11 = job.getFromDb().equals("data")?"I1_1":"max_I1_1";
+                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getFromDb()));
 
-                    // for following 6h
-                    String i11 = "std_I1_1";
-                    QueryResult res1 = influxDB.query(new Query(String.format("select last(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getDbName()));
+
                     //QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     // only do 7 hours
@@ -171,6 +169,12 @@ public class AggregationService {
                     String endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
 //                    System.out.println(startTime);
 //                    System.out.println(endTime);
+
+                    // to do the next 7h.
+                    for(int i=0;i<1;i++){
+                        startTime = endTime;
+                        endTime = LocalDateTime.parse(startTime).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+                    }
                     List<String> queries = new ArrayList<>();
                     for(int count=0;count<selection.size();count++){
                         //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
