@@ -173,7 +173,7 @@ public class AggregationService {
                     // to do the next 7h.
                     for(int i=0;i<1;i++){
                         startTime = endTime;
-                        endTime = LocalDateTime.parse(startTime).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+                        endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
                     }
                     List<String> queries = new ArrayList<>();
                     for(int count=0;count<selection.size();count++){
