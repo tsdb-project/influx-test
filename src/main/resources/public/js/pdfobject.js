@@ -288,3 +288,4 @@
 PDFObject.embed("/pdf/pdfEEG.pdf", "#pdfEEG");
 PDFObject.embed("/pdf/pdfManual.pdf", "#pdfManual");
 PDFObject.embed("/pdf/pdfVC.pdf", "#pdfVC");
+
