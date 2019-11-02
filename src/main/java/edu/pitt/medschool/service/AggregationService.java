@@ -296,8 +296,7 @@ public class AggregationService {
     }
 
     private ExecutorService generateNewThreadPool(int i) {
-        //return Executors.newFixedThreadPool(i);
-        return Executors.newCachedThreadPool();
+        return Executors.newFixedThreadPool(i);
     }
 
     public String databaseNavigator(String query){
