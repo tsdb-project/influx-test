@@ -186,7 +186,7 @@ public class AggregationService {
                     for(int count=0;count<selection.size();count++){
                         //QueryResult rs = influxDB.query(new Query(queries.get(count),"aggdata"));
                         QueryResult rs = influxDB.query(new Query(queries.get(count),job.getFromDb()));
-                        System.out.println(queries.get(count));
+//                        System.out.println(queries.get(count));
                     }
                     this.bufferedWriter.write("Success: "+pid);
                     this.bufferedWriter.newLine();
