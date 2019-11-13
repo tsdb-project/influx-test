@@ -679,6 +679,9 @@ public class AggregationService {
         for(int i=1;i<colums.size();i++){
             //get the current column
             List<Double> arr = getOneColumn(res,i+1);
+            if(arr.isEmpty()){
+                continue;
+            }
             Collections.sort(arr);
             int size = arr.size();
             double median = (arr.get(size/2) + arr.get((size+1)/2))/2;
@@ -698,6 +701,9 @@ public class AggregationService {
         List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
         for(int i=1;i<colums.size();i++){
             List<Double> arr = getOneColumn(res,i+1);
+            if(arr.isEmpty()){
+                continue;
+            }
             double sum = 0;
             int size = arr.size();
             double var = 0;
