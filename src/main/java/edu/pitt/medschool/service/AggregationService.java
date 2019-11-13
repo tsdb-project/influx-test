@@ -351,9 +351,9 @@ public class AggregationService {
                     for(String x: cols){
                         sb.append(String.format("\"%s\", ",x));
                     }
-                    sb.substring(0,sb.lastIndexOf(","));
-                    sb.append(String.format(" from \"%s\" arType='ar' AND ",pid));
-                    String formerQuery = sb.toString();
+                    String former = sb.toString();
+                    former = former.substring(0,former.length()-2);
+                    String formerQuery = former+String.format(" from \"%s\" where arType='ar' AND ",pid);
 
                     // run query
                     for(int count=0;count<7;count++){
