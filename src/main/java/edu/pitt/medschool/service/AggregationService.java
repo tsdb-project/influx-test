@@ -349,9 +349,10 @@ public class AggregationService {
                     sb.append("select ");
                     List<String> cols = getColumns();
                     for(String x: cols){
-                        sb.append(String.format("\"%s\" ",x));
+                        sb.append(String.format("\"%s\", ",x));
                     }
-                    sb.append(String.format("from \"%s\" arType='ar' AND ",pid));
+                    sb.substring(0,sb.lastIndexOf(","));
+                    sb.append(String.format(" from \"%s\" arType='ar' AND ",pid));
                     String formerQuery = sb.toString();
 
                     // run query
@@ -362,6 +363,7 @@ public class AggregationService {
                         String subEndTime = LocalDateTime.parse(startTime,df).plusHours(count+1).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
                         oneHoursb.append(String.format("time>='%s' AND time<'%s'",subStratTime,subEndTime));
                         String query = oneHoursb.toString();
+                        System.out.println(query);
                         QueryResult rs = influxDB.query(new Query(query,job.getFromDb()));
 //                        System.out.println(queries.get(count));
 //
