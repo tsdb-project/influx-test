@@ -368,6 +368,9 @@ public class AggregationService {
 //                        System.out.println(queries.get(count));
 //
 //                      calculate 8 features
+                        if(rs==null || rs.getResults().isEmpty()){
+                            continue;
+                        }
                         HashMap<String,Object> map  = new HashMap<>(cols.size()*8,1.0f);
                         getSortedFeatures(map,rs,cols);
                         getSumFeatures(map,rs,cols);
