@@ -372,8 +372,8 @@ public class AggregationService {
                             continue;
                         }
                         HashMap<String,Object> map  = new HashMap<>(cols.size()*8,1.0f);
-                        getSortedFeatures(map,rs,cols);
-                        getSumFeatures(map,rs,cols);
+                        getSortedFeatures(map,rs);
+                        getSumFeatures(map,rs);
                         Point record = Point.measurement(pid).time(LocalDateTime.parse(subStratTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
                         records.point(record);
                     }
@@ -674,53 +674,57 @@ public class AggregationService {
     }
 
 
-    public void getSortedFeatures(HashMap<String,Object> map, QueryResult res,List<String> cols){
-        for(int i=0;i<cols.size();i++){
+    public void getSortedFeatures(HashMap<String,Object> map, QueryResult res){
+        List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
+        for(int i=1;i<colums.size();i++){
             //get the current column
-            double[] arr = getOneColumn(res,i+1);
-            Arrays.sort(arr);
-            int size = arr.length;
-            double median = (arr[size/2] + arr[(size+1)/2])/2;
-            double max = arr[size-1];
-            double min = arr[0];
-            double p25 = arr[(int)(0.25*size)];
-            double p75 = arr[(int)(0.75*size)];
-            map.put("median_"+cols.get(i),median);
-            map.put("max_"+cols.get(i),max);
-            map.put("min_"+cols.get(i),min);
-            map.put("p25_"+cols.get(i),p25);
-            map.put("p75_"+cols.get(i),p75);
+            List<Double> arr = getOneColumn(res,i+1);
+            Collections.sort(arr);
+            int size = arr.size();
+            double median = (arr.get(size/2) + arr.get((size+1)/2))/2;
+            double max = arr.get(size-1);
+            double min = arr.get(0);
+            double p25 = arr.get((int)(0.25*size));
+            double p75 = arr.get((int)(0.75*size));
+            map.put("median_"+colums.get(i),median);
+            map.put("max_"+colums.get(i),max);
+            map.put("min_"+colums.get(i),min);
+            map.put("p25_"+colums.get(i),p25);
+            map.put("p75_"+colums.get(i),p75);
         }
     }
 
-    public void getSumFeatures(HashMap<String,Object> map, QueryResult res, List<String> cols){
-        for(int i=0;i<cols.size();i++){
-            double[] arr = getOneColumn(res,i+1);
+    public void getSumFeatures(HashMap<String,Object> map, QueryResult res){
+        List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
+        for(int i=1;i<colums.size();i++){
+            List<Double> arr = getOneColumn(res,i+1);
             double sum = 0;
-            int size = arr.length;
+            int size = arr.size();
             double var = 0;
             for(int j=0;j<size;j++){
-                sum+=arr[j];
+                sum+=arr.get(j);
             }
 
             double mean = sum/size;
-            for(int k=0; k<arr.length;k++){
-                var += Math.pow(arr[k] - mean,2);
+            for(int k=0; k<arr.size();k++){
+                var += Math.pow(arr.get(k) - mean,2);
             }
 
             var = var/size;
             var = Math.sqrt(var);
-            map.put("mean_"+cols.get(i),mean);
-            map.put("sum_"+cols.get(i),sum);
-            map.put("std_"+cols.get(i),var);
+            map.put("mean_"+colums.get(i),mean);
+            map.put("sum_"+colums.get(i),sum);
+            map.put("std_"+colums.get(i),var);
         }
     }
 
-    private double[] getOneColumn(QueryResult res, int col) {
+    private List<Double> getOneColumn(QueryResult res, int col) {
         int n = res.getResults().get(0).getSeries().get(0).getValues().size();
-        double[] arr = new double[n];
+        List<Double> arr = new ArrayList<>();
         for(int i=0;i<n;i++){
-            arr[i] = (double) res.getResults().get(0).getSeries().get(0).getValues().get(i).get(col);
+            if(res.getResults().get(0).getSeries().get(0).getValues().get(i).get(col)!=null){
+                arr.add((double) res.getResults().get(0).getSeries().get(0).getValues().get(i).get(col));
+            }
         }
         return arr;
     }
