@@ -363,7 +363,7 @@ public class AggregationService {
                         String subEndTime = LocalDateTime.parse(startTime,df).plusHours(count+1).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
                         oneHoursb.append(String.format("time>='%s' AND time<'%s'",subStratTime,subEndTime));
                         String query = oneHoursb.toString();
-                        System.out.println(query);
+//                        System.out.println(query);
                         QueryResult rs = influxDB.query(new Query(query,job.getFromDb()));
 //                        System.out.println(queries.get(count));
 //
