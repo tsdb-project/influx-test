@@ -1,6 +1,7 @@
 package edu.pitt.medschool.service;
 
 import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
 import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.AggregationDao;
@@ -9,6 +10,7 @@ import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.VersionDao;
 import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
+import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
@@ -152,7 +154,7 @@ public class AggregationService {
         LocalDateTime start_Time = LocalDateTime.now();
         Runnable queryTask = () -> {
             String pid;
-            InfluxDB influxDB = generateIdbClient(false);
+            InfluxDB influxDB = generateIdbClient();
             while ((pid=idQueue.poll())!=null){
                 try{
                     // generate query
@@ -303,7 +305,7 @@ public class AggregationService {
             this.bufferedWriter.write("Cores: "+paraCount);
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
-            InfluxDB influxDB = generateIdbClient(false);
+            InfluxDB influxDB = generateIdbClient();
             String command = "create database " + job.getDbName();
             influxDB.query(new Query(command));
             influxDB.close();
@@ -315,7 +317,7 @@ public class AggregationService {
         LocalDateTime start_Time = LocalDateTime.now();
         Runnable queryTask = () -> {
             String pid;
-            InfluxDB influxDB = generateIdbClient(false);
+            InfluxDB influxDB = generateIdbClient();
             while ((pid=idQueue.poll())!=null){
                 try{
                     // generate query
@@ -571,7 +573,7 @@ public class AggregationService {
         try{
             BufferedWriter writer = new BufferedWriter(new FileWriter(path,true));
             List<String> pids = importedFileDao.selectAllImportedPidOnMachine("realpsc");
-            InfluxDB influxDB = generateIdbClient(false);
+            InfluxDB influxDB = generateIdbClient();
             int count = 0;
             if(job.getMean()){
                 count++;
@@ -734,6 +736,18 @@ public class AggregationService {
             }
         }
         return arr;
+    }
+
+    private InfluxDB generateIdbClient() {
+        // Disable GZip to save CPU
+        InfluxDB idb = InfluxUtil.generateIdbClient(true);
+        BatchOptions bo = BatchOptions.DEFAULTS.consistency(InfluxDB.ConsistencyLevel.ALL)
+                // Flush every 2000 Points, at least every 100ms, buffer for failed oper is 2200
+                .actions(2000).flushDuration(500).bufferLimit(10000).jitterDuration(200)
+                .exceptionHandler((p, t) -> logger.warn("Write point failed", t));
+        idb.enableBatch(bo);
+
+        return idb;
     }
 
 //    public String getDbName(AggregationDatabaseWithBLOBs database) {
