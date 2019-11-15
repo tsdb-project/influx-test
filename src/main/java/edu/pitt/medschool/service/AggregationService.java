@@ -336,7 +336,7 @@ public class AggregationService {
 //                    System.out.println(endTime);
 
                     // to do the next 7h.
-                    for(int i=0;i<1;i++){
+                    for(int i=0;i<0;i++){
                         startTime = endTime;
                         endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
                     }
@@ -368,14 +368,15 @@ public class AggregationService {
 //                        System.out.println(queries.get(count));
 //
 //                      calculate 8 features
-                        if(rs==null || rs.getResults().isEmpty()){
+                        if(rs==null || rs.getResults().get(0) == null || rs.getResults().get(0).getSeries() == null || rs.getResults().get(0).getSeries().isEmpty() || rs.getResults().get(0).getSeries().get(0) == null){
                             continue;
                         }
                         HashMap<String,Object> map  = new HashMap<>(cols.size()*8,1.0f);
                         getSortedFeatures(map,rs);
                         getSumFeatures(map,rs);
-                        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStratTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
+                        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStratTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(new HashMap<>(map)).build();
                         records.point(record);
+                        map.clear();
                     }
 
                     influxDB.write(records);
@@ -678,7 +679,7 @@ public class AggregationService {
         List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
         for(int i=1;i<colums.size();i++){
             //get the current column
-            List<Double> arr = getOneColumn(res,i+1);
+            List<Double> arr = getOneColumn(res,i);
             if(arr.isEmpty()){
                 continue;
             }
@@ -700,7 +701,7 @@ public class AggregationService {
     public void getSumFeatures(HashMap<String,Object> map, QueryResult res){
         List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
         for(int i=1;i<colums.size();i++){
-            List<Double> arr = getOneColumn(res,i+1);
+            List<Double> arr = getOneColumn(res,i);
             if(arr.isEmpty()){
                 continue;
             }
