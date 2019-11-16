@@ -375,11 +375,11 @@ public class AggregationService {
                             continue;
                         }
 
-                        getSumFeatures(rs,pid,subStartTime,df,records);
-                        influxDB.write(records);
+                        getSumFeatures(rs,pid,subStartTime,df,records,influxDB,job.getDbName());
+                        //influxDB.write(records);
                         records = BatchPoints.database(job.getDbName()).tag("arType","ar").build();
-                        getSortedFeatures(rs,pid,subStartTime,df,records);
-                        influxDB.write(records);
+                        getSortedFeatures(rs,pid,subStartTime,df,records,influxDB,job.getDbName());
+                        //influxDB.write(records);
 
                     }
 
@@ -677,7 +677,7 @@ public class AggregationService {
     }
 
 
-    public void getSortedFeatures(QueryResult res, String pid, String subStartTime, DateTimeFormatter df, BatchPoints records){
+    public void getSortedFeatures(QueryResult res, String pid, String subStartTime, DateTimeFormatter df, BatchPoints records,InfluxDB influx, String dbname){
         HashMap<String,Object> map  = new HashMap<>();
         List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
         for(int i=1;i<colums.size();i++){
@@ -700,10 +700,11 @@ public class AggregationService {
             map.put("p75_"+colums.get(i),p75);
         }
         Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(new HashMap<>(map)).build();
-        records.point(record);
+//        records.point(record);
+        influx.write(dbname,"default",record);
     }
 
-    public void getSumFeatures(QueryResult res, String pid, String subStartTime, DateTimeFormatter df, BatchPoints records){
+    public void getSumFeatures(QueryResult res, String pid, String subStartTime, DateTimeFormatter df, BatchPoints records, InfluxDB influxDB,String dbname){
         HashMap<String,Object> map1 = new HashMap<>();
         HashMap<String,Object> map2 = new HashMap<>();
         HashMap<String,Object> map  = new HashMap<>();
@@ -728,15 +729,16 @@ public class AggregationService {
             var = var/size;
             var = Math.sqrt(var);
             map.put("mean_"+colums.get(i),mean);
-            map1.put("sum_"+colums.get(i),sum);
-            map2.put("std_"+colums.get(i),var);
+            map.put("sum_"+colums.get(i),sum);
+            map.put("std_"+colums.get(i),var);
         }
         Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
-        Point record1 = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map1).build();
-        Point record2 = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map2).build();
-        records.point(record);
-        records.point(record1);
-        records.point(record2);
+//        Point record1 = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map1).build();
+//        Point record2 = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map2).build();
+//        records.point(record);
+//        records.point(record1);
+//        records.point(record);
+        influxDB.write(dbname,"default",record);
     }
 
     private List<Double> getOneColumn(QueryResult res, int col) {
