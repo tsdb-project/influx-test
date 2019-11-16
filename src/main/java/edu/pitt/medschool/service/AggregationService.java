@@ -704,6 +704,8 @@ public class AggregationService {
     }
 
     public void getSumFeatures(QueryResult res, String pid, String subStartTime, DateTimeFormatter df, BatchPoints records){
+        HashMap<String,Object> map1 = new HashMap<>();
+        HashMap<String,Object> map2 = new HashMap<>();
         HashMap<String,Object> map  = new HashMap<>();
         List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
         for(int i=1;i<colums.size();i++){
@@ -726,11 +728,15 @@ public class AggregationService {
             var = var/size;
             var = Math.sqrt(var);
             map.put("mean_"+colums.get(i),mean);
-            map.put("sum_"+colums.get(i),sum);
-            map.put("std_"+colums.get(i),var);
+            map1.put("sum_"+colums.get(i),sum);
+            map2.put("std_"+colums.get(i),var);
         }
-        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(new HashMap<>(map)).build();
+        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
+        Point record1 = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map1).build();
+        Point record2 = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map2).build();
         records.point(record);
+        records.point(record1);
+        records.point(record2);
     }
 
     private List<Double> getOneColumn(QueryResult res, int col) {
