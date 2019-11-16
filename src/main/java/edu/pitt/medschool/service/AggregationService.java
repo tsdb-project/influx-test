@@ -65,7 +65,7 @@ public class AggregationService {
             AggregationDatabaseWithBLOBs target = null;
             while ((target = this.jobQueue.poll()) != null) {
                 logger.info("Start to process job #<{}>", target.getId());
-                //startAgg(target);
+//                startAgg(target);
                 startEfficentAgg(target);
                 logger.info("Finished one job #<{}>", target.getId());
             }
@@ -142,10 +142,10 @@ public class AggregationService {
             this.bufferedWriter.write("Cores: "+paraCount);
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
-//            InfluxDB influxDB = generateIdbClient(false);
-//            String command = "create database " + job.getDbName();
-//            influxDB.query(new Query(command));
-//            influxDB.close();
+            InfluxDB influxDB = generateIdbClient();
+            String command = "create database " + job.getDbName();
+            influxDB.query(new Query(command));
+            influxDB.close();
         }catch (IOException e){
             e.printStackTrace();
             return;
@@ -175,7 +175,7 @@ public class AggregationService {
 //                    System.out.println(endTime);
 
                     // to do the next 7h.
-                    for(int i=0;i<1;i++){
+                    for(int i=0;i<0;i++){
                         startTime = endTime;
                         endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
                     }
@@ -743,7 +743,7 @@ public class AggregationService {
         InfluxDB idb = InfluxUtil.generateIdbClient(true);
         BatchOptions bo = BatchOptions.DEFAULTS.consistency(InfluxDB.ConsistencyLevel.ALL)
                 // Flush every 2000 Points, at least every 100ms, buffer for failed oper is 2200
-                .actions(2000).flushDuration(500).bufferLimit(10000).jitterDuration(200)
+                .actions(2000).flushDuration(5).bufferLimit(10000).jitterDuration(200)
                 .exceptionHandler((p, t) -> logger.warn("Write point failed", t));
         idb.enableBatch(bo);
 
