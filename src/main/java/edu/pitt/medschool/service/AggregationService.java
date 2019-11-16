@@ -145,7 +145,7 @@ public class AggregationService {
             this.bufferedWriter.write("Cores: "+paraCount);
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
-            InfluxDB influxDB = generateIdbClient();
+            InfluxDB influxDB = generateIdbClient(false);
             String command = "create database " + job.getDbName();
             influxDB.query(new Query(command));
             influxDB.close();
