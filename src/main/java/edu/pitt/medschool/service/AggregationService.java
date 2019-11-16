@@ -239,10 +239,8 @@ public class AggregationService {
 
 
     private void startEfficentAgg(AggregationDatabaseWithBLOBs job){
-        System.out.println("start aggregation");
-        String time = getAggTime(job.getAggregateTime());
+        System.out.println("start efficient aggregation");
         final String DIR = "aggregationDBLog";
-        final ZoneId zoneId = ZoneId.of("UTC");
 
         List<String> patientIDs;
         String plist = job.getPidList();
@@ -294,11 +292,7 @@ public class AggregationService {
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
 
-        // get all 6037 columns
-        List<String> columns = getColumns();
 
-        // get selection condition from 6037 columns, now each file is splited into 9 parts
-        List<String> selection = getSelection(columns,job);
         int paraCount = job.getThreads();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
@@ -679,8 +673,8 @@ public class AggregationService {
 
     public void getSortedFeatures(QueryResult res, String pid, String subStartTime, DateTimeFormatter df, BatchPoints records,InfluxDB influx, String dbname){
         HashMap<String,Object> map  = new HashMap<>();
-        List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
-        for(int i=1;i<colums.size();i++){
+        List<String> columns = res.getResults().get(0).getSeries().get(0).getColumns();
+        for(int i=1;i<columns.size();i++){
             //get the current column
             List<Double> arr = getOneColumn(res,i);
             if(arr.isEmpty()){
@@ -693,11 +687,11 @@ public class AggregationService {
             double min = arr.get(0);
             double p25 = arr.get((int)(0.25*size));
             double p75 = arr.get((int)(0.75*size));
-            map.put("median_"+colums.get(i),median);
-            map.put("max_"+colums.get(i),max);
-            map.put("min_"+colums.get(i),min);
-            map.put("p25_"+colums.get(i),p25);
-            map.put("p75_"+colums.get(i),p75);
+            map.put("median_"+columns.get(i),median);
+            map.put("max_"+columns.get(i),max);
+            map.put("min_"+columns.get(i),min);
+            map.put("p25_"+columns.get(i),p25);
+            map.put("p75_"+columns.get(i),p75);
         }
         Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(new HashMap<>(map)).build();
 //        records.point(record);
@@ -708,8 +702,8 @@ public class AggregationService {
         HashMap<String,Object> map1 = new HashMap<>();
         HashMap<String,Object> map2 = new HashMap<>();
         HashMap<String,Object> map  = new HashMap<>();
-        List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
-        for(int i=1;i<colums.size();i++){
+        List<String> columns = res.getResults().get(0).getSeries().get(0).getColumns();
+        for(int i=1;i<columns.size();i++){
             List<Double> arr = getOneColumn(res,i);
             if(arr.isEmpty()){
                 continue;
@@ -728,9 +722,9 @@ public class AggregationService {
 
             var = var/size;
             var = Math.sqrt(var);
-            map.put("mean_"+colums.get(i),mean);
-            map.put("sum_"+colums.get(i),sum);
-            map.put("std_"+colums.get(i),var);
+            map.put("mean_"+columns.get(i),mean);
+            map.put("sum_"+columns.get(i),sum);
+            map.put("std_"+columns.get(i),var);
         }
         Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
 //        Point record1 = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map1).build();
