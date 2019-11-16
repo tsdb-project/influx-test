@@ -10,6 +10,7 @@ import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.VersionDao;
 import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
+import org.apache.poi.ss.usermodel.DataFormat;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.BatchPoints;
@@ -361,9 +362,9 @@ public class AggregationService {
                     for(int count=0;count<7;count++){
                         StringBuilder oneHoursb = new StringBuilder();
                         oneHoursb.append(formerQuery);
-                        String subStratTime = LocalDateTime.parse(startTime,df).plusHours(count).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+                        String subStartTime = LocalDateTime.parse(startTime,df).plusHours(count).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
                         String subEndTime = LocalDateTime.parse(startTime,df).plusHours(count+1).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
-                        oneHoursb.append(String.format("time>='%s' AND time<'%s'",subStratTime,subEndTime));
+                        oneHoursb.append(String.format("time>='%s' AND time<'%s'",subStartTime,subEndTime));
                         String query = oneHoursb.toString();
                         System.out.println(query);
                         QueryResult rs = influxDB.query(new Query(query,job.getFromDb()));
@@ -373,15 +374,14 @@ public class AggregationService {
                         if(rs==null || rs.getResults().get(0) == null || rs.getResults().get(0).getSeries() == null || rs.getResults().get(0).getSeries().isEmpty() || rs.getResults().get(0).getSeries().get(0) == null){
                             continue;
                         }
-                        HashMap<String,Object> map  = new HashMap<>(cols.size()*8,1.0f);
-                        getSortedFeatures(map,rs);
-                        getSumFeatures(map,rs);
-                        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStratTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(new HashMap<>(map)).build();
-                        records.point(record);
-                        map.clear();
-                    }
 
-                    influxDB.write(records);
+                        getSortedFeatures(rs,pid,subStartTime,df,records);
+                        influxDB.write(records);
+                        records = BatchPoints.database(job.getDbName()).tag("arType","ar").build();
+                        getSumFeatures(rs,pid,subStartTime,df,records);
+                        influxDB.write(records);
+
+                    }
 
                     // one patient finished
                     this.bufferedWriter.write("Success: "+pid);
@@ -677,7 +677,8 @@ public class AggregationService {
     }
 
 
-    public void getSortedFeatures(HashMap<String,Object> map, QueryResult res){
+    public void getSortedFeatures(QueryResult res, String pid, String subStartTime, DateTimeFormatter df, BatchPoints records){
+        HashMap<String,Object> map  = new HashMap<>();
         List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
         for(int i=1;i<colums.size();i++){
             //get the current column
@@ -698,9 +699,12 @@ public class AggregationService {
             map.put("p25_"+colums.get(i),p25);
             map.put("p75_"+colums.get(i),p75);
         }
+        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(new HashMap<>(map)).build();
+        records.point(record);
     }
 
-    public void getSumFeatures(HashMap<String,Object> map, QueryResult res){
+    public void getSumFeatures(QueryResult res, String pid, String subStartTime, DateTimeFormatter df, BatchPoints records){
+        HashMap<String,Object> map  = new HashMap<>();
         List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
         for(int i=1;i<colums.size();i++){
             List<Double> arr = getOneColumn(res,i);
@@ -725,6 +729,8 @@ public class AggregationService {
             map.put("sum_"+colums.get(i),sum);
             map.put("std_"+colums.get(i),var);
         }
+        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(new HashMap<>(map)).build();
+        records.point(record);
     }
 
     private List<Double> getOneColumn(QueryResult res, int col) {
