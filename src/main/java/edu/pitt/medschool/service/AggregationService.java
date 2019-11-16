@@ -701,7 +701,7 @@ public class AggregationService {
         }
         Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(new HashMap<>(map)).build();
 //        records.point(record);
-        influx.write(dbname,"default",record);
+        influx.write(dbname,"autogen",record);
     }
 
     public void getSumFeatures(QueryResult res, String pid, String subStartTime, DateTimeFormatter df, BatchPoints records, InfluxDB influxDB,String dbname){
@@ -738,7 +738,7 @@ public class AggregationService {
 //        records.point(record);
 //        records.point(record1);
 //        records.point(record);
-        influxDB.write(dbname,"default",record);
+        influxDB.write(dbname,"autogen",record);
     }
 
     private List<Double> getOneColumn(QueryResult res, int col) {
@@ -754,7 +754,7 @@ public class AggregationService {
 
     private InfluxDB generateIdbClient() {
         // Disable GZip to save CPU
-        InfluxDB idb = InfluxUtil.generateIdbClient(true);
+        InfluxDB idb = InfluxUtil.generateIdbClient(false);
         BatchOptions bo = BatchOptions.DEFAULTS.consistency(InfluxDB.ConsistencyLevel.ALL)
                 // Flush every 2000 Points, at least every 100ms, buffer for failed oper is 2200
                 .actions(2000).flushDuration(500).bufferLimit(10000).jitterDuration(200)
