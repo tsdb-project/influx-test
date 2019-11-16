@@ -375,10 +375,10 @@ public class AggregationService {
                             continue;
                         }
 
-                        getSortedFeatures(rs,pid,subStartTime,df,records);
+                        getSumFeatures(rs,pid,subStartTime,df,records);
                         influxDB.write(records);
                         records = BatchPoints.database(job.getDbName()).tag("arType","ar").build();
-                        getSumFeatures(rs,pid,subStartTime,df,records);
+                        getSortedFeatures(rs,pid,subStartTime,df,records);
                         influxDB.write(records);
 
                     }
@@ -749,7 +749,7 @@ public class AggregationService {
         InfluxDB idb = InfluxUtil.generateIdbClient(true);
         BatchOptions bo = BatchOptions.DEFAULTS.consistency(InfluxDB.ConsistencyLevel.ALL)
                 // Flush every 2000 Points, at least every 100ms, buffer for failed oper is 2200
-                .actions(2000).flushDuration(5).bufferLimit(10000).jitterDuration(200)
+                .actions(2000).flushDuration(500).bufferLimit(10000).jitterDuration(200)
                 .exceptionHandler((p, t) -> logger.warn("Write point failed", t));
         idb.enableBatch(bo);
 
