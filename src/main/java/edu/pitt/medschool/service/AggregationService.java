@@ -370,14 +370,14 @@ public class AggregationService {
                         if(rs==null || rs.getResults().get(0) == null || rs.getResults().get(0).getSeries() == null || rs.getResults().get(0).getSeries().isEmpty() || rs.getResults().get(0).getSeries().get(0) == null){
                             continue;
                         }
-
-                        getSumFeatures(rs,pid,subStartTime,df,records,influxDB,job.getDbName());
-                        //influxDB.write(records);
-                        records = BatchPoints.database(job.getDbName()).tag("arType","ar").build();
-                        getSortedFeatures(rs,pid,subStartTime,df,records,influxDB,job.getDbName());
-                        //influxDB.write(records);
-
+                        HashMap<String,Object> map  = new HashMap<>(cols.size()*8,1.0f);
+                        getSortedFeatures(map,rs);
+                        getSumFeatures(map,rs);
+                        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
+                        records.point(record);
                     }
+
+                    influxDB.write(records);
 
                     // one patient finished
                     this.bufferedWriter.write("Success: "+pid);
@@ -673,12 +673,11 @@ public class AggregationService {
     }
 
 
-    public void getSortedFeatures(QueryResult res, String pid, String subStartTime, DateTimeFormatter df, BatchPoints records,InfluxDB influx, String dbname){
-        HashMap<String,Object> map  = new HashMap<>();
-        List<String> columns = res.getResults().get(0).getSeries().get(0).getColumns();
-        for(int i=1;i<columns.size();i++){
+    public void getSortedFeatures(HashMap<String,Object> map, QueryResult res){
+        List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
+        for(int i=1;i<colums.size();i++){
             //get the current column
-            List<Double> arr = getOneColumn(res,i);
+            List<Double> arr = getOneColumn(res,i+1);
             if(arr.isEmpty()){
                 continue;
             }
@@ -689,24 +688,18 @@ public class AggregationService {
             double min = arr.get(0);
             double p25 = arr.get((int)(0.25*size));
             double p75 = arr.get((int)(0.75*size));
-            map.put("median_"+columns.get(i),median);
-            map.put("max_"+columns.get(i),max);
-            map.put("min_"+columns.get(i),min);
-            map.put("p25_"+columns.get(i),p25);
-            map.put("p75_"+columns.get(i),p75);
+            map.put("median_"+colums.get(i),median);
+            map.put("max_"+colums.get(i),max);
+            map.put("min_"+colums.get(i),min);
+            map.put("p25_"+colums.get(i),p25);
+            map.put("p75_"+colums.get(i),p75);
         }
-        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(new HashMap<>(map)).build();
-//        records.point(record);
-        influx.write(dbname,"autogen",record);
     }
 
-    public void getSumFeatures(QueryResult res, String pid, String subStartTime, DateTimeFormatter df, BatchPoints records, InfluxDB influxDB,String dbname){
-        HashMap<String,Object> map1 = new HashMap<>();
-        HashMap<String,Object> map2 = new HashMap<>();
-        HashMap<String,Object> map  = new HashMap<>();
-        List<String> columns = res.getResults().get(0).getSeries().get(0).getColumns();
-        for(int i=1;i<columns.size();i++){
-            List<Double> arr = getOneColumn(res,i);
+    public void getSumFeatures(HashMap<String,Object> map, QueryResult res){
+        List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
+        for(int i=1;i<colums.size();i++){
+            List<Double> arr = getOneColumn(res,i+1);
             if(arr.isEmpty()){
                 continue;
             }
@@ -724,17 +717,10 @@ public class AggregationService {
 
             var = var/size;
             var = Math.sqrt(var);
-            map.put("mean_"+columns.get(i),mean);
-            map.put("sum_"+columns.get(i),sum);
-            map.put("std_"+columns.get(i),var);
+            map.put("mean_"+colums.get(i),mean);
+            map.put("sum_"+colums.get(i),sum);
+            map.put("std_"+colums.get(i),var);
         }
-        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
-//        Point record1 = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map1).build();
-//        Point record2 = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map2).build();
-//        records.point(record);
-//        records.point(record1);
-//        records.point(record);
-        influxDB.write(dbname,"autogen",record);
     }
 
     private List<Double> getOneColumn(QueryResult res, int col) {
