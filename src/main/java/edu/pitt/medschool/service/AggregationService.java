@@ -677,7 +677,7 @@ public class AggregationService {
         List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
         for(int i=1;i<colums.size();i++){
             //get the current column
-            List<Double> arr = getOneColumn(res,i+1);
+            List<Double> arr = getOneColumn(res,i);
             if(arr.isEmpty()){
                 continue;
             }
@@ -699,7 +699,7 @@ public class AggregationService {
     public void getSumFeatures(HashMap<String,Object> map, QueryResult res){
         List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
         for(int i=1;i<colums.size();i++){
-            List<Double> arr = getOneColumn(res,i+1);
+            List<Double> arr = getOneColumn(res,i);
             if(arr.isEmpty()){
                 continue;
             }
