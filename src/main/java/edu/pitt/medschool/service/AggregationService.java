@@ -683,11 +683,11 @@ public class AggregationService {
             }
             Collections.sort(arr);
             int size = arr.size();
-            double median = (arr.get(size/2) + arr.get((size+1)/2))/2;
+            double median = (arr.get((size-1)/2) + arr.get(size/2))/2;
             double max = arr.get(size-1);
             double min = arr.get(0);
-            double p25 = arr.get((int)(0.25*size));
-            double p75 = arr.get((int)(0.75*size));
+            double p25 = arr.get(Math.max(0,(int)(0.25*size)-1));
+            double p75 = arr.get(Math.max(0,(int)(0.75*size)-1));
             map.put("median_"+colums.get(i),median);
             map.put("max_"+colums.get(i),max);
             map.put("min_"+colums.get(i),min);
