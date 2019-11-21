@@ -321,24 +321,24 @@ public class AggregationService {
 //                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
 //                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
 
-                    //to generate the first 6h
                     String i11 = job.getFromDb().equals("data")?"I1_1":"max_I1_1";
                     QueryResult res1 = influxDB.query(new Query(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getFromDb()));
-
-
-                    //QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
+                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
-                    // only do 7 hours
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-                    String endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+                    String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+//                    String endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
 //                    System.out.println(startTime);
 //                    System.out.println(endTime);
 
-                    // to do the next 7h.
-                    for(int i=0;i<1;i++){
-                        startTime = endTime;
-                        endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
-                    }
+//                    // to do the next 7h.
+//                    for(int i=0;i<1;i++){
+//                        startTime = endTime;
+//                        endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+//                    }
+
+                    //skip first 14 hours
+                    startTime = LocalDateTime.parse(startTime,df).plusHours(14).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
 
 
                     // generate the batch
@@ -354,12 +354,15 @@ public class AggregationService {
                     former = former.substring(0,former.length()-2);
                     String formerQuery = former+String.format(" from \"%s\" where arType='ar' AND ",pid);
 
-                    // run query
-                    for(int count=0;count<7;count++){
+                    // run query hour by hour
+                    int count = 0;
+                    String subStartTime = startTime;
+                    String subEndTime;
+                    while (LocalDateTime.parse(subStartTime).isBefore(LocalDateTime.parse(endTime)) || subStartTime.equals(endTime)){
                         StringBuilder oneHoursb = new StringBuilder();
                         oneHoursb.append(formerQuery);
-                        String subStartTime = LocalDateTime.parse(startTime,df).plusHours(count).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
-                        String subEndTime = LocalDateTime.parse(startTime,df).plusHours(count+1).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+                        subStartTime = LocalDateTime.parse(startTime,df).plusHours(count).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+                        subEndTime = LocalDateTime.parse(startTime,df).plusHours(count+1).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
                         oneHoursb.append(String.format("time>='%s' AND time<'%s'",subStartTime,subEndTime));
                         String query = oneHoursb.toString();
 //                        System.out.println(query);
@@ -375,6 +378,7 @@ public class AggregationService {
                         getSumFeatures(map,rs);
                         Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
                         records.point(record);
+                        count++;
                     }
 
                     influxDB.write(records);
