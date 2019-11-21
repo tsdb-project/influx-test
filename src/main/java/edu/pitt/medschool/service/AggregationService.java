@@ -358,7 +358,7 @@ public class AggregationService {
                     int count = 0;
                     String subStartTime = startTime;
                     String subEndTime;
-                    while (LocalDateTime.parse(subStartTime).isBefore(LocalDateTime.parse(endTime)) || subStartTime.equals(endTime)){
+                    while (LocalDateTime.parse(subStartTime,df).isBefore(LocalDateTime.parse(endTime,df)) || subStartTime.equals(endTime)){
                         StringBuilder oneHoursb = new StringBuilder();
                         oneHoursb.append(formerQuery);
                         subStartTime = LocalDateTime.parse(startTime,df).plusHours(count).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
