@@ -379,9 +379,11 @@ public class AggregationService {
                         Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
                         records.point(record);
                         count++;
+                        influxDB.flush();
                     }
 
                     influxDB.write(records);
+
 
                     // one patient finished
                     this.bufferedWriter.write("Success: "+pid);
