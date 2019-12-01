@@ -268,13 +268,16 @@
                                 </div>
                                 <div class="col-sm-12 col-md-12" style="height: 15px"></div>
                                 <div class="col-sm-12 col-md-12" id="availableDBs">
-                                    <label>Choose Database you want to export from</label>
-                                    <input type="button" class="btn btn-info btn-lg btn-block" id="db1"
-                                           value="Base">
-                                    <input type="button" class="btn btn-light btn-lg btn-block" id="db2"
-                                           value="1m summary">
-                                    <input type="button" class="btn btn-light btn-lg btn-block" id="db3"
-                                           value="1h summary">
+                                    <label>Choose database you want to export from</label>
+                                	<select class="custom-select" style="height: 100px"
+                                        data-placeholder="Select database" id="databases"
+                                        size="15">
+                                        <option value="data">data(hard coded)</option>
+                                        <option value="onem_V1">onem_V1(hard coded)</option>
+                                    	<option th:value="${database}"
+                                            th:each="database : ${databases}"
+                                            th:text="${database}"></option>
+                                	</select>
                                 </div>
                             </div>
                         </div>

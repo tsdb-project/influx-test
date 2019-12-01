@@ -1224,6 +1224,76 @@ public class ExportExample {
 			return (Criteria) this;
 		}
 
+		public Criteria andFromDbIsNull() {
+			addCriterion("from_db is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbIsNotNull() {
+			addCriterion("from_db is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbEqualTo(String value) {
+			addCriterion("from_db =", value, "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbNotEqualTo(String value) {
+			addCriterion("from_db <>", value, "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbGreaterThan(String value) {
+			addCriterion("from_db >", value, "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbGreaterThanOrEqualTo(String value) {
+			addCriterion("from_db >=", value, "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbLessThan(String value) {
+			addCriterion("from_db <", value, "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbLessThanOrEqualTo(String value) {
+			addCriterion("from_db <=", value, "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbLike(String value) {
+			addCriterion("from_db like", value, "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbNotLike(String value) {
+			addCriterion("from_db not like", value, "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbIn(List<String> values) {
+			addCriterion("from_db in", values, "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbNotIn(List<String> values) {
+			addCriterion("from_db not in", values, "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbBetween(String value1, String value2) {
+			addCriterion("from_db between", value1, value2, "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbNotBetween(String value1, String value2) {
+			addCriterion("from_db not between", value1, value2, "fromDb");
+			return (Criteria) this;
+		}
+
 		public Criteria andMachineLikeInsensitive(String value) {
 			addCriterion("upper(machine) like", value.toUpperCase(), "machine");
 			return (Criteria) this;
@@ -1241,6 +1311,11 @@ public class ExportExample {
 
 		public Criteria andUsernameLikeInsensitive(String value) {
 			addCriterion("upper(username) like", value.toUpperCase(), "username");
+			return (Criteria) this;
+		}
+
+		public Criteria andFromDbLikeInsensitive(String value) {
+			addCriterion("upper(from_db) like", value.toUpperCase(), "fromDb");
 			return (Criteria) this;
 		}
 	}

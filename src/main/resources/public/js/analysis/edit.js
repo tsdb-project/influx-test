@@ -134,7 +134,8 @@ $(document).ready(function() {
             "layout": $('#layout label.active input').val() == "true",
             "ar": $('#ar label.active input').val() == "true",
             "dbType": $('#selectdb label.active input').val(),
-            "username":$('#user_name').html()
+            "username":$('#user_name').html(),
+            "fromDb": $("#databases").val(),
         };
         $.ajax({
             url: "/api/export/export/",
