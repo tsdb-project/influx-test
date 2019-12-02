@@ -30,7 +30,7 @@
         </javaClientGenerator>
 
         
-        <table tableName="export">
+        <table tableName="aggregation_database">
             <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
         </table>
         

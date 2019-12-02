@@ -55,6 +55,8 @@ import edu.pitt.medschool.model.dto.MedicalDownsampleGroup;
 import edu.pitt.medschool.model.dto.Medication;
 import okhttp3.OkHttpClient;
 
+import org.apache.commons.io.FileUtils;
+
 /**
  * Export functions
  */
@@ -163,7 +165,7 @@ public class AnalysisService {
         boolean isPscRequired = job.getDbType().equals("psc");
 
         // Create output folder, if failed, finish this process
-        File outputDir = generateOutputDir(exportQuery.getAlias(), null);
+        File outputDir = generateOutputDir(jobId, exportQuery.getAlias(), null);
         if (outputDir == null)
             return;
 
@@ -391,7 +393,7 @@ public class AnalysisService {
         MedicalDownsample exportQuery = medicalDownsampleDao.selectByPrimaryKey(queryId);
         boolean isPscRequired = job.getDbType().equals("psc");
         // create output folder, if failed finish this process
-        File outputDir = generateOutputDir(exportQuery.getAlias(), null);
+        File outputDir = generateOutputDir(jobId, exportQuery.getAlias(), null);
         if (outputDir == null) {
             return;
         }
@@ -916,6 +918,8 @@ public class AnalysisService {
      * @param purpose What's this dir for
      * @param uuid    UUID for this dir (Current time in RFC3339 if is null)
      */
+    
+    //old model of outputDir generator
     private File generateOutputDir(String purpose, String uuid) {
         String identifier = uuid;
         if (identifier == null)
@@ -944,6 +948,50 @@ public class AnalysisService {
         }
         // If the directory already exists (bad for us), we should consider this operation failed
         return null;
+    }
+    
+    //New file directory generator: add jobId
+    private File generateOutputDir(int jobId, String purpose, String uuid) {
+        String identifier = uuid;
+        if (identifier == null)
+            identifier = "_(" + LocalDateTime.now().toString() + ")";
+        // Windows name restriction
+        String path = InfluxappConfig.OUTPUT_DIRECTORY + purpose + identifier.replace(':', '.') + "_" + jobId;
+        File outputDir = new File(path);
+        boolean dirCreationSuccess = true;
+
+        if (!outputDir.exists()) {
+            String err = "Failed to create 'Results' dir. ";
+            try {
+                if (!outputDir.mkdirs()) {
+                    dirCreationSuccess = false;
+                }
+            } catch (SecurityException se) {
+                err += se.getLocalizedMessage();
+                dirCreationSuccess = false;
+            }
+            // Use a flag for flexible work flow
+            if (!dirCreationSuccess) {
+                logger.error(err);
+                return null;
+            }
+            return outputDir;
+        }
+        // If the directory already exists (bad for us), we should consider this operation failed
+        return null;
+    }
+    
+    public int deleteFileDir(int jobId) throws IOException {
+    	File dir = new File(InfluxappConfig.OUTPUT_DIRECTORY);
+    	File[] files = dir.listFiles();
+		String type1 = "_" + jobId;
+		String type2 = type1 + "_split";
+    	for(File file: files) {
+    		if(file.toString().endsWith(type1) || file.toString().endsWith(type2)) {	
+    			FileUtils.forceDelete(file);
+    		}
+    	}
+    	return 1;
     }
 
     /**

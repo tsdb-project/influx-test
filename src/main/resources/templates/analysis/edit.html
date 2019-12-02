@@ -165,6 +165,12 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row">    
+                                    <div class="col-sm-4 col-md-4">
+                                    	<label>Choose parameters you want to export</label>
+                                    	<button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#param-modal" id="param">Param</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="row">
@@ -178,7 +184,7 @@
                                 <div class="form-group">
                                     <label>&nbsp</label>
                                     <!-- <a role="button" class="btn btn-primary btn-lg btn-block" target="_blank" th:href="@{/api/export/export/{id}(id=${query.downsample.id})}">Export</a> -->
-                                    <button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#export-modal">Export</button>
+                                    <button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#export-modal" id="export">Export</button>
                                 </div>
                             </div>
                             <div class="col-sm-4 col-md-2">
@@ -267,19 +273,22 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-12 col-md-12" style="height: 15px"></div>
-                                <div class="col-sm-12 col-md-12" id="availableDBs">
-                                    <label>Choose Database you want to export from</label>
-                                    <input type="button" class="btn btn-info btn-lg btn-block" id="db1"
-                                           value="Base">
-                                    <input type="button" class="btn btn-light btn-lg btn-block" id="db2"
-                                           value="1m summary">
-                                    <input type="button" class="btn btn-light btn-lg btn-block" id="db3"
-                                           value="1h summary">
+                                <div class="col-sm-12 col-md-12">
+                            		<div class="col-sm-12 col-md-12" >
+                               		 <label>Choose database you want to export from</label>
+                                	 <select class="custom-select" style="height: 100px"
+                                   		     data-placeholder="Select database" id="databases"
+                                   		     size="15">
+                                  		  <option th:value="${database}"
+                                 		           th:each="database : ${databases}"
+                                   		         th:text="${database}"></option>
+                           		   	 </select>
+                          		  </div>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-link" data-dismiss="modal" id = cancelButton>Cancel</button>
                             <button type="button" class="btn btn-primary" data-dismiss="modal" id="submitJobButton">Submit Job</button>
                         </div>
                     </div>
@@ -491,6 +500,68 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="modal fade" id="param-modal" tabindex="-1" data-backdrop="static">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title pull-left">select statistics used for aggregation</h5>
+                        </div>
+                        <div class="modal-body">
+                            <p>selected features will have blue color.if you don't select any of following feature, the default option is updating all. </p>
+                            <div class="row">
+                                <div class="col-sm-4 col-md-4">
+                                    <label>&nbsp</label>
+                                    <input type="button" class="btn btn-light btn-lg btn-block" id="MaxBtn" value="Max">
+                                </div>
+                                <div class="col-sm-4 col-md-4">
+                                    <label>&nbsp</label>
+                                    <input type="button" class="btn btn-light btn-lg btn-block" id="MinBtn" value="Min">
+                                </div>
+                                <div class="col-sm-4 col-md-4">
+                                    <label>&nbsp</label>
+                                    <input type="button" class="btn btn-light btn-lg btn-block" id="MeanBtn"
+                                           value="Mean">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 col-md-4">
+                                    <label>&nbsp</label>
+                                    <input type="button" class="btn btn-light btn-lg btn-block" id="MedianBtn"
+                                           value="Median">
+                                </div>
+                                <div class="col-sm-4 col-md-4">
+                                    <label>&nbsp</label>
+                                    <input type="button" class="btn btn-light btn-lg btn-block" id="FQBtn"
+                                           value="25%tile">
+                                </div>
+                                <div class="col-sm-4 col-md-4">
+                                    <label>&nbsp</label>
+                                    <input type="button" class="btn btn-light btn-lg btn-block" id="TQBtn"
+                                           value="75%ile">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 col-md-4">
+                                    <label>&nbsp</label>
+                                    <input type="button" class="btn btn-light btn-lg btn-block" id="SumBtn" value="Sum">
+                                </div>
+                                <div class="col-sm-4 col-md-4">
+                                    <label>&nbsp</label>
+                                    <input type="button" class="btn btn-light btn-lg btn-block" id="StdBtn"
+                                           value="Standard deviation">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" data-dismiss="modal" id="saveExportMethod">Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="card" th:if="${edit} == false">
                 <div class="card-body">
                     <h3 class="card-title">Existing Queries</h3>

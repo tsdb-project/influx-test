@@ -40,6 +40,27 @@ $(document).ready(function() {
         });
     };
 
+    /*
+    * get database information
+    * */
+    var databaseData = null;
+    
+//    function getDatabases(){
+//        $.ajax({
+//            'url': "/aggregation/getUsefulDBs?" + "periodVal=" + $("#period").val() + "andperiodUnit=" + $("#period_unit").val() + "andoriginVal=" + $("#origin").val() + "andoriginUnit=" + $("#origin_unit").val() + "anddurationVal=" + $("#duration").val() + "anddurationUnit=" + $("#duration_unit").val(),
+//            'type': 'get',
+//            'contentType':"application/json",
+//            'dataType':"json",
+//            'async': false,
+//            'success': function(data) {
+//                databaseData = data.data;
+//            },
+//            'error': function() {}
+//        });
+//        console.log(databaseData);
+//    }
+//    getDatabases();
+
     var groups = {
         "data": []
     };
@@ -122,9 +143,60 @@ $(document).ready(function() {
     });
 
     $("#export-modal").on('hidden.bs.modal', function (e) {
-        $("#uploadPatientList").val('');
+    	$("#uploadPatientList").val('');
         patientList = null;
     });
+    
+    $("#export").click(function (e) {
+    	var dbList = document.getElementById("databases");
+    	var l = document.getElementById("databases").length;
+    	for(var i = 0; i < l; i++){
+    		dbList.remove(0);
+    	}
+//      	$("#uploadPatientList").val('');
+//        patientList = null;
+    	if ($('#parameter-form')[0].checkValidity()){
+            var period = $("#period").val() * $("#period_unit").val();
+            var origin = $("#origin").val() * $("#origin_unit").val();
+            var duration = $("#duration").val() * $("#duration_unit").val();
+            $.ajax({
+            	'url': "/aggregation/getUsefulDBs?" + "period=" + period + "&origin=" + origin + "&duration=" + duration + 
+            		"&max=" + exportMethod.Max +
+            		"&min=" + exportMethod.Min +
+            		"&mean=" + exportMethod.Mean +
+            		"&median=" + exportMethod.Median +
+            		"&std=" + exportMethod.Std +
+            		"&fq=" + exportMethod.FQ +
+            		"&tq=" + exportMethod.TQ +
+            		"&sum=" + exportMethod.Sum,
+            	'type': 'get',
+            	'contentType':"application/json",
+            	'dataType':"json",
+            	'async': false,
+            	'success': function(data) {
+            		databaseData = data.data;
+            	},
+            	'error': function() {}
+            });
+//        console.log(databaseData);
+            for(var i = 0; i < databaseData.length; i++){
+            	var data = databaseData[i];
+            	var option = document.createElement("option");
+            	option.text = data.dbName;
+//      	  	console.log(data);
+            	dbList.add(option);
+            }
+    	}
+    });
+    
+    $("#cancelButton").click(function(e){
+    	var dbList = document.getElementById("databases");
+    	var l = document.getElementById("databases").length;
+    	for(var i = 0; i < l; i++){
+    		dbList.remove(0);
+    	}
+    })
+
 
     $("#submitJobButton").click(function () {
         $("#submitJobButton").attr('disabled', 'disabled');
@@ -134,7 +206,8 @@ $(document).ready(function() {
             "layout": $('#layout label.active input').val() == "true",
             "ar": $('#ar label.active input').val() == "true",
             "dbType": $('#selectdb label.active input').val(),
-            "username":$('#user_name').html()
+            "username":$('#user_name').html(),
+            "fromDb": $('#databases').val(),
         };
         $.ajax({
             url: "/api/export/export/",
@@ -551,4 +624,193 @@ $(document).ready(function() {
         }
     });
 
+    var exportMethod = {
+            Max:false,
+            Min:false,
+            Mean:false,
+            Median:false,
+            Std:false,
+            FQ:false,
+            TQ:false,
+            Sum:false
+        };
+    var exportFinalMethod = null;
+    
+    var maxBtn = $('#MaxBtn');
+    var minBtn = $('#MinBtn');
+    var meanBtn = $('#MeanBtn');
+    var medianBtn = $('#MedianBtn');
+    var stdBtn = $('#StdBtn');
+    var fqBtn = $('#FQBtn');
+    var tqBtn = $('#TQBtn');
+    var sumBtn = $('#SumBtn');
+    
+    $('#param-modal').on('show.bs.modal', function(event) {
+
+        if(exportMethod.Max){
+            maxBtn.removeClass("btn-light");
+            maxBtn.addClass("btn-primary");
+        }else{
+            maxBtn.addClass("btn-light");
+            maxBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.Min){
+            minBtn.removeClass("btn-light");
+            minBtn.addClass("btn-primary");
+        }else{
+            minBtn.addClass("btn-light");
+            minBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.Mean){
+            meanBtn.removeClass("btn-light");
+            meanBtn.addClass("btn-primary");
+        }else{
+            meanBtn.addClass("btn-light");
+            meanBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.Median){
+            medianBtn.removeClass("btn-light");
+            medianBtn.addClass("btn-primary");
+        }else{
+            medianBtn.addClass("btn-light");
+            medianBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.Std){
+            stdBtn.removeClass("btn-light");
+            stdBtn.addClass("btn-primary");
+        }else{
+            stdBtn.addClass("btn-light");
+            stdBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.FQ){
+            fqBtn.removeClass("btn-light");
+            fqBtn.addClass("btn-primary");
+        }else{
+            fqBtn.addClass("btn-light");
+            fqBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.TQ){
+            tqBtn.removeClass("btn-light");
+            tqBtn.addClass("btn-primary");
+        }else{
+            tqBtn.addClass("btn-light");
+            tqBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.Sum){
+            sumBtn.removeClass("btn-light");
+            sumBtn.addClass("btn-primary");
+        }else{
+            sumBtn.addClass("btn-light");
+            sumBtn.removeClass("btn-primary");
+        }
+    });
+
+    
+    maxBtn.click(function () {
+        if(! exportMethod.Max){
+        	exportMethod.Max = true;
+            maxBtn.removeClass("btn-light");
+            maxBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Max = false;
+            maxBtn.addClass("btn-light");
+            maxBtn.removeClass("btn-primary");
+        }
+    });
+
+    minBtn.click(function () {
+        if(! exportMethod.Min){
+        	exportMethod.Min = true;
+            minBtn.removeClass("btn-light");
+            minBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Min = false;
+            minBtn.addClass("btn-light");
+            minBtn.removeClass("btn-primary");
+        }
+    });
+
+    meanBtn.click(function () {
+        if(! exportMethod.Mean){
+        	exportMethod.Mean = true;
+            meanBtn.removeClass("btn-light");
+            meanBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Mean = false;
+            meanBtn.addClass("btn-light");
+            meanBtn.removeClass("btn-primary");
+        }
+    });
+
+    medianBtn.click(function () {
+        if(! exportMethod.Median){
+        	exportMethod.Median = true;
+            medianBtn.removeClass("btn-light");
+            medianBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Median = false;
+            medianBtn.addClass("btn-light");
+            medianBtn.removeClass("btn-primary");
+        }
+    });
+
+    stdBtn.click(function () {
+        if(! exportMethod.Std){
+        	exportMethod.Std = true;
+            stdBtn.removeClass("btn-light");
+            stdBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Std = false;
+            stdBtn.addClass("btn-light");
+            stdBtn.removeClass("btn-primary");
+        }
+    });
+
+    fqBtn.click(function () {
+        if(! exportMethod.FQ){
+        	exportMethod.FQ = true;
+            fqBtn.removeClass("btn-light");
+            fqBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.FQ = false;
+            fqBtn.addClass("btn-light");
+            fqBtn.removeClass("btn-primary");
+        }
+    });
+
+    tqBtn.click(function () {
+        if(! exportMethod.TQ){
+        	exportMethod.TQ = true;
+            tqBtn.removeClass("btn-light");
+            tqBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.TQ = false;
+            tqBtn.addClass("btn-light");
+            tqBtn.removeClass("btn-primary");
+        }
+    });
+
+    sumBtn.click(function () {
+        if(! exportMethod.Sum){
+        	exportMethod.Sum = true;
+            sumBtn.removeClass("btn-light");
+            sumBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Sum = false;
+            sumBtn.addClass("btn-light");
+            sumBtn.removeClass("btn-primary");
+        }
+    });
+    
+    $('#saveExportMethod').click(function () {
+        notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'aggregation methods Saved.');
+        aggFinalMethod = aggMethod;
+    });
 });

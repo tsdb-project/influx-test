@@ -62,6 +62,7 @@ public class AggregationService {
             AggregationDatabaseWithBLOBs target = null;
             while ((target = this.jobQueue.poll()) != null) {
                 logger.info("Start to process job #<{}>", target.getId());
+                System.out.print(target.getId());
                 startAgg(target);
                 logger.info("Finished one job #<{}>", target.getId());
             }
@@ -138,10 +139,10 @@ public class AggregationService {
             this.bufferedWriter.write("Cores: "+paraCount);
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
-//            InfluxDB influxDB = generateIdbClient(false);
-//            String command = "create database " + job.getDbName().replace(" ","_")+"_V"+job.getVersion();
-//            influxDB.query(new Query(command));
-//            influxDB.close();
+            InfluxDB influxDB = generateIdbClient(false);
+            String command = "create database " + job.getDbName().replace(" ","_");
+            influxDB.query(new Query(command));
+            influxDB.close();
         }catch (IOException e){
             e.printStackTrace();
             return;
@@ -293,6 +294,11 @@ public class AggregationService {
 
     public List<AggregationDatabase> selectAllAvailableDBs() {
         return aggregationDao.selectAllAvailableDBs();
+    }
+    
+    public List<AggregationDatabase> selectAllUsefulDBs(Integer period, Integer origin, Integer duration, String max, String min, String mean, String median,
+    		String std, String fq, String tq, String sum) {
+        return aggregationDao.selectAllUsefulDBs(period, origin, duration, max, min, mean, median, std, fq, tq, sum);
     }
 
     public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {

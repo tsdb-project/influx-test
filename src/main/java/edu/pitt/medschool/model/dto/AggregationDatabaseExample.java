@@ -483,7 +483,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanEqualTo(Boolean value) {
+		public Criteria andMeanEqualTo(String value) {
 			addCriterion("mean =", value, "mean");
 			return (Criteria) this;
 		}
@@ -543,7 +543,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxEqualTo(Boolean value) {
+		public Criteria andMaxEqualTo(String value) {
 			addCriterion("max =", value, "max");
 			return (Criteria) this;
 		}
@@ -603,7 +603,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMinEqualTo(Boolean value) {
+		public Criteria andMinEqualTo(String value) {
 			addCriterion("min =", value, "min");
 			return (Criteria) this;
 		}
@@ -663,7 +663,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andSdEqualTo(Boolean value) {
+		public Criteria andSdEqualTo(String value) {
 			addCriterion("sd =", value, "sd");
 			return (Criteria) this;
 		}
@@ -723,7 +723,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianEqualTo(Boolean value) {
+		public Criteria andMedianEqualTo(String value) {
 			addCriterion("median =", value, "median");
 			return (Criteria) this;
 		}
@@ -783,7 +783,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1EqualTo(Boolean value) {
+		public Criteria andQ1EqualTo(String value) {
 			addCriterion("q1 =", value, "q1");
 			return (Criteria) this;
 		}
@@ -843,7 +843,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3EqualTo(Boolean value) {
+		public Criteria andQ3EqualTo(String value) {
 			addCriterion("q3 =", value, "q3");
 			return (Criteria) this;
 		}
@@ -903,7 +903,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andSumEqualTo(Boolean value) {
+		public Criteria andSumEqualTo(String value) {
 			addCriterion("sum =", value, "sum");
 			return (Criteria) this;
 		}

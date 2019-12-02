@@ -57,6 +57,8 @@ $(document).ready(function() {
             },
             'error': function() {}
         });
+        databaseData = databaseData[0];
+        console.log(databaseData);
     }
     getDatabases();
 
