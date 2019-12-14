@@ -203,7 +203,6 @@ public class ExportQueryBuilder {
      * Aggr part for Aggr first
      */
     private String aggregationWhenAggregationFirst(String locator) {
-    	System.out.println("aggregationWhenAggregationFirst!");
         String[] cols = new String[this.numOfDownsampleGroups];
         for (int i = 0; i < this.numOfDownsampleGroups; i++) {
             DownsampleGroup dg = this.downsampleGroups[i];
@@ -242,7 +241,6 @@ public class ExportQueryBuilder {
             if (!fromDb.equals("data")) {
         		for(int j = 0; j < this.columnNames.get(i).size(); j++) {
         			List<String> column = this.columnNames.get(i);
-        			System.out.println("before: " + column);
         			if(column.get(j).indexOf("I") == 0) {
         				column.set(j, String.format(formDownsampleFunctionInDBTemplate(dg), column.get(j)));
         			}
@@ -259,7 +257,12 @@ public class ExportQueryBuilder {
             String concated = populateByAggregationType(downsampleOperators, null, dg, "");
             cols[i] = selectQueryWithAlias(concated, this.columnNameAliases.get(i));
         }
-        cols[cols.length - 1] = String.format(Template.aggregationCount, "Time");
+        if (fromDb.equals("data")) {
+        	cols[cols.length - 1] = String.format(Template.aggregationCount, "Time");
+        }
+        else {
+        	cols[cols.length - 1] = String.format(Template.aggregationCount, "max_I1_1");
+        }
 
         return String.format(Template.basicDownsampleOuter, String.join(", ", cols), "\"" + pid + "\"", locator,
                 this.downsampleInterval, this.downsampleOffset);
