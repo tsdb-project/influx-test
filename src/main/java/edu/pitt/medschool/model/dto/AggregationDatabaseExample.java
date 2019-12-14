@@ -3,6 +3,7 @@ package edu.pitt.medschool.model.dto;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 public class AggregationDatabaseExample {
     /**
@@ -428,52 +429,52 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeEqualTo(Date value) {
 			addCriterion("create_time =", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeNotEqualTo(Date value) {
 			addCriterion("create_time <>", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeGreaterThan(LocalDateTime value) {
+		public Criteria andCreateTimeGreaterThan(Date value) {
 			addCriterion("create_time >", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeGreaterThanOrEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeGreaterThanOrEqualTo(Date value) {
 			addCriterion("create_time >=", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeLessThan(LocalDateTime value) {
+		public Criteria andCreateTimeLessThan(Date value) {
 			addCriterion("create_time <", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeLessThanOrEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeLessThanOrEqualTo(Date value) {
 			addCriterion("create_time <=", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeIn(List<LocalDateTime> values) {
+		public Criteria andCreateTimeIn(List<Date> values) {
 			addCriterion("create_time in", values, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotIn(List<LocalDateTime> values) {
+		public Criteria andCreateTimeNotIn(List<Date> values) {
 			addCriterion("create_time not in", values, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeBetween(LocalDateTime value1, LocalDateTime value2) {
+		public Criteria andCreateTimeBetween(Date value1, Date value2) {
 			addCriterion("create_time between", value1, value2, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
+		public Criteria andCreateTimeNotBetween(Date value1, Date value2) {
 			addCriterion("create_time not between", value1, value2, "createTime");
 			return (Criteria) this;
 		}
@@ -1338,6 +1339,196 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
+		public Criteria andTimeCostIsNull() {
+			addCriterion("time_cost is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostIsNotNull() {
+			addCriterion("time_cost is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostEqualTo(String value) {
+			addCriterion("time_cost =", value, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostNotEqualTo(String value) {
+			addCriterion("time_cost <>", value, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostGreaterThan(String value) {
+			addCriterion("time_cost >", value, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostGreaterThanOrEqualTo(String value) {
+			addCriterion("time_cost >=", value, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostLessThan(String value) {
+			addCriterion("time_cost <", value, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostLessThanOrEqualTo(String value) {
+			addCriterion("time_cost <=", value, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostLike(String value) {
+			addCriterion("time_cost like", value, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostNotLike(String value) {
+			addCriterion("time_cost not like", value, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostIn(List<String> values) {
+			addCriterion("time_cost in", values, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostNotIn(List<String> values) {
+			addCriterion("time_cost not in", values, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostBetween(String value1, String value2) {
+			addCriterion("time_cost between", value1, value2, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostNotBetween(String value1, String value2) {
+			addCriterion("time_cost not between", value1, value2, "timeCost");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsIsNull() {
+			addCriterion("threads is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsIsNotNull() {
+			addCriterion("threads is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsEqualTo(Integer value) {
+			addCriterion("threads =", value, "threads");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsNotEqualTo(Integer value) {
+			addCriterion("threads <>", value, "threads");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsGreaterThan(Integer value) {
+			addCriterion("threads >", value, "threads");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsGreaterThanOrEqualTo(Integer value) {
+			addCriterion("threads >=", value, "threads");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsLessThan(Integer value) {
+			addCriterion("threads <", value, "threads");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsLessThanOrEqualTo(Integer value) {
+			addCriterion("threads <=", value, "threads");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsIn(List<Integer> values) {
+			addCriterion("threads in", values, "threads");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsNotIn(List<Integer> values) {
+			addCriterion("threads not in", values, "threads");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsBetween(Integer value1, Integer value2) {
+			addCriterion("threads between", value1, value2, "threads");
+			return (Criteria) this;
+		}
+
+		public Criteria andThreadsNotBetween(Integer value1, Integer value2) {
+			addCriterion("threads not between", value1, value2, "threads");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsIsNull() {
+			addCriterion("parts is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsIsNotNull() {
+			addCriterion("parts is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsEqualTo(Integer value) {
+			addCriterion("parts =", value, "parts");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsNotEqualTo(Integer value) {
+			addCriterion("parts <>", value, "parts");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsGreaterThan(Integer value) {
+			addCriterion("parts >", value, "parts");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsGreaterThanOrEqualTo(Integer value) {
+			addCriterion("parts >=", value, "parts");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsLessThan(Integer value) {
+			addCriterion("parts <", value, "parts");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsLessThanOrEqualTo(Integer value) {
+			addCriterion("parts <=", value, "parts");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsIn(List<Integer> values) {
+			addCriterion("parts in", values, "parts");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsNotIn(List<Integer> values) {
+			addCriterion("parts not in", values, "parts");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsBetween(Integer value1, Integer value2) {
+			addCriterion("parts between", value1, value2, "parts");
+			return (Criteria) this;
+		}
+
+		public Criteria andPartsNotBetween(Integer value1, Integer value2) {
+			addCriterion("parts not between", value1, value2, "parts");
+			return (Criteria) this;
+		}
+
 		public Criteria andDbNameLikeInsensitive(String value) {
 			addCriterion("upper(db_name) like", value.toUpperCase(), "dbName");
 			return (Criteria) this;
@@ -1350,6 +1541,11 @@ public class AggregationDatabaseExample {
 
 		public Criteria andFromDbLikeInsensitive(String value) {
 			addCriterion("upper(from_db) like", value.toUpperCase(), "fromDb");
+			return (Criteria) this;
+		}
+
+		public Criteria andTimeCostLikeInsensitive(String value) {
+			addCriterion("upper(time_cost) like", value.toUpperCase(), "timeCost");
 			return (Criteria) this;
 		}
 	}

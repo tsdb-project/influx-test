@@ -17,6 +17,10 @@
 	text-align: center;
 }
 </style>
+
+<style>
+    .pdfobject-container { height: 40rem; border: 1rem solid rgba(0,0,0,.1); }
+</style>
 </head>
 
 <body data-ma-theme="blue">
@@ -29,7 +33,13 @@
         <div class="content__inner">
             <!-- PUT THE MAIN CONTENT HERE -->
             <div class="card">
-                <div class="card-body" style="margin: 0 150px">
+                <div class="card-body" style="margin: 0 0px">
+                	<div id="pdfManual"></div>
+					If this browser does not support PDFs, please download the PDF to view it: 
+					<a href="/pdf/pdfManual.pdf">Download PDF</a>
+                    <!-- <p>---------------------------</p>
+                    <div class='typora-export os-windows'>
+                
                     <h2 id="brain-flux-user-manual-introduction">Brain Flux User Manual / Introduction</h2>
                     <p>
                         <strong>1. System Overview</strong>
@@ -125,7 +135,7 @@
                     <p>
                         <a name="section_5"></a>
                         <strong>5. Data Analysis</strong>
-                    </p>
+                    </p> -->
                 </div>
             </div>
             <div th:insert="fragments/footer :: footer"></div>
@@ -142,7 +152,8 @@
     <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
     <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
-
+	<script src="/js/pdfobject.js"></script>
+	
     <!-- App functions and actions -->
     <script src="/js/navigation.js"></script>
     <script src="/js/app.min.js"></script>
