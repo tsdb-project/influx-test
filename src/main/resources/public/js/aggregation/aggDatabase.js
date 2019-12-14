@@ -663,49 +663,55 @@ $(document).ready(function() {
     * */
 
     $("#createButton").click(function () {
-        $("#createButton").attr('disabled', 'disabled');
-        var newDB = {
-            dbName: $("#alias").val(),
-            aggregateTime: $('#period').val() * $('#period_unit').val(),
-            artype:$('#ar label.active input').val() == "true",
-            columns:columnsFinalList == null ? null: columnsFinalList.toString(),
-            pidList: patientsFinalList == null ? null: patientsFinalList.toString(),
-            max:aggFinalMethod == null ? true : aggFinalMethod.Max,
-            min:aggFinalMethod == null ? true : aggFinalMethod.Min,
-            mean:aggFinalMethod == null ? true : aggFinalMethod.Mean,
-            median:aggFinalMethod == null ? true : aggFinalMethod.Median,
-            sd:aggFinalMethod == null ? true : aggFinalMethod.Std,
-            q1:aggFinalMethod == null ? true : aggFinalMethod.FQ,
-            q3:aggFinalMethod == null ? true : aggFinalMethod.TQ,
-            sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
-            fromDb:$("#databases").val(),
-            threads: 7,
-            parts: 15,
-            total:1,
-            finished:0,
-            autoUpdate:true
-        };
-        console.log(newDB);
-        $.ajax({
-            url: "/aggregation/newDB/",
-            type: 'post',
-            data: JSON.stringify(newDB),
-            contentType: "application/json",
-            dataType: 'json',
-            success: function (response) {
-                if(response.code == 1){
-                    notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
-                        'Successfully create database setting.');
-                }else{
-                    notify("top", "center", null, "failed", "animated bounceIn", "animated fadeOut",
-                        ' Create database setting failed.');
+        if ($("#alias").val() == null||  $('#period').val() == null|| $('#period_unit').val() == null){
+            notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                'alias or the aggregation interval is invalid');
+        }else{
+            $("#createButton").attr('disabled', 'disabled');
+            var newDB = {
+                dbName: $("#alias").val(),
+                aggregateTime: $('#period').val() * $('#period_unit').val(),
+                artype:$('#ar label.active input').val() == "true",
+                columns:columnsFinalList == null ? null: columnsFinalList.toString(),
+                pidList: patientsFinalList == null ? null: patientsFinalList.toString(),
+                max:aggFinalMethod == null ? true : aggFinalMethod.Max,
+                min:aggFinalMethod == null ? true : aggFinalMethod.Min,
+                mean:aggFinalMethod == null ? true : aggFinalMethod.Mean,
+                median:aggFinalMethod == null ? true : aggFinalMethod.Median,
+                sd:aggFinalMethod == null ? true : aggFinalMethod.Std,
+                q1:aggFinalMethod == null ? true : aggFinalMethod.FQ,
+                q3:aggFinalMethod == null ? true : aggFinalMethod.TQ,
+                sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
+                fromDb:$("#databases").val() == null? "data" : $("#databases").val(),
+                nday: $("#nday").val() == ""? 1: $("#nday").val(),
+                threads: 10,
+                parts: 15,
+                total:1,
+                finished:0,
+                autoUpdate:true
+            };
+            console.log(newDB);
+            $.ajax({
+                url: "/aggregation/newDB/",
+                type: 'post',
+                data: JSON.stringify(newDB),
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (response) {
+                    if(response.code == 1){
+                        notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
+                            'Successfully create database setting.');
+                    }else{
+                        notify("top", "center", null, "failed", "animated bounceIn", "animated fadeOut",
+                            ' Create database setting failed.');
+                    }
+                },
+                error: function () {
+                    notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                        'Failed to submit this job, please try again.');
                 }
-            },
-            error: function () {
-                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
-                    'Failed to submit this job, please try again.');
-            }
-        });
+            });
+        }
     });
 
     /*
