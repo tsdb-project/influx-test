@@ -89,7 +89,7 @@ public class AggregationService {
 
         // todo update total
         List<String> patients = new ArrayList<>();
-
+        System.out.println("91!");
         // recover job after break down
         //get finished pids
         String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+".txt";
@@ -111,27 +111,27 @@ public class AggregationService {
                 HashSet<String> allPid = new HashSet<>(patientIDs);
                 allPid.removeAll(finishedPid);
                 patients = new ArrayList<>(allPid);
-//                System.out.println(finishedPid.size());
-//                System.out.println(allPid.size());
+                System.out.println("finishedPid: " + finishedPid.size());
+                System.out.println("allPid: " + allPid.size());
             }catch (IOException e){
                 e.printStackTrace();
             }
         }else{
             patients = patientIDs;
         }
-
         // update the total number of patients of this job
         aggregationDao.updateTotalnumber(job.getId(),patients.size());
         
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
-
+        
         // get all 6037 columns
         List<String> columns = getColumns();
-
+        System.out.println("131!");
         // get selection condition from 6037 columns, now each file is splited into 9 parts
         List<String> selection = getSelection(columns,job);
+        System.out.println("selection = " + selection.size());
         int paraCount = determineParaNumber();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
@@ -149,6 +149,7 @@ public class AggregationService {
         }
 
         LocalDateTime start_Time = LocalDateTime.now();
+
         Runnable queryTask = () -> {
             String pid;
             InfluxDB influxDB = generateIdbClient(false);
@@ -160,6 +161,7 @@ public class AggregationService {
                     String i11 = job.getFromDb().equals("data")?"I1_1":"max_I1_1";
                     QueryResult res1 = influxDB.query(new Query(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getFromDb()));
                     //QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
+                    System.out.println(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid));
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     // only do 7 hours
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -167,7 +169,9 @@ public class AggregationService {
                     System.out.println(startTime);
                     System.out.println(endTime);
                     List<String> queries = new ArrayList<>();
+                    System.out.println(selection.size());
                     for(int count=0;count<selection.size();count++){
+                    	//System.out.println(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName(),pid, pid,endTime,startTime,time));
                         //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
 //                        queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
                         queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<'%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName(),pid, pid,endTime,startTime,time));
@@ -177,6 +181,7 @@ public class AggregationService {
                     for(int count=0;count<selection.size();count++){
                         //QueryResult rs = influxDB.query(new Query(queries.get(count),"aggdata"));
                         QueryResult rs = influxDB.query(new Query(queries.get(count),job.getFromDb()));
+                        System.out.print(count + ", ");
                     }
                     this.bufferedWriter.write("Success: "+pid);
                     this.bufferedWriter.newLine();
@@ -249,7 +254,8 @@ public class AggregationService {
     }
 
     private List<String> getSelection(List<String> columns,AggregationDatabaseWithBLOBs job){
-        List<String> res= new ArrayList<>();
+        System.out.println("getSelection!");
+    	List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
         for(int count=0;count<15;count++){
             for(int j=count*380;j<(count+1)*380;j++){
@@ -302,7 +308,8 @@ public class AggregationService {
     }
 
     public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {
-        String dbname = database.getDbName()+"_V"+database.getVersion();
+        System.out.println(database.getDbName() + "  301!");
+    	String dbname = database.getDbName()+"_V"+database.getVersion();
         List<AggregationDatabase> databaseList = aggregationDao.selectByname(dbname);
         if(!databaseList.isEmpty()){
             AggregationDatabaseWithBLOBs db = new AggregationDatabaseWithBLOBs();

@@ -208,6 +208,7 @@ $(document).ready(function() {
             "dbType": $('#selectdb label.active input').val(),
             "username":$('#user_name').html(),
             "fromDb": $('#databases').val(),
+
         };
         $.ajax({
             url: "/api/export/export/",
