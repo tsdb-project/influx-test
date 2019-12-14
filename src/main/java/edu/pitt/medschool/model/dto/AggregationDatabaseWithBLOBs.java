@@ -94,6 +94,7 @@ public class AggregationDatabaseWithBLOBs extends AggregationDatabase {
 				&& (this.getThreads() == null ? other.getThreads() == null
 						: this.getThreads().equals(other.getThreads()))
 				&& (this.getParts() == null ? other.getParts() == null : this.getParts().equals(other.getParts()))
+				&& (this.getNday() == null ? other.getNday() == null : this.getNday().equals(other.getNday()))
 				&& (this.getPidList() == null ? other.getPidList() == null
 						: this.getPidList().equals(other.getPidList()))
 				&& (this.getColumns() == null ? other.getColumns() == null
@@ -130,6 +131,7 @@ public class AggregationDatabaseWithBLOBs extends AggregationDatabase {
 		result = prime * result + ((getTimeCost() == null) ? 0 : getTimeCost().hashCode());
 		result = prime * result + ((getThreads() == null) ? 0 : getThreads().hashCode());
 		result = prime * result + ((getParts() == null) ? 0 : getParts().hashCode());
+		result = prime * result + ((getNday() == null) ? 0 : getNday().hashCode());
 		result = prime * result + ((getPidList() == null) ? 0 : getPidList().hashCode());
 		result = prime * result + ((getColumns() == null) ? 0 : getColumns().hashCode());
 		return result;
