@@ -1523,6 +1523,66 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
+		public Criteria andNdayIsNull() {
+			addCriterion("nday is null");
+			return (Criteria) this;
+		}
+
+		public Criteria andNdayIsNotNull() {
+			addCriterion("nday is not null");
+			return (Criteria) this;
+		}
+
+		public Criteria andNdayEqualTo(Integer value) {
+			addCriterion("nday =", value, "nday");
+			return (Criteria) this;
+		}
+
+		public Criteria andNdayNotEqualTo(Integer value) {
+			addCriterion("nday <>", value, "nday");
+			return (Criteria) this;
+		}
+
+		public Criteria andNdayGreaterThan(Integer value) {
+			addCriterion("nday >", value, "nday");
+			return (Criteria) this;
+		}
+
+		public Criteria andNdayGreaterThanOrEqualTo(Integer value) {
+			addCriterion("nday >=", value, "nday");
+			return (Criteria) this;
+		}
+
+		public Criteria andNdayLessThan(Integer value) {
+			addCriterion("nday <", value, "nday");
+			return (Criteria) this;
+		}
+
+		public Criteria andNdayLessThanOrEqualTo(Integer value) {
+			addCriterion("nday <=", value, "nday");
+			return (Criteria) this;
+		}
+
+		public Criteria andNdayIn(List<Integer> values) {
+			addCriterion("nday in", values, "nday");
+			return (Criteria) this;
+		}
+
+		public Criteria andNdayNotIn(List<Integer> values) {
+			addCriterion("nday not in", values, "nday");
+			return (Criteria) this;
+		}
+
+		public Criteria andNdayBetween(Integer value1, Integer value2) {
+			addCriterion("nday between", value1, value2, "nday");
+			return (Criteria) this;
+		}
+
+		public Criteria andNdayNotBetween(Integer value1, Integer value2) {
+			addCriterion("nday not between", value1, value2, "nday");
+			return (Criteria) this;
+		}
+
 		public Criteria andDbNameLikeInsensitive(String value) {
 			addCriterion("upper(db_name) like", value.toUpperCase(), "dbName");
 			return (Criteria) this;

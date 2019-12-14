@@ -327,12 +327,12 @@ public class AggregationService {
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 //                    String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
-                    String endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+                    String endTime = LocalDateTime.parse(startTime,df).plusHours(24).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
 //                    System.out.println(startTime);
 //                    System.out.println(endTime);
 
-//                    // to do the third 7h.
-                    for(int i=0;i<2;i++){
+//                    // to do the nth 24h.
+                    for(int i=0;i<job.getNday()-1;i++){
                         startTime = endTime;
                         endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
                     }

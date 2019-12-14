@@ -102,6 +102,9 @@ public class AggregationDatabaseSqlProvider {
 		if (record.getParts() != null) {
 			sql.VALUES("parts", "#{parts,jdbcType=INTEGER}");
 		}
+		if (record.getNday() != null) {
+			sql.VALUES("nday", "#{nday,jdbcType=INTEGER}");
+		}
 		if (record.getPidList() != null) {
 			sql.VALUES("pid_list", "#{pidList,jdbcType=LONGVARCHAR}");
 		}
@@ -143,6 +146,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SELECT("time_cost");
 		sql.SELECT("threads");
 		sql.SELECT("parts");
+		sql.SELECT("nday");
 		sql.SELECT("pid_list");
 		sql.SELECT("columns");
 		sql.FROM("aggregation_database");
@@ -185,6 +189,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SELECT("time_cost");
 		sql.SELECT("threads");
 		sql.SELECT("parts");
+		sql.SELECT("nday");
 		sql.FROM("aggregation_database");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {
@@ -268,6 +273,9 @@ public class AggregationDatabaseSqlProvider {
 		if (record.getParts() != null) {
 			sql.SET("parts = #{record.parts,jdbcType=INTEGER}");
 		}
+		if (record.getNday() != null) {
+			sql.SET("nday = #{record.nday,jdbcType=INTEGER}");
+		}
 		if (record.getPidList() != null) {
 			sql.SET("pid_list = #{record.pidList,jdbcType=LONGVARCHAR}");
 		}
@@ -307,6 +315,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SET("time_cost = #{record.timeCost,jdbcType=VARCHAR}");
 		sql.SET("threads = #{record.threads,jdbcType=INTEGER}");
 		sql.SET("parts = #{record.parts,jdbcType=INTEGER}");
+		sql.SET("nday = #{record.nday,jdbcType=INTEGER}");
 		sql.SET("pid_list = #{record.pidList,jdbcType=LONGVARCHAR}");
 		sql.SET("columns = #{record.columns,jdbcType=LONGVARCHAR}");
 		AggregationDatabaseExample example = (AggregationDatabaseExample) parameter.get("example");
@@ -343,6 +352,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SET("time_cost = #{record.timeCost,jdbcType=VARCHAR}");
 		sql.SET("threads = #{record.threads,jdbcType=INTEGER}");
 		sql.SET("parts = #{record.parts,jdbcType=INTEGER}");
+		sql.SET("nday = #{record.nday,jdbcType=INTEGER}");
 		AggregationDatabaseExample example = (AggregationDatabaseExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
@@ -417,6 +427,9 @@ public class AggregationDatabaseSqlProvider {
 		}
 		if (record.getParts() != null) {
 			sql.SET("parts = #{parts,jdbcType=INTEGER}");
+		}
+		if (record.getNday() != null) {
+			sql.SET("nday = #{nday,jdbcType=INTEGER}");
 		}
 		if (record.getPidList() != null) {
 			sql.SET("pid_list = #{pidList,jdbcType=LONGVARCHAR}");
