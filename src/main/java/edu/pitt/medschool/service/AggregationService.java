@@ -334,7 +334,7 @@ public class AggregationService {
 //                    // to do the nth 24h.
                     for(int i=0;i<job.getNday()-1;i++){
                         startTime = endTime;
-                        endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+                        endTime = LocalDateTime.parse(startTime,df).plusHours(24).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
                     }
 
                     //skip first 14 hours
