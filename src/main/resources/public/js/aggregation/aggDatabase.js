@@ -683,7 +683,7 @@ $(document).ready(function() {
                 q3:aggFinalMethod == null ? true : aggFinalMethod.TQ,
                 sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
                 fromDb:$("#databases").val() == null? "data" : $("#databases").val(),
-                nday: $("#nday").val() == ""? 1: $("#nday").val(),
+                nday: $('#nday').val(),
                 threads: 10,
                 parts: 15,
                 total:1,
