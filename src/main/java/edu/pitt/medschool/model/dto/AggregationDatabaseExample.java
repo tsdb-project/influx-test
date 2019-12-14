@@ -412,6 +412,11 @@ public class AggregationDatabaseExample {
 			addCriterion("aggregate_time not between", value1, value2, "aggregateTime");
 			return (Criteria) this;
 		}
+		
+		public Criteria anddAggregateTimeAliquot(Integer value) {
+			addCriterion(value + " % aggregate_time =", 0, "aggregate_time");
+			return (Criteria) this;
+		}
 
 		public Criteria andCreateTimeIsNull() {
 			addCriterion("create_time is null");

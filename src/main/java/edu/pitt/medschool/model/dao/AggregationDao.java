@@ -36,8 +36,13 @@ public class AggregationDao {
         AggregationDatabaseExample.Criteria criteria = example.createCriteria();
         criteria.andStatusEqualTo("success");
         criteria.andAggregateTimeLessThanOrEqualTo(period);
-        criteria.andAggregateTimeLessThanOrEqualTo(origin);
-        criteria.andAggregateTimeLessThanOrEqualTo(duration);
+        criteria.anddAggregateTimeAliquot(period);
+        if(origin != 0) {
+        	criteria.anddAggregateTimeAliquot(origin);
+        }
+        if(duration != 0) {
+        	criteria.andAggregateTimeLessThanOrEqualTo(duration);
+        }
         if(max.equals("true")) {
         	criteria.andMaxEqualTo("1");
         }
