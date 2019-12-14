@@ -368,6 +368,7 @@ public class AggregationService {
                         String query = oneHoursb.toString();
 //                        System.out.println(query);
                         QueryResult rs = influxDB.query(new Query(query,job.getFromDb()));
+                        count++;
 //                        System.out.println(queries.get(count));
 //
 //                      calculate 8 features
@@ -379,7 +380,6 @@ public class AggregationService {
                         getSumFeatures(map,rs);
                         Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
                         records.point(record);
-                        count++;
                     }
 
                     influxDB.write(records);
