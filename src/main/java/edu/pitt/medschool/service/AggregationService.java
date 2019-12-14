@@ -359,6 +359,7 @@ public class AggregationService {
                     String subStartTime = startTime;
                     String subEndTime;
                     while (LocalDateTime.parse(subStartTime,df).isBefore(LocalDateTime.parse(endTime,df))){
+                        System.out.println("pid: "+ pid+"sub "+subStartTime+"end "+ endTime);
                         StringBuilder oneHoursb = new StringBuilder();
                         oneHoursb.append(formerQuery);
                         subStartTime = LocalDateTime.parse(startTime,df).plusHours(count).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
