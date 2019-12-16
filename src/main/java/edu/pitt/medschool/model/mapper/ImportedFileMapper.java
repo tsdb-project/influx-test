@@ -118,4 +118,9 @@ public interface ImportedFileMapper {
     @ResultType(String.class)
     @Results({ @Result(column = "PID", property = "PID", jdbcType = JdbcType.VARCHAR) })
     List<String> selectAllImportedPidOnMachine(String machineId);
+
+    @Select({"SELECT DISTINCT PID", "FROM imported_file", "WHERE uuid = #{machineId} and PID not like \"TBI%\"", "ORDER BY PID ASC"})
+	@ResultType(String.class)
+	@Results({ @Result(column = "PID", property = "PID", jdbcType = JdbcType.VARCHAR) })
+    List<String> selectAllImportedPidWithoutTBI(String machineId);
 }

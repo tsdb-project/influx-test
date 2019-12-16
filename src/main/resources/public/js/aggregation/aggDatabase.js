@@ -511,6 +511,12 @@ $(document).ready(function() {
                 return localeDateString(data.createTime)
             }
         }, {
+            data : 'timeCost'
+        },{
+            data : 'threads'
+        }, {
+            data : 'parts'
+        },{
             data : null,
             render : function(data, type, row, meta) {
                 html = '<div class="btn-demo">';
@@ -673,11 +679,13 @@ $(document).ready(function() {
             q3:aggFinalMethod == null ? true : aggFinalMethod.TQ,
             sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
             fromDb:$("#databases").val(),
+            threads: 14,
+            parts: 15,
             total:1,
             finished:0,
             autoUpdate:true
         };
-
+        console.log(newDB);
         $.ajax({
             url: "/aggregation/newDB/",
             type: 'post',

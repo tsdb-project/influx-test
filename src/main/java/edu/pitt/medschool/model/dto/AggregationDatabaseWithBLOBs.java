@@ -89,6 +89,11 @@ public class AggregationDatabaseWithBLOBs extends AggregationDatabase {
 						: this.getAutoUpdate().equals(other.getAutoUpdate()))
 				&& (this.getArtype() == null ? other.getArtype() == null : this.getArtype().equals(other.getArtype()))
 				&& (this.getFromDb() == null ? other.getFromDb() == null : this.getFromDb().equals(other.getFromDb()))
+				&& (this.getTimeCost() == null ? other.getTimeCost() == null
+						: this.getTimeCost().equals(other.getTimeCost()))
+				&& (this.getThreads() == null ? other.getThreads() == null
+						: this.getThreads().equals(other.getThreads()))
+				&& (this.getParts() == null ? other.getParts() == null : this.getParts().equals(other.getParts()))
 				&& (this.getPidList() == null ? other.getPidList() == null
 						: this.getPidList().equals(other.getPidList()))
 				&& (this.getColumns() == null ? other.getColumns() == null
@@ -122,6 +127,9 @@ public class AggregationDatabaseWithBLOBs extends AggregationDatabase {
 		result = prime * result + ((getAutoUpdate() == null) ? 0 : getAutoUpdate().hashCode());
 		result = prime * result + ((getArtype() == null) ? 0 : getArtype().hashCode());
 		result = prime * result + ((getFromDb() == null) ? 0 : getFromDb().hashCode());
+		result = prime * result + ((getTimeCost() == null) ? 0 : getTimeCost().hashCode());
+		result = prime * result + ((getThreads() == null) ? 0 : getThreads().hashCode());
+		result = prime * result + ((getParts() == null) ? 0 : getParts().hashCode());
 		result = prime * result + ((getPidList() == null) ? 0 : getPidList().hashCode());
 		result = prime * result + ((getColumns() == null) ? 0 : getColumns().hashCode());
 		return result;
