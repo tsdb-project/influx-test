@@ -30,15 +30,6 @@ public class AggregationDBController {
     public Model aggDatabasePage(Model model) {
         model.addAttribute("nav", "management");
         model.addAttribute("subnav", "aggDatabase");
-//        List<String> trends = columnService.selectAllMeasures();
-        List<String> trends = aggregationService.getColumns();
-        List<AggregationDatabase> availableDatabases = aggregationService.selectAllAvailableDBs();
-        List<String> DBNames = new ArrayList<>();
-        for (AggregationDatabase database: availableDatabases){
-            DBNames.add(database.getDbName());
-        }
-        model.addAttribute("measures", trends);
-        model.addAttribute("databases",DBNames);
         return model;
     }
 
