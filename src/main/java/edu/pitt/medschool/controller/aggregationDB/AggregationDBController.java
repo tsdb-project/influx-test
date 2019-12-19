@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
+import edu.pitt.medschool.model.dto.AggregationDb;
 import edu.pitt.medschool.service.AggregationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -52,26 +53,46 @@ public class AggregationDBController {
     }
 
 
+    // todo old way, delete later
     // insert a new agg db into aggregation database table
-    @PostMapping("/newDB")
-    @ResponseBody
-    public RestfulResponse exportQuery(@RequestBody(required = true) AggregationDatabaseWithBLOBs job, RestfulResponse response) {
-        if (aggregationService.completeJobAndInsert(job)) {
-//            int jobid = 0;
-//            if(job.getId()==null){
-//                String dbname = aggregationService.getDbName(job);
-//                jobid = aggregationService.getJobId(dbname);
-//            }else {
-//                jobid = job.getId();
+//    @PostMapping("/newDB")
+//    @ResponseBody
+//    public RestfulResponse exportQuery(@RequestBody(required = true) AggregationDatabaseWithBLOBs job, RestfulResponse response) {
+//        if (aggregationService.completeJobAndInsert(job)) {
+////            int jobid = 0;
+////            if(job.getId()==null){
+////                String dbname = aggregationService.getDbName(job);
+////                jobid = aggregationService.getJobId(dbname);
+////            }else {
+////                jobid = job.getId();
+////            }
+//            if (aggregationService.addOneAggregationJob(job.getId())) {
+//                response.setCode(1);
+//                response.setMsg("Successfully added job.");
+//            } else {
+//                response.setCode(2);
+//                response.setMsg("Failed to add job into queue.");
 //            }
-            if (aggregationService.addOneAggregationJob(job.getId())) {
+//        } else {
+//            response.setCode(0);
+//            response.setMsg("Database error!");
+//        }
+//        return response;
+//    }
+
+    // new way to create db aggregation
+    @PostMapping("/createDB")
+    @ResponseBody
+    public RestfulResponse createDB(@RequestBody(required = true) AggregationDb job, RestfulResponse response){
+        if(aggregationService.insertNewDB(job)){
+            if(aggregationService.addOneAggregationJob(job.getId())){
                 response.setCode(1);
                 response.setMsg("Successfully added job.");
-            } else {
+            }else {
                 response.setCode(2);
                 response.setMsg("Failed to add job into queue.");
             }
-        } else {
+        }else {
             response.setCode(0);
             response.setMsg("Database error!");
         }
