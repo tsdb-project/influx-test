@@ -462,6 +462,10 @@ $(document).ready(function() {
                 return data.artype ? "AR" : "NOAR";
             }
         },{
+            data : 'version'
+        },{
+            data : 'nday'
+        },{
             data : null,
             render : function(data) {
                 return localeDateString(data.createTime)
