@@ -534,56 +534,56 @@ public class AggregationService {
         return dbname;
     }
 
-    public List<AggregationDatabase> selectAllAvailableDBs() {
+    public List<AggregationDb> selectAllAvailableDBs() {
         return aggregationDao.selectAllAvailableDBs();
     }
 
-    public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {
-//        String dbname = database.getDbName()+"_V"+database.getVersion();
-//        List<AggregationDatabase> databaseList = aggregationDao.selectByname(dbname);
-//        if(!databaseList.isEmpty()){
-//            AggregationDatabaseWithBLOBs db = new AggregationDatabaseWithBLOBs();
-//            db.setId(databaseList.get(0).getId());
-//            db.setDbName(dbname);
-//            if(database.getMean()){
-//                db.setMean(true);
-//            }
-//            if(database.getSum()){
-//                db.setSum(true);
-//            }
-//            if(database.getMax()){
-//                db.setMax(true);
-//            }
-//            if(database.getMedian()){
-//                db.setMedian(true);
-//            }
-//            if(database.getQ1()){
-//                db.setQ1(true);
-//            }
-//            if(database.getQ3()){
-//                db.setQ3(true);
-//            }
-//            if(database.getSd()){
-//                db.setSd(true);
-//            }
-//            if(database.getMin()){
-//                db.setMin(true);
-//            }
-//            db.setFinished(0);
-//            db.setCreateTime(LocalDateTime.now());
-//            db.setThreads(database.getThreads());
-//            db.setParts(database.getParts());
-//            return aggregationDao.updateAggretaionMethods(db) !=0;
-//        }else {
-            database.setVersion(versionDao.getLatestVersion());
-            database.setStatus("processing");
-            database.setDbName(database.getDbName()+"_V"+database.getVersion());
-            database.setCreateTime(LocalDateTime.now(ZoneId.of("America/New_York")));
-            return aggregationDao.setNewDB(database) != 0;
-//        }
-
-
-    }
+//    public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {
+////        String dbname = database.getDbName()+"_V"+database.getVersion();
+////        List<AggregationDatabase> databaseList = aggregationDao.selectByname(dbname);
+////        if(!databaseList.isEmpty()){
+////            AggregationDatabaseWithBLOBs db = new AggregationDatabaseWithBLOBs();
+////            db.setId(databaseList.get(0).getId());
+////            db.setDbName(dbname);
+////            if(database.getMean()){
+////                db.setMean(true);
+////            }
+////            if(database.getSum()){
+////                db.setSum(true);
+////            }
+////            if(database.getMax()){
+////                db.setMax(true);
+////            }
+////            if(database.getMedian()){
+////                db.setMedian(true);
+////            }
+////            if(database.getQ1()){
+////                db.setQ1(true);
+////            }
+////            if(database.getQ3()){
+////                db.setQ3(true);
+////            }
+////            if(database.getSd()){
+////                db.setSd(true);
+////            }
+////            if(database.getMin()){
+////                db.setMin(true);
+////            }
+////            db.setFinished(0);
+////            db.setCreateTime(LocalDateTime.now());
+////            db.setThreads(database.getThreads());
+////            db.setParts(database.getParts());
+////            return aggregationDao.updateAggretaionMethods(db) !=0;
+////        }else {
+//            database.setVersion(versionDao.getLatestVersion());
+//            database.setStatus("processing");
+//            database.setDbName(database.getDbName()+"_V"+database.getVersion());
+//            database.setCreateTime(LocalDateTime.now(ZoneId.of("America/New_York")));
+//            return aggregationDao.setNewDB(database) != 0;
+////        }
+//
+//
+//    }
 
 
     public boolean insertNewDB(AggregationDb job){
@@ -593,7 +593,7 @@ public class AggregationService {
         return aggregationDao.insertNewDB(job) != 0;
     }
 
-    public List<AggregationDatabase> selectAllOnGoing() {
+    public List<AggregationDb> selectAllOnGoing() {
         return aggregationDao.selectOngoing();
     }
 
