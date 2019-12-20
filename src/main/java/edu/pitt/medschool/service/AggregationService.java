@@ -789,7 +789,7 @@ public class AggregationService {
         List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
         HashMap<String,HashMap<String,Object>> maps = new HashMap<>();
         for(int i=0;i<(int)(60/minutes);i++){
-            maps.put(LocalDateTime.parse(subStartTime,df).plusMinutes(i*minutes).toString()+":00Z",new HashMap());
+            maps.put(LocalDateTime.parse(subStartTime,df).plusMinutes(i*minutes).toString()+":00Z",new HashMap<>());
         }
         for(int i=1;i<colums.size();i++){
             HashMap<String,List<Double>> tempResults = getOneColumnwithTime(res,i,subStartTime,minutes,df);
@@ -833,6 +833,9 @@ public class AggregationService {
             }
         }
         for(Map.Entry<String,HashMap<String,Object>> part : maps.entrySet()){
+            if(part.getValue().keySet().isEmpty()){
+                continue;
+            }
             Point record = Point.measurement(pid).time(LocalDateTime.parse(part.getKey(),df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(part.getValue()).build();
             records.point(record);
         }
