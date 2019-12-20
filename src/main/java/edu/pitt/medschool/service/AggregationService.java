@@ -351,11 +351,11 @@ public class AggregationService {
 
                     // generate the batchs
                     BatchPoints records_60m = BatchPoints.database(DBNAME_1H+job.getVersion()).tag("arType","ar").build();
-                    BatchPoints records_1m = BatchPoints.database(DBNAME_1M+job.getVersion()).tag("arType","ar").build();
-                    BatchPoints records_5m = BatchPoints.database(DBNAME_5M+job.getVersion()).tag("arType","ar").build();
-                    BatchPoints records_10m = BatchPoints.database(DBNAME_10M+job.getVersion()).tag("arType","ar").build();
-                    BatchPoints records_15m = BatchPoints.database(DBNAME_15M+job.getVersion()).tag("arType","ar").build();
-                    BatchPoints records_30m = BatchPoints.database(DBNAME_30M+job.getVersion()).tag("arType","ar").build();
+//                    BatchPoints records_1m = BatchPoints.database(DBNAME_1M+job.getVersion()).tag("arType","ar").build();
+//                    BatchPoints records_5m = BatchPoints.database(DBNAME_5M+job.getVersion()).tag("arType","ar").build();
+//                    BatchPoints records_10m = BatchPoints.database(DBNAME_10M+job.getVersion()).tag("arType","ar").build();
+//                    BatchPoints records_15m = BatchPoints.database(DBNAME_15M+job.getVersion()).tag("arType","ar").build();
+//                    BatchPoints records_30m = BatchPoints.database(DBNAME_30M+job.getVersion()).tag("arType","ar").build();
 
                     // generate part of the query
                     StringBuilder sb = new StringBuilder();
@@ -396,28 +396,23 @@ public class AggregationService {
                         records_60m.point(record);
                         System.out.println("60");
                         // do 1m agg
-                        getAllFeaturesAggregation(subStartTime,rs,records_1m, 1,df,pid);
+                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_1M+job.getVersion(), 1,df,pid,influxDB,"ar");
                         System.out.println("1");
                         // do 30m agg
-                        getAllFeaturesAggregation(subStartTime,rs,records_30m, 30,df,pid);
+                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_30M+job.getVersion(), 30,df,pid,influxDB,"ar");
                         System.out.println("30");
                         // do 15m agg
-                        getAllFeaturesAggregation(subStartTime,rs,records_15m, 15,df,pid);
+                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_15M+job.getVersion(), 15,df,pid,influxDB,"ar");
                         System.out.println("15");
                         // do 10m agg
-                        getAllFeaturesAggregation(subStartTime,rs,records_10m, 10,df,pid);
+                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_10M+job.getVersion(), 10,df,pid,influxDB,"ar");
                         System.out.println("10");
                         // do 5m agg
-                        getAllFeaturesAggregation(subStartTime,rs,records_5m, 5,df,pid);
+                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_5M+job.getVersion(), 5,df,pid,influxDB,"ar");
                         System.out.println("5");
                     }
 
                     influxDB.write(records_60m);
-                    influxDB.write(records_1m);
-                    influxDB.write(records_5m);
-                    influxDB.write(records_10m);
-                    influxDB.write(records_15m);
-                    influxDB.write(records_30m);
 
 
 
@@ -785,7 +780,7 @@ public class AggregationService {
     }
 
 
-    private void getAllFeaturesAggregation(String subStartTime, QueryResult res, BatchPoints records, int minutes,DateTimeFormatter df,String pid){
+    private void getAllFeaturesAggregation(String subStartTime, QueryResult res, String dbname, int minutes,DateTimeFormatter df,String pid,InfluxDB influxDB, String arType){
         List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
         HashMap<String,HashMap<String,Object>> maps = new HashMap<>();
         for(int i=0;i<(int)(60/minutes);i++){
@@ -836,8 +831,8 @@ public class AggregationService {
             if(part.getValue().keySet().isEmpty()){
                 continue;
             }
-            Point record = Point.measurement(pid).time(LocalDateTime.parse(part.getKey(),df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(part.getValue()).build();
-            records.point(record);
+            Point record = Point.measurement(pid).time(LocalDateTime.parse(part.getKey(),df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).tag("arType",arType).fields(part.getValue()).build();
+            influxDB.setDatabase(dbname).write(record);
         }
 
     }
