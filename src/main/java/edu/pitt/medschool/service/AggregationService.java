@@ -394,16 +394,22 @@ public class AggregationService {
                         getSumFeatures(map,rs);
                         Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
                         records_60m.point(record);
+                        System.out.println("60");
                         // do 1m agg
                         getAllFeaturesAggregation(subStartTime,rs,records_1m, 1,df,pid);
+                        System.out.println("1");
                         // do 30m agg
                         getAllFeaturesAggregation(subStartTime,rs,records_30m, 30,df,pid);
+                        System.out.println("30");
                         // do 15m agg
                         getAllFeaturesAggregation(subStartTime,rs,records_15m, 15,df,pid);
+                        System.out.println("15");
                         // do 10m agg
                         getAllFeaturesAggregation(subStartTime,rs,records_10m, 10,df,pid);
+                        System.out.println("10");
                         // do 5m agg
                         getAllFeaturesAggregation(subStartTime,rs,records_5m, 5,df,pid);
+                        System.out.println("5");
                     }
 
                     influxDB.write(records_60m);
@@ -862,10 +868,10 @@ public class AggregationService {
                     row++;
                 }else {
                     result.put(currentTime.toString(),new ArrayList<>(arr));
-                    currentTime = currentTime.plusMinutes(minutes);
                     break;
                 }
             }
+            currentTime = currentTime.plusMinutes(minutes);
         }
         return result;
     }
