@@ -869,10 +869,10 @@ public class AggregationService {
                     arr.add((double)res.getResults().get(0).getSeries().get(0).getValues().get(row).get(col));
                     row++;
                 }else {
-                    result.put(currentTime.toString()+":00Z",new ArrayList<>(arr));
                     break;
                 }
             }
+            result.put(currentTime.toString()+":00Z",new ArrayList<>(arr));
             currentTime = currentTime.plusMinutes(minutes);
         }
         return result;
