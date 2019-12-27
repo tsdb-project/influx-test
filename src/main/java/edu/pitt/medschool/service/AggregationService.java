@@ -389,12 +389,12 @@ public class AggregationService {
                             continue;
                         }
                         // do 60m agg
-                        HashMap<String,Object> map  = new HashMap<>(cols.size()*8,1.0f);
-                        getSortedFeatures(map,rs);
-                        getSumFeatures(map,rs);
-                        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
-                        records_60m.point(record);
-                        System.out.println("60");
+//                        HashMap<String,Object> map  = new HashMap<>(cols.size()*8,1.0f);
+//                        getSortedFeatures(map,rs);
+//                        getSumFeatures(map,rs);
+//                        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
+//                        records_60m.point(record);
+//                        System.out.println("60");
                         // do 1m agg
                         getAllFeaturesAggregation(subStartTime,rs,DBNAME_1M+job.getVersion(), 1,df,pid,influxDB,"ar");
                         System.out.println("1");
@@ -412,7 +412,7 @@ public class AggregationService {
                         System.out.println("5");
                     }
 
-                    influxDB.write(records_60m);
+//                    influxDB.write(records_60m);
 
 
 
