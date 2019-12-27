@@ -812,7 +812,7 @@ $(document).ready(function() {
                             color = " bg-danger";
                         }
                         progressHtml += "<div class=\"progress\"><div class=\"progress-bar" + color + "\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
-                            + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.data[i].dbName + ' - ' + progress + "%</small><br><br>";
+                            + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.data[i].nday + '_V' + data.data[i].version + ' - ' + progress + "%</small><br><br>";
                     }
 
                     var totalPercent = (finishedOverall / totalOverall * 100).toFixed(2);
