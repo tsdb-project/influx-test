@@ -833,6 +833,7 @@ public class AggregationService {
             }
             Point record = Point.measurement(pid).time(LocalDateTime.parse(part.getKey(),df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).tag("arType",arType).fields(part.getValue()).build();
             influxDB.setDatabase(dbname).write(record);
+            influxDB.flush();
         }
 
     }
