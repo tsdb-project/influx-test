@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.sql.Time;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -42,6 +43,10 @@ import static edu.pitt.medschool.framework.influxdb.InfluxUtil.generateIdbClient
 public class AggregationService {
     @Value("${load}")
     private double loadFactor;
+    @Value("${softTimeOut}")
+    private double softTimeOut;
+    @Value("${timeoutSleep}")
+    private long timeoutSleep;
 
     private BufferedWriter bufferedWriter;
     private String dir;
@@ -824,24 +829,33 @@ public class AggregationService {
 
             }
         }
-        int batchCount =0;
-        for(Map.Entry<String,HashMap<String,Object>> part : maps.entrySet()){
-            if(part.getValue().keySet().isEmpty()){
-                continue;
+        try {
+            int batchCount =0;
+            for(Map.Entry<String,HashMap<String,Object>> part : maps.entrySet()){
+                if(part.getValue().keySet().isEmpty()){
+                    continue;
+                }
+
+                Point record = Point.measurement(pid).time(LocalDateTime.parse(part.getKey(),df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).tag("arType",arType).fields(part.getValue()).build();
+                batch.point(record);
+                batchCount++;
+
+                if(batchCount>=MAXBATCH){
+                    long start = System.currentTimeMillis();
+                    influxDB.write(batch);
+                    long end = System.currentTimeMillis();
+                    batchCount=0;
+                    batch = BatchPoints.database(dbname).tag("arType","ar").build();
+                    if(end-start>softTimeOut){
+                        System.out.println("Warning time out");
+                        TimeUnit.SECONDS.sleep(timeoutSleep);
+                    }
+                }
+
             }
-
-            Point record = Point.measurement(pid).time(LocalDateTime.parse(part.getKey(),df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).tag("arType",arType).fields(part.getValue()).build();
-            batch.point(record);
-            batchCount++;
-
-            if(batchCount>=MAXBATCH){
-                influxDB.write(batch);
-                batchCount=0;
-                batch = BatchPoints.database(dbname).tag("arType","ar").build();
-            }
-
+        }catch (Exception e){
+            e.printStackTrace();
         }
-
     }
 
     private List<Double> getOneColumn(QueryResult res, int col) {
