@@ -43,9 +43,9 @@ import static edu.pitt.medschool.framework.influxdb.InfluxUtil.generateIdbClient
 public class AggregationService {
     @Value("${load}")
     private double loadFactor;
-    @Value("${softTimeOut}")
+    @Value("${soft-timeout}")
     private double softTimeOut;
-    @Value("${timeoutSleep}")
+    @Value("${soft-timeout-sleep}")
     private long timeoutSleep;
 
     private BufferedWriter bufferedWriter;
@@ -69,7 +69,7 @@ public class AggregationService {
     private final String DBNAME_15M = "fifteen_minute_summary_V";
     private final String DBNAME_30M = "thirty_minute_summary_V";
     private final String DBNAME_10M = "ten_minute_summary_V";
-    private final int MAXBATCH = 24;
+    private final int MAXBATCH = 15;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -853,6 +853,7 @@ public class AggregationService {
                 }
 
             }
+            influxDB.write(batch);
         }catch (Exception e){
             e.printStackTrace();
         }
