@@ -854,6 +854,7 @@ public class AggregationService {
 
             }
             influxDB.write(batch);
+            influxDB.flush();
         }catch (Exception e){
             e.printStackTrace();
         }
