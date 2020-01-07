@@ -194,7 +194,6 @@ public class ExportOutput {
             List<Object> row = r.getDatalistByRow(i);
             int resultSize = row.size();
             logger.info("resultSize = " + resultSize);
-            System.out.println("row: " + row);
             int count = (int) (double) row.get(resultSize - 1);
             mainDataLong[2] = String.valueOf(i + 1);
             mainDataLong[1] = String.valueOf(row.get(0));

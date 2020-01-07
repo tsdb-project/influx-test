@@ -87,7 +87,6 @@ public class ExportQueryBuilder {
         this.validTimeSpanIds = new ArrayList<>(this.numDataSegments);
         this.isAr = needAr;
         this.versionCondition = versionCondition;
-        System.out.println("Constructor of buildQuery()!");
         this.fromDb = fromDb;
 
         populateDownsampleGroup(v);
@@ -109,7 +108,7 @@ public class ExportQueryBuilder {
         calcOffsetInSeconds(fakeStartTime);
         this.globalTimeLimitWhere = String.format(Template.timeCondition, this.queryStartTime.toString(),
                 this.queryEndTime.toString());
-        System.out.println("start building the query!");
+        System.out.println("start building the export query!");
         buildQuery();
     }
 
@@ -188,11 +187,9 @@ public class ExportQueryBuilder {
         }
         if (!this.isDownSampleFirst) {
             String aggrQ = aggregationWhenAggregationFirst(whereClause);
-            System.out.println("aggrQ@buildQuery(): " + aggrQ);
             this.queryString = downsampleWhenAggregationFirst(aggrQ);
         } else {
             this.queryString = whenDownsampleFirst(whereClause);
-            System.out.println("DSfrist: " + this.queryString);
         }
     }
 
@@ -206,7 +203,7 @@ public class ExportQueryBuilder {
         String[] cols = new String[this.numOfDownsampleGroups];
         for (int i = 0; i < this.numOfDownsampleGroups; i++) {
             DownsampleGroup dg = this.downsampleGroups[i];
-            System.out.println(this.columnNames.get(i));
+            //System.out.println(this.columnNames.get(i));
             cols[i] = populateByAggregationType(this.columnNames.get(i), this.columnNameAliases.get(i), dg, "\"");
         }
         return String.format(Template.basicAggregationInner, String.join(", ", cols), this.pid, locator);
@@ -282,14 +279,12 @@ public class ExportQueryBuilder {
     		//export job is from a higher database layer.
     		//when agg, select aggregated columns e.g. max_I1_1
     		// can be simplified
-    		//System.out.println(fromDb + " is data or not?" + fromDb.equals("data"));
-    		System.out.println(aggregateName);
+    		//HSX
     		for(int i = 0; i < aggregateName.size(); i++) {
     			if(aggregateName.get(i).indexOf("I") == 0) {
     				aggregateName.set(i, String.format(formDownsampleFunctionInDBTemplate(dg), aggregateName.get(i)));
     			}
     		}
-    		System.out.println(aggregateName);
     	}
     	
         switch (dg.getAggregation().toLowerCase()) {

@@ -72,7 +72,6 @@ public class AggregationService {
 
     // todo add version condition into aggregation query
     private void startAgg(AggregationDatabaseWithBLOBs job){
-        System.out.println("start aggregation");
         String time = getAggTime(job.getAggregateTime());
         final String DIR = "aggregationDBLog";
 
@@ -89,7 +88,6 @@ public class AggregationService {
 
         // todo update total
         List<String> patients = new ArrayList<>();
-        System.out.println("91!");
         // recover job after break down
         //get finished pids
         String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+".txt";
@@ -111,8 +109,6 @@ public class AggregationService {
                 HashSet<String> allPid = new HashSet<>(patientIDs);
                 allPid.removeAll(finishedPid);
                 patients = new ArrayList<>(allPid);
-                System.out.println("finishedPid: " + finishedPid.size());
-                System.out.println("allPid: " + allPid.size());
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -128,10 +124,8 @@ public class AggregationService {
         
         // get all 6037 columns
         List<String> columns = getColumns();
-        System.out.println("131!");
         // get selection condition from 6037 columns, now each file is splited into 9 parts
         List<String> selection = getSelection(columns,job);
-        System.out.println("selection = " + selection.size());
         int paraCount = determineParaNumber();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
@@ -181,7 +175,6 @@ public class AggregationService {
                     for(int count=0;count<selection.size();count++){
                         //QueryResult rs = influxDB.query(new Query(queries.get(count),"aggdata"));
                         QueryResult rs = influxDB.query(new Query(queries.get(count),job.getFromDb()));
-                        System.out.print(count + ", ");
                     }
                     this.bufferedWriter.write("Success: "+pid);
                     this.bufferedWriter.newLine();

@@ -161,7 +161,7 @@ public class AnalysisService {
      */
     private void mainExportProcess(ExportWithBLOBs job) {
     	String jobFromdb = job.getFromDb() == null ? "data" : job.getFromDb();
-    	System.out.println(jobFromdb + " start export!");
+    	System.out.println(String.format("Database %s start export!", job.getFromDb()));
 //    	if(jobFromdb != null && jobFromdb != "data") {
 //    		//from agg database, not base database
 //    		InfluxDB toSwitchDBlayer = generateIdbClient(false);
@@ -337,7 +337,7 @@ public class AnalysisService {
                             Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
                             job.getAr(),versionCondition);
                     String finalQueryString = eq.getQueryString();
-                    System.out.println("finalQueryString for " + patientId + ": " + finalQueryString);
+                    //System.out.println("finalQueryString for " + patientId + ": " + finalQueryString);
                     logger.info(finalQueryString);
                     if (finalQueryString.isEmpty()) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> no available data.%n", patientId));
