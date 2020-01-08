@@ -556,7 +556,7 @@ public class AggregationService {
             database.setDbName(database.getDbName()+"_V"+database.getVersion());
             database.setCreateTime(LocalDateTime.now(ZoneId.of("America/New_York")));
             return aggregationDao.setNewDB(database) != 0;
-//        }
+        }
 
 
     }
