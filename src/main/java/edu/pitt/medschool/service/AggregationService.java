@@ -36,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.text.DecimalFormat;
 
 import static edu.pitt.medschool.framework.influxdb.InfluxUtil.generateIdbClient;
 
@@ -70,6 +71,7 @@ public class AggregationService {
     private final String DBNAME_30M = "thirty_minute_summary_V";
     private final String DBNAME_10M = "ten_minute_summary_V";
     private final int MAXBATCH = 10;
+    private final DecimalFormat DIGIT = new   java.text.DecimalFormat("#.00");
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -802,21 +804,21 @@ public class AggregationService {
                 for(int j=0;j<size;j++){
                     sum+=arr.get(j);
                 }
-
-                double mean = sum/size;
+                sum = Double.parseDouble(DIGIT.format(sum));
+                double mean = Double.parseDouble(DIGIT.format(sum/size));
                 for(int k=0; k<arr.size();k++){
                     var += Math.pow(arr.get(k) - mean,2);
                 }
 
                 var = var/size;
-                var = Math.sqrt(var);
+                var = Double.parseDouble(DIGIT.format(Math.sqrt(var)));
 
                 Collections.sort(arr);
-                double median = (arr.get((size-1)/2) + arr.get(size/2))/2;
-                double max = arr.get(size-1);
-                double min = arr.get(0);
-                double p25 = arr.get(Math.max(0,(int)(0.25*size)-1));
-                double p75 = arr.get(Math.max(0,(int)(0.75*size)-1));
+                double median = Double.parseDouble(DIGIT.format((arr.get((size-1)/2) + arr.get(size/2))/2));
+                double max = Double.parseDouble(DIGIT.format(arr.get(size-1)));
+                double min = Double.parseDouble(DIGIT.format(arr.get(0)));
+                double p25 = Double.parseDouble(DIGIT.format(arr.get(Math.max(0,(int)(0.25*size)-1))));
+                double p75 = Double.parseDouble(DIGIT.format(arr.get(Math.max(0,(int)(0.75*size)-1))));
 
                 currentMap.put("median_"+colums.get(i),median);
                 currentMap.put("max_"+colums.get(i),max);
