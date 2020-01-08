@@ -100,6 +100,13 @@ public class AggregationDao {
         return aggregationDatabaseMapper.updateByPrimaryKeySelective(e);
     }
 
+    public int updateTimeCost(int id, String time){
+        AggregationDatabaseWithBLOBs e = new AggregationDatabaseWithBLOBs();
+        e.setId(id);
+        e.setTimeCost(time);
+        return aggregationDatabaseMapper.updateByPrimaryKeySelective(e);
+    }
+
     public List<AggregationDatabase> selectByname(String dbname) {
         AggregationDatabaseExample example = new AggregationDatabaseExample();
         AggregationDatabaseExample.Criteria criteria = example.createCriteria();
@@ -117,6 +124,8 @@ public class AggregationDao {
         criteria.andDbNameEqualTo(dbname);
         return aggregationDatabaseMapper.selectByExample(example).get(0).getId();
     }
+
+
 
     //todo: add version to db name
     //public String getInfluxDBName()

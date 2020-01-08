@@ -1,6 +1,8 @@
 package edu.pitt.medschool.service;
 
 import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.influxdb.InfluxUtil;
+import edu.pitt.medschool.framework.influxdb.ResultTable;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.AggregationDao;
 import edu.pitt.medschool.model.dao.ExportDao;
@@ -8,7 +10,13 @@ import edu.pitt.medschool.model.dao.ImportedFileDao;
 import edu.pitt.medschool.model.dao.VersionDao;
 import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
+import okhttp3.OkHttpClient;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.BatchPoints;
+import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.slf4j.Logger;
@@ -21,11 +29,9 @@ import java.io.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -62,8 +68,10 @@ public class AggregationService {
             AggregationDatabaseWithBLOBs target = null;
             while ((target = this.jobQueue.poll()) != null) {
                 logger.info("Start to process job #<{}>", target.getId());
+
                 System.out.print(target.getId());
                 startAgg(target);
+
                 logger.info("Finished one job #<{}>", target.getId());
             }
         }, 10, 20, TimeUnit.SECONDS);
@@ -126,7 +134,7 @@ public class AggregationService {
         List<String> columns = getColumns();
         // get selection condition from 6037 columns, now each file is splited into 9 parts
         List<String> selection = getSelection(columns,job);
-        int paraCount = determineParaNumber();
+        int paraCount = job.getThreads();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
             this.bufferedWriter = new BufferedWriter(new FileWriter(pathname,true));
@@ -134,7 +142,9 @@ public class AggregationService {
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
             InfluxDB influxDB = generateIdbClient(false);
+
             String command = "create database " + job.getDbName().replace(" ","_");
+
             influxDB.query(new Query(command));
             influxDB.close();
         }catch (IOException e){
@@ -152,16 +162,22 @@ public class AggregationService {
                     // generate query
 //                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
 //                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
+
+                    //to generate the first 6h
                     String i11 = job.getFromDb().equals("data")?"I1_1":"max_I1_1";
                     QueryResult res1 = influxDB.query(new Query(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getFromDb()));
+
+
                     //QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
                     System.out.println(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid));
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     // only do 7 hours
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
                     String endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+
                     System.out.println(startTime);
                     System.out.println(endTime);
+
                     List<String> queries = new ArrayList<>();
                     System.out.println(selection.size());
                     for(int count=0;count<selection.size();count++){
@@ -175,6 +191,7 @@ public class AggregationService {
                     for(int count=0;count<selection.size();count++){
                         //QueryResult rs = influxDB.query(new Query(queries.get(count),"aggdata"));
                         QueryResult rs = influxDB.query(new Query(queries.get(count),job.getFromDb()));
+//                        System.out.println(queries.get(count));
                     }
                     this.bufferedWriter.write("Success: "+pid);
                     this.bufferedWriter.newLine();
@@ -211,6 +228,7 @@ public class AggregationService {
                 this.bufferedWriter.close();
                 System.out.println("Job finished");
                 aggregationDao.updateStatus(job.getId(),"Success");
+                aggregationDao.updateTimeCost(job.getId(),String.valueOf(Duration.between(start_Time,end_Time)));
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -218,6 +236,198 @@ public class AggregationService {
 
 
     }
+
+
+    private void startEfficentAgg(AggregationDatabaseWithBLOBs job){
+        System.out.println("start efficient aggregation");
+        final String DIR = "aggregationDBLog";
+
+        List<String> patientIDs;
+        String plist = job.getPidList();
+
+        if(plist == null || plist.isEmpty()){
+            //todo new way to get all pids from csv_file table
+            patientIDs = importedFileDao.selectAllImportedPidWithoutTBI("realpsc");
+        }else {
+            patientIDs = Arrays.asList(job.getPidList().split(","));
+        }
+
+        // todo update total
+        List<String> patients = new ArrayList<>();
+
+        // recover job after break down
+        //get finished pids
+        String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+".txt";
+        File filename = new File(pathname);
+        if(filename.exists()){
+            try{
+                InputStreamReader reader = new InputStreamReader(
+                        new FileInputStream(filename));
+                BufferedReader br = new BufferedReader(reader);
+                HashSet<String> finishedPid = new HashSet<>();
+                String line = br.readLine();
+                while (line != null) {
+                    String[] record = line.split(":");
+                    if(record[0].equals("Success")){
+                        finishedPid.add(record[1].trim());
+                    }
+                    line = br.readLine();
+                }
+                HashSet<String> allPid = new HashSet<>(patientIDs);
+                allPid.removeAll(finishedPid);
+                patients = new ArrayList<>(allPid);
+//                System.out.println(finishedPid.size());
+//                System.out.println(allPid.size());
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }else{
+            patients = patientIDs;
+        }
+
+        // update the total number of patients of this job
+        aggregationDao.updateTotalnumber(job.getId(),patients.size());
+
+        // count the finished number
+        AtomicInteger finishedPatientCounter = new AtomicInteger(0);
+        BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
+
+
+        int paraCount = job.getThreads();
+        ExecutorService scheduler = generateNewThreadPool(paraCount);
+        try{
+            this.bufferedWriter = new BufferedWriter(new FileWriter(pathname,true));
+            this.bufferedWriter.write("Cores: "+paraCount);
+            this.bufferedWriter.newLine();
+            this.bufferedWriter.flush();
+            InfluxDB influxDB = generateIdbClient(false);
+            String command = "create database " + job.getDbName();
+            influxDB.query(new Query(command));
+            influxDB.close();
+        }catch (IOException e){
+            e.printStackTrace();
+            return;
+        }
+
+        LocalDateTime start_Time = LocalDateTime.now();
+        Runnable queryTask = () -> {
+            String pid;
+            InfluxDB influxDB = generateIdbClient(false);
+            while ((pid=idQueue.poll())!=null){
+                try{
+                    // generate query
+//                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
+//                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
+
+                    String i11 = job.getFromDb().equals("data")?"I1_1":"max_I1_1";
+                    QueryResult res1 = influxDB.query(new Query(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid),job.getFromDb()));
+                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
+                    String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                    String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+//                    String endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+//                    System.out.println(startTime);
+//                    System.out.println(endTime);
+
+//                    // to do the next 7h.
+//                    for(int i=0;i<1;i++){
+//                        startTime = endTime;
+//                        endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+//                    }
+
+                    //skip first 14 hours
+                    startTime = LocalDateTime.parse(startTime,df).plusHours(14).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+
+
+                    // generate the batch
+                    BatchPoints records = BatchPoints.database(job.getDbName()).tag("arType","ar").build();
+                    // generate part of the query
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("select ");
+                    List<String> cols = getColumns();
+                    for(String x: cols){
+                        sb.append(String.format("\"%s\", ",x));
+                    }
+                    String former = sb.toString();
+                    former = former.substring(0,former.length()-2);
+                    String formerQuery = former+String.format(" from \"%s\" where arType='ar' AND ",pid);
+
+                    // run query hour by hour
+                    int count = 0;
+                    String subStartTime = startTime;
+                    String subEndTime;
+                    while (LocalDateTime.parse(subStartTime,df).isBefore(LocalDateTime.parse(endTime,df)) || subStartTime.equals(endTime)){
+                        StringBuilder oneHoursb = new StringBuilder();
+                        oneHoursb.append(formerQuery);
+                        subStartTime = LocalDateTime.parse(startTime,df).plusHours(count).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+                        subEndTime = LocalDateTime.parse(startTime,df).plusHours(count+1).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
+                        oneHoursb.append(String.format("time>='%s' AND time<'%s'",subStartTime,subEndTime));
+                        String query = oneHoursb.toString();
+//                        System.out.println(query);
+                        QueryResult rs = influxDB.query(new Query(query,job.getFromDb()));
+//                        System.out.println(queries.get(count));
+//
+//                      calculate 8 features
+                        if(rs==null || rs.getResults().get(0) == null || rs.getResults().get(0).getSeries() == null || rs.getResults().get(0).getSeries().isEmpty() || rs.getResults().get(0).getSeries().get(0) == null){
+                            continue;
+                        }
+                        HashMap<String,Object> map  = new HashMap<>(cols.size()*8,1.0f);
+                        getSortedFeatures(map,rs);
+                        getSumFeatures(map,rs);
+                        Point record = Point.measurement(pid).time(LocalDateTime.parse(subStartTime,df).toInstant(ZoneOffset.UTC).toEpochMilli(),TimeUnit.MILLISECONDS).fields(map).build();
+                        records.point(record);
+                        count++;
+                        influxDB.flush();
+                    }
+
+                    influxDB.write(records);
+
+
+                    // one patient finished
+                    this.bufferedWriter.write("Success: "+pid);
+                    this.bufferedWriter.newLine();
+                    this.bufferedWriter.flush();
+                    finishedPatientCounter.getAndIncrement();
+                    aggregationDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
+
+                }catch (Exception e){
+                    logger.info(pid);
+                    recordError(pid,e);
+                    finishedPatientCounter.getAndIncrement();
+                    aggregationDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
+                    e.printStackTrace();
+                }
+            }
+            influxDB.close();
+        };
+
+        for (int i = 0; i < paraCount; ++i) {
+            scheduler.submit(queryTask);
+        }
+        scheduler.shutdown();
+        try {
+            scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.error(Util.stackTraceErrorToString(e));
+        }
+        finally {
+            try{
+                LocalDateTime end_Time = LocalDateTime.now();
+                this.bufferedWriter.write(String.valueOf(Duration.between(start_Time,end_Time)).replace("PT","Run Time: "));
+                this.bufferedWriter.newLine();
+                this.bufferedWriter.flush();
+                this.bufferedWriter.close();
+                System.out.println("Job finished");
+                aggregationDao.updateStatus(job.getId(),"Success");
+                aggregationDao.updateTimeCost(job.getId(),String.valueOf(Duration.between(start_Time,end_Time)));
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
+
+    }
+
 
 
     private String getAggTime(Integer aggregateTime) {
@@ -250,14 +460,17 @@ public class AggregationService {
         System.out.println("getSelection!");
     	List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
+
         for(int count=0;count<15;count++){
             for(int j=count*380;j<(count+1)*380;j++){
+
                 //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
                 onepart.append(getAggregations(job,columns.get(j)));
             }
             res.add(onepart.substring(0,onepart.length()-2));
             onepart = new StringBuilder();
         }
+
         for(int j=15*380;j<columns.size();j++){
             //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
             onepart.append(getAggregations(job,columns.get(j)));
@@ -301,6 +514,7 @@ public class AggregationService {
     }
 
     public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {
+
         System.out.println(database.getDbName() + "  301!");
     	String dbname = database.getDbName()+"_V"+database.getVersion();
         List<AggregationDatabase> databaseList = aggregationDao.selectByname(dbname);
@@ -336,12 +550,13 @@ public class AggregationService {
             db.setCreateTime(LocalDateTime.now());
             return aggregationDao.updateAggretaionMethods(db) !=0;
         }else {
+
             database.setVersion(versionDao.getLatestVersion());
             database.setStatus("processing");
             database.setDbName(database.getDbName()+"_V"+database.getVersion());
             database.setCreateTime(LocalDateTime.now(ZoneId.of("America/New_York")));
             return aggregationDao.setNewDB(database) != 0;
-        }
+//        }
 
 
     }
@@ -467,6 +682,87 @@ public class AggregationService {
         }
         String finalq = builder.toString();
         return finalq;
+    }
+
+
+    public void getSortedFeatures(HashMap<String,Object> map, QueryResult res){
+        List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
+        for(int i=1;i<colums.size();i++){
+            //get the current column
+            List<Double> arr = getOneColumn(res,i);
+            if(arr.isEmpty()){
+                continue;
+            }
+            Collections.sort(arr);
+            int size = arr.size();
+            double median = (arr.get((size-1)/2) + arr.get(size/2))/2;
+            double max = arr.get(size-1);
+            double min = arr.get(0);
+            double p25 = arr.get(Math.max(0,(int)(0.25*size)-1));
+            double p75 = arr.get(Math.max(0,(int)(0.75*size)-1));
+            map.put("median_"+colums.get(i),median);
+            map.put("max_"+colums.get(i),max);
+            map.put("min_"+colums.get(i),min);
+            map.put("p25_"+colums.get(i),p25);
+            map.put("p75_"+colums.get(i),p75);
+        }
+    }
+
+    public void getSumFeatures(HashMap<String,Object> map, QueryResult res){
+        List<String> colums = res.getResults().get(0).getSeries().get(0).getColumns();
+        for(int i=1;i<colums.size();i++){
+            List<Double> arr = getOneColumn(res,i);
+            if(arr.isEmpty()){
+                continue;
+            }
+            double sum = 0;
+            int size = arr.size();
+            double var = 0;
+            for(int j=0;j<size;j++){
+                sum+=arr.get(j);
+            }
+
+            double mean = sum/size;
+            for(int k=0; k<arr.size();k++){
+                var += Math.pow(arr.get(k) - mean,2);
+            }
+
+            var = var/size;
+            var = Math.sqrt(var);
+            map.put("mean_"+colums.get(i),mean);
+            map.put("sum_"+colums.get(i),sum);
+            map.put("std_"+colums.get(i),var);
+        }
+    }
+
+    private List<Double> getOneColumn(QueryResult res, int col) {
+        int n = res.getResults().get(0).getSeries().get(0).getValues().size();
+        List<Double> arr = new ArrayList<>();
+        for(int i=0;i<n;i++){
+            if(res.getResults().get(0).getSeries().get(0).getValues().get(i).get(col)!=null){
+                arr.add((double) res.getResults().get(0).getSeries().get(0).getValues().get(i).get(col));
+            }
+        }
+        return arr;
+    }
+
+    private InfluxDB generateIdbClient(Boolean needGzip) {
+        // Disable GZip to save CPU
+        InfluxDB idb = InfluxDBFactory.connect(InfluxappConfig.IFX_ADDR, InfluxappConfig.IFX_USERNAME,
+                InfluxappConfig.IFX_PASSWD, new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS)
+                        .readTimeout(1, TimeUnit.HOURS).writeTimeout(1, TimeUnit.HOURS));
+        if (needGzip) {
+            idb.enableGzip();
+        } else {
+            idb.disableGzip();
+        }
+        BatchOptions bo = BatchOptions.DEFAULTS.consistency(InfluxDB.ConsistencyLevel.ALL)
+                // Flush every 2000 Points, at least every 100ms, buffer for failed oper is 2200
+                .actions(2000).flushDuration(500).bufferLimit(10000).jitterDuration(200)
+                .exceptionHandler((p, t) -> logger.warn("Write point failed", t));
+        idb.enableBatch(bo);
+
+        return idb;
     }
 
 //    public String getDbName(AggregationDatabaseWithBLOBs database) {
