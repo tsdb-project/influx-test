@@ -44,6 +44,20 @@ public class InfluxUtil {
     }
 
     /**
+     * Method for lazy man, just query the designated aggregated database and get the result Just use fast method for general queries
+     * same as the last method, only add "fromDb" parameter
+     * by HSX
+     */
+    public static ResultTable[] justQueryData(String fromDb, InfluxDB i, boolean fastMethod, String query) {
+        QueryResult qr = i.query(new Query(query, fromDb));
+        if (fastMethod)
+            return queryResultToTable(qr).toArray(new ResultTable[0]);
+        else
+            return queryResultToKV(qr).toArray(new ResultTable[0]);
+    }
+    
+    
+    /**
      * Query results to a table, fast conversion but not safe to modify anything
      */
     public static List<FastResultTable> queryResultToTable(QueryResult results) {

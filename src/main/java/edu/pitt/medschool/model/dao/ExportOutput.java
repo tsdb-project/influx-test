@@ -192,7 +192,9 @@ public class ExportOutput {
         mainDataLong[0] = patientId;
         for (int i = 0; i < dataRows; i++) {
             List<Object> row = r.getDatalistByRow(i);
-            int resultSize = row.size(), count = (int) (double) row.get(resultSize - 1);
+            int resultSize = row.size();
+            logger.info("resultSize = " + resultSize);
+            int count = (int) (double) row.get(resultSize - 1);
             mainDataLong[2] = String.valueOf(i + 1);
             mainDataLong[1] = String.valueOf(row.get(0));
             boolean thisRowInsuffData = count < this.minSecondsForBinPerRow; // Based on the fact that single data per second

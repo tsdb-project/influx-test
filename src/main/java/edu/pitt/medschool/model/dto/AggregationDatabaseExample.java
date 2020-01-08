@@ -3,6 +3,7 @@ package edu.pitt.medschool.model.dto;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 public class AggregationDatabaseExample {
     /**
@@ -412,6 +413,11 @@ public class AggregationDatabaseExample {
 			addCriterion("aggregate_time not between", value1, value2, "aggregateTime");
 			return (Criteria) this;
 		}
+		
+		public Criteria anddAggregateTimeAliquot(Integer value) {
+			addCriterion(value + " % aggregate_time =", 0, "aggregate_time");
+			return (Criteria) this;
+		}
 
 		public Criteria andCreateTimeIsNull() {
 			addCriterion("create_time is null");
@@ -423,52 +429,52 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeEqualTo(Date value) {
 			addCriterion("create_time =", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeNotEqualTo(Date value) {
 			addCriterion("create_time <>", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeGreaterThan(LocalDateTime value) {
+		public Criteria andCreateTimeGreaterThan(Date value) {
 			addCriterion("create_time >", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeGreaterThanOrEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeGreaterThanOrEqualTo(Date value) {
 			addCriterion("create_time >=", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeLessThan(LocalDateTime value) {
+		public Criteria andCreateTimeLessThan(Date value) {
 			addCriterion("create_time <", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeLessThanOrEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeLessThanOrEqualTo(Date value) {
 			addCriterion("create_time <=", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeIn(List<LocalDateTime> values) {
+		public Criteria andCreateTimeIn(List<Date> values) {
 			addCriterion("create_time in", values, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotIn(List<LocalDateTime> values) {
+		public Criteria andCreateTimeNotIn(List<Date> values) {
 			addCriterion("create_time not in", values, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeBetween(LocalDateTime value1, LocalDateTime value2) {
+		public Criteria andCreateTimeBetween(Date value1, Date value2) {
 			addCriterion("create_time between", value1, value2, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
+		public Criteria andCreateTimeNotBetween(Date value1, Date value2) {
 			addCriterion("create_time not between", value1, value2, "createTime");
 			return (Criteria) this;
 		}
@@ -483,7 +489,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMeanEqualTo(Boolean value) {
+		public Criteria andMeanEqualTo(String value) {
 			addCriterion("mean =", value, "mean");
 			return (Criteria) this;
 		}
@@ -543,7 +549,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMaxEqualTo(Boolean value) {
+		public Criteria andMaxEqualTo(String value) {
 			addCriterion("max =", value, "max");
 			return (Criteria) this;
 		}
@@ -603,7 +609,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMinEqualTo(Boolean value) {
+		public Criteria andMinEqualTo(String value) {
 			addCriterion("min =", value, "min");
 			return (Criteria) this;
 		}
@@ -663,7 +669,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andSdEqualTo(Boolean value) {
+		public Criteria andSdEqualTo(String value) {
 			addCriterion("sd =", value, "sd");
 			return (Criteria) this;
 		}
@@ -723,7 +729,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andMedianEqualTo(Boolean value) {
+		public Criteria andMedianEqualTo(String value) {
 			addCriterion("median =", value, "median");
 			return (Criteria) this;
 		}
@@ -783,7 +789,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andQ1EqualTo(Boolean value) {
+		public Criteria andQ1EqualTo(String value) {
 			addCriterion("q1 =", value, "q1");
 			return (Criteria) this;
 		}
@@ -843,7 +849,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andQ3EqualTo(Boolean value) {
+		public Criteria andQ3EqualTo(String value) {
 			addCriterion("q3 =", value, "q3");
 			return (Criteria) this;
 		}
@@ -903,7 +909,7 @@ public class AggregationDatabaseExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andSumEqualTo(Boolean value) {
+		public Criteria andSumEqualTo(String value) {
 			addCriterion("sum =", value, "sum");
 			return (Criteria) this;
 		}

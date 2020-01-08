@@ -68,8 +68,10 @@ public class AggregationService {
             AggregationDatabaseWithBLOBs target = null;
             while ((target = this.jobQueue.poll()) != null) {
                 logger.info("Start to process job #<{}>", target.getId());
-//                startAgg(target);
-                startEfficentAgg(target);
+
+                System.out.print(target.getId());
+                startAgg(target);
+
                 logger.info("Finished one job #<{}>", target.getId());
             }
         }, 10, 20, TimeUnit.SECONDS);
@@ -78,7 +80,6 @@ public class AggregationService {
 
     // todo add version condition into aggregation query
     private void startAgg(AggregationDatabaseWithBLOBs job){
-        System.out.println("start aggregation");
         String time = getAggTime(job.getAggregateTime());
         final String DIR = "aggregationDBLog";
 
@@ -95,7 +96,6 @@ public class AggregationService {
 
         // todo update total
         List<String> patients = new ArrayList<>();
-
         // recover job after break down
         //get finished pids
         String pathname = "/tsdb/output/"+DIR+"/"+job.getDbName()+".txt";
@@ -117,25 +117,21 @@ public class AggregationService {
                 HashSet<String> allPid = new HashSet<>(patientIDs);
                 allPid.removeAll(finishedPid);
                 patients = new ArrayList<>(allPid);
-//                System.out.println(finishedPid.size());
-//                System.out.println(allPid.size());
             }catch (IOException e){
                 e.printStackTrace();
             }
         }else{
             patients = patientIDs;
         }
-
         // update the total number of patients of this job
         aggregationDao.updateTotalnumber(job.getId(),patients.size());
         
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
-
+        
         // get all 6037 columns
         List<String> columns = getColumns();
-
         // get selection condition from 6037 columns, now each file is splited into 9 parts
         List<String> selection = getSelection(columns,job);
         int paraCount = job.getThreads();
@@ -146,7 +142,9 @@ public class AggregationService {
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
             InfluxDB influxDB = generateIdbClient(false);
-            String command = "create database " + job.getDbName();
+
+            String command = "create database " + job.getDbName().replace(" ","_");
+
             influxDB.query(new Query(command));
             influxDB.close();
         }catch (IOException e){
@@ -155,6 +153,7 @@ public class AggregationService {
         }
 
         LocalDateTime start_Time = LocalDateTime.now();
+
         Runnable queryTask = () -> {
             String pid;
             InfluxDB influxDB = generateIdbClient(false);
@@ -170,20 +169,19 @@ public class AggregationService {
 
 
                     //QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
+                    System.out.println(String.format("select first(\"%s\") from \"%s\" where arType='ar'",i11, pid));
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     // only do 7 hours
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
                     String endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
-//                    System.out.println(startTime);
-//                    System.out.println(endTime);
 
-                    // to do the next 7h.
-                    for(int i=0;i<0;i++){
-                        startTime = endTime;
-                        endTime = LocalDateTime.parse(startTime,df).plusHours(7).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
-                    }
+                    System.out.println(startTime);
+                    System.out.println(endTime);
+
                     List<String> queries = new ArrayList<>();
+                    System.out.println(selection.size());
                     for(int count=0;count<selection.size();count++){
+                    	//System.out.println(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName(),pid, pid,endTime,startTime,time));
                         //queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName().replace(" ","_")+"_V"+job.getVersion(),pid, pid,endTime,startTime,time));
 //                        queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<='%s' AND time>='%s' group by time(%s), arType", selection.get(count), "aggdata",pid, pid,endTime,startTime,time));
                         queries.add(String.format("select %s into \"%s\".\"autogen\".\"%s\" from \"%s\" where arType='ar' AND time<'%s' AND time>='%s' group by time(%s), arType", selection.get(count), job.getDbName(),pid, pid,endTime,startTime,time));
@@ -459,19 +457,21 @@ public class AggregationService {
     }
 
     private List<String> getSelection(List<String> columns,AggregationDatabaseWithBLOBs job){
-        List<String> res= new ArrayList<>();
+        System.out.println("getSelection!");
+    	List<String> res= new ArrayList<>();
         StringBuilder onepart = new StringBuilder();
-        int parts = job.getParts();
-        int onePartLength = columns.size()/parts;
-        for(int count=0;count<parts;count++){
-            for(int j=count*onePartLength;j<(count+1)*onePartLength;j++){
+
+        for(int count=0;count<15;count++){
+            for(int j=count*380;j<(count+1)*380;j++){
+
                 //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
                 onepart.append(getAggregations(job,columns.get(j)));
             }
             res.add(onepart.substring(0,onepart.length()-2));
             onepart = new StringBuilder();
         }
-        for(int j=parts*onePartLength;j<columns.size();j++){
+
+        for(int j=15*380;j<columns.size();j++){
             //onepart.append(String.format("max(\"%s\") as max_%s , min(\"%s\") as min_%s,", "max_"+columns.get(j), columns.get(j), "min_"+columns.get(j),columns.get(j)));
             onepart.append(getAggregations(job,columns.get(j)));
         }
@@ -507,44 +507,50 @@ public class AggregationService {
     public List<AggregationDatabase> selectAllAvailableDBs() {
         return aggregationDao.selectAllAvailableDBs();
     }
+    
+    public List<AggregationDatabase> selectAllUsefulDBs(Integer period, Integer origin, Integer duration, String max, String min, String mean, String median,
+    		String std, String fq, String tq, String sum) {
+        return aggregationDao.selectAllUsefulDBs(period, origin, duration, max, min, mean, median, std, fq, tq, sum);
+    }
 
     public boolean completeJobAndInsert(AggregationDatabaseWithBLOBs database) {
-//        String dbname = database.getDbName()+"_V"+database.getVersion();
-//        List<AggregationDatabase> databaseList = aggregationDao.selectByname(dbname);
-//        if(!databaseList.isEmpty()){
-//            AggregationDatabaseWithBLOBs db = new AggregationDatabaseWithBLOBs();
-//            db.setId(databaseList.get(0).getId());
-//            db.setDbName(dbname);
-//            if(database.getMean()){
-//                db.setMean(true);
-//            }
-//            if(database.getSum()){
-//                db.setSum(true);
-//            }
-//            if(database.getMax()){
-//                db.setMax(true);
-//            }
-//            if(database.getMedian()){
-//                db.setMedian(true);
-//            }
-//            if(database.getQ1()){
-//                db.setQ1(true);
-//            }
-//            if(database.getQ3()){
-//                db.setQ3(true);
-//            }
-//            if(database.getSd()){
-//                db.setSd(true);
-//            }
-//            if(database.getMin()){
-//                db.setMin(true);
-//            }
-//            db.setFinished(0);
-//            db.setCreateTime(LocalDateTime.now());
-//            db.setThreads(database.getThreads());
-//            db.setParts(database.getParts());
-//            return aggregationDao.updateAggretaionMethods(db) !=0;
-//        }else {
+
+        System.out.println(database.getDbName() + "  301!");
+    	String dbname = database.getDbName()+"_V"+database.getVersion();
+        List<AggregationDatabase> databaseList = aggregationDao.selectByname(dbname);
+        if(!databaseList.isEmpty()){
+            AggregationDatabaseWithBLOBs db = new AggregationDatabaseWithBLOBs();
+            db.setId(databaseList.get(0).getId());
+            db.setDbName(dbname);
+            if(database.getMean()){
+                db.setMean(true);
+            }
+            if(database.getSum()){
+                db.setSum(true);
+            }
+            if(database.getMax()){
+                db.setMax(true);
+            }
+            if(database.getMedian()){
+                db.setMedian(true);
+            }
+            if(database.getQ1()){
+                db.setQ1(true);
+            }
+            if(database.getQ3()){
+                db.setQ3(true);
+            }
+            if(database.getSd()){
+                db.setSd(true);
+            }
+            if(database.getMin()){
+                db.setMin(true);
+            }
+            db.setFinished(0);
+            db.setCreateTime(LocalDateTime.now());
+            return aggregationDao.updateAggretaionMethods(db) !=0;
+        }else {
+
             database.setVersion(versionDao.getLatestVersion());
             database.setStatus("processing");
             database.setDbName(database.getDbName()+"_V"+database.getVersion());

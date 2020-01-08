@@ -29,6 +29,47 @@ public class AggregationDao {
         criteria.andStatusEqualTo("success");
         return aggregationDatabaseMapper.selectByExample(example);
     }
+    
+    public List<AggregationDatabase> selectAllUsefulDBs(Integer period, Integer origin, Integer duration,
+    		String max, String min, String mean, String median, String std, String fq, String tq, String sum) {
+    	AggregationDatabaseExample example = new AggregationDatabaseExample();
+        AggregationDatabaseExample.Criteria criteria = example.createCriteria();
+        criteria.andStatusEqualTo("success");
+        criteria.andAggregateTimeLessThanOrEqualTo(period);
+        criteria.anddAggregateTimeAliquot(period);
+        if(origin != 0) {
+        	criteria.anddAggregateTimeAliquot(origin);
+        }
+        if(duration != 0) {
+        	criteria.andAggregateTimeLessThanOrEqualTo(duration);
+        }
+        if(max.equals("true")) {
+        	criteria.andMaxEqualTo("1");
+        }
+        if(min.equals("true")) {
+        	criteria.andMinEqualTo("1");
+        }
+        if(mean.equals("true")) {
+        	criteria.andMeanEqualTo("1");
+        }
+        if(median.equals("true")) {
+        	criteria.andMedianEqualTo("1");
+        }
+        if(fq.equals("true")) {
+        	criteria.andQ1EqualTo("1");
+        }
+        if(tq.equals("true")) {
+        	criteria.andQ3EqualTo("1");
+        }
+        if(sum.equals("true")) {
+        	criteria.andSumEqualTo("1");
+        }
+        // If need to export standard deviation, the only databases useful is base data
+        if(std.equals("true")) {
+        	criteria.andDbNameEqualTo("data");
+        }
+        return aggregationDatabaseMapper.selectByExample(example);
+    }
 
     public int setNewDB(AggregationDatabaseWithBLOBs database) {
         return aggregationDatabaseMapper.insert(database);

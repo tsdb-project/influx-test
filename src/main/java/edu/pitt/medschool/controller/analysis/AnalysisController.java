@@ -582,8 +582,10 @@ public class AnalysisController {
     @DeleteMapping("api/export/export/{id}")
     @ResponseBody
     public RestfulResponse deleteExportQuery(@PathVariable(value = "id", required = true) Integer jobId,
-                                             RestfulResponse response) {
-        if (exportService.deleteExportJobById(jobId) == 1) {
+
+            RestfulResponse response) throws IOException {
+        if (exportService.deleteExportJobById(jobId) == 1 && analysisService.deleteFileDir(jobId) == 1) {
+
             response.setCode(1);
             response.setMsg("Successfully deleted job.");
         } else {

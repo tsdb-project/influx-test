@@ -60,6 +60,9 @@ public class ExportQueryBuilder {
     private Instant lastAvailData = Instant.MIN; // Immutable once set
     private Instant queryStartTime = null;
     private Instant queryEndTime = null;
+    
+    //export from which database layer. e.g. "data", null, "one_minute_V1"
+    private String fromDb;
 
     /**
      * Initialize this class (Generate nothing if dts is empty)
@@ -71,7 +74,7 @@ public class ExportQueryBuilder {
      * @param ds            Downsample itself
      * @param needAr        This job is Ar or NoAr
      */
-    public ExportQueryBuilder(Instant startTime, Instant fakeStartTime, List<DataTimeSpanBean> dts, List<DownsampleGroup> v,
+    public ExportQueryBuilder(String fromDb, Instant startTime, Instant fakeStartTime, List<DataTimeSpanBean> dts, List<DownsampleGroup> v,
             List<List<String>> columns, Downsample ds, boolean needAr, String versionCondition) {
         // no available data
         if (dts == null || dts.isEmpty()) {
@@ -84,6 +87,7 @@ public class ExportQueryBuilder {
         this.validTimeSpanIds = new ArrayList<>(this.numDataSegments);
         this.isAr = needAr;
         this.versionCondition = versionCondition;
+        this.fromDb = fromDb;
 
         populateDownsampleGroup(v);
         populateDownsampleData(ds);
@@ -104,6 +108,7 @@ public class ExportQueryBuilder {
         calcOffsetInSeconds(fakeStartTime);
         this.globalTimeLimitWhere = String.format(Template.timeCondition, this.queryStartTime.toString(),
                 this.queryEndTime.toString());
+        System.out.println("start building the export query!");
         buildQuery();
     }
 
@@ -174,8 +179,12 @@ public class ExportQueryBuilder {
 
     // Lookup all in one query, DO NOT lookup by files
     private void buildQuery() {
-        String whereClause = this.artypeWhereClause(this.isAr) + " AND " + this.globalTimeLimitWhere +" AND "+ this.versionCondition;
-
+    	String whereClause = "";
+        if(fromDb.equals("data")) {
+        	whereClause = this.artypeWhereClause(this.isAr) + " AND " + this.globalTimeLimitWhere +" AND "+ this.versionCondition;
+        }else {
+        	whereClause = this.artypeWhereClause(this.isAr) + " AND " + this.globalTimeLimitWhere;
+        }
         if (!this.isDownSampleFirst) {
             String aggrQ = aggregationWhenAggregationFirst(whereClause);
             this.queryString = downsampleWhenAggregationFirst(aggrQ);
@@ -194,6 +203,7 @@ public class ExportQueryBuilder {
         String[] cols = new String[this.numOfDownsampleGroups];
         for (int i = 0; i < this.numOfDownsampleGroups; i++) {
             DownsampleGroup dg = this.downsampleGroups[i];
+            //System.out.println(this.columnNames.get(i));
             cols[i] = populateByAggregationType(this.columnNames.get(i), this.columnNameAliases.get(i), dg, "\"");
         }
         return String.format(Template.basicAggregationInner, String.join(", ", cols), this.pid, locator);
@@ -204,12 +214,12 @@ public class ExportQueryBuilder {
      */
     private String downsampleWhenAggregationFirst(String aggrQuery) {
         StringBuilder cols = new StringBuilder();
-        for (int i = 0; i < this.numOfDownsampleGroups; i++) {
-            String template = formDownsampleFunctionTemplate(this.downsampleGroups[i]);
-            cols.append(String.format(template, this.columnNameAliases.get(i)));
+        for (int i = 0; i < this.numOfDownsampleGroups; i++) {		//downSample functions
+            String template = formDownsampleFunctionTemplate(this.downsampleGroups[i]);	//template: MEAN(%s)
+            cols.append(String.format(template, this.columnNameAliases.get(i)));		//MEAN(ag_label_#)
             cols.append(", ");
         }
-        // A count column
+        // A count column  COUNT(ag_label_#)
         cols.append(String.format(Template.aggregationCount, this.columnNameAliases.get(0)));
         String timeBoud = String.format(Template.timeCondition, this.queryStartTime.toString(), this.queryEndTime.toString());
 
@@ -224,7 +234,17 @@ public class ExportQueryBuilder {
         String[] cols = new String[this.numOfDownsampleGroups + 1];
         for (int i = 0; i < this.numOfDownsampleGroups; i++) {
             DownsampleGroup dg = this.downsampleGroups[i];
-
+            
+            if (!fromDb.equals("data")) {
+        		for(int j = 0; j < this.columnNames.get(i).size(); j++) {
+        			List<String> column = this.columnNames.get(i);
+        			if(column.get(j).indexOf("I") == 0) {
+        				column.set(j, String.format(formDownsampleFunctionInDBTemplate(dg), column.get(j)));
+        			}
+        			System.out.println("after: " + column);
+        		}
+        	}
+            
             // Generate downsample InfluxQLs
             String downsampleTemplate = formDownsampleFunctionTemplate(dg);
             List<String> downsampleOperators = this.columnNames.get(i).stream().map(s -> String.format(downsampleTemplate, s))
@@ -234,7 +254,12 @@ public class ExportQueryBuilder {
             String concated = populateByAggregationType(downsampleOperators, null, dg, "");
             cols[i] = selectQueryWithAlias(concated, this.columnNameAliases.get(i));
         }
-        cols[cols.length - 1] = String.format(Template.aggregationCount, "Time");
+        if (fromDb.equals("data")) {
+        	cols[cols.length - 1] = String.format(Template.aggregationCount, "Time");
+        }
+        else {
+        	cols[cols.length - 1] = String.format(Template.aggregationCount, "max_I1_1");
+        }
 
         return String.format(Template.basicDownsampleOuter, String.join(", ", cols), "\"" + pid + "\"", locator,
                 this.downsampleInterval, this.downsampleOffset);
@@ -250,6 +275,18 @@ public class ExportQueryBuilder {
      */
     private String populateByAggregationType(List<String> aggregateName, String columnAlias, DownsampleGroup dg,
             String delimter) {
+    	if (!fromDb.equals("data")) {
+    		//export job is from a higher database layer.
+    		//when agg, select aggregated columns e.g. max_I1_1
+    		// can be simplified
+    		//HSX
+    		for(int i = 0; i < aggregateName.size(); i++) {
+    			if(aggregateName.get(i).indexOf("I") == 0) {
+    				aggregateName.set(i, String.format(formDownsampleFunctionInDBTemplate(dg), aggregateName.get(i)));
+    			}
+    		}
+    	}
+    	
         switch (dg.getAggregation().toLowerCase()) {
             case "mean":
                 return columnsMeanQuery(aggregateName, columnAlias, delimter);
@@ -286,6 +323,33 @@ public class ExportQueryBuilder {
         }
     }
 
+    /**
+     * MEAN_%s
+     * by HSX
+     */
+    private String formDownsampleFunctionInDBTemplate(DownsampleGroup dg) {
+        switch (dg.getDownsample().toLowerCase()) {
+            case "mean":
+                return "mean_%s";
+            case "median":
+                return "median_%s";
+            case "sum":
+                return "sum_%s";
+            case "stddev":
+                return "std_%s";
+            case "min":
+                return "min_%s";
+            case "max":
+                return "max_%s";
+            case "25":
+                return "p25_%s";
+            case "75":
+                return "p75_%s";
+            default:
+                throw new RuntimeException("Unsupported downsample type: " + dg.getDownsample());
+        }
+    }
+    
     /**
      * Concat the column name list into an add string: ("f1"+"f2") " Could be set as `delimters`
      *

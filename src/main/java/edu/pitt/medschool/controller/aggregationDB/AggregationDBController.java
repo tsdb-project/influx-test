@@ -50,6 +50,21 @@ public class AggregationDBController {
         response.setData(aggregationService.selectAllAvailableDBs());
         return response;
     }
+    
+    
+    // get useful db refer to period, origin, and duration
+    @GetMapping("/getUsefulDBs")
+    @ResponseBody
+    public RestfulResponse getUsefulDBs(@RequestParam String period, @RequestParam String origin, @RequestParam String duration, 
+    		@RequestParam String max, @RequestParam String min, @RequestParam String mean, @RequestParam String median,
+    		@RequestParam String std, @RequestParam String fq, @RequestParam String tq, @RequestParam String sum){
+        RestfulResponse response = new RestfulResponse(1, "");
+        Integer period0 = Integer.valueOf(period);
+        Integer origin0 = Integer.valueOf(origin);
+        Integer duration0 = Integer.valueOf(duration);
+        response.setData(aggregationService.selectAllUsefulDBs(period0, origin0, duration0, max, min, mean, median, std, fq, tq, sum));
+        return response;
+    }
 
 
     // insert a new agg db into aggregation database table

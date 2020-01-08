@@ -88,6 +88,66 @@ public class AnalysisUtil {
         // Cache this object into MySQL if necessary
         return res;
     }
+    
+    /**
+     * Get all the data periods for a patient
+     * @param fromDb 
+     */
+    public static List<DataTimeSpanBean> getPatientAllDataSpan(String fromDb, InfluxDB i, Logger logger, String pid, String versionCondition) {
+        pid = pid.toUpperCase().trim();
+        String uuidSearchQuery = "show tag values from \"" + pid + "\" with key = fileUUID where "+versionCondition;
+        ResultTable[] patientUuids = justQueryData(fromDb, i, true, uuidSearchQuery);
+        // No data for this patient
+        if (patientUuids.length == 0) return new ArrayList<>(0);
+
+        List<Object> uuids = patientUuids[0].getDatalistByColumnName("value");
+        List<DataTimeSpanBean> res = new ArrayList<>(uuids.size());
+        for (Object uuid : uuids) {
+            // Query 4 at the same time to save some requests
+            String template = "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' and "+versionCondition+" ORDER BY time %s LIMIT 1;";
+            template += "SELECT time,Time FROM \"" + pid + "\" WHERE fileUUID = '%s' and "+versionCondition+" ORDER BY time %s LIMIT 1;";
+            template += "show tag values from \"" + pid + "\" with key = arType where fileUUID = '%s' and "+versionCondition+";";
+            template += "SELECT count(Time) FROM \"" + pid + "\" WHERE fileUUID = '%s' and "+versionCondition+";";
+
+            String query = String.format(template, uuid, "ASC", uuid, "DESC", uuid, uuid);
+            logger.info(query);
+            DataTimeSpanBean dts = new DataTimeSpanBean();
+            ResultTable[] table = justQueryData(fromDb, i, true,query);
+
+            Instant start = Instant.parse((CharSequence) table[0].getDataByColAndRow(0, 0)),
+                    end = Instant.parse((CharSequence) table[1].getDataByColAndRow(0, 0));
+            List<Object> arType = table[2].getDatalistByColumnName("value");
+            long count = Math.round((double) table[3].getDataByColAndRow(1, 0)),
+                    timeDelta = end.toEpochMilli() - start.toEpochMilli();
+
+            // Determine Ar/NoAr status
+            if (arType.contains("ar") && arType.contains("noar")) {
+                if (count % 2 != 0) {
+                    String msg = String.format("Ar and NoAr data skewed. ('%s', '%s')", pid, uuid);
+                    logger.error(msg);
+                }
+                dts.setArStat(DataTimeSpanBean.ArStatus.Both);
+                count /= 2;
+            } else if (arType.contains("ar") && !arType.contains("noar")) {
+                dts.setArStat(DataTimeSpanBean.ArStatus.ArOnly);
+            } else if (!arType.contains("ar") && arType.contains("noar")) {
+                dts.setArStat(DataTimeSpanBean.ArStatus.NoArOnly);
+            } else throw new RuntimeException("Ar type fatal error!");
+
+            dts.setEffectiveDataCount(count);
+            dts.setFileUuid((String) uuid);
+            dts.setPid(pid);
+            dts.setStart(start);
+            dts.setEnd(end);
+            dts.setDelta(timeDelta);
+            dts.setEffectiveDataPerSecond(count / (1.0 * timeDelta / 1000));
+
+            res.add(dts);
+        }
+
+        // Cache this object into MySQL if necessary
+        return res;
+    }
 
     /**
      * Calc the total valid available time span for a patient
@@ -120,6 +180,28 @@ public class AnalysisUtil {
         String firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId
                 + "\" where arType = \'" +artype+ "\' and "+versionCondition+"limit 1 offset 30";
         QueryResult recordResult = i.query(new Query(firstRecordTimeQuery, dbName));
+        logger.info(firstRecordTimeQuery);
+        String startTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+        logger.info(startTime);
+        return startTime;
+    }
+    
+    // get the start time eliminate first 30 rows
+    public static String getPatientStartTime(String fromDb, InfluxDB i, Logger logger, String patientId, Boolean ar, String versionCondition){
+        String artype = ar? "ar" : "noar";
+        logger.debug("<" + patientId + "> STARTED PROCESSING ");
+        String firstRecordTimeQuery = "";
+        if (fromDb.equals("data")) {
+        	//export from base database
+        	firstRecordTimeQuery = "select \"I3_1\" from \"" + patientId
+                + "\" where arType = \'" +artype+ "\' and "+versionCondition+"limit 1 offset 30";
+        }
+        else{
+        	//export from higher database
+        	firstRecordTimeQuery = "select \"max_I3_1\" from \"" + patientId
+                    + "\" where arType = \'" +artype+ "\' limit 1 offset 3";
+        }
+        QueryResult recordResult = i.query(new Query(firstRecordTimeQuery, fromDb));
         logger.info(firstRecordTimeQuery);
         String startTime = recordResult.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
         logger.info(startTime);

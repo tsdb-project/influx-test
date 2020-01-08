@@ -78,12 +78,15 @@ $(document).ready(function() {
             data: null,
             render: function(data) {
                 if (data.finished) {
-                    return "<th><button role=\"button\" class=\"btn btn-success btn-sm\" data-toggle=\"modal\" data-target=\"#download-modal\" " +
-                        "data-type=\"download\" data-id = \"" + data.id + "\"><i class=\"zmdi zmdi-download\"></i> Download</button><th>"
+                    var exportBtn = "<th><button role=\"button\" class=\"btn btn-success btn-sm\" data-toggle=\"modal\" data-target=\"#download-modal\" " +
+                    "data-type=\"download\" data-id = \"" + data.id + "\"><i class=\"zmdi zmdi-download\"></i> Download</button><th>";
                 } else {
-                    return "<th><button role=\"button\" class=\"btn btn-info btn-sm\" data-type=\"progress\" data-id=\"" +
-                    data.id + "\"><i class=\"zmdi zmdi-settings zmdi-hc-spin\"></i> Check Progress</button><th>"
+                    var exportBtn = "<th><button role=\"button\" class=\"btn btn-info btn-sm\" data-type=\"progress\" data-id=\"" +
+                    data.id + "\"><i class=\"zmdi zmdi-settings zmdi-hc-spin\"></i> Check Progress</button><th>";
                 }
+            		var deleteBtn = "<th><button role=\"button\" class=\"btn btn-danger btn-sm\" data-toggle=\"modal\" data-target=\"#delete-file-modal\" " +
+            		"data-type=\"delete\" data-id = \"" + data.id + "\"> Delete</button><th>";
+            		return exportBtn + "\t" + deleteBtn;
             }
         }]
     });
@@ -96,6 +99,8 @@ $(document).ready(function() {
             currentPid = event.target.dataset.id;
         }else if (status == 'progress' ) {
             alert("current job is still in progress");
+        }else if (status == 'delete'){
+            currentPid = event.target.dataset.id;
         }
     });
 
@@ -107,6 +112,26 @@ $(document).ready(function() {
     $('#split-version-button').click(function () {
         window.location = '/download?path=archive/output_split_' + currentPid + '.zip&id=' + currentPid;
         $('#download-modal').modal('hide');
+    });
+    
+    $('#delete-file-button').click(function (){
+    	var form = {
+                "id": currentPid,
+            };
+        $.ajax({
+            url: "/api/export/export/" + currentPid,
+            type: 'delete',
+//            data: JSON.stringify(form),
+//            contentType: "application/json",
+//            dataType: 'json',
+            success: function () {
+            	jobTable.ajax.reload();
+            },
+            error: function () {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Failed to delete this job.');
+            }
+        });        
     });
 
     setInterval( function () {
