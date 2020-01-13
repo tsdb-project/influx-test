@@ -5,6 +5,8 @@ import edu.pitt.medschool.framework.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -18,7 +20,7 @@ public class AutoImportService {
 
     public void initImport(){
         System.out.println("init autoImport");
-        cronJob(0,0,0,FILETOIMPORT);
+        cronJob(12,0,0,FILETOIMPORT);
 
     }
 
@@ -31,6 +33,7 @@ public class AutoImportService {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
+                System.out.println("start auto at "+ LocalDateTime.now());
                 if(! Util.filesInFolder(dir , "csv").isEmpty() && ! Util.filesInFolder(dir,"txt").isEmpty()){
                     List<FileBean> csvs = Util.filesInFolder(dir , "csv");
                     List<FileBean> txts = Util.filesInFolder(dir,"txt");
@@ -47,7 +50,8 @@ public class AutoImportService {
                     for (int i=0;i<importList.size();i++){
                         path[i] = importList.get(i).getDirectory()+importList.get(i).getName();
                     }
-                    importCsvService.AddArrayFiles(path);
+                    System.out.println("start import at "+ LocalDateTime.now());
+//                    importCsvService.AddArrayFiles(path);
                 }
             }
         }, cal.getTime(), 24 * 60 * 60 * 1000);
