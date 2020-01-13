@@ -20,7 +20,7 @@ public class AutoImportService {
 
     public void initImport(){
         System.out.println("init autoImport");
-        cronJob(12,0,0,FILETOIMPORT);
+        cronJob(21,0,0,FILETOIMPORT);
 
     }
 
