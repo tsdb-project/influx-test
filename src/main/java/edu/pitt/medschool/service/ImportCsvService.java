@@ -259,7 +259,7 @@ public class ImportCsvService {
      * @param paths List of files
      */
     public void AddArrayFiles(String[] paths) {
-
+        System.out.println("in add function "+ LocalDateTime.now());
         if (processingSet.isEmpty()) {
             newBatch();
         }
@@ -267,6 +267,7 @@ public class ImportCsvService {
             System.out.println(aPath);
             this.internalAddOne(aPath, true);
         }
+        System.out.println("add one finished "+ LocalDateTime.now());
         this.startImport();
     }
 

@@ -33,7 +33,6 @@ public class AutoImportService {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                System.out.println("start auto at "+ LocalDateTime.now());
                 if(! Util.filesInFolder(dir , "csv").isEmpty() && ! Util.filesInFolder(dir,"txt").isEmpty()){
                     List<FileBean> csvs = Util.filesInFolder(dir , "csv");
                     List<FileBean> txts = Util.filesInFolder(dir,"txt");
@@ -50,8 +49,7 @@ public class AutoImportService {
                     for (int i=0;i<importList.size();i++){
                         path[i] = importList.get(i).getDirectory()+importList.get(i).getName();
                     }
-                    System.out.println("start import at "+ LocalDateTime.now());
-//                    importCsvService.AddArrayFiles(path);
+                    importCsvService.AddArrayFiles(path);
                 }
             }
         }, cal.getTime(), 24 * 60 * 60 * 1000);
