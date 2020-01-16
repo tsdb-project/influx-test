@@ -70,7 +70,7 @@ public class AggregationService {
     private final String DBNAME_15M = "fifteen_minute_summary_V";
     private final String DBNAME_30M = "thirty_minute_summary_V";
     private final String DBNAME_10M = "ten_minute_summary_V";
-    private final int MAXBATCH = 10;
+    private final int MAXBATCH = 7;
     private final DecimalFormat DIGIT = new   java.text.DecimalFormat("#.00");
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
