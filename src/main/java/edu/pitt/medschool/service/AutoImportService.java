@@ -3,7 +3,10 @@ package edu.pitt.medschool.service;
 import edu.pitt.medschool.framework.util.FileBean;
 import edu.pitt.medschool.framework.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -11,20 +14,21 @@ public class AutoImportService {
 
     @Autowired
     ImportCsvService importCsvService;
+    @Value("${FILETOIMPORT}")
+    String FILETOIMPORT;
 
 
     public void initImport(){
-        String dir = "D:/fileFromWin";
         System.out.println("init autoImport");
-        cronJob(0,0,0,dir);
+        cronJob(21,0,0,FILETOIMPORT);
 
     }
 
-    public void cronJob(int shi, int fen, int miao, String dir) {
+    public void cronJob(int hour, int min, int sec, String dir) {
         Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, shi);
-        cal.set(Calendar.MINUTE, fen);
-        cal.set(Calendar.SECOND, miao);
+        cal.set(Calendar.HOUR_OF_DAY, hour);
+        cal.set(Calendar.MINUTE, min);
+        cal.set(Calendar.SECOND, sec);
 
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {

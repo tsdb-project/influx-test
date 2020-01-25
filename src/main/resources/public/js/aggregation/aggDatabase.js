@@ -69,18 +69,18 @@ $(document).ready(function() {
     var patientList = [];
     var patientsFinalList = null;
 
-    var aggMethod = {
-        Max:false,
-        Min:false,
-        Mean:false,
-        Median:false,
-        Std:false,
-        FQ:false,
-        TQ:false,
-        Sum:false
-    };
-    var aggFinalMethod = null
-    ;
+    // var aggMethod = {
+    //     Max:false,
+    //     Min:false,
+    //     Mean:false,
+    //     Median:false,
+    //     Std:false,
+    //     FQ:false,
+    //     TQ:false,
+    //     Sum:false
+    // };
+    // var aggFinalMethod = null
+    // ;
 
     /*
     *  select columns modal
@@ -237,214 +237,214 @@ $(document).ready(function() {
     //     });
     // });
 
-    var columnsList = [];
-    var columnsFinalList = null;
-    var columnsFinal = $('#columnsInGroup');
+    // var columnsList = [];
+    // var columnsFinalList = null;
+    // var columnsFinal = $('#columnsInGroup');
 
-    $("#addButton").click(function() {
-        columnsList = [];
-
-        if ($("#measure").val().length == 0) {
-            notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
-                'Please select at least one option from each\n category to form a valid column group.');
-            return;
-        }
-
-        $("#measure :selected").each(function(i, sel) {
-            columnsList.push($(sel).text());
-        });
-
-        columnsFinal.empty();
-        columnsList.forEach(function(e) {
-            columnsFinal.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
-        });
-    });
-
-    $("#saveColumns").click(function() {
-        notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'column list Saved.');
-      columnsFinalList = columnsList;
-    });
+    // $("#addButton").click(function() {
+    //     columnsList = [];
+    //
+    //     if ($("#measure").val().length == 0) {
+    //         notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+    //             'Please select at least one option from each\n category to form a valid column group.');
+    //         return;
+    //     }
+    //
+    //     $("#measure :selected").each(function(i, sel) {
+    //         columnsList.push($(sel).text());
+    //     });
+    //
+    //     columnsFinal.empty();
+    //     columnsList.forEach(function(e) {
+    //         columnsFinal.append('<option value="' + e + '">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + e + '</option>');
+    //     });
+    // });
+    //
+    // $("#saveColumns").click(function() {
+    //     notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'column list Saved.');
+    //   columnsFinalList = columnsList;
+    // });
 
     /*
     * aggregation methods
     * */
 
-    var maxBtn = $('#MaxBtn');
-    var minBtn = $('#MinBtn');
-    var meanBtn = $('#MeanBtn');
-    var medianBtn = $('#MedianBtn');
-    var stdBtn = $('#StdBtn');
-    var fqBtn = $('#FQBtn');
-    var tqBtn = $('#TQBtn');
-    var sumBtn = $('#SumBtn');
-
-    $('#agg-method-modal').on('show.bs.modal', function(event) {
-
-        if(aggMethod.Max){
-            maxBtn.removeClass("btn-light");
-            maxBtn.addClass("btn-primary");
-        }else{
-            maxBtn.addClass("btn-light");
-            maxBtn.removeClass("btn-primary");
-        }
-
-        if(aggMethod.Min){
-            minBtn.removeClass("btn-light");
-            minBtn.addClass("btn-primary");
-        }else{
-            minBtn.addClass("btn-light");
-            minBtn.removeClass("btn-primary");
-        }
-
-        if(aggMethod.Mean){
-            meanBtn.removeClass("btn-light");
-            meanBtn.addClass("btn-primary");
-        }else{
-            meanBtn.addClass("btn-light");
-            meanBtn.removeClass("btn-primary");
-        }
-
-        if(aggMethod.Median){
-            medianBtn.removeClass("btn-light");
-            medianBtn.addClass("btn-primary");
-        }else{
-            medianBtn.addClass("btn-light");
-            medianBtn.removeClass("btn-primary");
-        }
-
-        if(aggMethod.Std){
-            stdBtn.removeClass("btn-light");
-            stdBtn.addClass("btn-primary");
-        }else{
-            stdBtn.addClass("btn-light");
-            stdBtn.removeClass("btn-primary");
-        }
-
-        if(aggMethod.FQ){
-            fqBtn.removeClass("btn-light");
-            fqBtn.addClass("btn-primary");
-        }else{
-            fqBtn.addClass("btn-light");
-            fqBtn.removeClass("btn-primary");
-        }
-
-        if(aggMethod.TQ){
-            tqBtn.removeClass("btn-light");
-            tqBtn.addClass("btn-primary");
-        }else{
-            tqBtn.addClass("btn-light");
-            tqBtn.removeClass("btn-primary");
-        }
-
-        if(aggMethod.Sum){
-            sumBtn.removeClass("btn-light");
-            sumBtn.addClass("btn-primary");
-        }else{
-            sumBtn.addClass("btn-light");
-            sumBtn.removeClass("btn-primary");
-        }
-    });
-
-    maxBtn.click(function () {
-        if(! aggMethod.Max){
-            aggMethod.Max = true;
-            maxBtn.removeClass("btn-light");
-            maxBtn.addClass("btn-primary");
-        }else{
-            aggMethod.Max = false;
-            maxBtn.addClass("btn-light");
-            maxBtn.removeClass("btn-primary");
-        }
-    });
-
-    minBtn.click(function () {
-        if(! aggMethod.Min){
-            aggMethod.Min = true;
-            minBtn.removeClass("btn-light");
-            minBtn.addClass("btn-primary");
-        }else{
-            aggMethod.Min = false;
-            minBtn.addClass("btn-light");
-            minBtn.removeClass("btn-primary");
-        }
-    });
-
-    meanBtn.click(function () {
-        if(! aggMethod.Mean){
-            aggMethod.Mean = true;
-            meanBtn.removeClass("btn-light");
-            meanBtn.addClass("btn-primary");
-        }else{
-            aggMethod.Mean = false;
-            meanBtn.addClass("btn-light");
-            meanBtn.removeClass("btn-primary");
-        }
-    });
-
-    medianBtn.click(function () {
-        if(! aggMethod.Median){
-            aggMethod.Median = true;
-            medianBtn.removeClass("btn-light");
-            medianBtn.addClass("btn-primary");
-        }else{
-            aggMethod.Median = false;
-            medianBtn.addClass("btn-light");
-            medianBtn.removeClass("btn-primary");
-        }
-    });
-
-    stdBtn.click(function () {
-        if(! aggMethod.Std){
-            aggMethod.Std = true;
-            stdBtn.removeClass("btn-light");
-            stdBtn.addClass("btn-primary");
-        }else{
-            aggMethod.Std = false;
-            stdBtn.addClass("btn-light");
-            stdBtn.removeClass("btn-primary");
-        }
-    });
-
-    fqBtn.click(function () {
-        if(! aggMethod.FQ){
-            aggMethod.FQ = true;
-            fqBtn.removeClass("btn-light");
-            fqBtn.addClass("btn-primary");
-        }else{
-            aggMethod.FQ = false;
-            fqBtn.addClass("btn-light");
-            fqBtn.removeClass("btn-primary");
-        }
-    });
-
-    tqBtn.click(function () {
-        if(! aggMethod.TQ){
-            aggMethod.TQ = true;
-            tqBtn.removeClass("btn-light");
-            tqBtn.addClass("btn-primary");
-        }else{
-            aggMethod.TQ = false;
-            tqBtn.addClass("btn-light");
-            tqBtn.removeClass("btn-primary");
-        }
-    });
-
-    sumBtn.click(function () {
-        if(! aggMethod.Sum){
-            aggMethod.Sum = true;
-            sumBtn.removeClass("btn-light");
-            sumBtn.addClass("btn-primary");
-        }else{
-            aggMethod.Sum = false;
-            sumBtn.addClass("btn-light");
-            sumBtn.removeClass("btn-primary");
-        }
-    });
-
-    $('#saveAggMethod').click(function () {
-        notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'aggregation methods Saved.');
-        aggFinalMethod = aggMethod;
-    });
+    // var maxBtn = $('#MaxBtn');
+    // var minBtn = $('#MinBtn');
+    // var meanBtn = $('#MeanBtn');
+    // var medianBtn = $('#MedianBtn');
+    // var stdBtn = $('#StdBtn');
+    // var fqBtn = $('#FQBtn');
+    // var tqBtn = $('#TQBtn');
+    // var sumBtn = $('#SumBtn');
+    //
+    // $('#agg-method-modal').on('show.bs.modal', function(event) {
+    //
+    //     if(aggMethod.Max){
+    //         maxBtn.removeClass("btn-light");
+    //         maxBtn.addClass("btn-primary");
+    //     }else{
+    //         maxBtn.addClass("btn-light");
+    //         maxBtn.removeClass("btn-primary");
+    //     }
+    //
+    //     if(aggMethod.Min){
+    //         minBtn.removeClass("btn-light");
+    //         minBtn.addClass("btn-primary");
+    //     }else{
+    //         minBtn.addClass("btn-light");
+    //         minBtn.removeClass("btn-primary");
+    //     }
+    //
+    //     if(aggMethod.Mean){
+    //         meanBtn.removeClass("btn-light");
+    //         meanBtn.addClass("btn-primary");
+    //     }else{
+    //         meanBtn.addClass("btn-light");
+    //         meanBtn.removeClass("btn-primary");
+    //     }
+    //
+    //     if(aggMethod.Median){
+    //         medianBtn.removeClass("btn-light");
+    //         medianBtn.addClass("btn-primary");
+    //     }else{
+    //         medianBtn.addClass("btn-light");
+    //         medianBtn.removeClass("btn-primary");
+    //     }
+    //
+    //     if(aggMethod.Std){
+    //         stdBtn.removeClass("btn-light");
+    //         stdBtn.addClass("btn-primary");
+    //     }else{
+    //         stdBtn.addClass("btn-light");
+    //         stdBtn.removeClass("btn-primary");
+    //     }
+    //
+    //     if(aggMethod.FQ){
+    //         fqBtn.removeClass("btn-light");
+    //         fqBtn.addClass("btn-primary");
+    //     }else{
+    //         fqBtn.addClass("btn-light");
+    //         fqBtn.removeClass("btn-primary");
+    //     }
+    //
+    //     if(aggMethod.TQ){
+    //         tqBtn.removeClass("btn-light");
+    //         tqBtn.addClass("btn-primary");
+    //     }else{
+    //         tqBtn.addClass("btn-light");
+    //         tqBtn.removeClass("btn-primary");
+    //     }
+    //
+    //     if(aggMethod.Sum){
+    //         sumBtn.removeClass("btn-light");
+    //         sumBtn.addClass("btn-primary");
+    //     }else{
+    //         sumBtn.addClass("btn-light");
+    //         sumBtn.removeClass("btn-primary");
+    //     }
+    // });
+    //
+    // maxBtn.click(function () {
+    //     if(! aggMethod.Max){
+    //         aggMethod.Max = true;
+    //         maxBtn.removeClass("btn-light");
+    //         maxBtn.addClass("btn-primary");
+    //     }else{
+    //         aggMethod.Max = false;
+    //         maxBtn.addClass("btn-light");
+    //         maxBtn.removeClass("btn-primary");
+    //     }
+    // });
+    //
+    // minBtn.click(function () {
+    //     if(! aggMethod.Min){
+    //         aggMethod.Min = true;
+    //         minBtn.removeClass("btn-light");
+    //         minBtn.addClass("btn-primary");
+    //     }else{
+    //         aggMethod.Min = false;
+    //         minBtn.addClass("btn-light");
+    //         minBtn.removeClass("btn-primary");
+    //     }
+    // });
+    //
+    // meanBtn.click(function () {
+    //     if(! aggMethod.Mean){
+    //         aggMethod.Mean = true;
+    //         meanBtn.removeClass("btn-light");
+    //         meanBtn.addClass("btn-primary");
+    //     }else{
+    //         aggMethod.Mean = false;
+    //         meanBtn.addClass("btn-light");
+    //         meanBtn.removeClass("btn-primary");
+    //     }
+    // });
+    //
+    // medianBtn.click(function () {
+    //     if(! aggMethod.Median){
+    //         aggMethod.Median = true;
+    //         medianBtn.removeClass("btn-light");
+    //         medianBtn.addClass("btn-primary");
+    //     }else{
+    //         aggMethod.Median = false;
+    //         medianBtn.addClass("btn-light");
+    //         medianBtn.removeClass("btn-primary");
+    //     }
+    // });
+    //
+    // stdBtn.click(function () {
+    //     if(! aggMethod.Std){
+    //         aggMethod.Std = true;
+    //         stdBtn.removeClass("btn-light");
+    //         stdBtn.addClass("btn-primary");
+    //     }else{
+    //         aggMethod.Std = false;
+    //         stdBtn.addClass("btn-light");
+    //         stdBtn.removeClass("btn-primary");
+    //     }
+    // });
+    //
+    // fqBtn.click(function () {
+    //     if(! aggMethod.FQ){
+    //         aggMethod.FQ = true;
+    //         fqBtn.removeClass("btn-light");
+    //         fqBtn.addClass("btn-primary");
+    //     }else{
+    //         aggMethod.FQ = false;
+    //         fqBtn.addClass("btn-light");
+    //         fqBtn.removeClass("btn-primary");
+    //     }
+    // });
+    //
+    // tqBtn.click(function () {
+    //     if(! aggMethod.TQ){
+    //         aggMethod.TQ = true;
+    //         tqBtn.removeClass("btn-light");
+    //         tqBtn.addClass("btn-primary");
+    //     }else{
+    //         aggMethod.TQ = false;
+    //         tqBtn.addClass("btn-light");
+    //         tqBtn.removeClass("btn-primary");
+    //     }
+    // });
+    //
+    // sumBtn.click(function () {
+    //     if(! aggMethod.Sum){
+    //         aggMethod.Sum = true;
+    //         sumBtn.removeClass("btn-light");
+    //         sumBtn.addClass("btn-primary");
+    //     }else{
+    //         aggMethod.Sum = false;
+    //         sumBtn.addClass("btn-light");
+    //         sumBtn.removeClass("btn-primary");
+    //     }
+    // });
+    //
+    // $('#saveAggMethod').click(function () {
+    //     notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'aggregation methods Saved.');
+    //     aggFinalMethod = aggMethod;
+    // });
 
 
     $.fn.dataTable.moment('M/D/YYYY, hh:mm:ss a');
@@ -459,66 +459,23 @@ $(document).ready(function() {
         columns : [ {
             data : 'id'
         }, {
-            data : 'dbName'
-        }, {
-            data : null,
-            render : function(data) {
-                var time = data.aggregateTime;
-                var string = "";
-                var h = 3600;
-                var m = 60;
-                if(time % h==0){
-                    return time/h+"h";
-                }else {
-                    if(Math.floor(time / h ) > 0){
-                        string += Math.floor(time / h ) + "h"
-                    }
-                    time %= h;
-
-                }
-                if(time % m==0){
-                    return time/m+"m";
-                }else{
-                    if(Math.floor(time / m ) > 0){
-                        string += Math.floor(time / m ) + "m"
-                    }
-                    time %= m;
-                }
-                string += time + "s";
-
-                return string;
-            }
-        }, {
-            data : null,
-            render : function(data) {
-                string = "";
-                if (data.max){string += "Max "}
-                if (data.min){string += "Min "}
-                if (data.mean){string += "Mean "}
-                if (data.median){string += "Median "}
-                if (data.sd){string += "Std "}
-                if (data.q1){string += "25%ile "}
-                if (data.q3){string += "75%ile "}
-                if (data.sum){string += "Sum"}
-                return string;
-            }
-        },{
             data : null,
             render : function(data) {
                 return data.artype ? "AR" : "NOAR";
             }
-        }, {
+        },{
+            data : 'version'
+        },{
+            data : 'nday'
+        },{
             data : null,
             render : function(data) {
                 return localeDateString(data.createTime)
             }
         }, {
             data : 'timeCost'
-        },{
-            data : 'threads'
+
         }, {
-            data : 'parts'
-        },{
             data : null,
             render : function(data, type, row, meta) {
                 html = '<div class="btn-demo">';
@@ -526,28 +483,99 @@ $(document).ready(function() {
                 html += '</div>';
                 return html
             }
-        },{
-            data : null,
-            render : function(data, type, row, meta) {
-                html = '<div class="btn-demo">';
-                if (data.autoUpdate) {
-                    html += '<button class="btn btn-light btn-sm" data-toggle="modal" data-target="#toggle-disable-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-block"></i> Disable</button>'
-                } else {
-                    html += '<button class="btn btn-light btn-sm" data-toggle="modal" data-target="#toggle-enable-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-arrow-right"></i> Enable</button>'
-                }
-                html += '</div>';
-                return html
-            }
-        },{
-            data : null,
-            render : function(data, type, row, meta) {
-                html = '<div class="btn-demo">';
-                html += '<button class="btn btn-light btn-sm integrityCheckBtn"  data-row="' + meta.row + '"><i class="zmdi zmdi-arrow-right"></i> Check</button>';
-                html += '</div>';
-                return html
-            }
-        }
-        ]
+        }]
+        // columns : [ {
+        //     data : 'id'
+        // }, {
+        //     data : 'dbName'
+        // }, {
+        //     data : null,
+        //     render : function(data) {
+        //         var time = data.aggregateTime;
+        //         var string = "";
+        //         var h = 3600;
+        //         var m = 60;
+        //         if(time % h==0){
+        //             return time/h+"h";
+        //         }else {
+        //             if(Math.floor(time / h ) > 0){
+        //                 string += Math.floor(time / h ) + "h"
+        //             }
+        //             time %= h;
+        //
+        //         }
+        //         if(time % m==0){
+        //             return time/m+"m";
+        //         }else{
+        //             if(Math.floor(time / m ) > 0){
+        //                 string += Math.floor(time / m ) + "m"
+        //             }
+        //             time %= m;
+        //         }
+        //         string += time + "s";
+        //
+        //         return string;
+        //     }
+        // }, {
+        //     data : null,
+        //     render : function(data) {
+        //         string = "";
+        //         if (data.max){string += "Max "}
+        //         if (data.min){string += "Min "}
+        //         if (data.mean){string += "Mean "}
+        //         if (data.median){string += "Median "}
+        //         if (data.sd){string += "Std "}
+        //         if (data.q1){string += "25%ile "}
+        //         if (data.q3){string += "75%ile "}
+        //         if (data.sum){string += "Sum"}
+        //         return string;
+        //     }
+        // },{
+        //     data : null,
+        //     render : function(data) {
+        //         return data.artype ? "AR" : "NOAR";
+        //     }
+        // }, {
+        //     data : null,
+        //     render : function(data) {
+        //         return localeDateString(data.createTime)
+        //     }
+        // }, {
+        //     data : 'timeCost'
+        // },{
+        //     data : 'threads'
+        // }, {
+        //     data : 'parts'
+        // },{
+        //     data : null,
+        //     render : function(data, type, row, meta) {
+        //         html = '<div class="btn-demo">';
+        //         html += '<button class="btn btn-info btn-sm" data-toggle="modal"  id = "showDetaildBtn" data-target="#DB-details-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i> Details</button>'
+        //         html += '</div>';
+        //         return html
+        //     }
+        // },{
+        //     data : null,
+        //     render : function(data, type, row, meta) {
+        //         html = '<div class="btn-demo">';
+        //         if (data.autoUpdate) {
+        //             html += '<button class="btn btn-light btn-sm" data-toggle="modal" data-target="#toggle-disable-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-block"></i> Disable</button>'
+        //         } else {
+        //             html += '<button class="btn btn-light btn-sm" data-toggle="modal" data-target="#toggle-enable-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-arrow-right"></i> Enable</button>'
+        //         }
+        //         html += '</div>';
+        //         return html
+        //     }
+        // },{
+        //     data : null,
+        //     render : function(data, type, row, meta) {
+        //         html = '<div class="btn-demo">';
+        //         html += '<button class="btn btn-light btn-sm integrityCheckBtn"  data-row="' + meta.row + '"><i class="zmdi zmdi-arrow-right"></i> Check</button>';
+        //         html += '</div>';
+        //         return html
+        //     }
+        // }
+        // ]
     });
 
     /*
@@ -593,25 +621,25 @@ $(document).ready(function() {
     * Integrity check
     * */
 
-    $(".integrityCheckBtn").click(function() {
-        var id = $(this).attr('data-row');
-        console.log(databaseData[id]);
-        $.ajax({
-            'url': "/aggregation/checkIntegrity/",
-            'type': 'POST',
-            'data': JSON.stringify(databaseData[id]),
-            'contentType': "application/json",
-            dataType: 'json',
-            success: function (response) {
-                notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
-                    'Integrity check complete');
-            },
-            error: function () {
-                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
-                    'Integrity check Failed.');
-            }
-        });
-    });
+    // $(".integrityCheckBtn").click(function() {
+    //     var id = $(this).attr('data-row');
+    //     console.log(databaseData[id]);
+    //     $.ajax({
+    //         'url': "/aggregation/checkIntegrity/",
+    //         'type': 'POST',
+    //         'data': JSON.stringify(databaseData[id]),
+    //         'contentType': "application/json",
+    //         dataType: 'json',
+    //         success: function (response) {
+    //             notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
+    //                 'Integrity check complete');
+    //         },
+    //         error: function () {
+    //             notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+    //                 'Integrity check Failed.');
+    //         }
+    //     });
+    // });
 
     /*
     *  update patient modal
@@ -667,29 +695,31 @@ $(document).ready(function() {
     $("#createButton").click(function () {
         $("#createButton").attr('disabled', 'disabled');
         var newDB = {
-            dbName: $("#alias").val(),
-            aggregateTime: $('#period').val() * $('#period_unit').val(),
+            // dbName: $("#alias").val(),
+            // aggregateTime: $('#period').val() * $('#period_unit').val(),
             artype:$('#ar label.active input').val() == "true",
-            columns:columnsFinalList == null ? null: columnsFinalList.toString(),
+            // columns:columnsFinalList == null ? null: columnsFinalList.toString(),
             pidList: patientsFinalList == null ? null: patientsFinalList.toString(),
-            max:aggFinalMethod == null ? true : aggFinalMethod.Max,
-            min:aggFinalMethod == null ? true : aggFinalMethod.Min,
-            mean:aggFinalMethod == null ? true : aggFinalMethod.Mean,
-            median:aggFinalMethod == null ? true : aggFinalMethod.Median,
-            sd:aggFinalMethod == null ? true : aggFinalMethod.Std,
-            q1:aggFinalMethod == null ? true : aggFinalMethod.FQ,
-            q3:aggFinalMethod == null ? true : aggFinalMethod.TQ,
-            sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
-            fromDb:$("#databases").val(),
-            threads: 14,
-            parts: 15,
-            total:1,
-            finished:0,
-            autoUpdate:true
+
+            // max:aggFinalMethod == null ? true : aggFinalMethod.Max,
+            // min:aggFinalMethod == null ? true : aggFinalMethod.Min,
+            // mean:aggFinalMethod == null ? true : aggFinalMethod.Mean,
+            // median:aggFinalMethod == null ? true : aggFinalMethod.Median,
+            // sd:aggFinalMethod == null ? true : aggFinalMethod.Std,
+            // q1:aggFinalMethod == null ? true : aggFinalMethod.FQ,
+            // q3:aggFinalMethod == null ? true : aggFinalMethod.TQ,
+            // sum:aggFinalMethod == null ? true : aggFinalMethod.Sum,
+            // fromDb:$("#databases").val() == null? "data" : $("#databases").val(),
+            nday: $('#nday').val(),
+            // threads: 10,
+            // parts: 15,
+            // total:1,
+            // finished:0,
+            // autoUpdate:true
         };
         console.log(newDB);
         $.ajax({
-            url: "/aggregation/newDB/",
+            url: "/aggregation/createDB/",
             type: 'post',
             data: JSON.stringify(newDB),
             contentType: "application/json",
@@ -786,7 +816,7 @@ $(document).ready(function() {
                             color = " bg-danger";
                         }
                         progressHtml += "<div class=\"progress\"><div class=\"progress-bar" + color + "\" role=\"progressbar\" style=\"width: " + progress + "%\" aria-valuenow=\"" + progress
-                            + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.data[i].dbName + ' - ' + progress + "%</small><br><br>";
+                            + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div><small class=\"card-subtitle\">" + data.data[i].nday + '_V' + data.data[i].version + ' - ' + progress + "%</small><br><br>";
                     }
 
                     var totalPercent = (finishedOverall / totalOverall * 100).toFixed(2);

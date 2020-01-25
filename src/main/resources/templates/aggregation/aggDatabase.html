@@ -43,14 +43,14 @@
                         <div class="row">
                             <div class="col-sm-12 col-md-12">
                                 <div class="row">
-                                    <div class="col-sm-4 col-md-4">
-                                        <label>Alias</label>
-                                        <div class="input-group mb-3">
-                                            <input type="text" class="form-control" id="alias"
-                                                   placeholder="Input the name of the database" required>
-                                            <i class="form-group__bar"></i>
-                                        </div>
-                                    </div>
+<!--                                    <div class="col-sm-4 col-md-4">-->
+<!--                                        <label>Alias</label>-->
+<!--                                        <div class="input-group mb-3">-->
+<!--                                            <input type="text" class="form-control" id="alias"-->
+<!--                                                   placeholder="Input the name of the database" required>-->
+<!--                                            <i class="form-group__bar"></i>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
                                     <div class="col-sm-4 col-md-4">
                                         <label>Using AR / Non-AR data</label>
                                         <div class="btn-group btn-group-toggle input-group mb-2" data-toggle="buttons"
@@ -65,85 +65,113 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="col-sm-4 col-md-4">
-                                        <label>Downsample Interval</label>
-                                        <div class="input-group mb-3">
-                                            <input type="number" min="0" step="1" class="form-control" id="period"
-                                                   placeholder="Leave empty for no downsampling">
-                                            <div class="input-group-append">
-                                                <select class="select2" data-placeholder="Time Unit" id="period_unit"
-                                                        data-minimum-results-for-search="Infinity" required>
-                                                    <option disabled="disabled" selected="selected" value="">Select Time
-                                                        Unit
-                                                    </option>
-                                                    <option value="1">Seconds</option>
-                                                    <option value="60">Minutes</option>
-                                                    <option value="3600">Hours</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-12 col-md-12">
-                                <div class="row">
-                                    <div class="col-sm-4 col-md-4">
-                                        <div class="form-group">
-                                            <label>Aggregation Method </label>
-                                            <label>&nbsp</label>
-                                            <input type="button" class="btn btn-primary btn-lg btn-block"
-                                                   data-toggle="modal"
-                                                   data-target="#agg-method-modal" id="aggMethodButtton"
-                                                   value="Aggregation Method" required>
-                                        </div>
-                                    </div>
+<!--                                    <div class="col-sm-4 col-md-4">-->
+<!--                                        <label>Downsample Interval</label>-->
+<!--                                        <div class="input-group mb-3">-->
+<!--                                            <input type="number" min="0" step="1" class="form-control" id="period"-->
+<!--                                                   placeholder="Leave empty for no downsampling">-->
+<!--                                            <div class="input-group-append">-->
+<!--                                                <select class="select2" data-placeholder="Time Unit" id="period_unit"-->
+<!--                                                        data-minimum-results-for-search="Infinity" required>-->
+<!--                                                    <option disabled="disabled" selected="selected" value="">Select Time-->
+<!--                                                        Unit-->
+<!--                                                    </option>-->
+<!--                                                    <option value="1">Seconds</option>-->
+<!--                                                    <option value="60">Minutes</option>-->
+<!--                                                    <option value="3600">Hours</option>-->
+<!--                                                </select>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
                                     <div class="col-sm-4 col-md-4">
                                         <label>Update patients list</label>
-                                        <input type="button" class="btn btn-primary btn-lg btn-block"
-                                               data-toggle="modal"
-                                               data-target="#upload-patient-modal" id="patientListButton"
-                                               value="Update">
+                                        <div class="input-group mb-3">
+
+                                            <input type="button" class="btn btn-primary btn-lg btn-block"
+                                                   data-toggle="modal"
+                                                   data-target="#upload-patient-modal" id="patientListButton"
+                                                   value="Update">
+                                        </div>
                                     </div>
                                     <div class="col-sm-4 col-md-4">
-                                        <label>Choose features</label>
-                                        <input type="button" class="btn btn-primary btn-lg btn-block"
-                                               data-toggle="modal"
-                                               data-target="#edit-group-modal" id="columnButton"
-                                               value="Choose">
+                                        <label>The nth day data</label>
+                                        <div class="input-group mb-3">
+                                            <input type="number" min="0" step="1" class="form-control" id="nday"
+                                                   placeholder="indicate which day you want to aggregate" required>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+<!--                        <div class="row">-->
+<!--                            <div class="col-sm-12 col-md-12">-->
+<!--                                <div class="row">-->
+<!--                                    <div class="col-sm-4 col-md-4">-->
+                                        <!--                                        <div class="form-group">-->
+                                        <!--                                            <label>Aggregation Method </label>-->
+                                        <!--                                            <label>&nbsp</label>-->
+                                        <!--                                            <input type="button" class="btn btn-primary btn-lg btn-block"-->
+                                        <!--                                                   data-toggle="modal"-->
+                                        <!--                                                   data-target="#agg-method-modal" id="aggMethodButtton"-->
+                                        <!--                                                   value="Aggregation Method" required>-->
+                                        <!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="col-sm-4 col-md-4">-->
+<!--                                        <label>Update patients list</label>-->
+<!--                                        <div class="input-group mb-3">-->
+<!--                                            <input type="button" class="btn btn-primary btn-lg btn-block"-->
+<!--                                                   data-toggle="modal"-->
+<!--                                                   data-target="#upload-patient-modal" id="patientListButton"-->
+<!--                                                   value="Update">-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+                                    <!--                                    <div class="col-sm-4 col-md-4">-->
+                                    <!--                                        <label>Choose features</label>-->
+                                    <!--                                        <input type="button" class="btn btn-primary btn-lg btn-block"-->
+                                    <!--                                               data-toggle="modal"-->
+                                    <!--                                               data-target="#edit-group-modal" id="columnButton"-->
+                                    <!--                                               value="Choose">-->
+                                    <!--                                    </div>-->
+<!--                                    <div class="col-sm-4 col-md-4">-->
+<!--                                        <label>The nth day data</label>-->
+<!--                                        <div class="input-group mb-3">-->
+<!--                                            <input type="number" min="0" step="1" class="form-control" id="nday"-->
+<!--                                                   placeholder="indicate which day you want to aggregate" required>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="row">-->
+<!--                            <div class="col-sm-12 col-md-12">-->
+<!--                                <label>Choose database you want to export from</label>-->
+<!--                                <select class="custom-select" style="height: 100px"-->
+<!--                                        data-placeholder="Select database" id="databases"-->
+<!--                                        size="15" required>-->
+<!--                                    <option th:value="${database}"-->
+<!--                                            th:each="database : ${databases}"-->
+<!--                                            th:text="${database}"></option>-->
+<!--                                </select>-->
+<!--                            </div>-->
+<!--                        </div>-->
                         <div class="row">
-                            <div class="col-sm-12 col-md-12">
-                                <label>Choose database you want to export from</label>
-                                <select class="custom-select" style="height: 100px"
-                                        data-placeholder="Select database" id="databases"
-                                        size="15" required>
-                                    <option th:value="${database}"
-                                            th:each="database : ${databases}"
-                                            th:text="${database}"></option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
+
                             <!--<div class="col-sm-4 col-md-4">-->
-                                <!--<label>number of threads</label>-->
-                                <!--<div class="input-group mb-3">-->
-                                    <!--<input type="text" class="form-control" id="threads"-->
-                                           <!--placeholder="Input the number of threads you want to use" required>-->
-                                    <!--<i class="form-group__bar"></i>-->
-                                <!--</div>-->
+                            <!--<label>number of threads</label>-->
+                            <!--<div class="input-group mb-3">-->
+                            <!--<input type="text" class="form-control" id="threads"-->
+                            <!--placeholder="Input the number of threads you want to use" required>-->
+                            <!--<i class="form-group__bar"></i>-->
+                            <!--</div>-->
                             <!--</div>-->
                             <!--<div class="col-sm-4 col-md-4">-->
-                                <!--<label>number of parts</label>-->
-                                <!--<div class="input-group mb-3">-->
-                                    <!--<input type="text" class="form-control" id="parts"-->
-                                           <!--placeholder="Input the number of parts you want to use" required>-->
-                                    <!--<i class="form-group__bar"></i>-->
-                                <!--</div>-->
+                            <!--<label>number of parts</label>-->
+                            <!--<div class="input-group mb-3">-->
+                            <!--<input type="text" class="form-control" id="parts"-->
+                            <!--placeholder="Input the number of parts you want to use" required>-->
+                            <!--<i class="form-group__bar"></i>-->
+                            <!--</div>-->
+
                             <!--</div>-->
                             <div class="col-sm-4 col-md-4">
                                 <label>&nbsp</label>
@@ -170,17 +198,21 @@
                             <thead class="thead-default">
                             <tr>
                                 <th>Id</th>
-                                <th>Name</th>
-                                <th>Aggregation Time</th>
-                                <th>Aggregation Methods</th>
+<!--                                <th>Name</th>-->
+<!--                                <th>Aggregation Time</th>-->
+<!--                                <th>Aggregation Methods</th>-->
                                 <th>AR/NOAR</th>
+                                <th>Version</th>
+                                <th>nth days</th>
                                 <th>Create Time</th>
                                 <th>time used</th>
-                                <th>thread</th>
-                                <th>parts</th>
+
+<!--                                <th>thread</th>-->
+<!--                                <th>parts</th>-->
+
                                 <th>Details</th>
-                                <th>Auto Update</th>
-                                <th>Integrity Check</th>
+<!--                                <th>Auto Update</th>-->
+<!--                                <th>Integrity Check</th>-->
                             </tr>
                             </thead>
                             <tbody style="cursor: pointer">
@@ -430,15 +462,16 @@
                                         <!--</div>-->
                                     <!--</div>-->
 
-                                <!--</div>-->
-                            <!--</form>-->
-                        <!--</div>-->
-                        <!--<div class="modal-footer">-->
-                            <!--<button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>-->
-                            <!--<input type="button" class="btn btn-primary" id="saveColumns" value="Save">-->
-                        <!--</div>-->
-                    <!--</div>-->
-                <!--</div>-->
+
+            <!--</div>-->
+            <!--</form>-->
+            <!--</div>-->
+            <!--<div class="modal-footer">-->
+            <!--<button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>-->
+            <!--<input type="button" class="btn btn-primary" id="saveColumns" value="Save">-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
             <!--</div>-->
 
             <div class="modal fade" id="edit-group-modal" data-backdrop="static">

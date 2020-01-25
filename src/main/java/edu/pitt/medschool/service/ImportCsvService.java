@@ -75,6 +75,12 @@ public class ImportCsvService {
     @Value("${soft-timeout-sleep}")
     private long timeoutSleep;
 
+    @Value("${SUCCESSFILES}")
+    private String SUCCESSFILES;
+
+    @Value("${FAILEDFILES}")
+    private String FAILEDFILES;
+
     private final AtomicBoolean importingLock = new AtomicBoolean(false);
 
     private final BlockingQueue<Path> fileQueue = new LinkedBlockingQueue<>();
@@ -253,7 +259,6 @@ public class ImportCsvService {
      * @param paths List of files
      */
     public void AddArrayFiles(String[] paths) {
-
         if (processingSet.isEmpty()) {
             newBatch();
         }
@@ -670,7 +675,7 @@ public class ImportCsvService {
                 versionControlService.setLog(csvFile, "Pending");
 
                 //Move file to other folder
-                //moveAndDelete(fileFullPath,true);
+                moveAndDelete(fileFullPath,true);
 
 
 
@@ -747,7 +752,7 @@ public class ImportCsvService {
         }
         importProgressService.UpdateFileProgress(batchId, fn, totalAllSize.get(), thisFileSize, thisFileProcessedSize,
                 totalProcessedSize.get(), ImportProgressService.FileProgressStatus.STATUS_FAIL, reason,lost);
-        //moveAndDelete(fn,false);
+        moveAndDelete(fn,false);
     }
 
     private void logMySQLFail(String fn){
@@ -786,17 +791,18 @@ public class ImportCsvService {
         System.out.println(path);
         try {
             File afile = new File(path);
-            String kind = afile.getName().substring(0,3);
             String destnation;
             if(success){
-                destnation = "d:/eegdata/"+kind+"/"+ afile.getName();
+                destnation = SUCCESSFILES;
+//                destnation = "d:/eegdata/"+kind+"/"+ afile.getName();
             }else {
-                destnation = "d:/eegdata/failed/"+afile.getName();
+                destnation = FAILEDFILES;
+//                destnation = "d:/eegdata/failed/"+afile.getName();
             }
-            if (afile.renameTo(new File(destnation))) {
-                System.out.println("File is moved successful!");
+            if (moveFile(destnation,afile)) {
+                System.out.println("File "+ afile.getName()+" is moved successful!");
             } else {
-                System.out.println("File is failed to move!");
+                System.out.println("File "+afile.getName()+" is failed to move!");
             }
             String txtpath = path.replace(".csv",".txt");
             System.out.println(txtpath);
@@ -809,4 +815,33 @@ public class ImportCsvService {
         }
     }
 
+    private boolean moveFile(String path, File file){
+        File folder = new File(path);
+        String year = file.getName().substring(4,8);
+        String pid = file.getName().substring(0,12);
+        Queue<File> fileQueue = new LinkedList<>();
+        if(folder.listFiles()!=null){
+            for(File f: folder.listFiles()){
+                if(f.getName().equals(year)){
+                    fileQueue.add(f);
+                }
+
+            }
+        }
+        while (!fileQueue.isEmpty()){
+            File current = fileQueue.poll();
+            if(current.getName().equals(year)){
+                for(File f: current.listFiles()){
+                    fileQueue.add(f);
+                }
+            }else if(current.getName().equals(pid)){
+                return file.renameTo(new File(current.getPath()+"/"+file.getName()));
+            }
+        }
+        File newFolder = new File(path+"/"+year);
+        newFolder.mkdir();
+        File subFolder = new File(path+"/"+year+"/"+pid);
+        subFolder.mkdir();
+        return file.renameTo(new File(subFolder.getPath()+"/"+file.getName()));
+    }
 }
