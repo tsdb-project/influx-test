@@ -53,4 +53,10 @@ public class CsvReader {
 
         return list;
     }
+    
+    public static void main(String[] args) {
+        List<String> result = CsvReader.init("src/main/resources/attributes.csv");
+        System.out.printf("Length: %d \n", result.size());
+        System.out.println(result.get(1));
+    }
 }
