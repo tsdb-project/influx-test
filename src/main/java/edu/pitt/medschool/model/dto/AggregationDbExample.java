@@ -3,6 +3,7 @@ package edu.pitt.medschool.model.dto;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 public class AggregationDbExample {
     /**
@@ -293,52 +294,52 @@ public class AggregationDbExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeEqualTo(Date value) {
 			addCriterion("create_time =", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeNotEqualTo(Date value) {
 			addCriterion("create_time <>", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeGreaterThan(LocalDateTime value) {
+		public Criteria andCreateTimeGreaterThan(Date value) {
 			addCriterion("create_time >", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeGreaterThanOrEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeGreaterThanOrEqualTo(Date value) {
 			addCriterion("create_time >=", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeLessThan(LocalDateTime value) {
+		public Criteria andCreateTimeLessThan(Date value) {
 			addCriterion("create_time <", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeLessThanOrEqualTo(LocalDateTime value) {
+		public Criteria andCreateTimeLessThanOrEqualTo(Date value) {
 			addCriterion("create_time <=", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeIn(List<LocalDateTime> values) {
+		public Criteria andCreateTimeIn(List<Date> values) {
 			addCriterion("create_time in", values, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotIn(List<LocalDateTime> values) {
+		public Criteria andCreateTimeNotIn(List<Date> values) {
 			addCriterion("create_time not in", values, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeBetween(LocalDateTime value1, LocalDateTime value2) {
+		public Criteria andCreateTimeBetween(Date value1, Date value2) {
 			addCriterion("create_time between", value1, value2, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
+		public Criteria andCreateTimeNotBetween(Date value1, Date value2) {
 			addCriterion("create_time not between", value1, value2, "createTime");
 			return (Criteria) this;
 		}

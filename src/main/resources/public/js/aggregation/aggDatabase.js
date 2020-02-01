@@ -57,7 +57,7 @@ $(document).ready(function() {
             },
             'error': function() {}
         });
-        databaseData = databaseData[0];
+        //databaseData = databaseData[0];
         console.log(databaseData);
     }
     getDatabases();
@@ -448,6 +448,7 @@ $(document).ready(function() {
 
 
     $.fn.dataTable.moment('M/D/YYYY, hh:mm:ss a');
+	console.log(databaseData);
     var table = $('#databaseTable').DataTable({
         data : databaseData,
         columnDefs : [ {
@@ -461,6 +462,7 @@ $(document).ready(function() {
         }, {
             data : null,
             render : function(data) {
+				console.log(data);
                 return data.artype ? "AR" : "NOAR";
             }
         },{
@@ -763,12 +765,12 @@ $(document).ready(function() {
     /*
     * Show details modal
     * */
-
+	console.log(databaseData);
 
     $('#DB-details-modal').on('show.bs.modal', function(event) {
         var button = $(event.relatedTarget);
         var id = button.data('row');
-        var plist = databaseData[id].patientList;
+        var plist = databaseData[id].pidList;
         var clist = databaseData[id].columns;
 
         $('#patients').empty();

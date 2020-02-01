@@ -352,7 +352,7 @@ public class AggregationDatabaseSqlProvider {
 		sql.SET("time_cost = #{record.timeCost,jdbcType=VARCHAR}");
 		sql.SET("threads = #{record.threads,jdbcType=INTEGER}");
 		sql.SET("parts = #{record.parts,jdbcType=INTEGER}");
-		sql.SET("nday = #{record.nday,jdbcType=INTEGER}")
+		sql.SET("nday = #{record.nday,jdbcType=INTEGER}");
 		AggregationDatabaseExample example = (AggregationDatabaseExample) parameter.get("example");
 		applyWhere(sql, example, true);
 		return sql.toString();
