@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.net.ConnectException;
+import java.net.ProtocolException;
 import java.sql.Time;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -62,6 +64,8 @@ public class AggregationService {
     VersionDao versionDao;
     @Autowired
     AggregationDao aggregationDao;
+    @Autowired
+    InfluxSwitcherService influxSwitcherService;
 
     //todo version control needs to change the db name
     private final String DBNAME_1H = "sixty_minute_summary_V";
@@ -260,7 +264,7 @@ public class AggregationService {
     private void startEfficentAgg(AggregationDb job){
         System.out.println("start efficient aggregation");
         final String DIR = "aggregationDBLog";
-
+        influxSwitcherService.setupLocalInflux();
         List<String> patientIDs;
         String plist = job.getPidList();
 
@@ -426,12 +430,23 @@ public class AggregationService {
                     finishedPatientCounter.getAndIncrement();
                     aggregationDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
 
-                }catch (Exception e){
+                }catch (ProtocolException pe){
                     logger.info(pid);
-                    recordError(pid,e);
+                    recordError(pid,pe);
                     finishedPatientCounter.getAndIncrement();
                     aggregationDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
-                    e.printStackTrace();
+                    pe.printStackTrace();
+                }catch (EOFException ee){
+                    logger.info(pid);
+                    recordError(pid,ee);
+                    finishedPatientCounter.getAndIncrement();
+                    aggregationDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
+                    ee.printStackTrace();
+
+                }catch (ConnectException ce){
+                    idQueue.add(pid);
+                }catch (IOException ie){
+                    ie.printStackTrace();
                 }
             }
             influxDB.close();
@@ -440,6 +455,7 @@ public class AggregationService {
         for (int i = 0; i < paraCount; ++i) {
             scheduler.submit(queryTask);
         }
+
         scheduler.shutdown();
         try {
             scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
@@ -456,6 +472,17 @@ public class AggregationService {
                 System.out.println("Job finished");
                 aggregationDao.updateStatus(job.getId(),"Success");
                 aggregationDao.updateTimeCost(job.getId(),String.valueOf(Duration.between(start_Time,end_Time)));
+                // restart the job to do the failed patients
+                if(!idQueue.isEmpty()){
+                    StringBuilder sb = new StringBuilder();
+                    while (!idQueue.isEmpty()){
+                        sb.append(idQueue.poll()).append(',');
+                    }
+                    plist  = sb.toString();
+                    plist = plist.substring(0,plist.length()-1);
+                    job.setPidList(plist);
+                    jobQueue.add(job);
+                }
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -924,6 +951,6 @@ public class AggregationService {
 //    }
 //
 //    public int getJobId(String dbname) {
-//        return aggregationDao.selectJobIdByName(dbname);
+////        return aggregationDao.selectJobIdByName(dbname);
 //    }
 }
