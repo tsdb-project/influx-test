@@ -311,6 +311,7 @@ public class AggregationService {
         // update the total number of patients of this job
         if(job.getTotal()==1){
             aggregationDao.updateTotalnumber(job.getId(),patients.size());
+            job.setTotal(patients.size());
         }
         aggregationDao.updatePatientFinishedNum(job.getId(),job.getTotal()-patients.size());
         // count the finished number
