@@ -267,7 +267,7 @@ public class AggregationService {
         influxSwitcherService.setupLocalInflux();
         List<String> patientIDs;
         String plist = job.getPidList();
-
+        LocalDateTime start_Time = LocalDateTime.now();
         if(plist == null || plist.isEmpty()){
             //todo new way to get all pids from csv_file table
             patientIDs = importedFileDao.selectAllImportedPidWithoutTBI("realpsc");
@@ -466,13 +466,13 @@ public class AggregationService {
         finally {
             try{
                 LocalDateTime end_Time = LocalDateTime.now();
-                this.bufferedWriter.write(String.valueOf(Duration.between(job.getCreateTime(),end_Time)).replace("PT","Run Time: "));
+                this.bufferedWriter.write(String.valueOf(Duration.between(start_Time,end_Time)).replace("PT","Run Time: "));
                 this.bufferedWriter.newLine();
                 this.bufferedWriter.flush();
                 this.bufferedWriter.close();
                 System.out.println("Job finished");
                 aggregationDao.updateStatus(job.getId(),"Success");
-                aggregationDao.updateTimeCost(job.getId(),String.valueOf(Duration.between(job.getCreateTime(),end_Time)));
+                aggregationDao.updateTimeCost(job.getId(),String.valueOf(Duration.between(job.getCreateTime(),end_Time)).replace("PT",""));
                 // restart the job to do the failed patients
                 if(!idQueue.isEmpty()){
                     StringBuilder sb = new StringBuilder();
