@@ -709,8 +709,8 @@ $(document).ready(function() {
             nday: $('#nday').val(),
             // threads: 10,
             // parts: 15,
-            // total:1,
-            // finished:0,
+            total:1,
+            finished:0
             // autoUpdate:true
         };
         console.log(newDB);
