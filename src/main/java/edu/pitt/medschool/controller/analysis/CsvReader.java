@@ -28,23 +28,18 @@ public class CsvReader {
                 StandardCharsets.US_ASCII)) {
 
             // read the first line from the text file
-            String line = br.readLine();
-            int lineCount = 0;
+            String line = new String();
+            //int lineCount = 0;
+            line = br.readLine(); //wait for reading the column names
             // loop until all lines are read
+            line = br.readLine();
             while (line != null) {
-
-                if (lineCount == 0) {
-                    line = br.readLine();
-                    lineCount ++;
-                }
-
+            	// read next line before looping
+                // if end of file reached, line would be null
                 list.add(line);
-
+				line = br.readLine();
                 // adding book into ArrayList
 
-                // read next line before looping
-                // if end of file reached, line would be null
-                line = br.readLine();
             }
 
         } catch (IOException ioe) {
@@ -55,7 +50,7 @@ public class CsvReader {
     }
     
     public static void main(String[] args) {
-        List<String> result = CsvReader.init("src/main/resources/attributes.csv");
+        List<String> result = CsvReader.init("src/main/resources/public/csv/attributes.csv");
         System.out.printf("Length: %d \n", result.size());
         System.out.println(result.get(1));
     }

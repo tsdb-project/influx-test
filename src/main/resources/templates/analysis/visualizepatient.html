@@ -218,9 +218,9 @@
 
                     const dataRes = await axios.get(
                         `/apis/data/patients/${attributesSelected}`
-                    );
-
+                    );                                      // read the 2 selected data
                     const rows = dataRes.data.data;
+                    console.log(rows);
                     const convertedToNumbers = rows.map(row =>
                         row.map((item, id) => (id > 0 ? Number(item) : item))
                 );

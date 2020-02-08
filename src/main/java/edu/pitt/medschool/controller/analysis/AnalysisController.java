@@ -673,23 +673,25 @@ public class AnalysisController {
         return response;
     }
 
-
-    private List<String> result = CsvReader.init("src/main/resources/attributes.csv");
-
+    /*
+     * @author  Wu Yue
+     * visualize patients
+     * {options}: {2 attributes Selected}*/
     @GetMapping("/apis/data/patients/{options}")
     @ResponseBody
     public RestfulResponse postProcessing(@PathVariable String options) throws IOException {
-        String[] optionsParsed = options.split(",");
+    	
+        List<String> result = CsvReader.init("src/main/resources/public/csv/attributes.csv");
+    	String[] optionsParsed = options.split(",");
         String attr1 = optionsParsed[0];
         String attr2 = optionsParsed[1];
 
         List<List<String>> parsed = new ArrayList();
+        //System.out.println(result.get(0));
         result.forEach(row -> {
             List<String> parsedRow = Arrays.asList(row.split(","));
             parsed.add(parsedRow);
         });
-
-
 
         List<List<String>> filteredResult = new ArrayList();
         parsed.forEach(row -> {
@@ -697,7 +699,6 @@ public class AnalysisController {
             String pid = row.get(0).replaceAll("\"", "");
 
             temp.add(pid);
-
 
             temp.add(row.get(Integer.parseInt(attr1)).replaceAll("\"", ""));
             temp.add(row.get(Integer.parseInt(attr2)).replaceAll("\"", ""));
@@ -707,7 +708,7 @@ public class AnalysisController {
 
 
         RestfulResponse response = new RestfulResponse(1, "Finished");
-
+        //return 2 selected attribute values
         response.setData(filteredResult);
         return response;
     }
