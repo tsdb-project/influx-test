@@ -58,7 +58,6 @@ $(document).ready(function() {
             'error': function() {}
         });
         //databaseData = databaseData[0];
-        console.log(databaseData);
     }
     getDatabases();
 
@@ -770,7 +769,7 @@ $(document).ready(function() {
     $('#DB-details-modal').on('show.bs.modal', function(event) {
         var button = $(event.relatedTarget);
         var id = button.data('row');
-        var plist = databaseData[id].pidList;
+        var plist = databaseData[id].pidList.split(',');
         var clist = databaseData[id].columns;
 
         $('#patients').empty();

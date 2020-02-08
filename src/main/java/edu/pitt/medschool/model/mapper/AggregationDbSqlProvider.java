@@ -94,6 +94,7 @@ public class AggregationDbSqlProvider {
 		if (example != null && example.getOrderByClause() != null) {
 			sql.ORDER_BY(example.getOrderByClause());
 		}
+		
 		return sql.toString();
 	}
 
@@ -116,6 +117,7 @@ public class AggregationDbSqlProvider {
 		sql.SELECT("arType");
 		sql.SELECT("time_cost");
 		sql.SELECT("nday");
+		sql.SELECT("pid_list");
 		sql.FROM("aggregation_db");
 		applyWhere(sql, example, false);
 		if (example != null && example.getOrderByClause() != null) {

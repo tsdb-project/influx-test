@@ -104,7 +104,8 @@ public interface AggregationDbMapper {
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
 			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT),
 			@Result(column = "time_cost", property = "timeCost", jdbcType = JdbcType.VARCHAR),
-			@Result(column = "nday", property = "nday", jdbcType = JdbcType.INTEGER) })
+			@Result(column = "nday", property = "nday", jdbcType = JdbcType.INTEGER),
+			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR)  })
 	List<AggregationDb> selectByExampleWithRowbounds(AggregationDbExample example, RowBounds rowBounds);
 
 	/**
@@ -120,7 +121,8 @@ public interface AggregationDbMapper {
 			@Result(column = "finished", property = "finished", jdbcType = JdbcType.INTEGER),
 			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT),
 			@Result(column = "time_cost", property = "timeCost", jdbcType = JdbcType.VARCHAR),
-			@Result(column = "nday", property = "nday", jdbcType = JdbcType.INTEGER) })
+			@Result(column = "nday", property = "nday", jdbcType = JdbcType.INTEGER),
+			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR) })
 	List<AggregationDb> selectByExample(AggregationDbExample example);
 
 	/**
