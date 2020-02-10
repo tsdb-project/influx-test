@@ -134,9 +134,10 @@ public class InfluxSwitcherService {
             return;
         }
         try {
-            Runtime.getRuntime().exec(new String[]{"influxd -config /Volumes/INFLUX_RAID/config/load.ini"});
-            // Local InfluxDB takes up to 20s for starting
-            Thread.sleep(20_000);
+            String[] command = {"/bin/bash","/Volumes/INFLUX_RAID/config/startDB.sh"};
+            Runtime.getRuntime().exec(command);
+            // Local InfluxDB takes up to 5 mins for starting
+            Thread.sleep(300_000);
         } catch (Exception e) {
             logger.error("Start local failed: {}", Util.stackTraceErrorToString(e));
             // Local may still started in this case
