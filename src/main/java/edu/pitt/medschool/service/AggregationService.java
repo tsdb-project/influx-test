@@ -406,16 +406,16 @@ public class AggregationService {
                         getAllFeaturesAggregation(subStartTime,rs,DBNAME_1M+job.getVersion(), 1,df,pid,influxDB,"ar");
 //                        System.out.println("1");
                         // do 30m agg
-                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_30M+job.getVersion(), 30,df,pid,influxDB,"ar");
+//                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_30M+job.getVersion(), 30,df,pid,influxDB,"ar");
 //                        System.out.println("30");
                         // do 15m agg
-                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_15M+job.getVersion(), 15,df,pid,influxDB,"ar");
+//                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_15M+job.getVersion(), 15,df,pid,influxDB,"ar");
 //                        System.out.println("15");
                         // do 10m agg
-                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_10M+job.getVersion(), 10,df,pid,influxDB,"ar");
+//                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_10M+job.getVersion(), 10,df,pid,influxDB,"ar");
 //                        System.out.println("10");
                         // do 5m agg
-                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_5M+job.getVersion(), 5,df,pid,influxDB,"ar");
+//                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_5M+job.getVersion(), 5,df,pid,influxDB,"ar");
 //                        System.out.println("5");
                     }
 
