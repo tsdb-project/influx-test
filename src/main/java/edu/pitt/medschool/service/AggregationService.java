@@ -72,6 +72,7 @@ public class AggregationService {
     private final String DBNAME_10M = "ten_minute_summary_V";
     private final int MAXBATCH = 5;
     private final DecimalFormat DIGIT = new   java.text.DecimalFormat("#.00");
+    private final int paraCount = 2;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -312,7 +313,6 @@ public class AggregationService {
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
 
 
-        int paraCount = determineParaNumber();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
             this.bufferedWriter = new BufferedWriter(new FileWriter(pathname,true));
