@@ -339,7 +339,7 @@ public class AggregationService {
 //                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"max_I1_1\") from \"%s\" where arType='ar'", pid),"aggdata"));
 
                     QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
-                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
+//                    QueryResult res2 = influxDB.query(new Query(String.format("select last(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 //                    String endTime = res2.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
@@ -358,7 +358,7 @@ public class AggregationService {
 
 
                     // generate the batchs
-                    BatchPoints records_60m = BatchPoints.database(DBNAME_1H+job.getVersion()).tag("arType","ar").build();
+//                    BatchPoints records_60m = BatchPoints.database(DBNAME_1H+job.getVersion()).tag("arType","ar").build();
 
                     // generate part of the query
                     StringBuilder sb = new StringBuilder();
@@ -402,16 +402,16 @@ public class AggregationService {
                         getAllFeaturesAggregation(subStartTime,rs,DBNAME_1M+job.getVersion(), 1,df,pid,influxDB,"ar");
 //                        System.out.println("1");
                         // do 30m agg
-//                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_30M+job.getVersion(), 30,df,pid,influxDB,"ar");
+                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_30M+job.getVersion(), 30,df,pid,influxDB,"ar");
 //                        System.out.println("30");
                         // do 15m agg
-//                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_15M+job.getVersion(), 15,df,pid,influxDB,"ar");
+                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_15M+job.getVersion(), 15,df,pid,influxDB,"ar");
 //                        System.out.println("15");
                         // do 10m agg
-//                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_10M+job.getVersion(), 10,df,pid,influxDB,"ar");
+                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_10M+job.getVersion(), 10,df,pid,influxDB,"ar");
 //                        System.out.println("10");
                         // do 5m agg
-//                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_5M+job.getVersion(), 5,df,pid,influxDB,"ar");
+                        getAllFeaturesAggregation(subStartTime,rs,DBNAME_5M+job.getVersion(), 5,df,pid,influxDB,"ar");
 //                        System.out.println("5");
                     }
 
