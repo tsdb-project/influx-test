@@ -309,10 +309,8 @@ public class AggregationService {
         }
 
         // update the total number of patients of this job
-        if(job.getTotal()==1){
-            aggregationDao.updateTotalnumber(job.getId(),patients.size());
-        }
-        aggregationDao.updatePatientFinishedNum(job.getId(),job.getTotal()-patients.size());
+        aggregationDao.updateTotalnumber(job.getId(),patients.size());
+
         // count the finished number
         AtomicInteger finishedPatientCounter = new AtomicInteger(0);
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
@@ -334,6 +332,7 @@ public class AggregationService {
             return;
         }
 
+        LocalDateTime start_Time = LocalDateTime.now();
         Runnable queryTask = () -> {
             String pid;
             InfluxDB influxDB = generateIdbClient(false);
@@ -466,13 +465,13 @@ public class AggregationService {
         finally {
             try{
                 LocalDateTime end_Time = LocalDateTime.now();
-                this.bufferedWriter.write(String.valueOf(Duration.between(job.getCreateTime(),end_Time)).replace("PT","Run Time: "));
+                this.bufferedWriter.write(String.valueOf(Duration.between(start_Time,end_Time)).replace("PT","Run Time: "));
                 this.bufferedWriter.newLine();
                 this.bufferedWriter.flush();
                 this.bufferedWriter.close();
                 System.out.println("Job finished");
                 aggregationDao.updateStatus(job.getId(),"Success");
-                aggregationDao.updateTimeCost(job.getId(),String.valueOf(Duration.between(job.getCreateTime(),end_Time)));
+                aggregationDao.updateTimeCost(job.getId(),String.valueOf(Duration.between(start_Time,end_Time)));
                 // restart the job to do the failed patients
                 if(!idQueue.isEmpty()){
                     StringBuilder sb = new StringBuilder();
@@ -482,7 +481,6 @@ public class AggregationService {
                     plist  = sb.toString();
                     plist = plist.substring(0,plist.length()-1);
                     job.setPidList(plist);
-
                     jobQueue.add(job);
                 }
             }catch (IOException e){
