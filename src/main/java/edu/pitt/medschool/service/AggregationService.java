@@ -318,8 +318,7 @@ public class AggregationService {
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patients);
 
 
-        // number of threads used to run aggregation
-        int paraCount = 1;
+        int paraCount = determineParaNumber();
         ExecutorService scheduler = generateNewThreadPool(paraCount);
         try{
             this.bufferedWriter = new BufferedWriter(new FileWriter(pathname,true));
