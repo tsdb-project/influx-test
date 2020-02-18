@@ -3,9 +3,11 @@ package edu.pitt.medschool.controller.aggregationDB;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
+import edu.pitt.medschool.model.dao.AggregationDao;
 import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
 import edu.pitt.medschool.model.dto.AggregationDb;
+import edu.pitt.medschool.model.dto.Version;
 import edu.pitt.medschool.service.AggregationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -123,4 +125,10 @@ public class AggregationDBController {
         return response;
     }
 
+    @PutMapping("/setComment")
+    @ResponseBody
+    public RestfulResponse createOrUpdateAggregationDB(@RequestBody(required = true) AggregationDb aggregationdb) {
+        aggregationService.updateComment(aggregationdb);
+        return new RestfulResponse(1, "success");
+    }
 }

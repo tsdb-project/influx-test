@@ -1144,6 +1144,12 @@ public class AggregationService {
         return idb;
     }
 
+
+	public int updateComment(AggregationDb aggregationdb) {
+		return aggregationDao.updateComment(aggregationdb);
+		
+	}
+
 //    public String getDbName(AggregationDatabaseWithBLOBs database) {
 //        String dbname = database.getDbName()+"_V"+versionDao.getLatestVersion();
 //        return dbname;

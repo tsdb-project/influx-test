@@ -133,6 +133,17 @@ public class AggregationDao {
         e.setTimeCost(time);
         return aggregationDbMapper.updateByPrimaryKeySelective(e);
     }
+    
+    // HSX 
+    // aggdb change comment function
+    public int updateComment(AggregationDb aggregationdb) {
+    	AggregationDbExample aggregationDbExample = new AggregationDbExample();
+    	AggregationDbExample.Criteria criteria = aggregationDbExample.createCriteria();
+        criteria.andIdEqualTo(aggregationdb.getId());
+        AggregationDb aggregationDb1 = new AggregationDb();
+        aggregationDb1.setComment(aggregationdb.getComment());
+        return aggregationDbMapper.updateByExampleSelective(aggregationDb1,aggregationDbExample);
+    }
 
 
 //    public List<AggregationDatabase> selectByname(String dbname) {

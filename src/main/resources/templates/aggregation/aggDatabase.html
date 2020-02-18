@@ -211,6 +211,7 @@
 <!--                                <th>parts</th>-->
 
                                 <th>Details</th>
+                                <th>Comments</th>
 <!--                                <th>Auto Update</th>-->
 <!--                                <th>Integrity Check</th>-->
                             </tr>
@@ -223,6 +224,8 @@
                     </div>
                 </div>
             </div>
+            
+
             <div class="card" id="progressCard">
                 <div class="card-body">
                     <h1 class="card-title">Database Update Progress</h1>
@@ -579,8 +582,9 @@
                                         <div class="col-sm-12 col-md-12">
                                             <div class="form-group">
                                                 <label>Patients List</label>
+                                                <label id="patients-count"></label>
                                                 <select class="custom-select" data-placeholder="Patients List"
-                                                        id="patients" size="15">
+                                                        id="patients" size="7">
                                                 </select>
                                             </div>
                                         </div>
@@ -590,10 +594,9 @@
                                     <div class="row">
                                         <div class="col-sm-12 col-md-12">
                                             <div class="form-group">
-                                                <label>Column List</label>
-                                                <select class="custom-select" data-placeholder="Patients List"
-                                                        id="columns" size="15">
-                                                </select>
+                                                <label>Database Size</label>
+                                                <input type="text" class="form-control" placeholder="unknown" id="db-size" value="100" required disabled>
+                                                <i class="form-group__bar"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -602,6 +605,28 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="comment-modal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title pull-left">Comment</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12">
+                                    <label id="agg_db_id"></label>
+                                    <textarea rows="10" cols="40" id="agg_db_comment" placeholder="No comments"></textarea>
+                                </div>
+                                <div class="col-sm-12 col-md-12" style="height: 15px"></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-link" data-dismiss="modal" id="edit_comment">edit</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">cancel</button>
                         </div>
                     </div>
                 </div>
