@@ -116,7 +116,7 @@ public interface AggregationDbMapper {
 			@Result(column = "arType", property = "artype", jdbcType = JdbcType.BIT),
 			@Result(column = "time_cost", property = "timeCost", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "nday", property = "nday", jdbcType = JdbcType.INTEGER),
-			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR)  })
+			@Result(column = "pid_list", property = "pidList", jdbcType = JdbcType.LONGVARCHAR),
 			@Result(column = "comment", property = "comment", jdbcType = JdbcType.VARCHAR),
 			@Result(column = "db_size", property = "dbSize", jdbcType = JdbcType.INTEGER) })
 	List<AggregationDb> selectByExampleWithRowbounds(AggregationDbExample example, RowBounds rowBounds);
