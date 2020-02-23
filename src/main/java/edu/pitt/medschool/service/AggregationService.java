@@ -71,8 +71,8 @@ public class AggregationService {
     private final String DBNAME_30M = "thirty_minute_summary_V";
     private final String DBNAME_10M = "ten_minute_summary_V";
     private final int MAXBATCH = 5;
-    private final DecimalFormat DIGIT = new   java.text.DecimalFormat("#.00");
-    private final int paraCount = 6;
+    private final DecimalFormat DIGIT = new java.text.DecimalFormat("#.00");
+    private final int paraCount = 8;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
