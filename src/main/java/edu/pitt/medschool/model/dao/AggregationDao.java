@@ -32,6 +32,11 @@ public class AggregationDao {
         return aggregationDbMapper.selectByExample(example);
     }
     
+    /*
+     * Tianfang Ma
+     * Navigator in 2019
+     * By duration, start time, interval
+     * */
     public List<AggregationDatabase> selectAllUsefulDBs(Integer period, Integer origin, Integer duration,
     		String max, String min, String mean, String median, String std, String fq, String tq, String sum) {
     	AggregationDatabaseExample example = new AggregationDatabaseExample();

@@ -749,16 +749,28 @@ public class AggregationService {
         return Executors.newFixedThreadPool(i);
     }
 
-    public String databaseNavigator(String query){
+    /**
+     * @author Ada Huang
+     * Navigator in 3.2020
+     * @param downsampleGroupId, [duration, start time, interval]
+     * @return a list of aggregationDb
+     * */
+    public List<AggregationDb> databaseNavigator(String query){
         String dbname="";
 
-        return dbname;
+        return null;
     }
 
     public List<AggregationDb> selectAllAvailableDBs() {
         return aggregationDao.selectAllAvailableDBs();
     }
     
+    
+    /*
+     * Tianfang Ma
+     * Navigator in 11.2019
+     * By duration, start time, interval, aggregation features
+     * */
     public List<AggregationDatabase> selectAllUsefulDBs(Integer period, Integer origin, Integer duration, String max, String min, String mean, String median,
     		String std, String fq, String tq, String sum) {
         return aggregationDao.selectAllUsefulDBs(period, origin, duration, max, min, mean, median, std, fq, tq, sum);
