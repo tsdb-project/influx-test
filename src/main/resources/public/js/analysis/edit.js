@@ -147,6 +147,154 @@ $(document).ready(function() {
         patientList = null;
     });
     
+    var downsampleMethods = [];
+    
+    
+    //suggest usable time levels
+    //whether dsMethod counts: ML models use "stds" in high time-levels, so it can wait...
+    //not considered now 
+    function usableTimeLevel(period, origin, duration) {
+        var suggest = {
+            "1": true,
+            "60": false,
+            "300": false,
+            "600": false,
+            "900": false,
+            "1800": false,
+            "3600": false,  
+        };
+        var levelsInSec = [60, 300, 600, 900, 1800, 3600];
+        for (level of levelsInSec) {
+            if ((origin == null || (origin != null && origin % level == 0)) && period % level == 0) {
+                suggest[level] = true;
+            }
+        }
+        return suggest;
+    }
+
+    var usableAggDB = {
+        0: {
+            id: 1,
+            version: 0,
+            createTime: "2020-02-01T00:00:00",
+            status: "success",
+            total: 2632,
+            finished: 2632,
+            artype: true,
+            timeCost: "3600",
+            nday: 3,
+            comment: null,
+            dbSize: 20000,
+            pidList: null
+        }
+    };
+    
+    //auto refresh useable Databases table
+    $('#refresh').click(function() {
+        console.log("click");
+        var period = $("#period").val() * $("#period_unit").val();
+        var origin = $("#origin").val() * $("#origin_unit").val();
+        var duration = $("#duration").val() * $("#duration_unit").val();
+        var dsMethod = $('#method').val();
+        console.log(patientList);
+        console.log(usableTimeLevel(period, origin, duration));
+        var para = {
+            // "dsmethod": dsMethod, //not important
+            "patientList": patientList,
+            "ar": $('#ar label.active input').val() == "true"
+        }
+        $.ajax({
+            url: "/aggregation/getUsableDBs",
+            type: 'post',
+            data: JSON.stringify(para),
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                usableAggDB = data.data;
+                console.log(usableAggDB);
+            }
+        });
+
+        usableTable.ajax.reload();
+        
+        
+    });
+
+    $.fn.dataTable.moment('M/D/YYYY, hh:mm:ss a');
+    var usableTable = $('#usableAggdbTable').DataTable({
+        data : usableAggDB,
+        columns: [ {
+            data : 'id'
+        }, {
+            data : null,
+            render : function(data) {
+                console.log('ar: ' + data);
+                return data.artype ? "AR" : "NOAR";
+            }
+        }, {
+            data : 'timeCost'
+        }, {
+            data : null,
+            render: function(data) {
+                return data.pidList == null ? "ALL" : 'pidList';
+            }
+        }, {
+            data : 'dbSize'
+        }, {
+            data : 'version'
+        }, {
+            data : null,
+            render : function(data, type, row, meta) {
+                console.log(meta);
+                return '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
+            }
+        }]
+    });
+   
+
+    $('#comment-modal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget);
+        console.log(button);
+        var id = button.data('row');
+        console.log(id);
+        $.ajax({
+            'url': "/aggregation/getDBs",
+            'type': 'get',
+            'success': function(data) {
+                var agg_dbs = data.data;
+                var agg_db = agg_dbs[id];
+                $("#agg_db_id").val(agg_db.id);
+                $("#agg_db_comment").val(agg_db.comment);
+            },
+            'error': function() {}
+        });
+        
+    });
+    
+    $("#edit_comment").click(function () {
+        console.log("edit button");
+        
+        var aggregationdb = {
+            "id":$("#agg_db_id").val(),
+            "comment":$("#agg_db_comment").val()
+        };
+        $.ajax({
+            'url' : "/aggregation/setComment",
+            'type' : 'put',
+            'data' : JSON.stringify(aggregationdb),
+            'contentType' : "application/json",
+            'dataType' : 'json',
+            'success' : function(data) {
+                notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "edit comment success");
+            },
+            'error' : function() {
+            }
+        });
+    });
+
+
+
+
     $("#export").click(function (e) {
     	var dbList = document.getElementById("databases");
     	var l = document.getElementById("databases").length;
@@ -159,16 +307,18 @@ $(document).ready(function() {
             var period = $("#period").val() * $("#period_unit").val();
             var origin = $("#origin").val() * $("#origin_unit").val();
             var duration = $("#duration").val() * $("#duration_unit").val();
+            var dsMethod = $('#method').val();
             $.ajax({
             	'url': "/aggregation/getUsefulDBs?" + "period=" + period + "&origin=" + origin + "&duration=" + duration + 
-            		"&max=" + exportMethod.Max +
-            		"&min=" + exportMethod.Min +
-            		"&mean=" + exportMethod.Mean +
-            		"&median=" + exportMethod.Median +
-            		"&std=" + exportMethod.Std +
-            		"&fq=" + exportMethod.FQ +
-            		"&tq=" + exportMethod.TQ +
-            		"&sum=" + exportMethod.Sum,
+            		"&method=" + dsMethod
+            		// "&min=" + exportMethod.Min +
+            		// "&mean=" + exportMethod.Mean +
+            		// "&median=" + exportMethod.Median +
+            		// "&std=" + exportMethod.Std +
+            		// "&fq=" + exportMethod.FQ +
+            		// "&tq=" + exportMethod.TQ +
+                    // "&sum=" + exportMethod.Sum
+                    ,
             	'type': 'get',
             	'contentType':"application/json",
             	'dataType':"json",

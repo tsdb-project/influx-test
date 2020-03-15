@@ -12,6 +12,7 @@ import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
 
 import edu.pitt.medschool.model.dto.AggregationDb;
+import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import okhttp3.OkHttpClient;
 import org.apache.poi.ss.usermodel.DataFormat;
 import org.influxdb.BatchOptions;
@@ -765,8 +766,15 @@ public class AggregationService {
         return aggregationDao.selectAllAvailableDBs();
     }
     
+    /**
+     * @author Sixuan Huang
+     * @return
+     */
+    public List<AggregationDb> selectAllUsableDBs(ExportWithBLOBs jobparam) {
+        return aggregationDao.selectAllUsableDBs(jobparam);
+    }
     
-    /*
+    /**
      * Tianfang Ma
      * Navigator in 11.2019
      * By duration, start time, interval, aggregation features

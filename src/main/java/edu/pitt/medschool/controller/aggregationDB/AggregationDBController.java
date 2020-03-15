@@ -7,6 +7,7 @@ import edu.pitt.medschool.model.dao.AggregationDao;
 import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
 import edu.pitt.medschool.model.dto.AggregationDb;
+import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 import edu.pitt.medschool.model.dto.Version;
 import edu.pitt.medschool.service.AggregationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,13 @@ public class AggregationDBController {
     public RestfulResponse getDBs(){
         RestfulResponse response = new RestfulResponse(1, "");
         response.setData(aggregationService.selectAllAvailableDBs());
+        return response;
+    }
+    
+    @PostMapping("/getUsableDBs")
+    @ResponseBody
+    public RestfulResponse getUsableDBs(@RequestBody(required = true) ExportWithBLOBs jobparam, RestfulResponse response) {
+        response.setData(aggregationService.selectAllUsableDBs(jobparam));
         return response;
     }
     

@@ -193,7 +193,7 @@
                         <div class="modal-header">
                             <h5 class="modal-title pull-left">Export Query (to be linked to SUBMIT-JOB button)</h5>
                         </div>
-                        <div class="modal-body">
+                        <!-- <div class="modal-body">
                             <div class="row">
                                 <div class="col-sm-12 col-md-12">
                                     <label>Using AR / Non-AR data</label>
@@ -263,7 +263,7 @@
                           		  </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="modal-footer">
                             <button type="button" class="btn btn-link" data-dismiss="modal" id = cancelButton>Cancel</button>
                             <button type="button" class="btn btn-primary" data-dismiss="modal" id="submitJobButton">Submit Job</button>
@@ -420,19 +420,55 @@
                             <div class="col-sm-12 col-md-12" style="height: 15px"></div>
 
                         </div> -->
-                            <div class="col-sm-12 col-md-12">
-                                <div class="col-sm-12 col-md-12" >
-                                    <label>Choose database you want to export from</label>
-                                 <select class="custom-select" style="height: 100px"
-                                            data-placeholder="Select database" id="databases"
-                                            size="15">
-                                        <option th:value="${database}"
-                                                th:each="database : ${databases}"
-                                                th:text="${database}"></option>
-                                       </select>
-                                </div>
+                    <div class="col-sm-12 col-md-12">
+                        <button type="button" class="btn btn-primary btn-lg btn-block" id="refresh">Refresh</button>
+                        <div class="col-sm-12 col-md-12" >
+                            <div class="table-responsive">
+                                <table id="usableAggdbTable" class="table table-bordered">
+                                    <thead class="thead-default">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>ArType</th>
+                                            <th>Time cost</th>
+                                            <th>Patients</th>
+                                            <th>Database size</th>
+                                            <th>Version</th>
+                                            <th>Comment</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="cursor: pointer">
+                                        <tr>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+
+            <div class="card" th:if="${edit} == true">
+                <div class="card-body">
+                    <div class="col-sm-12 col-md-12" >
+                        <div class="table-responsive">
+                            <table id="MLmodelInfo" class="table table-bordered">
+                                <thead class="thead-default">
+                                    <tr>
+                                        <th>Time Level</th>
+                                        <th>Model Name</th>
+                                        <th>Agg Method</th>
+                                        <th>Feature Group</th>
+                                        <th>Accuracy</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="cursor: pointer">
+                                    <tr>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
 
 
@@ -465,8 +501,6 @@
                             </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
 

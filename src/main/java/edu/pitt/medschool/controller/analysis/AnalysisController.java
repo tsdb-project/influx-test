@@ -673,7 +673,7 @@ public class AnalysisController {
         return response;
     }
 
-    /*
+    /**
      * @author  Wu Yue
      * visualize patients
      * {options}: {2 attributes Selected}*/

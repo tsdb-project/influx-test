@@ -32,6 +32,17 @@ public class AggregationDao {
         return aggregationDbMapper.selectByExample(example);
     }
     
+    public List<AggregationDb> selectAllUsableDBs(ExportWithBLOBs jobparam) {
+        AggregationDbExample example = new AggregationDbExample();
+        AggregationDbExample.Criteria criteria = example.createCriteria();
+        criteria.andStatusEqualTo("success");
+        System.out.println(jobparam.getPatientList());
+        System.out.println(jobparam.getAr());
+        criteria.andArtypeEqualTo(jobparam.getAr());
+        return aggregationDbMapper.selectByExample(example);
+    }
+    
+    
     /*
      * Tianfang Ma
      * Navigator in 2019
@@ -77,6 +88,7 @@ public class AggregationDao {
         }
         return aggregationDatabaseMapper.selectByExample(example);
     }
+
 
 //    public int setNewDB(AggregationDatabaseWithBLOBs database) {
 //        return aggregationDatabaseMapper.insert(database);
