@@ -172,23 +172,51 @@ $(document).ready(function() {
         return suggest;
     }
 
-    var usableAggDB = {
-        0: {
-            id: 1,
-            version: 0,
-            createTime: "2020-02-01T00:00:00",
-            status: "success",
-            total: 2632,
-            finished: 2632,
-            artype: true,
-            timeCost: "3600",
-            nday: 3,
-            comment: null,
-            dbSize: 20000,
-            pidList: null
-        }
-    };
-    
+    var usableAggDB = [{
+            // id: null,
+            // version: null,
+            // createTime: null,
+            // status: null,
+            // total: null,
+            // finished: null,
+            // artype: null,
+            // timeCost: null,
+            // nday: 0,
+            // comment: null,
+            // dbSize: null,
+            // pidList: null
+        }];
+
+    var usableTable = $('#usableAggdbTable').DataTable({
+        data : usableAggDB,
+        columns: [ {
+            data : 'id'
+        }, {
+            data : null,
+            render : function(data) {
+                console.log('ar: ' + data);
+                return data.artype ? "AR" : "NOAR";
+            }
+        }, {
+            data : 'timeCost'
+        }, {
+            data : null,
+            render: function(data) {
+                return data.pidList == null ? "ALL" : "SOME";
+            }
+        }, {
+            data : 'dbSize'
+        }, {
+            data : 'version'
+        }, {
+            data : null,
+            render : function(data, type, row, meta) {
+                console.log(meta);
+                return '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
+            }
+        }]
+    });
+
     //auto refresh useable Databases table
     $('#refresh').click(function() {
         console.log("click");
@@ -212,45 +240,15 @@ $(document).ready(function() {
             success: function (data) {
                 usableAggDB = data.data;
                 console.log(usableAggDB);
+                usableTable.clear().rows.add(usableAggDB).draw();
             }
         });
 
-        usableTable.ajax.reload();
-        
-        
     });
 
-    $.fn.dataTable.moment('M/D/YYYY, hh:mm:ss a');
-    var usableTable = $('#usableAggdbTable').DataTable({
-        data : usableAggDB,
-        columns: [ {
-            data : 'id'
-        }, {
-            data : null,
-            render : function(data) {
-                console.log('ar: ' + data);
-                return data.artype ? "AR" : "NOAR";
-            }
-        }, {
-            data : 'timeCost'
-        }, {
-            data : null,
-            render: function(data) {
-                return data.pidList == null ? "ALL" : 'pidList';
-            }
-        }, {
-            data : 'dbSize'
-        }, {
-            data : 'version'
-        }, {
-            data : null,
-            render : function(data, type, row, meta) {
-                console.log(meta);
-                return '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
-            }
-        }]
-    });
-   
+    
+
+
 
     $('#comment-modal').on('show.bs.modal', function(event) {
         var button = $(event.relatedTarget);
