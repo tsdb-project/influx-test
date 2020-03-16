@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/aggregation")
@@ -146,8 +147,20 @@ public class AggregationDBController {
     
     @PostMapping("/getMLmodels")
     @ResponseBody
-    public RestfulResponse getMLmodels() {
-		return null;
+    public List<MlModel> getMLmodels(@RequestBody(required = true) Map<Integer, Boolean> suggest) {
+    	System.out.println(suggest.toString());
+    	List<Integer> aggLevels = new ArrayList<>();
+    	List<String> aggMethods = new ArrayList<>();
+    	suggest.forEach((timeLevel, suggestion) -> {
+    		if (suggestion == true) {
+    			aggLevels.add(timeLevel);
+    		}
+    	});
+    	//unfinish: aggMethods
+    	aggMethods.add("sum");
+    	aggMethods.add("mean");
+    	aggMethods.add("std");
+		return mlModelDao.selectMlModelsByTimeLevelAndAggMethod(aggLevels, aggMethods);
     	
     	
     }
@@ -155,8 +168,6 @@ public class AggregationDBController {
     @PostMapping("/importMLmodels")
     @ResponseBody
     public RestfulResponse insertMLmodels(@RequestBody(required = true) List<MlModel> mlModels) {
-    	System.out.println("test: " + mlModels.get(0).getId());
-    	System.out.println("test: " + mlModels.get(0).getAccuracyScore());
     	for (MlModel eachModel : mlModels) {
     		mlModelDao.insertNewMlModel(eachModel);
     	}

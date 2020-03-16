@@ -187,6 +187,20 @@ $(document).ready(function() {
             pidList: null
         }];
 
+    var selectedMlModels = [{
+            id: 'NULL',
+            iteration: null,
+            pipelineName: null,
+            pipeline: null,
+            mlMethod: null,
+            aggLevel: null,
+            aggMethod: null,
+            featureSet: null,
+            accuracyScore: null,
+            threshold: null,
+            thresholdStandard: null
+        }];
+
     var usableTable = $('#usableAggdbTable').DataTable({
         data : usableAggDB,
         columns: [ {
@@ -218,6 +232,23 @@ $(document).ready(function() {
         }]
     });
 
+    var mlModelTable = $('#MLmodelInfo').DataTable({
+        data : selectedMlModels,
+        columns: [ {
+            data : 'id'
+        }, {
+            data : 'aggLevel'
+        }, {
+            data : 'mlMethod'
+        }, {
+            data : 'aggMethod'
+        }, {
+            data : 'featureSet'
+        }, {
+            data : 'accuracyScore'
+        }]
+    });
+
     //auto refresh useable Databases table
     $('#refresh').click(function() {
         console.log("click");
@@ -225,8 +256,9 @@ $(document).ready(function() {
         var origin = $("#origin").val() * $("#origin_unit").val();
         var duration = $("#duration").val() * $("#duration_unit").val();
         var dsMethod = $('#method').val();
-        console.log(patientList);
-        console.log(usableTimeLevel(period, origin, duration));
+        // console.log(patientList);
+        var timeLevelSuggest = usableTimeLevel(period, origin, duration);
+        console.log(timeLevelSuggest);
         var para = {
             // "dsmethod": dsMethod, //not important
             "patientList": patientList,
@@ -254,7 +286,14 @@ $(document).ready(function() {
         $.ajax({
             url: "/aggregation/getMLmodels",
             type: 'post',
-            data: JSON.stringify()
+            data: JSON.stringify(timeLevelSuggest),
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                selectedMlModels = data;
+                // console.log(selectedMlModels);
+                mlModelTable.clear().rows.add(selectedMlModels).draw();
+            }
         });
 
         //import all mlModels

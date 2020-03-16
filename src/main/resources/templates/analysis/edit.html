@@ -165,12 +165,12 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">    
+                                <!-- <div class="row">    
                                     <div class="col-sm-4 col-md-4">
                                     	<label>Choose parameters you want to export</label>
                                     	<button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#param-modal" id="param">Param</button>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div class="row">
@@ -359,7 +359,8 @@
                 </div>
             </div>
 
-
+            <button type="button" class="btn btn-primary btn-lg btn-block" id="refresh">Refresh</button>
+            
             <div class="card" th:if="${edit} == true">
                 <div class="card-body">
                     <h4 class="card-title">Choose from aggregated databases</h4>
@@ -421,7 +422,7 @@
 
                         </div> -->
                     <div class="col-sm-12 col-md-12">
-                        <button type="button" class="btn btn-primary btn-lg btn-block" id="refresh">Refresh</button>
+                        
                         <div class="col-sm-12 col-md-12" >
                             <div class="table-responsive">
                                 <table id="usableAggdbTable" class="table table-bordered">
@@ -476,11 +477,12 @@
                             <table id="MLmodelInfo" class="table table-bordered">
                                 <thead class="thead-default">
                                     <tr>
-                                        <th>Time Level</th>
+                                        <th>ID</th>
+                                        <th>Time Level(s)</th>
                                         <th>Model Name</th>
                                         <th>Agg Method</th>
                                         <th>Feature Group</th>
-                                        <th>Accuracy</th>
+                                        <th>Accuracy Score</th>
                                     </tr>
                                 </thead>
                                 <tbody style="cursor: pointer">

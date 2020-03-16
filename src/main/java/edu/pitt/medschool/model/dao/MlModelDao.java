@@ -19,10 +19,11 @@ public class MlModelDao {
 	MlModelMapper mlModelMapper;
 	
 	@Transactional
-	public List<MlModel> selectMlModelsByTimeLevelAndAggMethod(Integer aggLevel, String aggMethod){
+	public List<MlModel> selectMlModelsByTimeLevelAndAggMethod(List<Integer> aggLevels, List<String> aggMethods){
         MlModelExample example = new MlModelExample();
         MlModelExample.Criteria criteria = example.createCriteria();
-        criteria.andAggMethodIn(null);
+        criteria.andAggLevelIn(aggLevels);
+        criteria.andAggMethodIn(aggMethods);
         return mlModelMapper.selectByExample(example);
 	    
 		
