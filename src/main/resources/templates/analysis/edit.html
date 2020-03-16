@@ -446,7 +446,28 @@
                     </div>
                 </div>
             </div>
-
+            <div class="modal fade" id="comment-modal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title pull-left">Comment</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12">
+                                    <label id="agg_db_id"></label>
+                                    <textarea rows="10" cols="40" id="agg_db_comment" placeholder="No comments"></textarea>
+                                </div>
+                                <div class="col-sm-12 col-md-12" style="height: 15px"></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-link" data-dismiss="modal" id="edit_comment">edit</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="card" th:if="${edit} == true">
                 <div class="card-body">

@@ -173,18 +173,18 @@ $(document).ready(function() {
     }
 
     var usableAggDB = [{
-            // id: null,
-            // version: null,
-            // createTime: null,
-            // status: null,
-            // total: null,
-            // finished: null,
-            // artype: null,
-            // timeCost: null,
-            // nday: 0,
-            // comment: null,
-            // dbSize: null,
-            // pidList: null
+            id: "NULL",
+            version: "NULL",
+            createTime: null,
+            status: null,
+            total: null,
+            finished: null,
+            artype: null,
+            timeCost: null,
+            nday: 0,
+            comment: null,
+            dbSize: null,
+            pidList: null
         }];
 
     var usableTable = $('#usableAggdbTable').DataTable({
@@ -202,7 +202,7 @@ $(document).ready(function() {
         }, {
             data : null,
             render: function(data) {
-                return data.pidList == null ? "ALL" : "SOME";
+                return data.pidList == null ? "ALL" : data.pidList;
             }
         }, {
             data : 'dbSize'
@@ -212,7 +212,8 @@ $(document).ready(function() {
             data : null,
             render : function(data, type, row, meta) {
                 console.log(meta);
-                return '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
+                buttonHTML = data.id == 'NULL' ? ' ' : '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
+                return buttonHTML;
             }
         }]
     });
@@ -231,6 +232,10 @@ $(document).ready(function() {
             "patientList": patientList,
             "ar": $('#ar label.active input').val() == "true"
         }
+        //The following $ajax(): get usable DBs (with right arType)
+        //to do: right patientlist, right timelevel
+        //the agg_db table has no timelevel field
+        //2020.3.15
         $.ajax({
             url: "/aggregation/getUsableDBs",
             type: 'post',
@@ -240,12 +245,37 @@ $(document).ready(function() {
             success: function (data) {
                 usableAggDB = data.data;
                 console.log(usableAggDB);
+                //refresh the DB table
                 usableTable.clear().rows.add(usableAggDB).draw();
             }
         });
 
+        
+        $.ajax({
+            url: "/aggregation/getMLmodels",
+            type: 'post',
+            data: JSON.stringify()
+        });
+
+        //import all mlModels
+        //stupid. This can be totally done by python(to_sql), but failed.
+        //Sixuan Huang
+        // $.ajax( {
+        //     url: "/aggregation/importMLmodels",
+        //     type: 'post',
+        //     data: JSON.stringify(testmlModel),
+        //     contentType: "application/json",
+        //     dataType: 'json',
+        //     success: function(data){
+        //         console.log(data);
+        //     }
+        // });
+
     });
 
+   
+
+      
     
 
 

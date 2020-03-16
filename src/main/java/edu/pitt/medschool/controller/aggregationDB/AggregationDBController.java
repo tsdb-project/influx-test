@@ -4,10 +4,12 @@ package edu.pitt.medschool.controller.aggregationDB;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.model.dao.AggregationDao;
+import edu.pitt.medschool.model.dao.MlModelDao;
 import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
 import edu.pitt.medschool.model.dto.AggregationDb;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
+import edu.pitt.medschool.model.dto.MlModel;
 import edu.pitt.medschool.model.dto.Version;
 import edu.pitt.medschool.service.AggregationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,8 @@ public class AggregationDBController {
 
     @Autowired
     AggregationService aggregationService;
+    @Autowired
+    MlModelDao mlModelDao;
 
 //    @Autowired
 //    ColumnService columnService;
@@ -139,4 +143,27 @@ public class AggregationDBController {
         aggregationService.updateComment(aggregationdb);
         return new RestfulResponse(1, "success");
     }
+    
+    @PostMapping("/getMLmodels")
+    @ResponseBody
+    public RestfulResponse getMLmodels() {
+		return null;
+    	
+    	
+    }
+    
+    @PostMapping("/importMLmodels")
+    @ResponseBody
+    public RestfulResponse insertMLmodels(@RequestBody(required = true) List<MlModel> mlModels) {
+    	System.out.println("test: " + mlModels.get(0).getId());
+    	System.out.println("test: " + mlModels.get(0).getAccuracyScore());
+    	for (MlModel eachModel : mlModels) {
+    		mlModelDao.insertNewMlModel(eachModel);
+    	}
+    	
+		return new RestfulResponse(1, "success");
+    	
+    	
+    }
+    
 }
