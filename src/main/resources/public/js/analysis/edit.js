@@ -237,7 +237,10 @@ $(document).ready(function() {
         columns: [ {
             data : 'id'
         }, {
-            data : 'aggLevel'
+            data : null,
+            render : function(data){
+                return data.aggLevel / 60 + " min"
+            }
         }, {
             data : 'mlMethod'
         }, {
