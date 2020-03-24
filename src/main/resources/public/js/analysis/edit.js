@@ -285,7 +285,7 @@ $(document).ready(function() {
         //the agg_db table has no timelevel field
         //2020.3.15
         $.ajax({
-            url: "/aggregation/getUsableDataBases",
+            url: "/aggregation/getUsableDatabases",
             type: 'post',
             data: JSON.stringify(para),
             contentType: "application/json",
