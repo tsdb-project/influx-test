@@ -770,8 +770,8 @@ public class AggregationService {
      * @author Sixuan Huang
      * @return
      */
-    public List<AggregationDb> selectAllUsableDBs(ExportWithBLOBs jobparam) {
-        return aggregationDao.selectAllUsableDBs(jobparam);
+    public List<AggregationDatabase> selectAllUsableDataBases(ExportWithBLOBs jobparam) {
+        return aggregationDao.selectAllUsableDataBases(jobparam);
     }
     
     /**

@@ -153,6 +153,7 @@ $(document).ready(function() {
     //suggest usable time levels
     //whether dsMethod counts: ML models use "stds" in high time-levels, so it can wait...
     //not considered now 
+    var timeLevelSuggest = null;
     function usableTimeLevel(period, origin, duration) {
         var suggest = {
             "1": true,
@@ -174,16 +175,16 @@ $(document).ready(function() {
 
     var usableAggDB = [{
             id: "NULL",
+            dbName: null,
             version: "NULL",
+            aggaregatedTime: null,
             createTime: null,
+            columns: null,
             status: null,
             total: null,
             finished: null,
             artype: null,
             timeCost: null,
-            nday: 0,
-            comment: null,
-            dbSize: null,
             pidList: null
         }];
 
@@ -206,11 +207,23 @@ $(document).ready(function() {
         columns: [ {
             data : 'id'
         }, {
+            data : 'dbName'
+        }, {
+            data : null,
+            render : function(data) {
+                if (timeLevelSuggest == null) {
+                    return '-';
+                }
+                return timeLevelSuggest[data.aggaregatedTime] ? data.aggaregatedTime : data.aggaregatedTime + " not usable";
+            }
+        }, {
             data : null,
             render : function(data) {
                 console.log('ar: ' + data);
                 return data.artype ? "AR" : "NOAR";
             }
+        }, {
+            data : 'createTime'
         }, {
             data : 'timeCost'
         }, {
@@ -222,13 +235,13 @@ $(document).ready(function() {
             data : 'dbSize'
         }, {
             data : 'version'
-        }, {
-            data : null,
-            render : function(data, type, row, meta) {
-                console.log(meta);
-                buttonHTML = data.id == 'NULL' ? ' ' : '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
-                return buttonHTML;
-            }
+        // }, {
+        //     data : null,
+        //     render : function(data, type, row, meta) {
+        //         console.log(meta);
+        //         buttonHTML = data.id == 'NULL' ? ' ' : '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
+        //         return buttonHTML;
+        //     }
         }]
     });
 
@@ -257,7 +270,7 @@ $(document).ready(function() {
         var duration = $("#duration").val() * $("#duration_unit").val();
         var dsMethod = $('#method').val();
         // console.log(patientList);
-        var timeLevelSuggest = usableTimeLevel(period, origin, duration);
+        timeLevelSuggest = usableTimeLevel(period, origin, duration);
         console.log(timeLevelSuggest);
         var para = {
             // "dsmethod": dsMethod, //not important
@@ -269,7 +282,7 @@ $(document).ready(function() {
         //the agg_db table has no timelevel field
         //2020.3.15
         $.ajax({
-            url: "/aggregation/getUsableDBs",
+            url: "/aggregation/getUsableDataBases",
             type: 'post',
             data: JSON.stringify(para),
             contentType: "application/json",

@@ -32,14 +32,14 @@ public class AggregationDao {
         return aggregationDbMapper.selectByExample(example);
     }
     
-    public List<AggregationDb> selectAllUsableDBs(ExportWithBLOBs jobparam) {
-        AggregationDbExample example = new AggregationDbExample();
-        AggregationDbExample.Criteria criteria = example.createCriteria();
+    public List<AggregationDatabase> selectAllUsableDataBases(ExportWithBLOBs jobparam) {
+        AggregationDatabaseExample example = new AggregationDatabaseExample();
+        AggregationDatabaseExample.Criteria criteria = example.createCriteria();
         criteria.andStatusEqualTo("success");
         System.out.println(jobparam.getPatientList());
         System.out.println(jobparam.getAr());
         criteria.andArtypeEqualTo(jobparam.getAr());
-        return aggregationDbMapper.selectByExample(example);
+        return aggregationDatabaseMapper.selectByExample(example);
     }
     
     
