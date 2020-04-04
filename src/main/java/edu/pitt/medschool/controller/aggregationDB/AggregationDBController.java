@@ -51,10 +51,11 @@ public class AggregationDBController {
         return response;
     }
     
-    @PostMapping("/getUsableDatabases")
+
+    @PostMapping("/getUsableDBs")
     @ResponseBody
-    public RestfulResponse getUsableDatabases(@RequestBody(required = true) ExportWithBLOBs jobparam, RestfulResponse response) {
-        response.setData(aggregationService.selectAllUsableDataBases(jobparam));
+    public RestfulResponse getUsableDBs(@RequestBody(required = true) ExportWithBLOBs jobparam, RestfulResponse response) {
+        response.setData(aggregationService.selectAllUsableDBs(jobparam));
         return response;
     }
     
