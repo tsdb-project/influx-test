@@ -8,14 +8,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletResponse;
 
 
 import edu.pitt.medschool.config.DBConfiguration;
-import edu.pitt.medschool.controller.analysis.vo.*;
 import edu.pitt.medschool.model.PatientTimeLine;
 import edu.pitt.medschool.model.WrongPatientsNum;
 import edu.pitt.medschool.model.Wrongpatients;
@@ -44,9 +47,12 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 
+import edu.pitt.medschool.controller.analysis.vo.ColumnVO;
+import edu.pitt.medschool.controller.analysis.vo.DownsampleEditResponse;
+import edu.pitt.medschool.controller.analysis.vo.ElectrodeVO;
+import edu.pitt.medschool.controller.analysis.vo.MedicalDownsampleEditResponse;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
 import edu.pitt.medschool.framework.util.Util;
-
 
 /**
  * @author Isolachine
@@ -64,6 +70,7 @@ public class AnalysisController {
     ValidateCsvService validateCsvService;
     @Autowired
     PatientMedInfoService patientMedInfoService;
+
     @Autowired
     ColumnService columnService;
     @Autowired
@@ -120,14 +127,6 @@ public class AnalysisController {
     public Model chartPage(Model model) {
         model.addAttribute("nav", "management");
         model.addAttribute("subnav", "chart");
-        return model;
-    }
-
-    @RequestMapping("analysis/visualizepatient")
-    @ResponseBody
-    public Model aggregateChartPage(Model model) {
-        model.addAttribute("nav", "management");
-        model.addAttribute("subnav", "visualizepatient");
         return model;
     }
 
@@ -582,10 +581,8 @@ public class AnalysisController {
     @DeleteMapping("api/export/export/{id}")
     @ResponseBody
     public RestfulResponse deleteExportQuery(@PathVariable(value = "id", required = true) Integer jobId,
-
-            RestfulResponse response) throws IOException {
-        if (exportService.deleteExportJobById(jobId) == 1 && analysisService.deleteFileDir(jobId) == 1) {
-
+            RestfulResponse response) {
+        if (exportService.deleteExportJobById(jobId) == 1) {
             response.setCode(1);
             response.setMsg("Successfully deleted job.");
         } else {
@@ -598,7 +595,7 @@ public class AnalysisController {
     @DeleteMapping("api/export/stop/{id}")
     @ResponseBody
     public RestfulResponse stopExportQuery(@PathVariable(value = "id", required = true) Integer jobId,
-                                           RestfulResponse response) {
+            RestfulResponse response) {
         int res = analysisService.removeOneExportJob(jobId);
         if (res == 1) {
             response.setCode(1);
@@ -644,7 +641,7 @@ public class AnalysisController {
 
     @GetMapping(value = "download", params = { "path", "id" })
     public StreamingResponseBody getSteamingFile(HttpServletResponse response, @RequestParam("path") String path,
-                                                 @RequestParam("id") Integer id) throws IOException {
+            @RequestParam("id") Integer id) throws IOException {
         response.setContentType("application/zip");
         Path p = Paths.get(".", path);
         response.setContentLengthLong(Files.size(p));
@@ -670,46 +667,6 @@ public class AnalysisController {
         RestfulResponse response = new RestfulResponse(1, "Finished");
         String msg = exportPostProcessingService.transform(columnGroun);
         response.setData(msg);
-        return response;
-    }
-
-    /**
-     * @author  Wu Yue
-     * visualize patients
-     * {options}: {2 attributes Selected}*/
-    @GetMapping("/apis/data/patients/{options}")
-    @ResponseBody
-    public RestfulResponse postProcessing(@PathVariable String options) throws IOException {
-    	
-        List<String> result = CsvReader.init("src/main/resources/public/csv/attributes.csv");
-    	String[] optionsParsed = options.split(",");
-        String attr1 = optionsParsed[0];
-        String attr2 = optionsParsed[1];
-
-        List<List<String>> parsed = new ArrayList();
-        //System.out.println(result.get(0));
-        result.forEach(row -> {
-            List<String> parsedRow = Arrays.asList(row.split(","));
-            parsed.add(parsedRow);
-        });
-
-        List<List<String>> filteredResult = new ArrayList();
-        parsed.forEach(row -> {
-            List<String> temp = new ArrayList();
-            String pid = row.get(0).replaceAll("\"", "");
-
-            temp.add(pid);
-
-            temp.add(row.get(Integer.parseInt(attr1)).replaceAll("\"", ""));
-            temp.add(row.get(Integer.parseInt(attr2)).replaceAll("\"", ""));
-
-            filteredResult.add(temp);
-        });
-
-
-        RestfulResponse response = new RestfulResponse(1, "Finished");
-        //return 2 selected attribute values
-        response.setData(filteredResult);
         return response;
     }
 

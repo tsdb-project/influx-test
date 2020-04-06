@@ -3,7 +3,6 @@ package edu.pitt.medschool.model.dto;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Date;
 
 public class AggregationDbExample {
     /**
@@ -294,52 +293,52 @@ public class AggregationDbExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeEqualTo(Date value) {
+		public Criteria andCreateTimeEqualTo(LocalDateTime value) {
 			addCriterion("create_time =", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotEqualTo(Date value) {
+		public Criteria andCreateTimeNotEqualTo(LocalDateTime value) {
 			addCriterion("create_time <>", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeGreaterThan(Date value) {
+		public Criteria andCreateTimeGreaterThan(LocalDateTime value) {
 			addCriterion("create_time >", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeGreaterThanOrEqualTo(Date value) {
+		public Criteria andCreateTimeGreaterThanOrEqualTo(LocalDateTime value) {
 			addCriterion("create_time >=", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeLessThan(Date value) {
+		public Criteria andCreateTimeLessThan(LocalDateTime value) {
 			addCriterion("create_time <", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeLessThanOrEqualTo(Date value) {
+		public Criteria andCreateTimeLessThanOrEqualTo(LocalDateTime value) {
 			addCriterion("create_time <=", value, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeIn(List<Date> values) {
+		public Criteria andCreateTimeIn(List<LocalDateTime> values) {
 			addCriterion("create_time in", values, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotIn(List<Date> values) {
+		public Criteria andCreateTimeNotIn(List<LocalDateTime> values) {
 			addCriterion("create_time not in", values, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeBetween(Date value1, Date value2) {
+		public Criteria andCreateTimeBetween(LocalDateTime value1, LocalDateTime value2) {
 			addCriterion("create_time between", value1, value2, "createTime");
 			return (Criteria) this;
 		}
 
-		public Criteria andCreateTimeNotBetween(Date value1, Date value2) {
+		public Criteria andCreateTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
 			addCriterion("create_time not between", value1, value2, "createTime");
 			return (Criteria) this;
 		}
@@ -724,136 +723,6 @@ public class AggregationDbExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andCommentIsNull() {
-			addCriterion("comment is null");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentIsNotNull() {
-			addCriterion("comment is not null");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentEqualTo(String value) {
-			addCriterion("comment =", value, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentNotEqualTo(String value) {
-			addCriterion("comment <>", value, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentGreaterThan(String value) {
-			addCriterion("comment >", value, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentGreaterThanOrEqualTo(String value) {
-			addCriterion("comment >=", value, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentLessThan(String value) {
-			addCriterion("comment <", value, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentLessThanOrEqualTo(String value) {
-			addCriterion("comment <=", value, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentLike(String value) {
-			addCriterion("comment like", value, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentNotLike(String value) {
-			addCriterion("comment not like", value, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentIn(List<String> values) {
-			addCriterion("comment in", values, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentNotIn(List<String> values) {
-			addCriterion("comment not in", values, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentBetween(String value1, String value2) {
-			addCriterion("comment between", value1, value2, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentNotBetween(String value1, String value2) {
-			addCriterion("comment not between", value1, value2, "comment");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeIsNull() {
-			addCriterion("db_size is null");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeIsNotNull() {
-			addCriterion("db_size is not null");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeEqualTo(Integer value) {
-			addCriterion("db_size =", value, "dbSize");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeNotEqualTo(Integer value) {
-			addCriterion("db_size <>", value, "dbSize");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeGreaterThan(Integer value) {
-			addCriterion("db_size >", value, "dbSize");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeGreaterThanOrEqualTo(Integer value) {
-			addCriterion("db_size >=", value, "dbSize");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeLessThan(Integer value) {
-			addCriterion("db_size <", value, "dbSize");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeLessThanOrEqualTo(Integer value) {
-			addCriterion("db_size <=", value, "dbSize");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeIn(List<Integer> values) {
-			addCriterion("db_size in", values, "dbSize");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeNotIn(List<Integer> values) {
-			addCriterion("db_size not in", values, "dbSize");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeBetween(Integer value1, Integer value2) {
-			addCriterion("db_size between", value1, value2, "dbSize");
-			return (Criteria) this;
-		}
-
-		public Criteria andDbSizeNotBetween(Integer value1, Integer value2) {
-			addCriterion("db_size not between", value1, value2, "dbSize");
-			return (Criteria) this;
-		}
-
 		public Criteria andStatusLikeInsensitive(String value) {
 			addCriterion("upper(status) like", value.toUpperCase(), "status");
 			return (Criteria) this;
@@ -861,11 +730,6 @@ public class AggregationDbExample {
 
 		public Criteria andTimeCostLikeInsensitive(String value) {
 			addCriterion("upper(time_cost) like", value.toUpperCase(), "timeCost");
-			return (Criteria) this;
-		}
-
-		public Criteria andCommentLikeInsensitive(String value) {
-			addCriterion("upper(comment) like", value.toUpperCase(), "comment");
 			return (Criteria) this;
 		}
 	}

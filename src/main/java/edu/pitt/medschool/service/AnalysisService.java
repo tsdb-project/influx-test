@@ -30,7 +30,6 @@ import edu.pitt.medschool.model.PatientTimeLine;
 import edu.pitt.medschool.model.dao.*;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +54,6 @@ import edu.pitt.medschool.model.dto.MedicalDownsample;
 import edu.pitt.medschool.model.dto.MedicalDownsampleGroup;
 import edu.pitt.medschool.model.dto.Medication;
 import okhttp3.OkHttpClient;
-
-import org.apache.commons.io.FileUtils;
 
 /**
  * Export functions
@@ -160,22 +157,13 @@ public class AnalysisService {
      * Internal use only, export (downsample) a single query to files
      */
     private void mainExportProcess(ExportWithBLOBs job) {
-    	String jobFromdb = job.getFromDb() == null ? "data" : job.getFromDb();
-    	System.out.println(String.format("Database %s start export!", job.getFromDb()));
-//    	if(jobFromdb != null && jobFromdb != "data") {
-//    		//from agg database, not base database
-//    		InfluxDB toSwitchDBlayer = generateIdbClient(false);
-//            String command = "use " + jobFromdb;
-//            toSwitchDBlayer.query(new Query(command));
-//            toSwitchDBlayer.close();
-//    	}
         int jobId = job.getId();
         int queryId = job.getQueryId();
         Downsample exportQuery = downsampleDao.selectByPrimaryKey(queryId);
         boolean isPscRequired = job.getDbType().equals("psc");
 
         // Create output folder, if failed, finish this process
-        File outputDir = generateOutputDir(jobId, exportQuery.getAlias(), null);
+        File outputDir = generateOutputDir(exportQuery.getAlias(), null);
         if (outputDir == null)
             return;
 
@@ -212,7 +200,6 @@ public class AnalysisService {
         ExportOutput outputWriter;
         try {
             outputWriter = new ExportOutput(outputDir.getAbsolutePath(), columnLabelName, exportQuery, job);
-        	outputWriter.writeMetaFile(String.format("From database: %s. %n", jobFromdb));
         } catch (IOException e) {
             logger.error("Export writer failed to create: {}", Util.stackTraceErrorToString(e));
             jobClosingHandler(false, isPscRequired, job, outputDir, null, 0);
@@ -296,7 +283,6 @@ public class AnalysisService {
 
                     // get version condition
                     List<PatientTimeLine> files = validateCsvService.getPatientTimeLinesByVersionID("realpsc",usersService.getVersionByUserName(job.getUsername()),patientId);
-                    //System.out.println("usersService.getVersionByUserName(job.getUsername()) = " + usersService.getVersionByUserName(job.getUsername()));
                     String versionCondition = versionDao.getVersionCondition(files);
                     if(files.isEmpty()){
                         outputWriter.writeMetaFile(String.format("  PID <%s> is not available in this version.%n", patientId));
@@ -304,40 +290,24 @@ public class AnalysisService {
                         exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
                         continue;
                     }
-                   
                     // First get the group by time offset
-                    //HSX here to change
-//                    ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
-//                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') and "+versionCondition+" GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
-//                            patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
-                    ResultTable[] testOffset = null;
-                    if(jobFromdb.equals("data")) {
-                    	testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
-                              "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') and "+versionCondition+" GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
-                              patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
-                    	System.out.println(jobFromdb + ": " + testOffset.length);
-                    }
-                    else {
-                    	testOffset = InfluxUtil.justQueryData(jobFromdb, influxDB, true, String.format(
-                                "SELECT count(max_I1_1) From \"%s\" WHERE (arType='%s') GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
-                                patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
-                    }
+                    ResultTable[] testOffset = InfluxUtil.justQueryData(influxDB, true, String.format(
+                            "SELECT time, count(Time) From \"%s\" WHERE (arType='%s') and "+versionCondition+" GROUP BY time(%ds) fill(none) ORDER BY time ASC LIMIT 1",
+                            patientId, job.getAr() ? "ar" : "noar", exportQuery.getPeriod()));
                     if (testOffset.length != 1) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> don't have enough data to export.%n", patientId));
                         finishedPatientCounter.getAndIncrement();
                         exportDao.updatePatientFinishedNum(job.getId(),finishedPatientCounter.get());
-                        logger.info(String.format("write txt:  PID <%s> don't have enough data to export.%n", patientId));
                         continue;
                     }
                     // Then fetch meta data regrading file segments and build the query string
                     List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, patientId,versionCondition);
                     // get the startTime eliminate first 30 rows
-                    String startTime = AnalysisUtil.getPatientStartTime(jobFromdb, influxDB,logger,patientId,job.getAr(),versionCondition);
-                    ExportQueryBuilder eq = new ExportQueryBuilder(jobFromdb, Instant.parse(startTime),
+                    String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,patientId,job.getAr(),versionCondition);
+                    ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime),
                             Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
                             job.getAr(),versionCondition);
                     String finalQueryString = eq.getQueryString();
-                    //System.out.println("finalQueryString for " + patientId + ": " + finalQueryString);
                     logger.info(finalQueryString);
                     if (finalQueryString.isEmpty()) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> no available data.%n", patientId));
@@ -346,8 +316,8 @@ public class AnalysisService {
                         continue;
                     }
                     logger.debug("Query for <{}>: {}", patientId, finalQueryString);
-                    // Execute the query
-                    ResultTable[] res = InfluxUtil.justQueryData(jobFromdb, influxDB, true, finalQueryString);
+                    // Execuate the query
+                    ResultTable[] res = InfluxUtil.justQueryData(influxDB, true, finalQueryString);
 
                     if (res.length != 1) {
                         outputWriter.writeMetaFile(String.format("  PID <%s> incorrect result from database.%n", patientId));
@@ -421,7 +391,7 @@ public class AnalysisService {
         MedicalDownsample exportQuery = medicalDownsampleDao.selectByPrimaryKey(queryId);
         boolean isPscRequired = job.getDbType().equals("psc");
         // create output folder, if failed finish this process
-        File outputDir = generateOutputDir(jobId, exportQuery.getAlias(), null);
+        File outputDir = generateOutputDir(exportQuery.getAlias(), null);
         if (outputDir == null) {
             return;
         }
@@ -601,7 +571,7 @@ public class AnalysisService {
                         continue;
                     }
                     // Then fetch meta data regrading file segments and build the query string
-                    List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan("data", influxDB, logger, onerecord.getId(),versionCondition);
+                    List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, onerecord.getId(),versionCondition);
                     String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,onerecord.getId(),job.getAr(),versionCondition);
                     ExportMedicalQueryBuilder eq = new ExportMedicalQueryBuilder(Instant.parse(startTime),
                             Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb, groups, columns, exportQuery,
@@ -822,9 +792,9 @@ public class AnalysisService {
                 logger.info("no enough data");
             }
             // Then fetch meta data regrading file segments and build the query string
-            List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan("data", influxDB, logger, eegChart.getPatientID(),versionCondition);
+            List<DataTimeSpanBean> dtsb = AnalysisUtil.getPatientAllDataSpan(influxDB, logger, eegChart.getPatientID(),versionCondition);
             String startTime = AnalysisUtil.getPatientStartTime(influxDB,logger,eegChart.getPatientID(),eegChart.isAr(),versionCondition);
-            ExportQueryBuilder eq = new ExportQueryBuilder("data", Instant.parse(startTime), Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb,
+            ExportQueryBuilder eq = new ExportQueryBuilder(Instant.parse(startTime), Instant.parse((String) testOffset[0].getDataByColAndRow(0, 0)), dtsb,
                     groups, columns, downsample, eegChart.isAr(), versionCondition);
             String finalQueryString = eq.getQueryString();
             if (finalQueryString.isEmpty()) {
@@ -946,8 +916,6 @@ public class AnalysisService {
      * @param purpose What's this dir for
      * @param uuid    UUID for this dir (Current time in RFC3339 if is null)
      */
-    
-    //old model of outputDir generator
     private File generateOutputDir(String purpose, String uuid) {
         String identifier = uuid;
         if (identifier == null)
@@ -976,50 +944,6 @@ public class AnalysisService {
         }
         // If the directory already exists (bad for us), we should consider this operation failed
         return null;
-    }
-    
-    //New file directory generator: add jobId
-    private File generateOutputDir(int jobId, String purpose, String uuid) {
-        String identifier = uuid;
-        if (identifier == null)
-            identifier = "_(" + LocalDateTime.now().toString() + ")";
-        // Windows name restriction
-        String path = InfluxappConfig.OUTPUT_DIRECTORY + purpose + identifier.replace(':', '.') + "_" + jobId;
-        File outputDir = new File(path);
-        boolean dirCreationSuccess = true;
-
-        if (!outputDir.exists()) {
-            String err = "Failed to create 'Results' dir. ";
-            try {
-                if (!outputDir.mkdirs()) {
-                    dirCreationSuccess = false;
-                }
-            } catch (SecurityException se) {
-                err += se.getLocalizedMessage();
-                dirCreationSuccess = false;
-            }
-            // Use a flag for flexible work flow
-            if (!dirCreationSuccess) {
-                logger.error(err);
-                return null;
-            }
-            return outputDir;
-        }
-        // If the directory already exists (bad for us), we should consider this operation failed
-        return null;
-    }
-    
-    public int deleteFileDir(int jobId) throws IOException {
-    	File dir = new File(InfluxappConfig.OUTPUT_DIRECTORY);
-    	File[] files = dir.listFiles();
-		String type1 = "_" + jobId;
-		String type2 = type1 + "_split";
-    	for(File file: files) {
-    		if(file.toString().endsWith(type1) || file.toString().endsWith(type2)) {	
-    			FileUtils.forceDelete(file);
-    		}
-    	}
-    	return 1;
     }
 
     /**

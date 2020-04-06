@@ -50,10 +50,6 @@ public class PatientService {
         return patientDao.selectById(patientId);
     }
 
-    public List<Patient> getAllPatients() {
-        return patientDao.selectAll();
-    }
-
     public int updatePatientInfo(PatientWithBLOBs patient) {
         int updateResult = 0;
         try {

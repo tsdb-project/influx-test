@@ -57,17 +57,6 @@ public class PatientController {
         return patientService.getPatientByPid(pid);
     }
 
-    @RequestMapping(value = "/patients/allSurvival", method = RequestMethod.GET)
-    public HashMap getAllPatientsSurvival() {
-        HashMap result = new HashMap();
-        List<Patient> allPatients = patientService.getAllPatients();
-        allPatients.forEach(p -> {
-//            result.add( "{" + p.getId() + ":" + p.getSurv() + "}");
-            result.put(p.getId(), p.getSurv());
-        });
-
-        return result;
-    }
     @RequestMapping(value = "/patients/find", method = RequestMethod.POST)
     public RestfulResponse getPatientWithCriteria() {
         List<String> pids = importedFileDao.getAllImportedPid(uuid);
