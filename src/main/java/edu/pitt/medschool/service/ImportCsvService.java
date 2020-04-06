@@ -302,7 +302,7 @@ public class ImportCsvService {
             throw new RuntimeException("File UUID misformat!");
         if (!fLine.substring(fLine.length() - 40, fLine.length() - 4)
                 .matches("([\\w\\d]){8}-([\\w\\d]){4}-([\\w\\d]){4}-([\\w\\d]){4}-([\\w\\d]){12}"))
-            throw new RuntimeException("File does not have a valid UUID!");
+            throw new RuntimeException(fLine.substring(fLine.length() - 40, fLine.length() - 4) + ": File does not have a valid UUID!");
         return fLine.substring(fLine.length() - 40, fLine.length() - 4);
     }
 

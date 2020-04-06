@@ -40,6 +40,27 @@ $(document).ready(function() {
         });
     };
 
+    /*
+    * get database information
+    * */
+    var databaseData = null;
+    
+//    function getDatabases(){
+//        $.ajax({
+//            'url': "/aggregation/getUsefulDBs?" + "periodVal=" + $("#period").val() + "andperiodUnit=" + $("#period_unit").val() + "andoriginVal=" + $("#origin").val() + "andoriginUnit=" + $("#origin_unit").val() + "anddurationVal=" + $("#duration").val() + "anddurationUnit=" + $("#duration_unit").val(),
+//            'type': 'get',
+//            'contentType':"application/json",
+//            'dataType':"json",
+//            'async': false,
+//            'success': function(data) {
+//                databaseData = data.data;
+//            },
+//            'error': function() {}
+//        });
+//        console.log(databaseData);
+//    }
+//    getDatabases();
+
     var groups = {
         "data": []
     };
@@ -122,9 +143,280 @@ $(document).ready(function() {
     });
 
     $("#export-modal").on('hidden.bs.modal', function (e) {
-        $("#uploadPatientList").val('');
+    	$("#uploadPatientList").val('');
         patientList = null;
     });
+    
+    var downsampleMethods = [];
+    
+    
+    //suggest usable time levels
+    //whether dsMethod counts: ML models use "stds" in high time-levels, so it can wait...
+    //not considered now 
+    function usableTimeLevel(period, origin, duration) {
+        var suggest = {
+            "1": true,
+            "60": false,
+            "300": false,
+            "600": false,
+            "900": false,
+            "1800": false,
+            "3600": false,  
+        };
+        var levelsInSec = [60, 300, 600, 900, 1800, 3600];
+        for (level of levelsInSec) {
+            if ((origin == null || (origin != null && origin % level == 0)) && period % level == 0) {
+                suggest[level] = true;
+            }
+        }
+        return suggest;
+    }
+
+    var usableAggDB = [{
+            id: "NULL",
+            version: "NULL",
+            createTime: null,
+            status: null,
+            total: null,
+            finished: null,
+            artype: null,
+            timeCost: null,
+            nday: 0,
+            comment: null,
+            dbSize: null,
+            pidList: null
+        }];
+
+    var selectedMlModels = [{
+            id: 'NULL',
+            iteration: null,
+            pipelineName: null,
+            pipeline: null,
+            mlMethod: null,
+            aggLevel: null,
+            aggMethod: null,
+            featureSet: null,
+            accuracyScore: null,
+            threshold: null,
+            thresholdStandard: null
+        }];
+
+    var usableTable = $('#usableAggdbTable').DataTable({
+        data : usableAggDB,
+        columns: [ {
+            data : 'id'
+        }, {
+            data : null,
+            render : function(data) {
+                console.log('ar: ' + data);
+                return data.artype ? "AR" : "NOAR";
+            }
+        }, {
+            data : 'timeCost'
+        }, {
+            data : null,
+            render: function(data) {
+                return data.pidList == null ? "ALL" : data.pidList;
+            }
+        }, {
+            data : 'dbSize'
+        }, {
+            data : 'version'
+        }, {
+            data : null,
+            render : function(data, type, row, meta) {
+                console.log(meta);
+                buttonHTML = data.id == 'NULL' ? ' ' : '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
+                return buttonHTML;
+            }
+        }]
+    });
+
+    var mlModelTable = $('#MLmodelInfo').DataTable({
+        data : selectedMlModels,
+        columns: [ {
+            data : 'id'
+        }, {
+            data : null,
+            render : function(data){
+                return data.aggLevel / 60 + " min"
+            }
+        }, {
+            data : 'mlMethod'
+        }, {
+            data : 'aggMethod'
+        }, {
+            data : 'featureSet'
+        }, {
+            data : 'accuracyScore'
+        }]
+    });
+
+    //auto refresh useable Databases table
+    $('#refresh').click(function() {
+        console.log("click");
+        var period = $("#period").val() * $("#period_unit").val();
+        var origin = $("#origin").val() * $("#origin_unit").val();
+        var duration = $("#duration").val() * $("#duration_unit").val();
+        var dsMethod = $('#method').val();
+        // console.log(patientList);
+        var timeLevelSuggest = usableTimeLevel(period, origin, duration);
+        console.log(timeLevelSuggest);
+        var para = {
+            // "dsmethod": dsMethod, //not important
+            "patientList": patientList,
+            "ar": $('#ar label.active input').val() == "true"
+        }
+        //The following $ajax(): get usable DBs (with right arType)
+        //to do: right patientlist, right timelevel
+        //the agg_db table has no timelevel field
+        //2020.3.15
+        $.ajax({
+            url: "/aggregation/getUsableDBs",
+            type: 'post',
+            data: JSON.stringify(para),
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                usableAggDB = data.data;
+                console.log(usableAggDB);
+                //refresh the DB table
+                usableTable.clear().rows.add(usableAggDB).draw();
+            }
+        });
+
+        
+        $.ajax({
+            url: "/aggregation/getMLmodels",
+            type: 'post',
+            data: JSON.stringify(timeLevelSuggest),
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                selectedMlModels = data;
+                // console.log(selectedMlModels);
+                mlModelTable.clear().rows.add(selectedMlModels).draw();
+            }
+        });
+
+        //import all mlModels
+        //stupid. This can be totally done by python(to_sql), but failed.
+        //Sixuan Huang
+        // $.ajax( {
+        //     url: "/aggregation/importMLmodels",
+        //     type: 'post',
+        //     data: JSON.stringify(testmlModel),
+        //     contentType: "application/json",
+        //     dataType: 'json',
+        //     success: function(data){
+        //         console.log(data);
+        //     }
+        // });
+
+    });
+
+   
+
+      
+    
+
+
+
+    $('#comment-modal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget);
+        console.log(button);
+        var id = button.data('row');
+        console.log(id);
+        $.ajax({
+            'url': "/aggregation/getDBs",
+            'type': 'get',
+            'success': function(data) {
+                var agg_dbs = data.data;
+                var agg_db = agg_dbs[id];
+                $("#agg_db_id").val(agg_db.id);
+                $("#agg_db_comment").val(agg_db.comment);
+            },
+            'error': function() {}
+        });
+        
+    });
+    
+    $("#edit_comment").click(function () {
+        console.log("edit button");
+        
+        var aggregationdb = {
+            "id":$("#agg_db_id").val(),
+            "comment":$("#agg_db_comment").val()
+        };
+        $.ajax({
+            'url' : "/aggregation/setComment",
+            'type' : 'put',
+            'data' : JSON.stringify(aggregationdb),
+            'contentType' : "application/json",
+            'dataType' : 'json',
+            'success' : function(data) {
+                notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "edit comment success");
+            },
+            'error' : function() {
+            }
+        });
+    });
+
+
+
+
+    $("#export").click(function (e) {
+    	var dbList = document.getElementById("databases");
+    	var l = document.getElementById("databases").length;
+    	for(var i = 0; i < l; i++){
+    		dbList.remove(0);
+    	}
+//      	$("#uploadPatientList").val('');
+//        patientList = null;
+    	if ($('#parameter-form')[0].checkValidity()){
+            var period = $("#period").val() * $("#period_unit").val();
+            var origin = $("#origin").val() * $("#origin_unit").val();
+            var duration = $("#duration").val() * $("#duration_unit").val();
+            var dsMethod = $('#method').val();
+            $.ajax({
+            	'url': "/aggregation/getUsefulDBs?" + "period=" + period + "&origin=" + origin + "&duration=" + duration + 
+            		"&method=" + dsMethod
+            		// "&min=" + exportMethod.Min +
+            		// "&mean=" + exportMethod.Mean +
+            		// "&median=" + exportMethod.Median +
+            		// "&std=" + exportMethod.Std +
+            		// "&fq=" + exportMethod.FQ +
+            		// "&tq=" + exportMethod.TQ +
+                    // "&sum=" + exportMethod.Sum
+                    ,
+            	'type': 'get',
+            	'contentType':"application/json",
+            	'dataType':"json",
+            	'async': false,
+            	'success': function(data) {
+            		databaseData = data.data;
+            	},
+            	'error': function() {}
+            });
+//        console.log(databaseData);
+            for(var i = 0; i < databaseData.length; i++){
+            	var data = databaseData[i];
+            	var option = document.createElement("option");
+            	option.text = data.dbName;
+//      	  	console.log(data);
+            	dbList.add(option);
+            }
+    	}
+    });
+    
+    $("#cancelButton").click(function(e){
+    	var dbList = document.getElementById("databases");
+    	var l = document.getElementById("databases").length;
+    	for(var i = 0; i < l; i++){
+    		dbList.remove(0);
+    	}
+    })
+
 
     $("#submitJobButton").click(function () {
         $("#submitJobButton").attr('disabled', 'disabled');
@@ -134,7 +426,9 @@ $(document).ready(function() {
             "layout": $('#layout label.active input').val() == "true",
             "ar": $('#ar label.active input').val() == "true",
             "dbType": $('#selectdb label.active input').val(),
-            "username":$('#user_name').html()
+            "username":$('#user_name').html(),
+            "fromDb": $('#databases').val(),
+
         };
         $.ajax({
             url: "/api/export/export/",
@@ -551,4 +845,193 @@ $(document).ready(function() {
         }
     });
 
+    var exportMethod = {
+            Max:false,
+            Min:false,
+            Mean:false,
+            Median:false,
+            Std:false,
+            FQ:false,
+            TQ:false,
+            Sum:false
+        };
+    var exportFinalMethod = null;
+    
+    var maxBtn = $('#MaxBtn');
+    var minBtn = $('#MinBtn');
+    var meanBtn = $('#MeanBtn');
+    var medianBtn = $('#MedianBtn');
+    var stdBtn = $('#StdBtn');
+    var fqBtn = $('#FQBtn');
+    var tqBtn = $('#TQBtn');
+    var sumBtn = $('#SumBtn');
+    
+    $('#param-modal').on('show.bs.modal', function(event) {
+
+        if(exportMethod.Max){
+            maxBtn.removeClass("btn-light");
+            maxBtn.addClass("btn-primary");
+        }else{
+            maxBtn.addClass("btn-light");
+            maxBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.Min){
+            minBtn.removeClass("btn-light");
+            minBtn.addClass("btn-primary");
+        }else{
+            minBtn.addClass("btn-light");
+            minBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.Mean){
+            meanBtn.removeClass("btn-light");
+            meanBtn.addClass("btn-primary");
+        }else{
+            meanBtn.addClass("btn-light");
+            meanBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.Median){
+            medianBtn.removeClass("btn-light");
+            medianBtn.addClass("btn-primary");
+        }else{
+            medianBtn.addClass("btn-light");
+            medianBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.Std){
+            stdBtn.removeClass("btn-light");
+            stdBtn.addClass("btn-primary");
+        }else{
+            stdBtn.addClass("btn-light");
+            stdBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.FQ){
+            fqBtn.removeClass("btn-light");
+            fqBtn.addClass("btn-primary");
+        }else{
+            fqBtn.addClass("btn-light");
+            fqBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.TQ){
+            tqBtn.removeClass("btn-light");
+            tqBtn.addClass("btn-primary");
+        }else{
+            tqBtn.addClass("btn-light");
+            tqBtn.removeClass("btn-primary");
+        }
+
+        if(exportMethod.Sum){
+            sumBtn.removeClass("btn-light");
+            sumBtn.addClass("btn-primary");
+        }else{
+            sumBtn.addClass("btn-light");
+            sumBtn.removeClass("btn-primary");
+        }
+    });
+
+    
+    maxBtn.click(function () {
+        if(! exportMethod.Max){
+        	exportMethod.Max = true;
+            maxBtn.removeClass("btn-light");
+            maxBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Max = false;
+            maxBtn.addClass("btn-light");
+            maxBtn.removeClass("btn-primary");
+        }
+    });
+
+    minBtn.click(function () {
+        if(! exportMethod.Min){
+        	exportMethod.Min = true;
+            minBtn.removeClass("btn-light");
+            minBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Min = false;
+            minBtn.addClass("btn-light");
+            minBtn.removeClass("btn-primary");
+        }
+    });
+
+    meanBtn.click(function () {
+        if(! exportMethod.Mean){
+        	exportMethod.Mean = true;
+            meanBtn.removeClass("btn-light");
+            meanBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Mean = false;
+            meanBtn.addClass("btn-light");
+            meanBtn.removeClass("btn-primary");
+        }
+    });
+
+    medianBtn.click(function () {
+        if(! exportMethod.Median){
+        	exportMethod.Median = true;
+            medianBtn.removeClass("btn-light");
+            medianBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Median = false;
+            medianBtn.addClass("btn-light");
+            medianBtn.removeClass("btn-primary");
+        }
+    });
+
+    stdBtn.click(function () {
+        if(! exportMethod.Std){
+        	exportMethod.Std = true;
+            stdBtn.removeClass("btn-light");
+            stdBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Std = false;
+            stdBtn.addClass("btn-light");
+            stdBtn.removeClass("btn-primary");
+        }
+    });
+
+    fqBtn.click(function () {
+        if(! exportMethod.FQ){
+        	exportMethod.FQ = true;
+            fqBtn.removeClass("btn-light");
+            fqBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.FQ = false;
+            fqBtn.addClass("btn-light");
+            fqBtn.removeClass("btn-primary");
+        }
+    });
+
+    tqBtn.click(function () {
+        if(! exportMethod.TQ){
+        	exportMethod.TQ = true;
+            tqBtn.removeClass("btn-light");
+            tqBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.TQ = false;
+            tqBtn.addClass("btn-light");
+            tqBtn.removeClass("btn-primary");
+        }
+    });
+
+    sumBtn.click(function () {
+        if(! exportMethod.Sum){
+        	exportMethod.Sum = true;
+            sumBtn.removeClass("btn-light");
+            sumBtn.addClass("btn-primary");
+        }else{
+        	exportMethod.Sum = false;
+            sumBtn.addClass("btn-light");
+            sumBtn.removeClass("btn-primary");
+        }
+    });
+    
+    $('#saveExportMethod').click(function () {
+        notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'aggregation methods Saved.');
+        aggFinalMethod = aggMethod;
+    });
 });

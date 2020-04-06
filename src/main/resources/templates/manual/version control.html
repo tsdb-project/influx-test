@@ -24,6 +24,9 @@
             text-align: center;
         }
     </style>
+    <style>
+        .pdfobject-container { height: 40rem; border: 1rem solid rgba(0,0,0,.1); }
+    </style>
 </head>
 
 <body data-ma-theme="blue">
@@ -36,7 +39,12 @@
         <div class="content__inner">
             <!-- PUT THE MAIN CONTENT HERE -->
             <div class="card">
-                <div class="card-body" style="margin: 0 150px">
+                <div class="card-body" style="margin: 0 0px">
+                	<div id="pdfVC"></div>
+					If this browser does not support PDFs, please download the PDF to view it: 
+					<a href="/pdf/pdfVC.pdf">Download PDF</a>
+					
+                    <!--<p>-------------------------------------------</p>
                     <div class='typora-export os-windows'>
                         <div id='write' class='is-node'><h3><a name="version-control"
                                                                class="md-header-anchor"></a><span>Version control </span>
@@ -61,7 +69,7 @@
                             </h4>
                             <p><span>Since the filename is used as a key to find data in influxDB, it is important to make sure that the same file cannot have the same name in different versions of the database. For example, file &quot;PUH-2010-001_ar.csv&quot; is detected to be wrong after version 1 published. The administrator can delete it and reimport a correct one for future versions. In this situation, the system would add a version number before this filename to distinguish the file for version 1 and version 2. The name of this file in version 2 would be &quot;V2_PUH-2010-001_ar.csv&quot;. On the other hand, if a file is detected to be not complete after published, the administrator cannot import the rest part with the same filename directly, the system would not allow this. The administrator should delete the file and then reimport the complete file. </span>
                             </p></div>
-                    </div>
+                    </div>-->
                 </div>
             </div>
             <div th:insert="fragments/footer :: footer"></div>
@@ -78,6 +86,7 @@
 <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
 <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+<script src="/js/pdfobject.js"></script>
 
 <!-- App functions and actions -->
 <script src="/js/navigation.js"></script>

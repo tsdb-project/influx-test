@@ -22,8 +22,8 @@ import edu.pitt.medschool.framework.util.TimeUtil;
 
 @SpringBootApplication
 public class Application implements ApplicationRunner {
-    @Autowired
-    AutoImportService autoImportService;
+//    @Autowired
+//    AutoImportService autoImportService;
     @Autowired
     AggregationService aggregationService;
 
