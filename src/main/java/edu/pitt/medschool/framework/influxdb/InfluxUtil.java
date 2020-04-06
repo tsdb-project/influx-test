@@ -45,7 +45,8 @@ public class InfluxUtil {
 
     /**
      * Method for lazy man, just query the designated aggregated database and get the result Just use fast method for general queries
-     * same as the last method, only add "fromDb" parameter
+     * 
+     * Change: same as the last method, only add "fromDb" parameter
      * by HSX
      */
     public static ResultTable[] justQueryData(String fromDb, InfluxDB i, boolean fastMethod, String query) {

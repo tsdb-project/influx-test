@@ -299,6 +299,8 @@ $(document).ready(function() {
             }
         });
 
+        
+
         //import all mlModels
         //stupid. This can be totally done by python(to_sql), but failed.
         //Sixuan Huang
@@ -315,7 +317,35 @@ $(document).ready(function() {
 
     });
 
-   
+    $("#predict").click(function () {
+        console.log("Predict starts.");
+        var form = {
+            "queryId": $("#id").val(),
+            "patientList": patientList,
+            "layout": $('#layout label.active input').val() == "true",
+            "ar": $('#ar label.active input').val() == "true",
+            "dbType": $('#selectdb label.active input').val(),
+            "username":$('#user_name').html(),
+            "fromDb": $('#databases').val(),
+
+        };
+        $.ajax({
+            url: "/api/export/predict/",
+            type: 'post',
+            data: JSON.stringify(form),
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
+                    "Please wait for the result.");
+                console.log(data);
+            },
+            error: function () {
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Failed to submit this job, please try again.');
+            }
+        });
+    });
 
       
     

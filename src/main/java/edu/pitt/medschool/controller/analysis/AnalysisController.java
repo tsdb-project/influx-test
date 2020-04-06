@@ -74,6 +74,8 @@ public class AnalysisController {
     ExportPostProcessingService exportPostProcessingService;
     @Autowired
     UsersService usersService;
+    @Autowired
+    NavigatorService navigatorService;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -540,6 +542,42 @@ public class AnalysisController {
     public List<ColumnVO> column(@RequestBody(required = true) ColumnRequest params, Model model) {
         return columnService.selectColumnsByMeasuresAndElectrodes(params.measure, params.electrode);
     }
+    
+    /**
+     * @author HSX
+     * @param job
+     * @param response
+     * @return predict result
+     * @throws IOException 
+     */
+    @PostMapping("api/export/predict")
+    @ResponseBody
+    public RestfulResponse predictPatient(@RequestBody(required = true) ExportWithBLOBs jobOf10Features, RestfulResponse response)
+            throws IOException {
+    	if (exportService.completePredictJobAndInsert(jobOf10Features) == 1) {
+            if (analysisService.addOneExportJob(jobOf10Features.getId())) {
+                response.setCode(1);
+                response.setMsg("Successfully added predicting job.");
+            } else {
+                response.setCode(2);
+                response.setMsg("Failed to add predicting job into queue.");
+                return response;
+            }
+        } else {
+            response.setCode(0);
+            response.setMsg("Database error!");
+            return response;
+        }
+    	System.out.println("Add export job. Ready to predict.");
+    	try {
+			String results = navigatorService.predictWithExportFileViaPython(jobOf10Features);
+			response.setMsg(results);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        return response;
+    }
 
     @PostMapping("api/export/export")
     @ResponseBody
@@ -712,5 +750,7 @@ public class AnalysisController {
         response.setData(filteredResult);
         return response;
     }
+    
+    
 
 }

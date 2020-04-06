@@ -406,6 +406,7 @@ public class AnalysisService {
             }
             // Normal exit procedure
             jobClosingHandler(false, isPscRequired, job, outputDir, outputWriter, validPatientCounter.get());
+            
         }
     }
 
