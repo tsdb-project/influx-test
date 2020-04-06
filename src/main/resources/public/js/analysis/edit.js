@@ -318,6 +318,8 @@ $(document).ready(function() {
     });
 
     $("#predict").click(function () {
+        result_div = document.getElementById("predict_result");
+        result_div.innerHTML += "<p>Please wait ... </p>";
         console.log("Predict starts.");
         var form = {
             "queryId": $("#id").val(),
@@ -338,7 +340,14 @@ $(document).ready(function() {
             success: function (data) {
                 notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
                     "Please wait for the result.");
-                console.log(data);
+                if (data.code == 1) {
+                    result_div.innerHTML += "<p>" + data.data + " </p>";
+                    result_div.innerHTML += "<p>" + data.msg + " </p>";
+                }
+                else {
+                    result_div.innerHTML += "<p>Predicting fails. </p>";
+                }
+                    
             },
             error: function () {
                 notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",

@@ -554,6 +554,7 @@ public class AnalysisController {
     @ResponseBody
     public RestfulResponse predictPatient(@RequestBody(required = true) ExportWithBLOBs jobOf10Features, RestfulResponse response)
             throws IOException {
+    	long startTime = System.currentTimeMillis();
     	if (exportService.completePredictJobAndInsert(jobOf10Features) == 1) {
             if (analysisService.addOneExportJob(jobOf10Features.getId())) {
                 response.setCode(1);
@@ -571,7 +572,8 @@ public class AnalysisController {
     	System.out.println("Add export job. Ready to predict.");
     	try {
 			String results = navigatorService.predictWithExportFileViaPython(jobOf10Features);
-			response.setMsg(results);
+			response.setData(results);
+			response.setMsg("It took " + (System.currentTimeMillis() - startTime)/1000 + " seconds.");
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
