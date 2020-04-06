@@ -42,22 +42,22 @@
                     </ul>
                 </li>
                 <!-- Menu Filter out patients -->
-                <li class="navigation__sub" id="queries">
-                    <a href="">
-                        <i class="zmdi zmdi-view-list"></i>
-                        Filtering
-                    </a>
-                    <ul>
-                        <li id="exceed">
-                            <a href="/query/exceed">Exceed Threshold</a>
-                        </li>
-                        <li id="differ">
-                            <a href="/query/differ">Spatial Variance</a>
-                        </li>
-                    </ul>
-                </li>
+<!--                <li class="navigation__sub" id="queries">-->
+<!--                    <a href="">-->
+<!--                        <i class="zmdi zmdi-view-list"></i>-->
+<!--                        Filtering-->
+<!--                    </a>-->
+<!--                    <ul>-->
+<!--                        <li id="exceed">-->
+<!--                            <a href="/query/exceed">Exceed Threshold</a>-->
+<!--                        </li>-->
+<!--                        <li id="differ">-->
+<!--                            <a href="/query/differ">Spatial Variance</a>-->
+<!--                        </li>-->
+<!--                    </ul>-->
+<!--                </li>-->
                 <!-- Menu Export-->
-                <li class="navigation__sub" id="analysis">
+                <li class="navigation__sub" id="analysis" sec:authorize="hasAnyRole('USER','ADMIN')" >
                     <a href="">
                         <i class="zmdi zmdi-case-download"></i>
                         Export
@@ -122,9 +122,9 @@
                         <li id="EEGDataCodebook">
                             <a href="/manual/EEGDataCodebook">EEG Data Codebook</a>
                         </li>
-                        <li id="VersionControlManual">
-                            <a href="/manual/VersionControl">Version Control</a>
-                        </li>
+<!--                        <li id="VersionControlManual">-->
+<!--                            <a href="/manual/VersionControl">Version Control</a>-->
+<!--                        </li>-->
                     </ul>
                 </li>
                 <li id="user">

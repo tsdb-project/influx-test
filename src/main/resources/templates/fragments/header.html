@@ -20,12 +20,9 @@
         </div>
 
         <ul class="top-nav">
-            </li>
-            <li class="dropdown">
+            <li class="dropdown" >
                 <a href="" data-toggle="dropdown">
                     <i class="zmdi zmdi-account-circle"></i>
-                    Hello,
-                    <span id="first_name"></span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right dropdown-menu--block">
                     <div class="listview listview--hover">
@@ -36,17 +33,21 @@
                             </div>
                             <div>
                                 <span class="user__name" id="username"></span>
-                                <!--<div class="user__email" th:text="${#authentication.principal.email}">email</div>-->
                                 <div sec:authorize="hasRole('USER')" class="user__info" >DB version:<span id="user_version"></span></div>
                             </div>
                         </div>
 
-                        <a th:href="@{'/user/profile/' + ${#authentication.name}}", class="listview__item">
+                        <a sec:authorize="!isAuthenticated()" href="/login" , class="listview__item">
+                            <div class="listview__content">
+                                <div class="listview__heading">logIn / register </div>
+                            </div>
+                        </a>
+                        <a sec:authorize="hasAnyRole('USER', 'ADMIN')" th:href="@{'/user/profile/' + ${#authentication.name}}", class="listview__item">
                             <div class="listview__content">
                                 <div class="listview__heading">View Profile</div>
                             </div>
                         </a>
-                        <a href="javascript: document.logoutForm.submit()" role="menuitem" class="listview__item">
+                        <a sec:authorize="hasAnyRole('USER', 'ADMIN')" href="javascript: document.logoutForm.submit()" role="menuitem" class="listview__item">
                             <div class="listview__content">
                                 <div class="listview__heading">Logout</div>
                             </div>

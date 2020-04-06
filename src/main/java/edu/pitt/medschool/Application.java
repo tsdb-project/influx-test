@@ -64,6 +64,6 @@ public class Application implements ApplicationRunner {
                 logger.error(Util.stackTraceErrorToString(se));
             }
         }
-        autoImportService.initImport();
+//        autoImportService.initImport();
     }
 }

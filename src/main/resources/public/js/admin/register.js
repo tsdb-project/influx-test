@@ -61,41 +61,47 @@ $(document).ready(function() {
     $createUserForm.on('submit', function(ev){
         ev.preventDefault();
 
-        if ($createUserForm[0].checkValidity() && $("#c_password").val() === $("#c_password2").val()){
-            var form = {
-                "username" : $("#c_username").val(),
-                "firstName" : $("#c_firstname").val(),
-                "lastName" : $("#c_lastname").val(),
-                "email":$("#c_email").val(),
-                "password":$("#c_password").val(),
-                "enabled" : true,
-                "role" : "ROLE_USER"
-            };
+        if ( $("#c_password").val() === $("#c_password2").val()){
 
-            $.ajax({
-                'url' : "/user/user",
-                'type' : 'put',
-                'data' : JSON.stringify(form),
-                'contentType' : "application/json",
-                'dataType' : 'json',
-                'success' : function(data) {
-                    if(data.code == 0){
+            if ($createUserForm[0].checkValidity()){
+                var form = {
+                    "username" : $("#c_username").val(),
+                    "firstName" : $("#c_firstname").val(),
+                    "lastName" : $("#c_lastname").val(),
+                    "email":$("#c_email").val(),
+                    "password":$("#c_password").val(),
+                    "enabled" : true,
+                    "role" : "ROLE_USER"
+                };
+
+                $.ajax({
+                    'url' : "/user/user",
+                    'type' : 'put',
+                    'data' : JSON.stringify(form),
+                    'contentType' : "application/json",
+                    'dataType' : 'json',
+                    'success' : function(data) {
+                        if(data.code == 0){
+                            notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                                'found user with the same user name!');
+                        }else{
+                            notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
+                                'register success!');
+                            setTimeout("window.location.href = '/login'",1000);
+                        }
+                    },
+                    'error' : function() {
                         notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
-                            'found user with the same user name!');
-                    }else{
-                        notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
-                            'register success!');
-                        setTimeout("window.location.href = '/login'",1000);
+                            'register failed!');
                     }
-                },
-                'error' : function() {
-                    notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
-                        'register failed!');
-                }
-            });
+                });
+            }else{
+                notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                    'Email invalid, please try again!');
+            }
         } else {
             notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
-                'There is something wrong with your input, please try again!');
+                'Two passwords do not match, please try again!');
         }
     });
 });

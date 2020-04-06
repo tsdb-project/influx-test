@@ -32,9 +32,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/css/**", "/vendors/**", "/js/**", "/demo/**", "/fonts/**", "/img/**", "/scss/**","/user/user").permitAll()
-                .antMatchers("/**").hasAnyRole("USER", "ADMIN")
-                .antMatchers("/analysis/chart","/analysis/wrongpatients","/user/management").hasAnyRole("ADMIN")
+                .antMatchers("/","/manual/**", "/css/**", "/vendors/**", "/js/**", "/demo/**", "/fonts/**", "/img/**", "/scss/**","/user/user").permitAll()
+                .antMatchers("/*").hasAnyRole("USER", "ADMIN")
+                .antMatchers("/analysis/chart","/analysis/wrongpatients","/user/management").hasRole("ADMIN")
 
                 .and().formLogin()
                 .loginPage("/login")

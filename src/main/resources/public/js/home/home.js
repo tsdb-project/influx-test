@@ -6,17 +6,13 @@ $(document).ready(function() {
         'dataType' : 'json',
         'success' : function(data) {
             total = data.data;
-            console.log(total);
             var time = gettime(total.totalLength);
             var date = getDate(total.createDate);
-            console.log(total.patientNum);
             document.getElementById("csv").innerText=total.csvFileNum;
             document.getElementById("length").innerText=time;
             document.getElementById("patient").innerText=total.patientsWithCsv;
             document.getElementById("size").innerText=total.dbSize;
             document.getElementById("allpatients").innerText=total.patientNum;
-            document.getElementById("version").innerText=total.versionId;
-            document.getElementById("date").innerText=date;
         },
         'error' : function() {
         }
