@@ -149,6 +149,20 @@ $(document).ready(function() {
     
     var downsampleMethods = [];
     
+    var modelIDSelected = null;
+    $('#MLmodelInfo tbody').on('mouseover', 'tr', function () {
+        $(this).attr("style", "background-color:#ffffdd");
+    });
+    $('#MLmodelInfo tbody').on('mouseout', 'tr', function () {
+        $(this).removeAttr('style');
+    });
+    $('#MLmodelInfo tbody').on('click', 'tr', function () {
+        $(this).attr("style", "background-color:#ffffdd");
+        modelIDSelected = mlModelTable.row($(this)).data().id;
+        console.log(modelIDSelected);
+        var selectedRow = document.getElementById('selected-model');
+        selectedRow.innerHTML = "<p>Model ID " + modelIDSelected + " is selected.</p>";
+    });
     
     //suggest usable time levels
     //whether dsMethod counts: ML models use "stds" in high time-levels, so it can wait...
@@ -208,7 +222,7 @@ $(document).ready(function() {
         }, {
             data : null,
             render : function(data) {
-                console.log('ar: ' + data);
+                // console.log('ar: ' + data);
                 return data.artype ? "AR" : "NOAR";
             }
         }, {
@@ -225,7 +239,6 @@ $(document).ready(function() {
         }, {
             data : null,
             render : function(data, type, row, meta) {
-                console.log(meta);
                 buttonHTML = data.id == 'NULL' ? ' ' : '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
                 return buttonHTML;
             }
@@ -239,7 +252,7 @@ $(document).ready(function() {
         }, {
             data : null,
             render : function(data){
-                return data.aggLevel / 60 + " min"
+                return data.aggLevel * 5 + " min" // defined by the model agglevel unit
             }
         }, {
             data : 'mlMethod'
@@ -251,6 +264,8 @@ $(document).ready(function() {
             data : 'accuracyScore'
         }]
     });
+
+    // var testmlModel = [];
 
     //auto refresh useable Databases table
     $('#refresh').click(function() {
@@ -279,13 +294,12 @@ $(document).ready(function() {
             dataType: 'json',
             success: function (data) {
                 usableAggDB = data.data;
-                console.log(usableAggDB);
+                // console.log(usableAggDB);
                 //refresh the DB table
                 usableTable.clear().rows.add(usableAggDB).draw();
             }
         });
 
-        
         $.ajax({
             url: "/aggregation/getMLmodels",
             type: 'post',
@@ -294,7 +308,7 @@ $(document).ready(function() {
             dataType: 'json',
             success: function (data) {
                 selectedMlModels = data;
-                // console.log(selectedMlModels);
+                console.log(selectedMlModels);
                 mlModelTable.clear().rows.add(selectedMlModels).draw();
             }
         });

@@ -472,6 +472,7 @@
 
             <div class="card" th:if="${edit} == true">
                 <div class="card-body">
+                    <h4 class="card-title">Choose from usable Machine Learnling models</h4>
                     <div class="col-sm-12 col-md-12" >
                         <div class="table-responsive">
                             <table id="MLmodelInfo" class="table table-bordered">
@@ -492,7 +493,7 @@
                             </table>
                         </div>
                     </div>
-
+                    <div id="selected-model"></div>
                     <button type="button" class="btn btn-primary btn-lg btn-block" id="predict">Predict</button>
                     <div id="predict_result"></div>
                     <div class="row">
