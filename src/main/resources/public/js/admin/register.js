@@ -70,7 +70,7 @@ $(document).ready(function() {
                     "lastName" : $("#c_lastname").val(),
                     "email":$("#c_email").val(),
                     "password":$("#c_password").val(),
-                    "enabled" : true,
+                    "enabled" : false,
                     "role" : "ROLE_USER"
                 };
 
