@@ -4,6 +4,8 @@ import edu.pitt.medschool.model.dao.AccountsDao;
 import edu.pitt.medschool.model.dao.VersionDao;
 import edu.pitt.medschool.model.dto.Accounts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +17,8 @@ public class UsersService {
     AccountsDao accountsDao;
     @Autowired
     VersionDao versionDao;
+    @Autowired
+    private JavaMailSender mailSender;
 
     public List<Accounts> selectAll() {
         return accountsDao.selectAll();
@@ -59,5 +63,24 @@ public class UsersService {
         }else {
             return account.getDatabaseVersion();
         }
+    }
+
+    public boolean sendEmailMessage(String address, String content) throws Exception{
+        SimpleMailMessage message = new SimpleMailMessage();
+        List<Accounts> admins = accountsDao.selectByRole("ROLE_ADMIN");
+        try{
+            for(Accounts a: admins){
+                message.setFrom(address);
+                message.setTo(a.getEmail());
+                message.setSubject("feedback from brainFlux");
+                message.setText("From: "+address+"\n"+content);
+                mailSender.send(message);
+            }
+
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+
     }
 }

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Brain Flux</title>
+    <!-- Vendor styles -->
+    <link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
+    <link rel="stylesheet" href="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.css">
+    <link rel="stylesheet" href="/vendors/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
+    <link rel="icon" type="image/ico" href="/img/favicon.ico">
+
+    <!-- App styles -->
+    <link rel="stylesheet" href="/css/app.min.css">
+    <style>
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        img-block {
+            height: 300px;
+            border: solid;
+        }
+
+        /* fontawesome */
+        [class*="fontawesome-"]:before {
+            font-family: 'FontAwesome', sans-serif;
+        }
+        .left {
+            float: left;
+        }
+        .clear {
+            clear: both;
+        }
+
+        .buysblock {
+            background: rgb(38,168,226);
+        }
+        .commentsblock {
+            background: rgb(39,183,121);
+        }
+
+        .metroblock {
+            padding: 0em 1em 1em 1em;
+            color: #fff;
+            font-family: 'Open Sans', sans-serif;
+            margin: 0.5em;
+            white-space: nowrap;
+        }
+
+        .metroblock h1, .metroblock h2, .metroblock .icon {
+            color:#fff;
+            font-weight: 300;
+            margin: 0;
+            padding: 0;
+        }
+        .metroblock h1, .metroblock .icon {
+            font-size: 6em;
+            text-align: center;
+        }
+        .metroblock .icon {
+            margin-right: .2em;
+        }
+    </style>
+
+</head>
+
+<body data-ma-theme="blue">
+<main class="main">
+    <div th:insert="fragments/page-loader :: div"></div>
+    <div th:insert="fragments/header :: header"></div>
+    <div th:insert="fragments/sidebar :: aside"></div>
+
+    <section class="content">
+        <!-- PUT THE MAIN CONTENT HERE -->
+        <header class="content__title">
+            <h1>Contact us</h1>
+            <small>You can ask for permission code or give us your feedback through email</small>
+        </header>
+        <div class="card">
+            <div class="card-body">
+                <form role="form" id="parameter-form">
+                    <h4 class="card-title">Write your feedback</h4>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12">
+                                    <label>Your Email address</label>
+                                    <div class="input-group mb-3">
+                                        <input type="email" class="form-control" id="email" required>
+                                        <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 col-md-4">
+                                    <label>Your Feedback</label>
+                                    <div class="input-group mb-3">
+                                        <textarea cols="50" rows="10" class="form-control" id="content"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp</label>
+                                <input type="submit" class="btn btn-primary btn-lg btn-block" autocomplete="off" id="send" value="Send">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div th:insert="fragments/footer :: footer"></div>
+    </section>
+</main>
+
+<div th:insert="fragments/ie-warning :: div"></div>
+<!-- Javascript -->
+<!-- Vendors -->
+<script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="/vendors/bower_components/tether/dist/js/tether.min.js"></script>
+<script src="/vendors/bower_components/popper.js/dist/umd/popper.min.js"></script>
+<script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
+<script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+<script src="/vendors/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
+
+<!-- App functions and actions -->
+<!--<script src="/js/home/home.js"></script>-->
+<script src="/js/navigation.js"></script>
+<script src="/js/app.min.js"></script>
+<script src="/js/admin/email.js"></script>
+</body>
+</html>

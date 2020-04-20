@@ -2,7 +2,9 @@ package edu.pitt.medschool.controller.account;
 
 import edu.pitt.medschool.config.DBConfiguration;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
+import edu.pitt.medschool.model.Email;
 import edu.pitt.medschool.model.dto.Accounts;
+import edu.pitt.medschool.model.dto.Downsample;
 import edu.pitt.medschool.model.dto.Version;
 import edu.pitt.medschool.service.UsersService;
 import edu.pitt.medschool.service.VersionControlService;
@@ -103,6 +105,25 @@ public class AccountController {
     public RestfulResponse getUserByName(@PathVariable String username){
         Accounts accounts = usersService.selectByUserName(username).get(0);
         return new RestfulResponse(1,"success",accounts);
+    }
+
+    @RequestMapping("/email")
+    public ModelAndView userFeedBack(ModelAndView modelAndView) {
+//        modelAndView.addObject("nav", "user");
+//        modelAndView.addObject("subnav", "");
+        modelAndView.setViewName("user/email");
+        return modelAndView;
+    }
+
+    @RequestMapping(value = "/sendEmail", method = RequestMethod.POST)
+    @ResponseBody
+    public RestfulResponse sendEmail(@RequestBody(required = true) Email email) throws Exception {
+        if(usersService.sendEmailMessage(email.getEmailAddress(),email.getContent())){
+            System.out.println("true");
+            return new RestfulResponse(1,"success");
+        }else {
+            return new RestfulResponse(0,"fail");
+        }
     }
 
 }
