@@ -61,15 +61,11 @@ $(document).ready(function() {
                     else {
                         notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Something went wrong, please try again");
                     }
-                },
-                'error': function() {
                 }
             });
-            return false;
         } else {
             console.log("invalid form");
             notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Something went wrong, please try again");
-            return true;
         }
 
     });
