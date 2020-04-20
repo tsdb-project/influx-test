@@ -86,7 +86,6 @@
                                     <div class="col-sm-4 col-md-4">
                                         <label>Update patients list</label>
                                         <div class="input-group mb-3">
-
                                             <input type="button" class="btn btn-primary btn-lg btn-block"
                                                    data-toggle="modal"
                                                    data-target="#upload-patient-modal" id="patientListButton"
@@ -155,7 +154,6 @@
 <!--                            </div>-->
 <!--                        </div>-->
                         <div class="row">
-
                             <!--<div class="col-sm-4 col-md-4">-->
                             <!--<label>number of threads</label>-->
                             <!--<div class="input-group mb-3">-->
@@ -171,7 +169,6 @@
                             <!--placeholder="Input the number of parts you want to use" required>-->
                             <!--<i class="form-group__bar"></i>-->
                             <!--</div>-->
-
                             <!--</div>-->
                             <div class="col-sm-4 col-md-4">
                                 <label>&nbsp</label>
@@ -206,12 +203,9 @@
                                 <th>nth days</th>
                                 <th>Create Time</th>
                                 <th>time used</th>
-
 <!--                                <th>thread</th>-->
 <!--                                <th>parts</th>-->
-
                                 <th>Details</th>
-                                <th>Comments</th>
 <!--                                <th>Auto Update</th>-->
 <!--                                <th>Integrity Check</th>-->
                             </tr>
@@ -224,8 +218,6 @@
                     </div>
                 </div>
             </div>
-            
-
             <div class="card" id="progressCard">
                 <div class="card-body">
                     <h1 class="card-title">Database Update Progress</h1>
@@ -355,116 +347,115 @@
             </div>
 
             <!--<div class="modal fade" id="edit-group-modal" data-backdrop="static">-->
-                <!--<div class="modal-dialog modal-lg">-->
-                    <!--<div class="modal-content">-->
-                        <!--<div class="modal-header">-->
-                            <!--<h5 class="modal-title pull-left">Edit Aggregation Group</h5>-->
-                        <!--</div>-->
-                        <!--<div class="modal-body">-->
-                            <!--<form role="form" id="aggregation-form">-->
-                                <!--<div class="row">-->
-                                    <!--<div class="row">-->
-                                        <!--<div class="col-sm-5 col-md-5">-->
-                                            <!--<div class="row">-->
-                                                <!--<div class="col-sm-12 col-md-12">-->
-                                                    <!--<div class="form-group">-->
-                                                        <!--<label>Choose Columns</label>-->
-                                                        <!--<select class="custom-select"-->
-                                                                <!--data-placeholder="Select Measurement" id="measure"-->
-                                                                <!--size="15">-->
-                                                            <!--<option th:value="${measure}"-->
-                                                                    <!--th:each="measure : ${measures}"-->
-                                                                    <!--th:text="${measure}"></option>-->
-                                                        <!--</select>-->
-                                                    <!--</div>-->
-                                                <!--</div>-->
-                                            <!--</div>-->
-                                        <!--</div>-->
-                                        <!--<div class="col-sm-7 col-md-7">-->
-                                            <!--<div class="row">-->
-                                                <!--<div class="col-sm-12 col-md-12">-->
-                                                    <!--<div class="form-group">-->
-                                                        <!--<label>Choose Electrodes</label>-->
-                                                        <!--<select class="custom-select"-->
-                                                                <!--data-placeholder="Select Electrodes" id="predefined"-->
-                                                                <!--size="3">-->
-                                                            <!--<option value="" disabled>Predefined Sets</option>-->
-                                                        <!--</select>-->
-                                                    <!--</div>-->
-                                                <!--</div>-->
-                                                <!--<div class="col-sm-12 col-md-12">-->
-                                                    <!--<div class="form-group">-->
-                                                        <!--<select class="custom-select"-->
-                                                                <!--data-placeholder="Select Electrodes" id="electrode"-->
-                                                                <!--multiple size="10">-->
-                                                        <!--</select>-->
-                                                    <!--</div>-->
-                                                <!--</div>-->
-                                            <!--</div>-->
-                                        <!--</div>-->
-                                        <!--<div class="col-sm-5 col-md-5">-->
-                                            <!--<div class="row">-->
-                                                <!--<div class="col-sm-12 col-md-12">-->
-                                                    <!--<div class="form-group">-->
-                                                        <!--<label>Candidate</label>-->
-                                                        <!--<select class="custom-select" data-placeholder="Select Columns"-->
-                                                                <!--id="column" multiple size="15">-->
-                                                        <!--</select>-->
-                                                    <!--</div>-->
-                                                <!--</div>-->
-                                            <!--</div>-->
-                                        <!--</div>-->
-                                        <!--<div class="col-sm-2 col-md-2">-->
-                                            <!--<div class="row">-->
-                                                <!--<div class="col-sm-12 col-md-12">-->
-                                                    <!--<label>&nbsp</label>-->
-                                                <!--</div>-->
-                                                <!--<div class="col-sm-12 col-md-12">-->
-                                                    <!--<button type="button" class="btn btn-success col-sm-12 col-md-12"-->
-                                                            <!--style="margin-bottom: 10px" id="addButton">-->
-                                                        <!--<i class="zmdi zmdi-arrow-right"></i>-->
-                                                    <!--</button>-->
-                                                    <!--<p>-->
-                                                        <!--<i>To eliminate possible human errors, the add button above now-->
-                                                            <!--always clears the final list and renew the list with your-->
-                                                            <!--current selection.</i>-->
-                                                    <!--</p>-->
-                                                    <!--&lt;!&ndash; <button type="button" class="btn btn-danger col-sm-12 col-md-12" id="clearButton">-->
-                                                    <!--<i class="zmdi zmdi-close"></i>-->
-                                                    <!--</button> &ndash;&gt;-->
-                                                <!--</div>-->
-                                            <!--</div>-->
-                                        <!--</div>-->
-                                        <!--<div class="col-sm-5 col-md-5">-->
-                                            <!--<div class="row">-->
-                                                <!--<div class="col-sm-12 col-md-12">-->
-                                                    <!--<label>Final List</label>-->
-                                                <!--</div>-->
-                                                <!--<div class="col-sm-12 col-md-12">-->
-                                                    <!--<select class="custom-select" data-placeholder="Select Category"-->
-                                                            <!--id="columnsInGroup" multiple size="15">-->
-                                                    <!--</select>-->
-                                                <!--</div>-->
-                                            <!--</div>-->
-                                        <!--</div>-->
-                                    <!--</div>-->
-                                    <!--<div class="modal fade" id="modal-empty" tabindex="-1">-->
-                                        <!--<div class="modal-dialog">-->
-                                            <!--<div class="modal-content">-->
-                                                <!--<div class="modal-header">-->
-                                                    <!--<h5 class="modal-title pull-left">Empty Column Group</h5>-->
-                                                <!--</div>-->
-                                                <!--<div class="modal-body">Please add at least one column to the final-->
-                                                    <!--aggregation group list.-->
-                                                <!--</div>-->
-                                                <!--<div class="modal-footer">-->
-                                                    <!--<button type="button" class="btn btn-link" data-dismiss="modal">OK-->
-                                                    <!--</button>-->
-                                                <!--</div>-->
-                                            <!--</div>-->
-                                        <!--</div>-->
-                                    <!--</div>-->
-
+            <!--<div class="modal-dialog modal-lg">-->
+            <!--<div class="modal-content">-->
+            <!--<div class="modal-header">-->
+            <!--<h5 class="modal-title pull-left">Edit Aggregation Group</h5>-->
+            <!--</div>-->
+            <!--<div class="modal-body">-->
+            <!--<form role="form" id="aggregation-form">-->
+            <!--<div class="row">-->
+            <!--<div class="row">-->
+            <!--<div class="col-sm-5 col-md-5">-->
+            <!--<div class="row">-->
+            <!--<div class="col-sm-12 col-md-12">-->
+            <!--<div class="form-group">-->
+            <!--<label>Choose Columns</label>-->
+            <!--<select class="custom-select"-->
+            <!--data-placeholder="Select Measurement" id="measure"-->
+            <!--size="15">-->
+            <!--<option th:value="${measure}"-->
+            <!--th:each="measure : ${measures}"-->
+            <!--th:text="${measure}"></option>-->
+            <!--</select>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--<div class="col-sm-7 col-md-7">-->
+            <!--<div class="row">-->
+            <!--<div class="col-sm-12 col-md-12">-->
+            <!--<div class="form-group">-->
+            <!--<label>Choose Electrodes</label>-->
+            <!--<select class="custom-select"-->
+            <!--data-placeholder="Select Electrodes" id="predefined"-->
+            <!--size="3">-->
+            <!--<option value="" disabled>Predefined Sets</option>-->
+            <!--</select>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--<div class="col-sm-12 col-md-12">-->
+            <!--<div class="form-group">-->
+            <!--<select class="custom-select"-->
+            <!--data-placeholder="Select Electrodes" id="electrode"-->
+            <!--multiple size="10">-->
+            <!--</select>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--<div class="col-sm-5 col-md-5">-->
+            <!--<div class="row">-->
+            <!--<div class="col-sm-12 col-md-12">-->
+            <!--<div class="form-group">-->
+            <!--<label>Candidate</label>-->
+            <!--<select class="custom-select" data-placeholder="Select Columns"-->
+            <!--id="column" multiple size="15">-->
+            <!--</select>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--<div class="col-sm-2 col-md-2">-->
+            <!--<div class="row">-->
+            <!--<div class="col-sm-12 col-md-12">-->
+            <!--<label>&nbsp</label>-->
+            <!--</div>-->
+            <!--<div class="col-sm-12 col-md-12">-->
+            <!--<button type="button" class="btn btn-success col-sm-12 col-md-12"-->
+            <!--style="margin-bottom: 10px" id="addButton">-->
+            <!--<i class="zmdi zmdi-arrow-right"></i>-->
+            <!--</button>-->
+            <!--<p>-->
+            <!--<i>To eliminate possible human errors, the add button above now-->
+            <!--always clears the final list and renew the list with your-->
+            <!--current selection.</i>-->
+            <!--</p>-->
+            <!--&lt;!&ndash; <button type="button" class="btn btn-danger col-sm-12 col-md-12" id="clearButton">-->
+            <!--<i class="zmdi zmdi-close"></i>-->
+            <!--</button> &ndash;&gt;-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--<div class="col-sm-5 col-md-5">-->
+            <!--<div class="row">-->
+            <!--<div class="col-sm-12 col-md-12">-->
+            <!--<label>Final List</label>-->
+            <!--</div>-->
+            <!--<div class="col-sm-12 col-md-12">-->
+            <!--<select class="custom-select" data-placeholder="Select Category"-->
+            <!--id="columnsInGroup" multiple size="15">-->
+            <!--</select>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--<div class="modal fade" id="modal-empty" tabindex="-1">-->
+            <!--<div class="modal-dialog">-->
+            <!--<div class="modal-content">-->
+            <!--<div class="modal-header">-->
+            <!--<h5 class="modal-title pull-left">Empty Column Group</h5>-->
+            <!--</div>-->
+            <!--<div class="modal-body">Please add at least one column to the final-->
+            <!--aggregation group list.-->
+            <!--</div>-->
+            <!--<div class="modal-footer">-->
+            <!--<button type="button" class="btn btn-link" data-dismiss="modal">OK-->
+            <!--</button>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
 
             <!--</div>-->
             <!--</form>-->
@@ -582,9 +573,8 @@
                                         <div class="col-sm-12 col-md-12">
                                             <div class="form-group">
                                                 <label>Patients List</label>
-                                                <label id="patients-count"></label>
                                                 <select class="custom-select" data-placeholder="Patients List"
-                                                        id="patients" size="10">
+                                                        id="patients" size="15">
                                                 </select>
                                             </div>
                                         </div>
@@ -594,9 +584,10 @@
                                     <div class="row">
                                         <div class="col-sm-12 col-md-12">
                                             <div class="form-group">
-                                                <label>Database Size</label>
-                                                <input type="text" class="form-control" placeholder="unknown" id="db-size" value="100" required disabled>
-                                                <i class="form-group__bar"></i>
+                                                <label>Column List</label>
+                                                <select class="custom-select" data-placeholder="Patients List"
+                                                        id="columns" size="15">
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -605,28 +596,6 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal fade" id="comment-modal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title pull-left">Comment</h5>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-sm-12 col-md-12">
-                                    <label id="agg_db_id"></label>
-                                    <textarea rows="10" cols="40" id="agg_db_comment" placeholder="No comments"></textarea>
-                                </div>
-                                <div class="col-sm-12 col-md-12" style="height: 15px"></div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-link" data-dismiss="modal" id="edit_comment">edit</button>
-                            <button type="button" class="btn btn-danger" data-dismiss="modal">cancel</button>
                         </div>
                     </div>
                 </div>

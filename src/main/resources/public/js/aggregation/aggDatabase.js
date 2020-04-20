@@ -57,7 +57,6 @@ $(document).ready(function() {
             },
             'error': function() {}
         });
-        //databaseData = databaseData[0];
     }
     getDatabases();
 
@@ -447,7 +446,6 @@ $(document).ready(function() {
 
 
     $.fn.dataTable.moment('M/D/YYYY, hh:mm:ss a');
-	console.log(databaseData);
     var table = $('#databaseTable').DataTable({
         data : databaseData,
         columnDefs : [ {
@@ -461,7 +459,6 @@ $(document).ready(function() {
         }, {
             data : null,
             render : function(data) {
-				console.log(data);
                 return data.artype ? "AR" : "NOAR";
             }
         },{
@@ -475,21 +472,13 @@ $(document).ready(function() {
             }
         }, {
             data : 'timeCost'
-
         }, {
             data : null,
             render : function(data, type, row, meta) {
                 html = '<div class="btn-demo">';
                 html += '<button class="btn btn-info btn-sm" data-toggle="modal"  id = "showDetaildBtn" data-target="#DB-details-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i> Details</button>'
                 html += '</div>';
-                console.log(meta);
                 return html
-            }
-        }, {
-            data : null,
-            render : function(data, type, row, meta) {
-                console.log(meta);
-                return '<button class="btn btn-info btn-sm" data-toggle="modal" data-target="#comment-modal" data-row="' + meta.row + '"><i class="zmdi zmdi-edit"></i>Check comment</button>'
             }
         }]
         // columns : [ {
@@ -653,46 +642,6 @@ $(document).ready(function() {
     *  update patient modal
     * */
 
-    $('#comment-modal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget);
-        console.log(button);
-        var id = button.data('row');
-        console.log(id);
-        $.ajax({
-            'url': "/aggregation/getDBs",
-            'type': 'get',
-            'success': function(data) {
-                var agg_dbs = data.data;
-                var agg_db = agg_dbs[id];
-                $("#agg_db_id").val(agg_db.id);
-                $("#agg_db_comment").val(agg_db.comment);
-            },
-            'error': function() {}
-        });
-        
-    });
-    
-    $("#edit_comment").click(function () {
-        console.log("edit button");
-        
-        var aggregationdb = {
-            "id":$("#agg_db_id").val(),
-            "comment":$("#agg_db_comment").val()
-        };
-        $.ajax({
-            'url' : "/aggregation/setComment",
-            'type' : 'put',
-            'data' : JSON.stringify(aggregationdb),
-            'contentType' : "application/json",
-            'dataType' : 'json',
-            'success' : function(data) {
-                notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "edit comment success");
-            },
-            'error' : function() {
-            }
-        });
-    });
-
     $("#uploadPatientList").change(function() {
         patientList = null;
         var formData = new FormData();
@@ -748,7 +697,6 @@ $(document).ready(function() {
             artype:$('#ar label.active input').val() == "true",
             // columns:columnsFinalList == null ? null: columnsFinalList.toString(),
             pidList: patientsFinalList == null ? null: patientsFinalList.toString(),
-
             // max:aggFinalMethod == null ? true : aggFinalMethod.Max,
             // min:aggFinalMethod == null ? true : aggFinalMethod.Min,
             // mean:aggFinalMethod == null ? true : aggFinalMethod.Mean,
@@ -811,34 +759,33 @@ $(document).ready(function() {
     /*
     * Show details modal
     * */
-	console.log(databaseData);
+
 
     $('#DB-details-modal').on('show.bs.modal', function(event) {
         var button = $(event.relatedTarget);
-        console.log(button);
         var id = button.data('row');
-        console.log(id);
-        dbdata = databaseData[id];
-        
-        var plist = dbdata.pidList;
-        var ptotal = dbdata.total;
-        var pfinished = dbdata.finished;
-        var dbsize = dbdata.dbSize;
-
-        $('#patients-count').empty();
-        $('#patients-count').append('   (Finished: ' + pfinished + '/' + ptotal + ')');
-
-        $('#db-size').val(dbsize);
+        var plist = databaseData[id].patientList;
+        var clist = databaseData[id].columns;
 
         $('#patients').empty();
         if (plist == null){
-            $('#patients').append("<option>All patients in the database.</option>");
+            $('#patients').append("<option >ALL</option>");
         }else{
-            plist = plist.split(",");
             plist.forEach(function (value) {
                 $('#patients').append('<option value="' + value + '">&nbsp&nbsp&nbsp&nbsp' + value + '</option>');
             });
         }
+
+
+        $('#columns').empty();
+        if(clist == null){
+            $('#columns').append("<option>ALL</option>");
+        }else {
+            clist.forEach(function (value) {
+                $('#columns').append('<option value="' + value + '">&nbsp&nbsp&nbsp&nbsp' + value + '</option>');
+            })
+        }
+
     });
 
     /*

@@ -3,14 +3,9 @@ package edu.pitt.medschool.controller.aggregationDB;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.pitt.medschool.framework.rest.RestfulResponse;
-import edu.pitt.medschool.model.dao.AggregationDao;
-import edu.pitt.medschool.model.dao.MlModelDao;
 import edu.pitt.medschool.model.dto.AggregationDatabase;
 import edu.pitt.medschool.model.dto.AggregationDatabaseWithBLOBs;
 import edu.pitt.medschool.model.dto.AggregationDb;
-import edu.pitt.medschool.model.dto.ExportWithBLOBs;
-import edu.pitt.medschool.model.dto.MlModel;
-import edu.pitt.medschool.model.dto.Version;
 import edu.pitt.medschool.service.AggregationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -18,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/aggregation")
@@ -26,8 +20,6 @@ public class AggregationDBController {
 
     @Autowired
     AggregationService aggregationService;
-    @Autowired
-    MlModelDao mlModelDao;
 
 //    @Autowired
 //    ColumnService columnService;
@@ -48,29 +40,6 @@ public class AggregationDBController {
     public RestfulResponse getDBs(){
         RestfulResponse response = new RestfulResponse(1, "");
         response.setData(aggregationService.selectAllAvailableDBs());
-        return response;
-    }
-    
-
-    @PostMapping("/getUsableDBs")
-    @ResponseBody
-    public RestfulResponse getUsableDBs(@RequestBody(required = true) ExportWithBLOBs jobparam, RestfulResponse response) {
-        response.setData(aggregationService.selectAllUsableDBs(jobparam));
-        return response;
-    }
-    
-    
-    // get useful db refer to period, origin, and duration
-    @GetMapping("/getUsefulDBs")
-    @ResponseBody
-    public RestfulResponse getUsefulDBs(@RequestParam String period, @RequestParam String origin, @RequestParam String duration, 
-    		@RequestParam String max, @RequestParam String min, @RequestParam String mean, @RequestParam String median,
-    		@RequestParam String std, @RequestParam String fq, @RequestParam String tq, @RequestParam String sum){
-        RestfulResponse response = new RestfulResponse(1, "");
-        Integer period0 = Integer.valueOf(period);
-        Integer origin0 = Integer.valueOf(origin);
-        Integer duration0 = Integer.valueOf(duration);
-        response.setData(aggregationService.selectAllUsefulDBs(period0, origin0, duration0, max, min, mean, median, std, fq, tq, sum));
         return response;
     }
 
@@ -139,43 +108,4 @@ public class AggregationDBController {
         return response;
     }
 
-    @PutMapping("/setComment")
-    @ResponseBody
-    public RestfulResponse createOrUpdateAggregationDB(@RequestBody(required = true) AggregationDb aggregationdb) {
-        aggregationService.updateComment(aggregationdb);
-        return new RestfulResponse(1, "success");
-    }
-    
-    @PostMapping("/getMLmodels")
-    @ResponseBody
-    public List<MlModel> getMLmodels(@RequestBody(required = true) Map<Integer, Boolean> suggest) {
-    	System.out.println(suggest.toString());
-    	List<Integer> aggLevels = new ArrayList<>();
-    	List<String> aggMethods = new ArrayList<>();
-    	suggest.forEach((timeLevel, suggestion) -> {
-    		if (suggestion == true) {
-    			aggLevels.add(timeLevel);
-    		}
-    	});
-    	//unfinish: aggMethods
-    	aggMethods.add("sum");
-    	aggMethods.add("mean");
-    	aggMethods.add("std");
-		return mlModelDao.selectMlModelsByTimeLevelAndAggMethod(aggLevels, aggMethods);
-    	
-    	
-    }
-    
-    @PostMapping("/importMLmodels")
-    @ResponseBody
-    public RestfulResponse insertMLmodels(@RequestBody(required = true) List<MlModel> mlModels) {
-    	for (MlModel eachModel : mlModels) {
-    		mlModelDao.insertNewMlModel(eachModel);
-    	}
-    	
-		return new RestfulResponse(1, "success");
-    	
-    	
-    }
-    
 }

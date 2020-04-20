@@ -24,9 +24,6 @@
             text-align: center;
         }
     </style>
-    <style>
-        .pdfobject-container { height: 40rem; border: 1rem solid rgba(0,0,0,.1); }
-    </style>
 </head>
 
 <body data-ma-theme="blue">
@@ -43,7 +40,33 @@
                 	<div id="pdfVC"></div>
 					If this browser does not support PDFs, please download the PDF to view it: 
 					<a href="/pdf/pdfVC.pdf">Download PDF</a>
-                </div>
+<!--                <div class="card-body" style="margin: 0 150px">-->
+<!--                    <div class='typora-export os-windows'>-->
+<!--                        <div id='write' class='is-node'><h3><a name="version-control"-->
+<!--                                                               class="md-header-anchor"></a><span>Version control </span>-->
+<!--                        </h3>-->
+<!--                            <p><span>In order to make sure that users can access the same data from the database, the version control system is developed. Users can select a different version of the database and get different output. Even the database is upgraded, users can still get the same data from the old version.</span>-->
+<!--                            </p><h4><a name="design" class="md-header-anchor"></a><span>Design</span></h4>-->
+<!--                            <p><span>There are three different kinds of data in the database, the EEG data which is imported through .csv files, the patient data which includes basic information about each patient and the medication data which includes medication records of each patient. In order to achieve the version control system. New tags are added into different tables.</span>-->
+<!--                            </p>-->
+<!--                            <p><span>For EEG data, &quot;Start_Version&quot; and &quot;End_version&quot; are added. When a new version is published, the current version number would be added to every EEG record whose Start_Version is empty. When a record before the current version is deleted, the End_Version of that record would be set as the current version number. When a record of the current version is deleted, it would be deleted from both MySQL and Influx.</span>-->
+<!--                            </p>-->
+<!--                            <p><span>For example, after version 1 is published, all EEG data in the database should have a Start_Version as 1 and an End_Version as +</span>&infin;<span> (+</span>&infin;<span> is the default value). Now, some new EEG data are imported, the administrator can do the data cleaning job to delete some wrong data. If a record from version 1 is detected to be wrong(Should avoid this situation, try to clean the data before publish), the administrator can also delete it and the End_Version of this record would be set as 2 which means this record would not be used since version 2. When the data cleaning job finished, version 2 could be published and all data without Start_Version would be set as version 2. If a user wants to use version 1 database now, the system would select all the data with Start_Version &lt;=1 and End_Version&gt;1. </span>-->
+<!--                            </p>-->
+<!--                            <p><span>In summary, if the user wants to see the ith version of the database, all data with Start_Version &lt;=i and End_Version&gt;i would be shown.</span>-->
+<!--                            </p>-->
+<!--                            <p><span>For patient data, since old patient records would not be deleted, only one tag called version is added. If the user wants to check the ith version of the database, all patient records with version&lt;=i would be shown.</span>-->
+<!--                            </p>-->
+<!--                            <p><span>For medication records, they are the same as patient data, one tag called version is enough.</span>-->
+<!--                            </p><h4><a name="export-function" class="md-header-anchor"></a><span>Export function</span>-->
+<!--                            </h4>-->
+<!--                            <p><span>Since it is hard to add a new column in influxDB, filenames in MySQL are used to implement version control in influxDB. For every export job, filenames which can be used for this version would be got. When generating the influxDB query, filenames would be added to the where clause. In this way, users would get different export from different versions of the database.</span>-->
+<!--                            </p><h4><a name="import-function" class="md-header-anchor"></a><span>Import function</span>-->
+<!--                            </h4>-->
+<!--                            <p><span>Since the filename is used as a key to find data in influxDB, it is important to make sure that the same file cannot have the same name in different versions of the database. For example, file &quot;PUH-2010-001_ar.csv&quot; is detected to be wrong after version 1 published. The administrator can delete it and reimport a correct one for future versions. In this situation, the system would add a version number before this filename to distinguish the file for version 1 and version 2. The name of this file in version 2 would be &quot;V2_PUH-2010-001_ar.csv&quot;. On the other hand, if a file is detected to be not complete after published, the administrator cannot import the rest part with the same filename directly, the system would not allow this. The administrator should delete the file and then reimport the complete file. </span>-->
+<!--                            </p></div>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
             <div th:insert="fragments/footer :: footer"></div>
         </div>
@@ -59,7 +82,6 @@
 <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
 <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
-<script src="/js/pdfobject.js"></script>
 
 <!-- App functions and actions -->
 <script src="/js/navigation.js"></script>

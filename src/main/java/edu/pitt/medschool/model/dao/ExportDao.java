@@ -53,8 +53,8 @@ public class ExportDao {
     }
 
     public int markAsDeletedById(Integer id) {
-//        if (exportMapper.isGivenJobIdFinishOrCancel(id))
-//            return -1;
+        if (exportMapper.isGivenJobIdFinishOrCancel(id))
+            return -1;
         ExportWithBLOBs e = new ExportWithBLOBs();
         e.setId(id);
         e.setDeleted(true);

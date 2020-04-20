@@ -51,7 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout().permitAll();
 
         http
-                .headers().frameOptions().disable()
+                .headers()
                 .xssProtection()
                 .disable();
     }

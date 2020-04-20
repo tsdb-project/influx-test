@@ -94,7 +94,6 @@ public class ExportWithBLOBs extends Export {
 						: this.getFinishedPatient().equals(other.getFinishedPatient()))
 				&& (this.getAllPatient() == null ? other.getAllPatient() == null
 						: this.getAllPatient().equals(other.getAllPatient()))
-				&& (this.getFromDb() == null ? other.getFromDb() == null : this.getFromDb().equals(other.getFromDb()))
 				&& (this.getPatientList() == null ? other.getPatientList() == null
 						: this.getPatientList().equals(other.getPatientList()))
 				&& (this.getQueryJson() == null ? other.getQueryJson() == null
@@ -126,7 +125,6 @@ public class ExportWithBLOBs extends Export {
 		result = prime * result + ((getUsername() == null) ? 0 : getUsername().hashCode());
 		result = prime * result + ((getFinishedPatient() == null) ? 0 : getFinishedPatient().hashCode());
 		result = prime * result + ((getAllPatient() == null) ? 0 : getAllPatient().hashCode());
-		result = prime * result + ((getFromDb() == null) ? 0 : getFromDb().hashCode());
 		result = prime * result + ((getPatientList() == null) ? 0 : getPatientList().hashCode());
 		result = prime * result + ((getQueryJson() == null) ? 0 : getQueryJson().hashCode());
 		return result;

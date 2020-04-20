@@ -30,7 +30,7 @@
         </javaClientGenerator>
 
         
-        <table tableName="ml_model">
+        <table tableName="export">
             <generatedKey identity="true" column="id" sqlStatement="SELECT LAST_INSERT_ID()" />
         </table>
         

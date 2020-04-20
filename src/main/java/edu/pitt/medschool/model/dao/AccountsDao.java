@@ -105,4 +105,11 @@ public class AccountsDao {
         return accountsMapper.updateByPrimaryKeySelective(users);
     }
 
+    public List<Accounts> selectByRole(String role) {
+        AccountsExample accountsExample = new AccountsExample();
+        AccountsExample.Criteria criteria = accountsExample.createCriteria();
+        criteria.andRoleEqualTo(role);
+        return accountsMapper.selectByExample(accountsExample);
+    }
+
 }
