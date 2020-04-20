@@ -75,12 +75,10 @@
                         <li id="userchart" sec:authorize="hasRole('USER')">
                             <a href="/analysis/userchart">View Charts</a>
                         </li>
-
-                        <!-- <li id="export">
-                            <a href="/analysis/export">Export</a>
-                        </li> -->
                     </ul>
                 </li>
+
+                <!-- Database Management-->
                 <li class="navigation__sub" id="management" sec:authorize="hasRole('ADMIN')">
                     <a href="">
                         <i class="zmdi zmdi-spinner"></i>
@@ -102,18 +100,16 @@
                         <li id="aggDatabase">
                             <a href="/aggregation/aggDatabase">Database Aggregation</a>
                         </li>
-                        <!-- <li id="export">
-                            <a href="/analysis/export">Export</a>
-                        </li> -->
                     </ul>
                 </li>
+                <!-- Version Control-->
                 <li id="versionControl" sec:authorize="hasRole('ADMIN')">
                     <a href="/versionControl">
                         <i class="zmdi zmdi-time-restore"></i>
                         Version Control
                     </a>
                 </li>
-                <!-- Menu Export-->
+                <!-- Manual-->
                 <li class="navigation__sub" id="manual">
                     <a href="">
                         <i class="zmdi zmdi-format-clear-all"></i>
@@ -121,18 +117,16 @@
                     </a>
                     <ul>
                         <li id="manualIndex">
-                            <a href="/manual">Manual index</a>
+                            <a href="/manual/developerManual">Manual</a>
                         </li>
                         <li id="EEGDataCodebook">
                             <a href="/manual/EEGDataCodebook">EEG Data Codebook</a>
                         </li>
-<!--                        <li id="VersionControlManual">-->
-<!--                            <a href="/manual/VersionControl">Version Control</a>-->
-<!--                        </li>-->
                     </ul>
                 </li>
-                <li id="user">
-                    <a href="/user/management" sec:authorize="hasRole('ADMIN')">
+                <!-- User Management-->
+                <li id="user" sec:authorize="hasRole('ADMIN')">
+                    <a href="/user/management">
                         <i class="zmdi zmdi-accounts"></i>
                         User Management
                     </a>

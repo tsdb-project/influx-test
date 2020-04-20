@@ -11,7 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class ManualController {
-    @RequestMapping("manual")
+    @RequestMapping("manual/developerManual")
     public ModelAndView index(ModelAndView modelAndView) {
         modelAndView.addObject("nav", "manual");
         modelAndView.addObject("subnav", "manualIndex");
@@ -27,11 +27,4 @@ public class ManualController {
         return modelAndView;
     }
 
-    @RequestMapping("manual/VersionControl")
-    public ModelAndView VersionControl(ModelAndView modelAndView){
-        modelAndView.addObject("nav", "manual");
-        modelAndView.addObject("subnav", "VersionControlManual");
-        modelAndView.setViewName("manual/version control");
-        return modelAndView;
-    }
 }

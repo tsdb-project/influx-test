@@ -285,7 +285,6 @@
 
 }));
 
-PDFObject.embed("/pdf/pdfEEG.pdf", "#pdfEEG");
-PDFObject.embed("/pdf/pdfManual.pdf", "#pdfManual");
-PDFObject.embed("/pdf/pdfVC.pdf", "#pdfVC");
+PDFObject.embed("/pdf/EEGCodeBook.pdf", "#pdfEEGCodeBook");
+PDFObject.embed("/pdf/BrainFlux_Manual.pdf", "#pdfManual");
 
