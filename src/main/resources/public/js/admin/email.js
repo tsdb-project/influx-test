@@ -42,6 +42,8 @@ $(document).ready(function() {
     };
 
     $("#send").click(function() {
+
+        if ($('#parameter-form')[0].checkValidity()) {
             var form = {
                 "emailAddress": $("#email").val(),
                 "content": $("#content").val()
@@ -67,5 +69,10 @@ $(document).ready(function() {
                         'Error occurred when sending the email!');
                 }
             });
+
+        }else{
+            notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", " Invaild email address");
+        }
+
     });
 });
