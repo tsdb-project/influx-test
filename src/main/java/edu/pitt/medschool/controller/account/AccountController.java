@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -118,11 +119,13 @@ public class AccountController {
     @RequestMapping(value = "/sendEmail", method = RequestMethod.POST)
     @ResponseBody
     public RestfulResponse sendEmail(@RequestBody(required = true) Email email) throws Exception {
+        RestfulResponse response;
         if(usersService.sendEmailMessage(email.getEmailAddress(),email.getContent())){
-            return new RestfulResponse(1,"success");
+            response = new RestfulResponse(1, "success");
         }else {
-            return new RestfulResponse(0,"fail");
+            response = new RestfulResponse(0, "insert failed");
         }
+        return response;
     }
 
 }
