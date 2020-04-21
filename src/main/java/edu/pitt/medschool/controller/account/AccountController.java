@@ -120,7 +120,7 @@ public class AccountController {
     @ResponseBody
     public RestfulResponse sendEmail(@RequestBody(required = true) Email email) throws Exception {
         RestfulResponse response;
-        if(usersService.sendEmailMessage(email.getEmailAddress(),email.getContent())){
+        if(usersService.sendEmailMessage(email)){
             response = new RestfulResponse(1, "success");
         }else {
             response = new RestfulResponse(0, "insert failed");

@@ -44,6 +44,7 @@ $(document).ready(function() {
     $("#send").click(function() {
             var form = {
                 "emailAddress": $("#email").val(),
+                "username": $("input[id='user']").val(),
                 "content": $("#content").val()
             };
             $.ajax({
@@ -53,7 +54,6 @@ $(document).ready(function() {
                 'contentType': "application/json",
                 'dataType': 'json',
                 'success': function(data) {
-                    console.log(data.code);
                     if(data.code == 1){
                         notify("top", "center", null, "success", "animated fadeIn", "animated fadeOut", "We have received your message");
                         $("#send").attr('disabled', 'disabled');

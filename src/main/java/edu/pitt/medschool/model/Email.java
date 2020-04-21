@@ -8,6 +8,7 @@ import java.util.Properties;
 
 public class Email {
     private String emailAddress;
+    private String username;
     private String content;
 
     public String getEmailAddress() {
@@ -24,5 +25,13 @@ public class Email {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
