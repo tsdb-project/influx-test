@@ -61,6 +61,10 @@ $(document).ready(function() {
                     else {
                         notify("top", "center", null, "danger", "animated fadeIn", "animated fadeOut", "Something went wrong, please try again");
                     }
+                },
+                'error' : function() {
+                    notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",
+                        'Error occurred when sending the email!');
                 }
             });
         } else {
