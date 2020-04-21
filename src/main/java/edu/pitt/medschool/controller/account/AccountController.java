@@ -110,7 +110,7 @@ public class AccountController {
 
     @RequestMapping("/email")
     public ModelAndView userFeedBack(ModelAndView modelAndView) {
-//        modelAndView.addObject("nav", "user");
+        modelAndView.addObject("nav", "contactUs");
 //        modelAndView.addObject("subnav", "");
         modelAndView.setViewName("user/email");
         return modelAndView;

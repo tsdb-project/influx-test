@@ -10,11 +10,13 @@ $(document).ready(function () {
             'success': function (data) {
                 $("#username").html(data.data.username);
                 $("#user_version").html(data.data.databaseVersion);
+                $("#first_name").html(data.data.firstName);
             },
             'error': function () {
             }
         });
     }else{
-        $("#username").html( username );
+        $("#username").html( 'anonymous user' );
+        $("#first_name").html("please login as an authorize user");
     }
 });

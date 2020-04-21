@@ -10,7 +10,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class ManualController {
-    @RequestMapping("manual/developerManual")
+    @RequestMapping("manual/Manual")
     public ModelAndView index(ModelAndView modelAndView) {
         modelAndView.addObject("nav", "manual");
         modelAndView.addObject("subnav", "manualIndex");
