@@ -1,5 +1,6 @@
 package edu.pitt.medschool.service;
 
+import edu.pitt.medschool.model.Email;
 import edu.pitt.medschool.model.dao.AccountsDao;
 import edu.pitt.medschool.model.dao.VersionDao;
 import edu.pitt.medschool.model.dto.Accounts;
@@ -65,15 +66,15 @@ public class UsersService {
         }
     }
 
-    public boolean sendEmailMessage(String address, String content) throws Exception{
+    public boolean sendEmailMessage(Email email) throws Exception{
         SimpleMailMessage message = new SimpleMailMessage();
         List<Accounts> admins = accountsDao.selectByRole("ROLE_ADMIN");
         try{
             for(Accounts a: admins){
-                message.setFrom(address);
+                message.setFrom(email.getEmailAddress());
                 message.setTo(a.getEmail());
                 message.setSubject("feedback from brainFlux");
-                message.setText("From: "+address+"\n"+content);
+                message.setText("From: "+email.getEmailAddress()+"\nUsername: "+email.getUsername()+"\n"+email.getContent());
                 mailSender.send(message);
             }
 

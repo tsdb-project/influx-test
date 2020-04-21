@@ -87,7 +87,7 @@ $(document).ready(function() {
                         }else{
                             notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
                                 'register success!');
-                            setTimeout("window.location.href = '/login'",1000);
+                            setTimeout("window.location.href = '/user/email'",1000);
                         }
                     },
                     'error' : function() {

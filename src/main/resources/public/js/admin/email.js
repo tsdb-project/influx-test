@@ -46,6 +46,7 @@ $(document).ready(function() {
             $("#send").attr('disabled', 'disabled');
             var form = {
                 "emailAddress": $("#email").val(),
+                "username": $("input[id='user']").val(),
                 "content": $("#content").val()
             };
             $.ajax({

@@ -47,7 +47,10 @@
                 <i class="form-group__bar"></i>
             </div>
             <div class="alert alert-danger form-group" th:if="${param.error}">
-                <span>username or password is incorrect</span>
+                <span>Login failed<br>
+                    Please check your username and password<br>
+                    If your account is new, plase <a href="/user/email">contact us</a>  to unlock it.
+                </span>
             </div>
 
             <button type="submit" class="btn btn--icon login__block__btn">
