@@ -41,7 +41,7 @@
 
                         <a sec:authorize="!isAuthenticated()" href="/login" , class="listview__item">
                             <div class="listview__content">
-                                <div class="listview__heading"> Sign in </div>
+                                <div class="listview__heading"> Login / Register</div>
                             </div>
                         </a>
                         <a sec:authorize="hasAnyRole('USER', 'ADMIN')" th:href="@{'/user/profile/' + ${#authentication.name}}", class="listview__item">
