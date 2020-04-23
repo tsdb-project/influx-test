@@ -66,7 +66,7 @@ public class UsersService {
         }
     }
 
-    public boolean sendEmailMessage(Email email) throws Exception{
+    public boolean sendEmailMessage(Email email){
         SimpleMailMessage message = new SimpleMailMessage();
         List<Accounts> admins = accountsDao.selectByRole("ROLE_ADMIN");
         try{
@@ -83,5 +83,23 @@ public class UsersService {
             return false;
         }
 
+    }
+
+    public boolean newUserAlert(Accounts accounts){
+        SimpleMailMessage message = new SimpleMailMessage();
+        List<Accounts> admins = accountsDao.selectByRole("ROLE_ADMIN");
+        try{
+            for(Accounts a: admins){
+                message.setFrom(accounts.getEmail());
+                message.setTo(a.getEmail());
+                message.setSubject("BrainFlux has new user");
+                message.setText("From: "+accounts.getEmail()+"\nUsername: "+accounts.getUsername()+"\n"+accounts.getDescription());
+                mailSender.send(message);
+            }
+
+            return true;
+        }catch (Exception e){
+            return false;
+        }
     }
 }

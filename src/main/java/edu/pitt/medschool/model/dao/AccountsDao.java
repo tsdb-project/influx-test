@@ -49,6 +49,7 @@ public class AccountsDao {
         users.setLastUpdate(americaDateTime);
         users.setRole(userVO.getRole());
         users.setDatabaseVersion(userVO.getDatabaseVersion());
+        users.setDescription(userVO.getDescription());
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String pwdString = encoder.encode(userVO.getPassword());

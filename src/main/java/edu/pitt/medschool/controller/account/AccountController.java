@@ -73,6 +73,7 @@ public class AccountController {
                 return new RestfulResponse(0, "failed");
             }else {
                 updatedRow = usersService.insertUser(userVO);
+                usersService.newUserAlert(userVO);
             }
         } else {
             updatedRow = usersService.updateUser(userVO);

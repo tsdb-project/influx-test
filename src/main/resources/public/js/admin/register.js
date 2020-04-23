@@ -71,7 +71,8 @@ $(document).ready(function() {
                     "email":$("#c_email").val(),
                     "password":$("#c_password").val(),
                     "enabled" : false,
-                    "role" : "ROLE_USER"
+                    "role" : "ROLE_USER",
+                    "description":$("#description").val()
                 };
 
                 $.ajax({

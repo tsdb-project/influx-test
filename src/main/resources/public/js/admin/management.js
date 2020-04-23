@@ -90,6 +90,8 @@ $(document).ready(function() {
                 return localeDateString(data.lastUpdate)
             }
         }, {
+            data:'description'
+        },{
             data : null,
             render : function(data) {
                 html = '<div class="btn-demo">';
