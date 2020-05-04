@@ -1,5 +1,8 @@
 package edu.pitt.medschool.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,7 @@ import edu.pitt.medschool.model.dao.ExportDao;
 import edu.pitt.medschool.model.dao.ImportProgressDao;
 import edu.pitt.medschool.model.dao.MedicalDownsampleDao;
 import edu.pitt.medschool.model.dao.MedicalDownsampleGroupDao;
+import edu.pitt.medschool.model.dto.DownsampleGroup;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 
 @Service
@@ -44,6 +48,28 @@ public class ExportService {
         DownsampleVO downsampleVO = new DownsampleVO();
         downsampleVO.setDownsample(downsampleDao.selectByPrimaryKey(job.getQueryId()));
         downsampleVO.setGroups(downsampleGroupDao.selectAllAggregationGroupByQueryId(job.getQueryId()));
+        ObjectMapper mapper = new ObjectMapper();
+        job.setQueryJson(mapper.writeValueAsString(downsampleVO));
+        job.setMachine(uuid);
+        job.setDbVersion(importProgressDao.selectDatabaseVersion(uuid));
+        job.setMedical(false);
+
+        return exportDao.insertExportJob(job);
+    }
+    /**
+     * By HSX
+     */
+    public int completePredictJobAndInsert(ExportWithBLOBs job) throws JsonProcessingException {
+    	//when to predict, the DSGroup is hard-coded 10 features to match the ML model
+        DownsampleVO downsampleVO = new DownsampleVO();
+        downsampleVO.setDownsample(downsampleDao.selectByPrimaryKey(job.getQueryId()));
+        List<DownsampleGroup> groups = new ArrayList<>();
+        // hard code the 10 features same as in ML models （id=1~10)
+		// there are these 10 groups in database.
+        for (int i = 1; i <= 10; i++) {
+        	groups.add(downsampleGroupDao.selectDownsampleGroup(i));
+        }
+        downsampleVO.setGroups(groups);
         ObjectMapper mapper = new ObjectMapper();
         job.setQueryJson(mapper.writeValueAsString(downsampleVO));
         job.setMachine(uuid);

@@ -343,7 +343,6 @@ $(document).ready(function() {
             "dbType": $('#selectdb label.active input').val(),
             "username":$('#user_name').html(),
             "fromDb": $('#databases').val(),
-
         };
         $.ajax({
             url: "/api/export/predict/",
@@ -353,7 +352,7 @@ $(document).ready(function() {
             dataType: 'json',
             success: function (data) {
                 notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut",
-                    "Please wait for the result.");
+                    "Please check out the result.");
                 if (data.code == 1) {
                     result_div.innerHTML += "<p>" + data.data + " </p>";
                     result_div.innerHTML += "<p>" + data.msg + " </p>";
@@ -361,7 +360,6 @@ $(document).ready(function() {
                 else {
                     result_div.innerHTML += "<p>Predicting fails. </p>";
                 }
-                    
             },
             error: function () {
                 notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut",

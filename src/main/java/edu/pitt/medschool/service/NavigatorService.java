@@ -103,14 +103,6 @@ public class NavigatorService {
     }
     
     
-    
-    
-    
-    
-    
-    
-    
-    
     List<String> parseAggregationGroupColumnsString(String columnsJson) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ColumnJSON json = mapper.readValue(columnsJson, ColumnJSON.class);
@@ -119,6 +111,7 @@ public class NavigatorService {
     
     /**
      * Handler when a job is finished (With error or not)
+     * Not used
      */
     private void jobClosingHandler(boolean idbError, boolean isPscNeeded, ExportWithBLOBs job, File outputDir, ExportOutput eo,
             int validPatientNumber) {
@@ -144,6 +137,11 @@ public class NavigatorService {
         exportDao.updateByPrimaryKeySelective(updateJob);
     }
     
+    /**
+     * Not used
+     * @param purpose
+     * @return
+     */
     private File generateOutputDir(String purpose) {
         String identifier = uuid;
         if (identifier == null)
@@ -174,6 +172,12 @@ public class NavigatorService {
         return null;
     }
 	
+    /**
+     * Not used
+     * @param job
+     * @return
+     * @throws IOException
+     */
 	public String generateTestMatrix(ExportWithBLOBs job) throws IOException {
 		String jobFromdb = new String("data");
 //		int jobId = job.getId();
@@ -410,6 +414,8 @@ public class NavigatorService {
 		
 	}
 	
+	
+	
 	public String predictWithExportFileViaPython(ExportWithBLOBs job) throws InterruptedException {
 		String pList = job.getPatientList();
 		List<String> patientIDs;
@@ -500,7 +506,7 @@ public class NavigatorService {
               result = lineStr;
               System.out.println(result);
           }
-          // 关闭输入流
+
           br.close();
           in.close();
 		} catch (IOException e) {
@@ -515,7 +521,7 @@ public class NavigatorService {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
+		//unit test
 		    
 //		ExportWithBLOBs job = new ExportWithBLOBs();
 //		job.setId(999);
@@ -534,44 +540,7 @@ public class NavigatorService {
 			System.out.print(patient_txt + ", ");
 		}
 		System.out.println("End print.");
-		
-		
-		
-		
-		
-//        Scanner input = new Scanner(System.in);
-//        
-//        // 在同一行输入两个数字，用空格分开，作为传入Python代码的命令行参数
-//        System.out.println("Enter two integers(e.g. 12 34): ");
-//        String integers = input.nextLine();
-//        String[] numbers = integers.split(" ");
-//        
-//        // 定义传入Python脚本的命令行参数，将参数放入字符串数组里
-//        String cmds = String.format("python D://test_argv.py %s %s", 
-//                                    numbers[0], numbers[1]);
-//
-//        // 执行CMD命令
-//        System.out.println("\nExecuting python script file now.");
-//        Process pcs = Runtime.getRuntime().exec(cmds);
-//        pcs.waitFor();
-//
-//        // 定义Python脚本的返回值
-//        String result = null;
-//        // 获取CMD的返回流
-//        BufferedInputStream in = new BufferedInputStream(pcs.getInputStream());
-//        // 字符流转换字节流
-//        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-//        // 这里也可以输出文本日志
-//
-//        String lineStr = null;
-//        while ((lineStr = br.readLine()) != null) {
-//            result = lineStr;
-//        }
-//        // 关闭输入流
-//        br.close();
-//        in.close();
-//
-//        System.out.println(result);
+
 
     }
 	
