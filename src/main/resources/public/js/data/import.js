@@ -1,7 +1,69 @@
 $(document)
         .ready(
                 function() {
-                    
+
+                    function notify(from, align, icon, type, animIn, animOut, msg) {
+                        $.notify({
+                            icon: icon,
+                            title: '',
+                            message: msg,
+                            url: ''
+                        }, {
+                            element: 'body',
+                            type: type,
+                            allow_dismiss: false,
+                            placement: {
+                                from: from,
+                                align: align
+                            },
+                            offset: {
+                                x: 20,
+                                y: 20
+                            },
+                            spacing: 10,
+                            z_index: 1000000000,
+                            delay: 1500,
+                            timer: 750,
+                            url_target: '_blank',
+                            mouse_over: false,
+                            animate: {
+                                enter: animIn,
+                                exit: animOut
+                            },
+                            template: '<div data-notify="container" class="alert alert-dismissible alert-{0} alert--notify" role="alert">' +
+                                '<span data-notify="icon"></span> ' +
+                                '<span data-notify="title">{1}</span> ' +
+                                '<span data-notify="message">{2}</span>' +
+                                '<div class="progress" data-notify="progressbar">' +
+                                '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+                                '</div>' +
+                                '<a href="{3}" target="{4}" data-notify="url"></a>' +
+                                '<button type="button" aria-hidden="true" data-notify="dismiss" class="alert--notify__close">Close</button>' +
+                                '</div>'
+                        });
+                    };
+
+                    // autoImport init
+
+                    function AutoImportSetting(){
+                        $.ajax({
+                            'url': "/api/data/getAutoImportStatus",
+                            'type': 'get',
+                            'contentType':"application/json",
+                            'dataType':"json",
+                            'async': false,
+                            'success': function(data) {
+                                $("#hour").val(data.data.hour);
+                                $("#minute").val(data.data.minute);
+                                $("#second").val(data.data.second);
+                                $("#autoImportSwitch").attr('checked', data.data.checked);
+                            },
+                            'error': function() {}
+                        });
+                    }
+                    AutoImportSetting();
+
+
                     var directory;
                     
                     var files = {
@@ -139,32 +201,32 @@ $(document)
                     });
                     
                     // new for validate csv
-                    $("#analyzeButton").click(function() {
-                        $("#analyzeButton").attr('disabled', '');
-
-                        var data = {
-                            'files' : []
-                        };
-                        $.each($('.file-checkbox:checked'), function() {
-                            data['files'].push($(this).val());
-                        });
-
-                        var files = data;
-
-                        $.ajax({
-                            'url' : "/api/data/validate",
-                            'type' : 'post',
-                            'data' : JSON.stringify(files),
-                            'contentType' : "application/json",
-                            'dataType' : 'json',
-                            'success' : function(data) {
-                                    window.alert("analyze finished");
-                            },
-                            'error' : function() {
-                            }
-                        });
-
-                    });
+                    // $("#analyzeButton").click(function() {
+                    //     $("#analyzeButton").attr('disabled', '');
+                    //
+                    //     var data = {
+                    //         'files' : []
+                    //     };
+                    //     $.each($('.file-checkbox:checked'), function() {
+                    //         data['files'].push($(this).val());
+                    //     });
+                    //
+                    //     var files = data;
+                    //
+                    //     $.ajax({
+                    //         'url' : "/api/data/validate",
+                    //         'type' : 'post',
+                    //         'data' : JSON.stringify(files),
+                    //         'contentType' : "application/json",
+                    //         'dataType' : 'json',
+                    //         'success' : function(data) {
+                    //                 window.alert("analyze finished");
+                    //         },
+                    //         'error' : function() {
+                    //         }
+                    //     });
+                    //
+                    // });
 
                     // new for import patients
                     // $("#importPatients").click(function() {
@@ -224,4 +286,48 @@ $(document)
                     //         }
                     //     });
                     // });
+
+
+
+
+                    // AutoImport Switch btn
+                    $("#autoImportSwitch").click(function() {
+
+                        var checked = $(this).is(':checked');
+                        var data = {
+                            'checked':checked,
+                            'hour':$("#hour").val(),
+                            'minute': $("#minute").val(),
+                            'second':$("#second").val()
+                        }
+
+                        if(checked){
+                            $("#hour").attr('disabled', '');
+                            $("#minute").attr('disabled', '');
+                            $("#second").attr('disabled', '');
+                        }else{
+                            $("#hour").removeAttr('disabled');
+                            $("#minute").removeAttr('disabled');
+                            $("#second").removeAttr('disabled');
+                        }
+
+                            $.ajax({
+                                'url' : "/api/data/setAutoImportStatus",
+                                'type' : 'post',
+                                'data' : JSON.stringify(data),
+                                'contentType' : "application/json",
+                                'dataType' : 'json',
+                                'success' : function(data) {
+                                    if(data.code == 1){
+                                        notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'AutoImport setting changed.');
+                                    }else{
+                                        notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'Change AutoImport setting error.');
+                                    }
+                                },
+                                'error' : function() {
+                                    notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'Change AutoImport setting error.');
+                                }
+                            });
+
+                    })
                 });

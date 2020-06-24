@@ -1,21 +1,86 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Brain Flux</title>
-<!-- Vendor styles -->
-<link rel="stylesheet" href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
-<link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
-<link rel="stylesheet" href="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.css">
-<link rel="icon" type="image/ico" href="/img/favicon.ico">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Brain Flux</title>
+    <!-- Vendor styles -->
+    <link rel="stylesheet"
+          href="/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="/vendors/bower_components/animate.css/animate.min.css">
+    <link rel="stylesheet" href="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.css">
+    <link rel="icon" type="image/ico" href="/img/favicon.ico">
 
-<!-- App styles -->
-<link rel="stylesheet" href="/css/app.min.css">
+    <!-- App styles -->
+    <link rel="stylesheet" href="/css/app.min.css">
+    <style type="text/css">
+        /* The switch - the box around the slider */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* The slider */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+    </style>
 </head>
 
 <body data-ma-theme="blue">
-    <main class="main">
+<main class="main">
     <div th:insert="fragments/page-loader :: div"></div>
     <div th:insert="fragments/header :: header"></div>
     <div th:insert="fragments/sidebar :: aside"></div>
@@ -48,33 +113,58 @@
                         <div class="table-responsive">
                             <table id="filesTable" class="table table-bordered">
                                 <thead class="thead-default">
-                                    <tr>
-                                        <th>File Name</th>
-                                        <th>Size</th>
-                                        <th>
-                                            <div class="custom-control custom-checkbox">
-                                                <label for="selectAllFiles">Select All</label><input type="checkbox" class="custom-control-input" id="selectAllFiles">
-                                            </div>
-                                        </th>
-                                    </tr>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Size</th>
+                                    <th>
+                                        <div class="custom-control custom-checkbox">
+                                            <label for="selectAllFiles">Select All</label><input type="checkbox"
+                                                                                                 class="custom-control-input"
+                                                                                                 id="selectAllFiles">
+                                        </div>
+                                    </th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                    </tr>
+                                <tr>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
                     </form>
-                    <button type="button" class="btn btn-success waves-effect" id="importCsvButton">Import Csv Files</button>
+                    <button type="button" class="btn btn-success waves-effect" id="importCsvButton">Import Csv Files
+                    </button>
                     <!--<button type="button" class="btn btn-success waves-effect" id="importErdButton">Import Erd Files</button>-->
                     <!--<button type="button" class="btn btn-success waves-effect" id="analyzeButton">Analyze</button>-->
+                </div>
+            </div>
+
+            <div class="card" id="AutoImportCard">
+                <div class="card-body">
+                    <h2 class="card-title">Auto-Import trigger</h2>
+                    <h2 class="card-subtitle">Turn on/off the auto-Import </h2>
+                    <div class="row">
+                        <label>
+                            By turn on the auto-Import, the process will begin everyday on
+                            <input id='hour' type="number" max="23" min="0"> H
+                            <input id='minute' type="number" max="59" min="0"> M
+                            <input id='second' type="number" max="59" min="0"> S
+                        </label>
+                    </div>
+                    <div class="row">
+                        <label class="switch">
+                            <input type="checkbox" id="autoImportSwitch">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
             <div class="card" id="progressCard"><!--  style="display: none"> -->
                 <div class="card-body">
                     <h2 class="card-title">Import Progress</h2>
-                    <h2 class="card-subtitle">Track the import progress in <a href="/data/activity">Data - Activity</a> page. </h2>
+                    <h2 class="card-subtitle">Track the import progress in <a href="/data/activity">Data - Activity</a>
+                        page. </h2>
                     <!-- <div id="fileProgress">
                         <div class="progress">
                             <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="fileProgress"></div>
@@ -98,31 +188,34 @@
 
             <div th:insert="fragments/footer :: footer"></div>
     </section>
-    </main>
+</main>
 
-    <div th:insert="fragments/ie-warning :: div"></div>
-    <!-- Javascript -->
-    <!-- Vendors -->
-    <script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="/vendors/bower_components/tether/dist/js/tether.min.js"></script>
-    <script src="/vendors/bower_components/popper.js/dist/umd/popper.min.js"></script>
-    <script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
-    <script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
-    <script src="/vendors/bower_components/dropzone/dist/min/dropzone.min.js"></script>
+<div th:insert="fragments/ie-warning :: div"></div>
+<!-- Javascript -->
+<!-- Vendors -->
+<script src="/vendors/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="/vendors/bower_components/tether/dist/js/tether.min.js"></script>
+<script src="/vendors/bower_components/popper.js/dist/umd/popper.min.js"></script>
+<script src="/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/vendors/bower_components/jquery.scrollbar/jquery.scrollbar.min.js"></script>
+<script src="/vendors/bower_components/jquery-scrollLock/jquery-scrollLock.min.js"></script>
+<script src="/vendors/bower_components/dropzone/dist/min/dropzone.min.js"></script>
 
-    <!-- Vendors: Data tables -->
-    <script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
-    <script src="/vendors/bower_components/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
-    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.print.min.js"></script>
-    <script src="/vendors/bower_components/jszip/dist/jszip.min.js"></script>
-    <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
-    <script src="/vendors/bower_components/datatables.net/js/moment.min.js"></script>
-    <script src="/vendors/bower_components/datatables.net/js/datetime-moment.js"></script>
+<!--Notification JS-->
+<script src="/vendors/bower_components/remarkable-bootstrap-notify/dist/bootstrap-notify.min.js"></script>
 
-    <!-- App functions and actions -->
-    <script src="/js/navigation.js"></script>
-    <script src="/js/app.min.js"></script>
-    <script src="/js/data/import.js"></script>
+<!-- Vendors: Data tables -->
+<script src="/vendors/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="/vendors/bower_components/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+<script src="/vendors/bower_components/datatables.net-buttons/js/buttons.print.min.js"></script>
+<script src="/vendors/bower_components/jszip/dist/jszip.min.js"></script>
+<script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
+<script src="/vendors/bower_components/datatables.net/js/moment.min.js"></script>
+<script src="/vendors/bower_components/datatables.net/js/datetime-moment.js"></script>
+
+<!-- App functions and actions -->
+<script src="/js/navigation.js"></script>
+<script src="/js/app.min.js"></script>
+<script src="/js/data/import.js"></script>
 </body>
 </html>

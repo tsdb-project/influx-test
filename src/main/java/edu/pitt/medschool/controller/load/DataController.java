@@ -19,6 +19,7 @@ import edu.pitt.medschool.framework.util.FileBean;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dto.CsvFile;
 import edu.pitt.medschool.model.dto.ImportProgress;
+import edu.pitt.medschool.model.dto.AutoImportSetting;
 
 /**
  * @author Isolachine
@@ -42,8 +43,8 @@ public class DataController {
     TemplateService templateService;
     @Autowired
     TimeShiftService timeShiftService;
-//    @Autowired
-//    ConvertToCsvServies convertToCsvServies;
+    @Autowired
+    AutoImportService autoImportService;
 
     @RequestMapping("data/import")
     @ResponseBody
@@ -298,5 +299,26 @@ public class DataController {
         map.put("progress", list);
         map.put("total", importProgressService.GetTaskOverallProgress(uuid, batchId));
         return map;
+    }
+
+    @GetMapping(value = "/api/data/getAutoImportStatus")
+    @ResponseBody
+    public RestfulResponse getAutoImportStatus() throws Exception{
+        RestfulResponse response = new RestfulResponse(1, "success");
+        response.setData(autoImportService.getAutoImportSetting());
+        return response;
+    }
+
+    @PostMapping(value = "/api/data/setAutoImportStatus")
+    @ResponseBody
+    public RestfulResponse setAutoImportStatus(@RequestBody(required = true) AutoImportSetting setting){
+        RestfulResponse response = null;
+
+        if(autoImportService.setAutoImportSetting(setting)){
+            response = new RestfulResponse(1, "success");
+        }else {
+            response = new RestfulResponse(2, "failed");
+        }
+        return response;
     }
 }
