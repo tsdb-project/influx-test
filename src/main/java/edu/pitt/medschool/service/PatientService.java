@@ -114,8 +114,8 @@ public class PatientService {
                         patient.setAge((info[1]).getBytes()[0]);
                     patient.setFemale(info[2] == "1");
                     // [3] arrestdate
-                    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                    if (!info[21].isEmpty())
+                    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    if (!info[21].isEmpty() && info[21] != "1900/1/1  0:00")
                         patient.setArrestdate(LocalDate.parse(timeToStanderTime(info[21]), fmt));
                     if (!info[4].isEmpty())
                         patient.setOohca(Integer.valueOf(info[4]));
