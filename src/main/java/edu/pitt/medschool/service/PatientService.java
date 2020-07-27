@@ -7,6 +7,7 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -157,7 +158,7 @@ public class PatientService {
             e.printStackTrace();
         }
     }
-
+    
     private HashMap getPatientsFromCsv(BufferedWriter logWriter, String dir) {
         List<PatientWithBLOBs> patients = new ArrayList<>();
         int count = 0;
@@ -196,7 +197,7 @@ public class PatientService {
 
             // start reading csv
             while ((line != null)) {
-                while (patients.size() <= PATIENT_BATCH_SIZE) {
+                while (patients.size() <= PATIENT_BATCH_SIZE && line != null) {
                     String[] info = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
                     String currentId = info[0];
                     PatientWithBLOBs patient = new PatientWithBLOBs();
@@ -240,6 +241,13 @@ public class PatientService {
                         } else {
                             continue;
                         }
+                    }
+
+
+                    // if the arrest time is invalid, set to arrest date
+                    if (patient.getArresttime().isEqual(LocalDateTime.parse("1900-01-01 00:00:00", fmt)) ||
+                            patient.getArresttime() == null) {
+                        patient.setArresttime(LocalDateTime.of(patient.getArrestdate(), LocalTime.of(0, 0, 0)));
                     }
 
                     writeLog(logWriter, "Patient " + currentId + " imported");
