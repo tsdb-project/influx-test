@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import edu.pitt.medschool.model.dto.AutoImportSetting;
 
 @Service
@@ -18,76 +21,103 @@ public class AutoImportService {
     @Value("${FILE_TO_IMPORT}")
     String FILE_TO_IMPORT;
 
-    private Boolean checked = false;
-    private int hour = 5;
-    private int minute = 0;
-    private int second = 0;
+    private AtomicBoolean checked = new AtomicBoolean(false);
+    private AtomicInteger hour = new AtomicInteger(5);
+    private AtomicInteger minute = new AtomicInteger(0);
+    private AtomicInteger second = new AtomicInteger(0);
 
 
-    private Timer timer = null;
+    private volatile Timer timer;
 
-
-    public void start() {
-        if(this.checked){
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.HOUR_OF_DAY, this.hour);
-            cal.set(Calendar.MINUTE, this.minute);
-            cal.set(Calendar.SECOND, this.second);
-
-
-            timer = new Timer();
-            timer.schedule(new TimerTask() {
-                public void run() {
-                    if(! Util.filesInFolder(FILE_TO_IMPORT , "csv").isEmpty()
-                            && ! Util.filesInFolder(FILE_TO_IMPORT,"txt").isEmpty()){
-                        List<FileBean> csvs = Util.filesInFolder(FILE_TO_IMPORT , "csv");
-                        List<FileBean> txts = Util.filesInFolder(FILE_TO_IMPORT,"txt");
-                        List<FileBean> importList = new ArrayList<>();
-                        for(FileBean f: txts){
-                            String name = f.getName().toLowerCase().replace(".txt","");
-                            for(FileBean c: csvs){
-                                if(name.toLowerCase().equals(c.getName().toLowerCase().replace(".csv",""))){
-                                    importList.add(c);
-                                }
-                            }
-                        }
-                        String[] path = new String[importList.size()];
-                        for (int i=0;i<importList.size();i++){
-                            path[i] = importList.get(i).getDirectory()+importList.get(i).getName();
-                        }
-                        importCsvService.AddArrayFiles(path);
+    private void startAutoImport() {
+        if (!Util.filesInFolder(FILE_TO_IMPORT, "csv").isEmpty()
+                && !Util.filesInFolder(FILE_TO_IMPORT, "txt").isEmpty()) {
+            List<FileBean> csvs = Util.filesInFolder(FILE_TO_IMPORT, "csv");
+            List<FileBean> txts = Util.filesInFolder(FILE_TO_IMPORT, "txt");
+            List<FileBean> importList = new ArrayList<>();
+            for (FileBean f : txts) {
+                String name = f.getName().toLowerCase().replace(".txt", "");
+                for (FileBean c : csvs) {
+                    if (name.toLowerCase().equals(c.getName().toLowerCase().replace(".csv", ""))) {
+                        importList.add(c);
                     }
                 }
+            }
+            String[] path = new String[importList.size()];
+            for (int i = 0; i < importList.size(); i++) {
+                path[i] = importList.get(i).getDirectory() + importList.get(i).getName();
+            }
+            importCsvService.AddArrayFiles(path);
+        }
+    }
+
+
+    private void startAutoImportTimer() {
+        if (this.checked.get()) {
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR_OF_DAY, this.hour.get());
+            cal.set(Calendar.MINUTE, this.minute.get());
+            cal.set(Calendar.SECOND, this.second.get());
+            this.timer = new Timer();
+            timer.schedule(new TimerTask() {
+                public void run() {
+                    startAutoImport();
+                }
             }, cal.getTime(), 24 * 60 * 60 * 1000);
-        }else{
-            timer.cancel();
-            timer.purge();
-            timer = null;
+
+        } else {
+            this.timer.cancel();
+            this.timer.purge();
         }
 
     }
 
-    public AutoImportSetting getAutoImportSetting(){
+    public AutoImportSetting getAutoImportSetting() {
         AutoImportSetting setting = new AutoImportSetting();
-        setting.setChecked(this.checked);
-        setting.setHour(this.hour);
-        setting.setMinute(this.minute);
-        setting.setSecond(this.second);
+        setting.setChecked(this.checked.get());
+        setting.setHour(this.hour.get());
+        setting.setMinute(this.minute.get());
+        setting.setSecond(this.second.get());
         return setting;
     }
 
-    public Boolean setAutoImportSetting(AutoImportSetting setting){
-        this.checked = setting.getChecked();
-        this.hour = setting.getHour();
-        this.minute = setting.getMinute();
-        this.second = setting.getSecond();
+    public Boolean setAutoImportSetting(AutoImportSetting setting) {
+        this.checked.set(setting.getChecked());
+        this.hour.set(setting.getHour());
+        this.minute.set(setting.getMinute());
+        this.second.set(setting.getSecond());
 
         try {
-            this.start();
-        }catch (Exception e){
+            this.startAutoImportTimer();
+        } catch (Exception e) {
             return false;
         }
         return true;
     }
+
+
+//    public static void main(String[] args) {
+//        AutoImportSetting st = new AutoImportSetting();
+//        st.setHour(16);
+//        st.setMinute(0);
+//        st.setSecond(0);
+//        st.setChecked(false);
+//
+//        Calendar cal = Calendar.getInstance();
+//        cal.set(Calendar.HOUR_OF_DAY, st.getHour());
+//        cal.set(Calendar.MINUTE, st.getMinute());
+//        cal.set(Calendar.SECOND, st.getSecond());
+//
+//        AutoImportService ais = new AutoImportService();
+//
+//
+//        Timer timer = new Timer();
+//        timer.schedule(new TimerTask() {
+//            public void run() {
+//                st.setChecked(!st.getChecked());
+//                ais.setAutoImportSetting(st);
+//            }
+//        }, cal.getTime(), 30 * 1000);
+//    }
 }
 
