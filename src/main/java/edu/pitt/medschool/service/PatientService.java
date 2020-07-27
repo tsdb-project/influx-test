@@ -245,8 +245,7 @@ public class PatientService {
 
 
                     // if the arrest time is invalid, set to arrest date
-                    if (patient.getArresttime().isEqual(LocalDateTime.parse("1900-01-01 00:00:00", fmt)) ||
-                            patient.getArresttime() == null) {
+                    if (patient.getArresttime() == null || patient.getArresttime().isEqual(LocalDateTime.parse("1900-01-01 00:00:00", fmt))) {
                         patient.setArresttime(LocalDateTime.of(patient.getArrestdate(), LocalTime.of(0, 0, 0)));
                     }
 
