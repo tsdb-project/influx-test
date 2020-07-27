@@ -170,14 +170,8 @@ public class DataController {
     @RequestMapping(value = "api/data/importPatients")
     @ResponseBody
     public RestfulResponse ImportPatients(@RequestParam(name = "dir") String dirString) {
-        Map map = patientService.getPatientsFromCsv(dirString);
-        RestfulResponse response;
-        if(map.get("msg") == "success"){
-            response = new RestfulResponse(1,"success");
-        }else{
-            response = new RestfulResponse(2,"failed");
-        }
-        response.setData(map.get("num"));
+        patientService.startImportPatients(dirString);
+        RestfulResponse response = new RestfulResponse(1,"success");;
         return response;
     }
 
