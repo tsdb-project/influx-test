@@ -133,7 +133,7 @@ public class PatientService {
                         writeLog(logWriter, "Successfully imported " + result.get("num") + " patients, all done");
                     } else {
                         writeLog(logWriter, "Successfully imported " + result.get("num") +
-                                " patients, line" + ((int) result.get("num") + 1) + "is wrong");
+                                " patients, line " + ((int) result.get("num") + 1) + " is wrong");
                     }
 
                     logWriter.close();

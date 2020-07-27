@@ -4934,52 +4934,52 @@ public class PatientExample {
 			return (Criteria) this;
 		}
 
-		public Criteria andAdmitFloorEqualTo(Integer value) {
+		public Criteria andAdmitFloorEqualTo(String value) {
 			addCriterion("admit_floor =", value, "admitFloor");
 			return (Criteria) this;
 		}
 
-		public Criteria andAdmitFloorNotEqualTo(Integer value) {
+		public Criteria andAdmitFloorNotEqualTo(String value) {
 			addCriterion("admit_floor <>", value, "admitFloor");
 			return (Criteria) this;
 		}
 
-		public Criteria andAdmitFloorGreaterThan(Integer value) {
+		public Criteria andAdmitFloorGreaterThan(String value) {
 			addCriterion("admit_floor >", value, "admitFloor");
 			return (Criteria) this;
 		}
 
-		public Criteria andAdmitFloorGreaterThanOrEqualTo(Integer value) {
+		public Criteria andAdmitFloorGreaterThanOrEqualTo(String value) {
 			addCriterion("admit_floor >=", value, "admitFloor");
 			return (Criteria) this;
 		}
 
-		public Criteria andAdmitFloorLessThan(Integer value) {
+		public Criteria andAdmitFloorLessThan(String value) {
 			addCriterion("admit_floor <", value, "admitFloor");
 			return (Criteria) this;
 		}
 
-		public Criteria andAdmitFloorLessThanOrEqualTo(Integer value) {
+		public Criteria andAdmitFloorLessThanOrEqualTo(String value) {
 			addCriterion("admit_floor <=", value, "admitFloor");
 			return (Criteria) this;
 		}
 
-		public Criteria andAdmitFloorIn(List<Integer> values) {
+		public Criteria andAdmitFloorIn(List<String> values) {
 			addCriterion("admit_floor in", values, "admitFloor");
 			return (Criteria) this;
 		}
 
-		public Criteria andAdmitFloorNotIn(List<Integer> values) {
+		public Criteria andAdmitFloorNotIn(List<String> values) {
 			addCriterion("admit_floor not in", values, "admitFloor");
 			return (Criteria) this;
 		}
 
-		public Criteria andAdmitFloorBetween(Integer value1, Integer value2) {
+		public Criteria andAdmitFloorBetween(String value1, String value2) {
 			addCriterion("admit_floor between", value1, value2, "admitFloor");
 			return (Criteria) this;
 		}
 
-		public Criteria andAdmitFloorNotBetween(Integer value1, Integer value2) {
+		public Criteria andAdmitFloorNotBetween(String value1, String value2) {
 			addCriterion("admit_floor not between", value1, value2, "admitFloor");
 			return (Criteria) this;
 		}
