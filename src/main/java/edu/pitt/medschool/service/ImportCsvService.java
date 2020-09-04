@@ -546,10 +546,13 @@ public class ImportCsvService {
                     batchCount = 0;
                     logImportingFile(file.toString(), aFileSize, currentProcessed, totalLines);
 
+/*
+                    remove the sleep mechanism
                     if (end - start > softTimeout) {
                         logger.warn(String.format("Sleeping for %ds", timeoutSleep));
                         TimeUnit.SECONDS.sleep(timeoutSleep);
                     }
+*/
                 }
             }
 
