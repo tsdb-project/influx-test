@@ -359,7 +359,6 @@ public class ImportCsvService {
         // fixing 3 hours time shift
 //        double offset = -3 *1.0 / 24;
         try {
-            long start = System.currentTimeMillis();
             BufferedReader reader = Files.newBufferedReader(file);
             CSVReader csvReader = new CSVReader(reader);
 
@@ -470,12 +469,9 @@ public class ImportCsvService {
             long previousMeasurementEpoch = testStartTimeEpoch - 1000;
             String aLine;
 
-            long end = System.currentTimeMillis();
-            logger.info("preprocess for writing a file used {}s.", (end - start) / 1000.0);
 
             // Process every data lines
             while ((aLine = reader.readLine()) != null) {
-                start = System.currentTimeMillis();
                 String[] values = aLine.split(",");
                 int lengthOfThisLine = aLine.length();
 
@@ -540,14 +536,12 @@ public class ImportCsvService {
                 previousMeasurementEpoch = measurementEpoch;
 
 
-                end = System.currentTimeMillis();
-                logger.info("Create this batch of data used {}s.", (end - start) / 1000.0);
 
                 // Write batch into DB
                 if (batchCount >= bulkInsertMax) {
-                    start = System.currentTimeMillis();
+                    long start = System.currentTimeMillis();
                     idb.write(records);
-                    end = System.currentTimeMillis();
+                    long end = System.currentTimeMillis();
                     logger.info("Write to InfluxDB used {}s.", (end - start) / 1000.0);
 
                     // Reset batch point
@@ -556,13 +550,13 @@ public class ImportCsvService {
                     batchCount = 0;
                     logImportingFile(file.toString(), aFileSize, currentProcessed, totalLines);
 
-/*
-                    remove the sleep mechanism
+
+                    //The sleep mechanism
                     if (end - start > softTimeout) {
                         logger.warn(String.format("Sleeping for %ds", timeoutSleep));
                         TimeUnit.SECONDS.sleep(timeoutSleep);
                     }
-*/
+
                 }
             }
 
