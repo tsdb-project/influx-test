@@ -329,7 +329,7 @@ public class CsvFileDao {
     }
 
     public List<String> selectIdByCustom(CsvFileExample ce) {
-        return csvFileMapper.selectIdByExample(ce);
+        return csvFileMapper.selectPidByExample(ce);
     }
 
     public int updateEndVersion(CsvFile file) {
