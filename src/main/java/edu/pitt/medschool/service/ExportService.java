@@ -118,9 +118,12 @@ public class ExportService {
             InfluxDB influxDB = generateIdbClient(false);
             while ((pid=idQueue.poll())!=null){
 
+                logger.info("current PID: " + pid);
+
                 QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
                 if(res1.getResults() != null){
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
+                    logger.info("start time: " + startTime);
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
                     String endTime = LocalDateTime.parse(startTime,df).plusHours(12).withMinute(0).withSecond(0).withNano(0).toString()+":00"+"Z";
 
