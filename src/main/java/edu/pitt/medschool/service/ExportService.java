@@ -131,12 +131,12 @@ public class ExportService {
 
                     String query = String.format("select \u002A from /%s/ where arType='ar' AND time<'%s'",pid,endTime);
                     String exportDir = exportBaseDir + pid + "-12hours.csv";
-                    String command = String.format("influx -database data -precision rfc3339 -format csv > \"%s\" -execute \"%s\" ",exportDir,query);
-                    String[] Commandarr = new String[]{"influx", "-database","data","-precision","rfc3339","-format","csv", "1>", exportDir, "-execute", "\""+ query + "\""};
-                    logger.info("query is: " +  command);
+                    ProcessBuilder pd = new ProcessBuilder("influx", "-execute", query, "-database data","-precision rfc3339","-format csv",">" + exportDir);
+//                    String command = String.format("influx -execute \"%s\" -database data -precision rfc3339 -format csv > \"%s\" ",query,exportDir);
+//                    logger.info("query is: " +  command);
 
                     try {
-                        Process process = Runtime.getRuntime().exec(Commandarr);
+                        Process process = pd.start();
                         new RunThread(process.getInputStream(), "INFO").start();
                         new RunThread(process.getErrorStream(), "ERR").start();
                         if (process.waitFor() == 0) {
