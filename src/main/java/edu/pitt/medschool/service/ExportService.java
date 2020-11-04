@@ -131,17 +131,17 @@ public class ExportService {
                     String query = String.format("select * from \"%s\" where arType='ar' AND time<'%s'",pid,endTime);
                     String exportDir = exportBaseDir + pid.substring(0,10) + "XX-12hours.csv";
                     String command = String.format("influx -database data  -precision rfc3339 -execute \"%s\" -format csv > %s",query,exportDir);
-                    logger.info("query is: ", command);
+                    logger.info("query is: " +  command);
 
                     try {
                         Process process = Runtime.getRuntime().exec(command);
                         if (process.waitFor() == 0) {
-                            logger.info("process file successfully: " , exportDir);
+                            logger.info("process file successfully: " + exportDir);
                         } else {
-                            logger.info("process file failed: " , exportDir);
+                            logger.info("process file failed: " + exportDir);
                         }
                     } catch (Exception e) {
-                        logger.info("process file error occurred: " , exportDir);
+                        logger.info("process file error occurred: " + exportDir);
                     }
                 }
             }
