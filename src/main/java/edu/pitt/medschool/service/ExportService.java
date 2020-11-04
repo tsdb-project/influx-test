@@ -24,6 +24,7 @@ import edu.pitt.medschool.controller.analysis.vo.DownsampleVO;
 import edu.pitt.medschool.controller.analysis.vo.MedicalDownsampleVO;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -131,7 +132,8 @@ public class ExportService {
 
                     String query = String.format("select \u002A from /%s/ where arType='ar' AND time<'%s'",pid,endTime);
                     String exportDir = exportBaseDir + pid + "-12hours.csv";
-                    ProcessBuilder pd = new ProcessBuilder("influx", "-execute", query, "-database","data","-precision","rfc3339","-format","csv","-path", exportDir);
+                    ProcessBuilder pd = new ProcessBuilder("influx", "-execute", query, "-database","data","-precision","rfc3339","-format","csv");
+                    pd.redirectOutput(new File(exportDir));
 //                    String command = String.format("influx -execute \"%s\" -database data -precision rfc3339 -format csv > \"%s\" ",query,exportDir);
 //                    logger.info("query is: " +  command);
 
