@@ -1,6 +1,7 @@
 package edu.pitt.medschool.service;
 
 import edu.pitt.medschool.config.InfluxappConfig;
+import edu.pitt.medschool.framework.util.RunThread;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.*;
 import edu.pitt.medschool.model.dto.PatientExample;
@@ -135,6 +136,8 @@ public class ExportService {
 
                     try {
                         Process process = Runtime.getRuntime().exec(command);
+                        new RunThread(process.getInputStream(), "INFO").start();
+                        new RunThread(process.getErrorStream(), "ERR").start();
                         if (process.waitFor() == 0) {
                             logger.info("process file successfully: " + exportDir);
                         } else {
