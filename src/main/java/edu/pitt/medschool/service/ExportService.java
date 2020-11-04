@@ -125,7 +125,7 @@ public class ExportService {
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     logger.info("start time: " + startTime);
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-                    String endTime = LocalDateTime.parse(startTime,df).plusHours(12).toString()+":00"+"Z";
+                    String endTime = LocalDateTime.parse(startTime,df).plusHours(12).toString()+"Z";
 
 
                     String query = String.format("select * from /%s/ where arType='ar' AND time<'%s'",pid,endTime);
