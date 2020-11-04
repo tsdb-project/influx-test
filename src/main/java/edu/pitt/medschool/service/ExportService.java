@@ -51,7 +51,7 @@ public class ExportService {
     private final MedicalDownsampleGroupDao medicalDownsampleGroupDao;
 
     @Autowired
-    public ExportService(ExportDao exportDao,CsvFileDao csvFileDao, ImportProgressDao importProgressDao, DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, MedicalDownsampleDao medicalDownsampleDao, MedicalDownsampleGroupDao medicalDownsampleGroupDao) {
+    public ExportService(ExportDao exportDao, CsvFileDao csvFileDao, ImportProgressDao importProgressDao, DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, MedicalDownsampleDao medicalDownsampleDao, MedicalDownsampleGroupDao medicalDownsampleGroupDao) {
         this.exportDao = exportDao;
         this.csvFileDao = csvFileDao;
         this.importProgressDao = importProgressDao;
@@ -73,24 +73,24 @@ public class ExportService {
 
         return exportDao.insertExportJob(job);
     }
-    
-    public int completeMedicalJobAndInsert(ExportWithBLOBs job)throws JsonProcessingException{
-    	MedicalDownsampleVO medicalDownsampleVO = new MedicalDownsampleVO();
-    	medicalDownsampleVO.setMedicalDownsample(medicalDownsampleDao.selectByPrimaryKey(job.getQueryId()));
-    	medicalDownsampleVO.setGroups(medicalDownsampleGroupDao.selectAllAggregationGroupByQueryId(job.getQueryId()));
-    	ObjectMapper mapper = new ObjectMapper();
-    	job.setQueryJson(mapper.writeValueAsString(medicalDownsampleVO));
-    	job.setMachine(uuid);
-    	job.setDbVersion(importProgressDao.selectDatabaseVersion(uuid));
-    	job.setMedical(true);
-    	return exportDao.insertExportJob(job);
+
+    public int completeMedicalJobAndInsert(ExportWithBLOBs job) throws JsonProcessingException {
+        MedicalDownsampleVO medicalDownsampleVO = new MedicalDownsampleVO();
+        medicalDownsampleVO.setMedicalDownsample(medicalDownsampleDao.selectByPrimaryKey(job.getQueryId()));
+        medicalDownsampleVO.setGroups(medicalDownsampleGroupDao.selectAllAggregationGroupByQueryId(job.getQueryId()));
+        ObjectMapper mapper = new ObjectMapper();
+        job.setQueryJson(mapper.writeValueAsString(medicalDownsampleVO));
+        job.setMachine(uuid);
+        job.setDbVersion(importProgressDao.selectDatabaseVersion(uuid));
+        job.setMedical(true);
+        return exportDao.insertExportJob(job);
     }
 
     public int deleteExportJobById(Integer exportId) {
         return this.exportDao.markAsDeletedById(exportId);
     }
 
-    public Boolean startExportingEEG(String year){
+    public Boolean startExportingEEG(String year) {
         try {
             this.ExportEEGByYear(year);
         } catch (Exception e) {
@@ -118,37 +118,33 @@ public class ExportService {
         Runnable queryTask = () -> {
             String pid;
             InfluxDB influxDB = generateIdbClient(false);
-            while ((pid=idQueue.poll())!=null){
+            while ((pid = idQueue.poll()) != null) {
 
                 logger.info("current PID: " + pid);
 
-                QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
-                if(res1.getResults().get(0).getSeries().size() > 1){
+                QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid), "data"));
+                try{
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     logger.info("start time: " + startTime);
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-                    String endTime = LocalDateTime.parse(startTime,df).plusHours(12).toString()+"Z";
+                    String endTime = LocalDateTime.parse(startTime, df).plusHours(12).toString() + "Z";
 
 
-                    String query = String.format("select \u002A from /%s/ where arType='ar' AND time<'%s'",pid,endTime);
+                    String query = String.format("select \u002A from /%s/ where arType='ar' AND time<'%s'", pid, endTime);
                     String exportDir = exportBaseDir + pid + "-12hours.csv";
-                    ProcessBuilder pd = new ProcessBuilder("influx", "-execute", query, "-database","data","-precision","rfc3339","-format","csv");
+                    ProcessBuilder pd = new ProcessBuilder("influx", "-execute", query, "-database", "data", "-precision", "rfc3339", "-format", "csv");
                     pd.redirectOutput(new File(exportDir));
-//                    String command = String.format("influx -execute \"%s\" -database data -precision rfc3339 -format csv > \"%s\" ",query,exportDir);
-//                    logger.info("query is: " +  command);
 
-                    try {
-                        Process process = pd.start();
-                        new RunThread(process.getInputStream(), "INFO").start();
-                        new RunThread(process.getErrorStream(), "ERR").start();
-                        if (process.waitFor() == 0) {
-                            logger.info("process file successfully: " + exportDir);
-                        } else {
-                            logger.info("process file failed: " + exportDir);
-                        }
-                    } catch (Exception e) {
-                        logger.info("process file error occurred: " + exportDir);
+                    Process process = pd.start();
+                    new RunThread(process.getInputStream(), "INFO").start();
+                    new RunThread(process.getErrorStream(), "ERR").start();
+                    if (process.waitFor() == 0) {
+                        logger.info("process file successfully for patient: " + pid);
+                    } else {
+                        logger.info("process file failed for patient: " + pid);
                     }
+                }catch (Exception e){
+                    logger.info("process file error occurred for patient: " + pid);
                 }
             }
             influxDB.close();
