@@ -4,7 +4,7 @@ import edu.pitt.medschool.config.InfluxappConfig;
 import edu.pitt.medschool.framework.util.RunThread;
 import edu.pitt.medschool.framework.util.Util;
 import edu.pitt.medschool.model.dao.*;
-import edu.pitt.medschool.model.dto.PatientExample;
+import edu.pitt.medschool.model.dto.CsvFileExample;
 import okhttp3.OkHttpClient;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
@@ -25,8 +25,6 @@ import edu.pitt.medschool.controller.analysis.vo.MedicalDownsampleVO;
 import edu.pitt.medschool.model.dto.ExportWithBLOBs;
 
 import java.io.File;
-import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -43,7 +41,7 @@ public class ExportService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final ExportDao exportDao;
-    private final PatientDao patientDao;
+    private final CsvFileDao csvFileDao;
     private final ImportProgressDao importProgressDao;
     private final DownsampleDao downsampleDao;
     private final DownsampleGroupDao downsampleGroupDao;
@@ -51,9 +49,9 @@ public class ExportService {
     private final MedicalDownsampleGroupDao medicalDownsampleGroupDao;
 
     @Autowired
-    public ExportService(ExportDao exportDao,PatientDao patientDao, ImportProgressDao importProgressDao, DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, MedicalDownsampleDao medicalDownsampleDao, MedicalDownsampleGroupDao medicalDownsampleGroupDao) {
+    public ExportService(ExportDao exportDao,CsvFileDao csvFileDao, ImportProgressDao importProgressDao, DownsampleDao downsampleDao, DownsampleGroupDao downsampleGroupDao, MedicalDownsampleDao medicalDownsampleDao, MedicalDownsampleGroupDao medicalDownsampleGroupDao) {
         this.exportDao = exportDao;
-        this.patientDao = patientDao;
+        this.csvFileDao = csvFileDao;
         this.importProgressDao = importProgressDao;
         this.downsampleDao = downsampleDao;
         this.downsampleGroupDao = downsampleGroupDao;
@@ -102,10 +100,10 @@ public class ExportService {
     private void ExportEEGByYear(String year) {
         List<String> patientIDs;
 
-        PatientExample pe = new PatientExample();
-        PatientExample.Criteria pec = pe.createCriteria();
-        pec.andIdLike("PUH-" + year + "-1%");
-        patientIDs = patientDao.selectIdByCustom(pe);
+        CsvFileExample ce = new CsvFileExample();
+        CsvFileExample.Criteria cec = ce.createCriteria();
+        cec.andPidLike("PUH-" + year + "%");
+        patientIDs = csvFileDao.selectIdByCustom(ce);
 
         int paraCount = (int) Math.round(loadFactor * InfluxappConfig.AvailableCores);
         paraCount = paraCount > 0 ? paraCount : 1;
@@ -123,7 +121,7 @@ public class ExportService {
                 logger.info("current PID: " + pid);
 
                 QueryResult res1 = influxDB.query(new Query(String.format("select first(\"I1_1\") from \"%s\" where arType='ar'", pid),"data"));
-                if(res1.getResults() != null){
+                if(res1.getResults().get(0).getSeries().size() > 1){
                     String startTime = res1.getResults().get(0).getSeries().get(0).getValues().get(0).get(0).toString();
                     logger.info("start time: " + startTime);
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");

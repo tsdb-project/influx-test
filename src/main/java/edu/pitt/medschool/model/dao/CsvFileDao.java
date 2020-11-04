@@ -328,6 +328,10 @@ public class CsvFileDao {
         return csvFileMapper.updateByExampleSelective(csvFile,csvFileExample);
     }
 
+    public List<String> selectIdByCustom(CsvFileExample ce) {
+        return csvFileMapper.selectIdByExample(ce);
+    }
+
     public int updateEndVersion(CsvFile file) {
         CsvFileExample csvFileExample = new CsvFileExample();
         Criteria criteria = csvFileExample.createCriteria();
