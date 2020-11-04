@@ -107,7 +107,7 @@ public class ExportService {
         cec.andPidLike("PUH-" + year + "%");
         patientIDs = csvFileDao.selectIdByCustom(ce).stream().distinct().collect(Collectors.toList());
 
-        int paraCount = (int) Math.round(loadFactor * InfluxappConfig.AvailableCores);
+        int paraCount = (int) Math.round(loadFactor * InfluxappConfig.AvailableCores) /2;
         paraCount = paraCount > 0 ? paraCount : 1;
 
         BlockingQueue<String> idQueue = new LinkedBlockingQueue<>(patientIDs);
