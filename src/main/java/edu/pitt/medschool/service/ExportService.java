@@ -131,7 +131,7 @@ public class ExportService {
 
                     String query = String.format("select \u002A from /%s/ where arType='ar' AND time<'%s'",pid,endTime);
                     String exportDir = exportBaseDir + pid + "-12hours.csv";
-                    String command = String.format("influx -database data -precision rfc3339 -execute \"%s\" -format csv > \"%s\"",query,exportDir);
+                    String command = String.format("influx -database data -precision rfc3339 -format csv > \"%s\" -execute \"%s\" ",exportDir,query);
                     logger.info("query is: " +  command);
 
                     try {
