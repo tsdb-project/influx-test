@@ -130,7 +130,7 @@ public interface CsvFileMapper {
 
 
 	@SelectProvider(type = CsvFileSqlProvider.class, method = "selectByExample")
-	@Results({ @Result(column = "pid", property = "pid", jdbcType = JdbcType.INTEGER, id = true)})
+	@Results({ @Result(column = "pid", property = "pid", jdbcType = JdbcType.VARCHAR)})
 	List<String> selectPidByExample(CsvFileExample example);
 
 

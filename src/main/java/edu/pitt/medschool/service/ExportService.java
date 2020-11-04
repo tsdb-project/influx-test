@@ -28,7 +28,9 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ExportService {
@@ -103,7 +105,7 @@ public class ExportService {
         CsvFileExample ce = new CsvFileExample();
         CsvFileExample.Criteria cec = ce.createCriteria();
         cec.andPidLike("PUH-" + year + "%");
-        patientIDs = csvFileDao.selectIdByCustom(ce);
+        patientIDs = csvFileDao.selectIdByCustom(ce).stream().distinct().collect(Collectors.toList());
 
         int paraCount = (int) Math.round(loadFactor * InfluxappConfig.AvailableCores);
         paraCount = paraCount > 0 ? paraCount : 1;
