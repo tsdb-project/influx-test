@@ -193,6 +193,21 @@ public class AnalysisController {
 //        return validateCsvService.getFilteredtPatientTimeLines("realpsc", filter);
 //    }
 
+    // export EEG data by year
+    @GetMapping(value = { "analysis/ExportEEGByYear/{year}" })
+    @ResponseBody
+    public RestfulResponse ExportEEGByYear(@PathVariable String year) {
+        RestfulResponse response = null;
+
+        if(exportService.startExportingEEG(year)){
+            response = new RestfulResponse(1, "success");
+        }else {
+            response = new RestfulResponse(2, "failed");
+        }
+        return response;
+    }
+
+
     @RequestMapping(value = { "analysis/selecIdByfilter/{condition}" })
     @ResponseBody
     public List<String> selecIdByfilter(@PathVariable String condition) throws Exception {

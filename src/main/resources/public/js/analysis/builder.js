@@ -112,4 +112,28 @@ $(document).ready(function () {
     $('#queryTable tbody').on('click', 'tr', function () {
         window.location.href = '/analysis/edit/' + table.row($(this)).data().id;
     });
+
+
+    // AutoImport Switch btn
+    $("#ExportButton").click(function () {
+
+
+        $.ajax({
+            'url': "/analysis/ExportEEGByYear/" + $("#yearPicker").val(),
+            'type': 'get',
+            'contentType': "application/json",
+            'dataType': 'json',
+            'success': function (data) {
+                if (data.code == 1) {
+                    notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'Export successful.');
+                } else {
+                    notify("top", "center", null, "danger", "animated bounceIn", "animated fadeOut", 'Export failed.');
+                }
+            },
+            'error': function () {
+                notify("top", "center", null, "success", "animated bounceIn", "animated fadeOut", 'Error occur when exporting');
+            }
+        });
+
+    })
 });

@@ -28,12 +28,38 @@
     <div th:insert="fragments/sidebar :: aside"></div>
 
     <section class="content">
+
+
+
+
         <div class="content__inner">
             <!-- PUT THE MAIN CONTENT HERE -->
             <header class="content__title">
                 <h1>Data Summarization Query Builder</h1>
                 <small>Build analytical queries from scratch or using an existing query as template.</small>
             </header>
+
+            <div class="card" id="ExportEEGByYear">
+                <div class="card-body">
+                    <h2 class="card-title">Export EEG data by year</h2>
+                    <div class="container">
+                        <div class="row">
+                            <label>
+                                Please choose the year you want to export
+                                <input id='yearPicker' type="number" max="2010" min="2020" step="1">
+                                (between 2010 and 2020)
+                            </label>
+                        </div>
+                        <div class="row">
+                            <button class="btn btn-primary btn-block" id="ExportButton">
+                                Export EEG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <div class="card">
                 <div class="card-body">
                     <h3 class="card-title">
