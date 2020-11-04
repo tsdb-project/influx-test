@@ -128,9 +128,9 @@ public class ExportService {
                     String endTime = LocalDateTime.parse(startTime,df).plusHours(12).toString()+":00"+"Z";
 
 
-                    String query = String.format("select * from \"%s\" where arType='ar' AND time<'%s'",pid,endTime);
+                    String query = String.format("select * from /%s/ where arType='ar' AND time<'%s'",pid,endTime);
                     String exportDir = exportBaseDir + pid + "-12hours.csv";
-                    String command = String.format("influx -database data  -precision rfc3339 -execute /%s/ -format csv > %s",query,exportDir);
+                    String command = String.format("influx -database data  -precision rfc3339 -execute %s -format csv > %s",query,exportDir);
                     logger.info("query is: " +  command);
 
                     try {
